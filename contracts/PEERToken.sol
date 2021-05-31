@@ -1,5 +1,3 @@
-// contracts/GLDToken.sol
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.3;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -8,7 +6,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
-contract PEERToken is Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
+import "./interfaces/IPEERToken.sol";
+
+contract PEERToken is IPEERToken, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     function initialize(string memory name, string memory symbol, uint256 cap) public virtual initializer {
         __PEERToken_init(name, symbol, cap);
     }

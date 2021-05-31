@@ -1,5 +1,3 @@
-// contracts/GLDToken.sol
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.3;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -8,7 +6,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
-contract Peeranha is Initializable, AccessControlUpgradeable, PausableUpgradeable  {
+import "./libraries/User.sol";
+
+import "./interfaces/IPeeranha.sol";
+
+contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, PausableUpgradeable  {
+    using User for mapping(address => User.Info);
+    using User for User.Info;
+
+    mapping(address => User.Info) public users;
+    
     function initialize() public virtual initializer {
         __Peeranha_init();
     }
@@ -26,6 +33,28 @@ contract Peeranha is Initializable, AccessControlUpgradeable, PausableUpgradeabl
         _setupRole(PAUSER_ROLE, msg.sender);
     }
 
+    /**
+     * @dev Signup for user account.
+     *
+     * Requirements:
+     *
+     * - Must be a new user.
+     */
+    function createUser(bytes32 ipfsHash) external override {
+        users.create(msg.sender, ipfsHash);
+    }
+
+    /**
+     * @dev Edit user profile.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function updateUser(bytes32 ipfsHash) external override {
+        users.update(msg.sender, ipfsHash);
+    }
+    
     /**
      * @dev Pauses all token transfers.
      *
