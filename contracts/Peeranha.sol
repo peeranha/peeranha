@@ -10,14 +10,24 @@ import "./libraries/User.sol";
 
 import "./interfaces/IPeeranha.sol";
 
-contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, PausableUpgradeable  {
+contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using User for mapping(address => User.Info);
     using User for User.Info;
 
     mapping(address => User.Info) public users;
     
-    function initialize() public virtual initializer {
-        __Peeranha_init();
+    function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
+        __AccessControl_init_unchained();
+        __ERC20_init_unchained(name, symbol);
+        __Pausable_init_unchained();
+        __ERC20Capped_init_unchained(cap);
+        __ERC20Pausable_init_unchained();
+        __Peeranha_init_unchained(name, symbol, cap);
+    }
+
+    function __Peeranha_init_unchained(string memory name, string memory symbol, uint256 cap) internal initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(PAUSER_ROLE, msg.sender);
     }
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -81,5 +91,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, Pausabl
     function unpause() public virtual {
         require(hasRole(PAUSER_ROLE, msg.sender), "Peeranha: must have pauser role to unpause");
         _unpause();
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
+        super._beforeTokenTransfer(from, to, amount);
     }
 }
