@@ -11,10 +11,10 @@ import "./libraries/User.sol";
 import "./interfaces/IPeeranha.sol";
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
-    using User for mapping(address => User.Info);
+    using User for User.Collection;
     using User for User.Info;
 
-    mapping(address => User.Info) public users;
+    User.Collection users;
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();

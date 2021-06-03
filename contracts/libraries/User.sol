@@ -6,7 +6,11 @@ pragma solidity >=0.5.0;
 library User {
   struct Info {
     bytes32 ipfsHash;
-    uint32 rating;
+  }
+  
+  struct Collection {
+    mapping(address => Info) users;
+    address[] userList;
   }
   
   event UserCreated(address userAddress, bytes32 ipfsHash);
@@ -17,12 +21,13 @@ library User {
   /// @param userAddress Address of the user to create
   /// @param ipfsHash IPFS hash of document with user information
   function create(
-    mapping(address => Info) storage self,
+    Collection storage self,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self[userAddress].ipfsHash == bytes32(0x0), "User exists");
-    self[userAddress].ipfsHash = ipfsHash;
+    require(self.users[userAddress].ipfsHash == bytes32(0x0), "User exists");
+    self.users[userAddress].ipfsHash = ipfsHash;
+    self.userList.push(userAddress);
     emit UserCreated(userAddress, ipfsHash);
   }
 
@@ -31,12 +36,12 @@ library User {
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    mapping(address => Info) storage self,
+    Collection storage self,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self[userAddress].ipfsHash != bytes32(0x0), "User does not exist");
-    self[userAddress].ipfsHash = ipfsHash;
+    require(self.users[userAddress].ipfsHash != bytes32(0x0), "User does not exist");
+    self.users[userAddress].ipfsHash = ipfsHash;
     emit UserUpdated(userAddress, ipfsHash);
   }
 }
