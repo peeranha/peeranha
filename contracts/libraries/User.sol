@@ -45,4 +45,18 @@ library User {
     self.users[userAddress].ipfsHash = ipfsHash;
     emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
   }
+
+
+  function getUsersCount(Collection storage self) internal view returns (uint count) {
+    return self.userList.length;
+  }
+
+  function getUserByIndex(Collection storage self, uint index) internal view returns (Info memory) {
+    address addr = self.userList[index];
+    return self.users[addr];
+  }
+
+  function getUserByAddress(Collection storage self, address addr) internal view returns (Info memory) {
+    return self.users[addr];
+  }
 }

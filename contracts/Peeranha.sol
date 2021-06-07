@@ -1,4 +1,5 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -63,6 +64,35 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      */
     function updateUser(bytes32 ipfsHash) external override {
         users.update(msg.sender, ipfsHash);
+    }
+
+    /**
+     * @dev Get users count.
+     */
+    function getUsersCount() external view returns (uint count) {
+        return users.getUsersCount();
+    }
+
+    /**
+     * @dev Get user profile by index.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByIndex(uint index) external view returns (User.Info memory) {
+        return users.getUserByIndex(index);
+    }
+
+    /**
+     * @dev Get user profile by address.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByAddress(address addr) external view returns (User.Info memory) {
+        return users.getUserByAddress(addr);
     }
     
     /**
