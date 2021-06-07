@@ -1,4 +1,5 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -7,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 import "./libraries/User.sol";
+import "./libraries/Community.sol";
 
 import "./interfaces/IPeeranha.sol";
 
@@ -15,6 +17,11 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using User for User.Info;
 
     User.Collection users;
+
+    using Community for Community.Collection;
+    using Community for Community.Info;
+
+    Community.Collection communities;
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -59,10 +66,50 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * Requirements:
      *
-     * - Must be an existing user.
+     * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
         users.update(msg.sender, ipfsHash);
+    }
+
+    /**
+     * @dev Create new community.
+     *
+     * Requirements:
+     *
+     * - Must be a new community.
+     */
+    function createCommunity(uint communityId, bytes32 ipfsHash) external {
+        communities.create(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Edit community info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     */
+    function updateCommunity(uint communityId, bytes32 ipfsHash) external {
+        communities.update(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Get communities count.
+     */
+    function getCommunitiesCount() external view returns (uint count) {
+        return communities.getCommunitiesCount();
+    }
+
+    /**
+     * @dev Get community info by id.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getCommunityById(uint communityId) external view returns (Community.Info memory) {
+        return communities.getCommunityById(communityId);
     }
     
     /**
