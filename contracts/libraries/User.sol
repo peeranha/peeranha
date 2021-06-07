@@ -46,16 +46,23 @@ library User {
     emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
   }
 
-
+  /// @notice Get the number of users
+  /// @param self The mapping containing all users
   function getUsersCount(Collection storage self) internal view returns (uint count) {
     return self.userList.length;
   }
 
+  /// @notice Get user info by index
+  /// @param self The mapping containing all users
+  /// @param index Index of the user to get
   function getUserByIndex(Collection storage self, uint index) internal view returns (Info memory) {
     address addr = self.userList[index];
     return self.users[addr];
   }
 
+  /// @notice Get user info by address
+  /// @param self The mapping containing all users
+  /// @param addr Address of the user to get
   function getUserByAddress(Collection storage self, address addr) internal view returns (Info memory) {
     return self.users[addr];
   }
