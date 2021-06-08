@@ -2,19 +2,16 @@ pragma solidity >=0.5.0;
 import "./Utils.sol";
 
 /// @title Question
-/// @notice Provides information about registered user  //
-/// @dev Users information is stored in the mapping on the main contract  //
+/// @notice Provides information about operation with questions
+/// @dev Questions information is stored in the mapping on the main contract
 library Question_lib  {//
-
-  // uint32 public question_asked = 4294967294;
-  struct Comment { //bool isExists?
+  struct Comment {    //bool isExists?
     uint8 id;
     string name;
     uint256 post_time;
     bool isExists;
     Assert_lib.IpfsHash ipfs_link;
-    /*std::vector<int_key_value> properties;
-    std::vector<history_item> history;*/
+    //std::vector<history_item> history;
   }
 
   struct Answer { //bool isExists?
@@ -26,7 +23,6 @@ library Question_lib  {//
     bool isExists;
     Assert_lib.IpfsHash ipfs_link;
     //int16_t rating = 0;
-    //std::vector<int_key_value> properties;
     //std::vector<history_item> history;
   }
 
@@ -35,7 +31,6 @@ library Question_lib  {//
     uint16 community_id;
     uint256 post_time;
     string name;
-    string title;
     Answer[] answers;
     Comment[] comments;
     uint16 correct_answer_id;
@@ -43,47 +38,31 @@ library Question_lib  {//
     Assert_lib.IpfsHash ipfs_link;
     //std::vector<uint32_t> tags;
     //int16_t rating;
-    //std::vector<int_key_value> properties;    // type question + isDeleted?
+    // type question 
   }
 
-
-  ///
-  // template ?
-  ///
   struct Collection_question {
     mapping(uint32 => Question) questions;
     uint32 size;
   }
-
-  // struct Collection_answer {
-  //   mapping(uint32 => Answer) answers;
-  //   uint32 size;
-  // }
-
-  // struct Collection_comment {
-  //   mapping(uint32 => Comment) comments;
-  //   uint32 size;
-  // }
   
 
-  /// @notice Create new user info record                       //
-  /// @param name The mapping containing all users              //
-  /// @param community_id Address of the user to create         //
-  /// @param title IPFS hash of document with user information  //
-  /// @param question_id IPFS hash of document with user information  //
+  /// @notice Post Question
+  /// @param self The mapping containing all questions
+  /// @param name author of the question
+  /// @param community_id community where the question will ask
+  /// @param title title question
+  /// @param ipfs_link IPFS hash of document with question information
   
   function Post_question(
-    Assert_lib.IpfsHash memory ipfs_link,
+    Collection_question storage self,
     string memory name,
     uint16 community_id,
-    string memory title,
-    uint32 question_id,   //?
-    Collection_question storage self
-    /*const IpfsHash &ipfs_link 
-    const std::vector<uint32_t> tags,*/
+    string memory title,   
+    Assert_lib.IpfsHash memory ipfs_link
+    //const std::vector<uint32_t> tags
   ) public {
     Assert_lib.Assert_title(title);
-    require(self.size == question_id , "Id question is engaged");
     ///
     //check community, ipfs, tags
     ///
@@ -91,12 +70,11 @@ library Question_lib  {//
     ///
     //update user statistics + rating
     ///
-    self.questions[question_id] = Question(
-      question_id,
+    self.questions[self.size] = Question(
+      self.size,
       community_id,
       block.timestamp,
       name,
-      title,
       new Answer[](0),
       new Comment[](0),
       0,
@@ -111,10 +89,12 @@ library Question_lib  {//
     ///
   }
 
-  /// @notice Create new user info record                       //
-  /// @param name The mapping containing all users              //
-  /// @param question_id Address of the user to create         //
-  /// @param official_answer IPFS hash of document with user information  //
+  /// @notice Post answer
+  /// @param self The mapping containing all questions
+  /// @param name author of the answer
+  /// @param question_id question where the answer will post
+  /// @param official_answer flag show                                      //
+  /// @param ipfs_link IPFS hash of document with answer information
   
   function Post_answer(
     Collection_question storage self,
@@ -147,6 +127,13 @@ library Question_lib  {//
     // first answer / 15min
     ///
   }
+
+  /// @notice Post comment
+  /// @param self The mapping containing all questions
+  /// @param name author of the answer
+  /// @param question_id question where the comment will post
+  /// @param answer_id answer where the comment will post
+  /// @param ipfs_link IPFS hash of document with answer information
 
   function Post_comment(
     Collection_question storage self,
@@ -185,7 +172,6 @@ library Question_lib  {//
     uint32 question_id,
     uint16 community_id,
     // tags
-    string memory title,
     Assert_lib.IpfsHash memory ipfs_link
   ) public {
     require(self.size <= question_id , "Question not found");
@@ -193,7 +179,6 @@ library Question_lib  {//
     
     Question storage question = self.questions[question_id];
     question.community_id = community_id;
-    question.title = title;
     question.ipfs_link = ipfs_link;    
   }
 
