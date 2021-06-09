@@ -8,20 +8,19 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 import "./libraries/User.sol";
-import "./libraries/Community.sol";
+import "./libraries/CommunitiesAndTags.sol";
 
 import "./interfaces/IPeeranha.sol";
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using User for User.Collection;
     using User for User.Info;
+    using CommunitiesAndTags for CommunitiesAndTags.CommunityCollection;
+    using CommunitiesAndTags for CommunitiesAndTags.CommunityInfo;
 
     User.Collection users;
-
-    using Community for Community.Collection;
-    using Community for Community.Info;
-
-    Community.Collection communities;
+    CommunitiesAndTags.CommunityCollection communities;
+   
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -79,8 +78,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be a new community.
      */
-    function createCommunity(uint communityId, bytes32 ipfsHash) external {
-        communities.create(communityId, ipfsHash);
+    function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunitiesAndTags.TagInfo[] memory suggestedTags) external {
+        communities.createCommunity(communityId, ipfsHash, suggestedTags);
     }
 
     /**
@@ -90,14 +89,26 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.  
      */
-    function updateCommunity(uint communityId, bytes32 ipfsHash) external {
-        communities.update(communityId, ipfsHash);
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external {
+        communities.updateCommunity(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Create new tag.
+     *
+     * Requirements:
+     *
+     * - Must be a new tag.
+     * - Must be an existing community. 
+     */
+    function createTag(uint32 communityId, uint32 tagId, bytes32 ipfsHash) external {
+        communities.createTag(communityId, tagId, ipfsHash);
     }
 
     /**
      * @dev Get communities count.
      */
-    function getCommunitiesCount() external view returns (uint count) {
+    function getCommunitiesCount() external view returns (uint32 count) {
         return communities.getCommunitiesCount();
     }
 
@@ -108,8 +119,30 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.
      */
-    function getCommunityById(uint communityId) external view returns (Community.Info memory) {
+    function getCommunityById(uint32 communityId) external view returns (CommunitiesAndTags.CommunityInfo memory) {
         return communities.getCommunityById(communityId);
+    }
+
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTagsCountByCommunityId(uint32 id) external view returns (uint32 count) {
+        return communities.getTagsCountByCommunityId(id);
+    }
+
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTagsByCommunityId(uint32 communityId) external view returns (CommunitiesAndTags.TagInfo[] memory) {
+        return communities.getTagsByCommunityId(communityId);
     }
     
     /**
