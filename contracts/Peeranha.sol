@@ -69,7 +69,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     /**
      * @dev Get users count.
      */
-    function getUsersCount() external view returns (uint count) {
+    function getUsersCount() external view returns (uint256 count) {
         return users.getUsersCount();
     }
 
@@ -80,7 +80,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing user.
      */
-    function getUserByIndex(uint index) external view returns (User.Info memory) {
+    function getUserByIndex(uint256 index) external view returns (User.Info memory) {
         return users.getUserByIndex(index);
     }
 
