@@ -52,7 +52,9 @@ describe("Test users", function() {
     const usersByAddress = await Promise.all(signers.slice(0, 3).map(async (addr) => {
       return await peeranha.getUserByAddress(addr.address);
     }))
-    expect(JSON.stringify(usersByAddress) === JSON.stringify(usersByIndex)).to.be.true;
+
+    expect(JSON.stringify(usersByAddress)).to.equal(JSON.stringify(getUsers(hashContainer)))
+    expect(JSON.stringify(usersByIndex)).to.equal(JSON.stringify(getUsers(hashContainer)))
   })
 
   const createContract = async function(){
@@ -68,6 +70,13 @@ describe("Test users", function() {
       "0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
       "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
     ];
+  }
+
+  const getUsers = (hashes) => {
+    const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    return hashes.map((hash) => {
+      return [hash, ipfsHash2];
+    })
   }
 });
 
