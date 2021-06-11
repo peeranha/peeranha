@@ -17,7 +17,7 @@ module.exports = {
     }
   },
   gasReporter: {
-    currency: 'CHF',
-    gasPrice: 21
+    currency: 'ETH',
+    gasPrice: 24
   }
 };
