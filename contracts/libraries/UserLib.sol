@@ -3,14 +3,14 @@ pragma solidity >=0.5.0;
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
-library User {
-  struct Info {
+library UserLib {
+  struct User {
     bytes32 ipfsHash;
     bytes32 ipfsHash2; // Not currently used and added for the future compatibility
   }
   
-  struct Collection {
-    mapping(address => Info) users;
+  struct UserCollection {
+    mapping(address => User) users;
     address[] userList;
   }
   
@@ -22,7 +22,7 @@ library User {
   /// @param userAddress Address of the user to create
   /// @param ipfsHash IPFS hash of document with user information
   function create(
-    Collection storage self,
+    UserCollection storage self,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
@@ -37,7 +37,7 @@ library User {
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    Collection storage self,
+    UserCollection storage self,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
@@ -48,14 +48,14 @@ library User {
 
   /// @notice Get the number of users
   /// @param self The mapping containing all users
-  function getUsersCount(Collection storage self) internal view returns (uint256 count) {
+  function getUsersCount(UserCollection storage self) internal view returns (uint256 count) {
     return self.userList.length;
   }
 
   /// @notice Get user info by index
   /// @param self The mapping containing all users
   /// @param index Index of the user to get
-  function getUserByIndex(Collection storage self, uint256 index) internal view returns (Info memory) {
+  function getUserByIndex(UserCollection storage self, uint256 index) internal view returns (User memory) {
     address addr = self.userList[index];
     return self.users[addr];
   }
@@ -63,8 +63,8 @@ library User {
   /// @notice Get user info by address
   /// @param self The mapping containing all users
   /// @param addr Address of the user to get
-  function getUserByAddress(Collection storage self, address addr) internal view returns (Info memory) {
-    Info storage user = self.users[addr];
+  function getUserByAddress(UserCollection storage self, address addr) internal view returns (User memory) {
+    User storage user = self.users[addr];
     require(user.ipfsHash != bytes32(0x0), "User does not exist");
     return user;
   }
