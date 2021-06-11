@@ -8,18 +8,19 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 import "./libraries/User.sol";
-import "./libraries/CommunitiesAndTags.sol";
+import "./libraries/CommunityLib.sol";
 
 import "./interfaces/IPeeranha.sol";
+
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using User for User.Collection;
     using User for User.Info;
-    using CommunitiesAndTags for CommunitiesAndTags.CommunityCollection;
-    using CommunitiesAndTags for CommunitiesAndTags.CommunityInfo;
+    using CommunityLib for CommunityLib.CommunityCollection;
+    using CommunityLib for CommunityLib.Community;
 
     User.Collection users;
-    CommunitiesAndTags.CommunityCollection communities;
+    CommunityLib.CommunityCollection communities;
    
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
@@ -78,8 +79,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be a new community.
      */
-    function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunitiesAndTags.TagInfo[] memory suggestedTags) external {
-        communities.createCommunity(communityId, ipfsHash, suggestedTags);
+    function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        communities.createCommunity(communityId, ipfsHash, tags);
     }
 
     /**
@@ -89,7 +90,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.  
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external {
+    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -101,14 +102,14 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be a new tag.
      * - Must be an existing community. 
      */
-    function createTag(uint32 communityId, uint32 tagId, bytes32 ipfsHash) external {
+    function createTag(uint256 communityId, uint256 tagId, bytes32 ipfsHash) external {
         communities.createTag(communityId, tagId, ipfsHash);
     }
 
     /**
      * @dev Get communities count.
      */
-    function getCommunitiesCount() external view returns (uint32 count) {
+    function getCommunitiesCount() external view returns (uint256 count) {
         return communities.getCommunitiesCount();
     }
 
@@ -119,8 +120,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.
      */
-    function getCommunityById(uint32 communityId) external view returns (CommunitiesAndTags.CommunityInfo memory) {
-        return communities.getCommunityById(communityId);
+    function getCommunity(uint256 communityId) external view returns (CommunityLib.Community memory) {
+        return communities.getCommunity(communityId);
     }
 
     /**
@@ -130,8 +131,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.
      */
-    function getTagsCountByCommunityId(uint32 id) external view returns (uint32 count) {
-        return communities.getTagsCountByCommunityId(id);
+    function getTagsCount(uint256 id) external view returns (uint256 count) {
+        return communities.getTagsCount(id);
     }
 
     /**
@@ -141,8 +142,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.
      */
-    function getTagsByCommunityId(uint32 communityId) external view returns (CommunitiesAndTags.TagInfo[] memory) {
-        return communities.getTagsByCommunityId(communityId);
+    function getTags(uint256 communityId) external view returns (CommunityLib.Tag[] memory) {
+        return communities.getTags(communityId);
     }
     
     /**

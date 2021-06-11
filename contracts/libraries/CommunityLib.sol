@@ -5,29 +5,31 @@ pragma abicoder v2;
 /// @title Communities
 /// @notice Provides information about created communities
 /// @dev Community information is stored in the mapping on the main contract
-library CommunitiesAndTags {
-    struct CommunityInfo {
-        bytes32 ipfsHash;
-    }
-
-    struct TagInfo {
-        bytes32 ipfsHash;
-    }
-
+library CommunityLib {
     struct Community {
-        CommunityInfo info;
-        mapping(uint32 => TagInfo) tagList;
-        uint32 tagsCount;
+        bytes32 ipfsHash;
+        bytes32 ipfsHash2;
+    }
+
+    struct Tag {
+        bytes32 ipfsHash;
+        bytes32 ipfsHash2;
+    }
+
+    struct CommunityContainer {
+        Community info;
+        mapping(uint256 => Tag) tags;
+        uint256 tagsCount;
     }
 
     struct CommunityCollection {
-        mapping(uint32 => Community) communities;
-        uint32 communityCount;
+        mapping(uint256 => CommunityContainer) communities;
+        uint256 communityCount;
     }
 
-    event CommunityCreated(uint32 id, bytes32 ipfsHash, TagInfo[] suggestedTags);
-    event CommunityUpdated(uint32 id, bytes32 ipfsHash);
-    event TagCreated(uint32 communityId, uint32 tagId, bytes32 ipfsHash);
+    event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
+    event CommunityUpdated(uint256 id, bytes32 ipfsHash);
+    event TagCreated(uint256 communityId, uint256 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -35,23 +37,23 @@ library CommunitiesAndTags {
     /// @param ipfsHash IPFS hash of document with community information
     function createCommunity(
         CommunityCollection storage self,
-        uint32 id,
+        uint256 id,
         bytes32 ipfsHash,
-        TagInfo[] memory suggestedTags
+        Tag[] memory tags
     ) internal {
         require(
             self.communities[id].info.ipfsHash == bytes32(0x0),
             "Community exists"
         );
 
-        Community storage community = self.communities[id];
+        CommunityContainer storage community = self.communities[id];
         community.info.ipfsHash = ipfsHash;
-        community.tagsCount = uint32(suggestedTags.length);
-        for (uint32 i = 1; i <= uint32(suggestedTags.length); i++) {
-            community.tagList[i] = suggestedTags[i - 1];
+        community.tagsCount = uint256(tags.length);
+        for (uint256 i = 1; i <= uint256(tags.length); i++) {
+            community.tags[i] = tags[i - 1];
         }
         self.communityCount++;
-        emit CommunityCreated(id, ipfsHash, suggestedTags);
+        emit CommunityCreated(id, ipfsHash, bytes32(0x0), tags);
     }
 
     /// @notice Update community info record
@@ -60,7 +62,7 @@ library CommunitiesAndTags {
     /// @param ipfsHash IPFS hash of document with user information
     function updateCommunity(
         CommunityCollection storage self,
-        uint32 id,
+        uint256 id,
         bytes32 ipfsHash
     ) internal {
         require(
@@ -78,16 +80,16 @@ library CommunitiesAndTags {
     /// @param ipfsHash IPFS hash of document with community information
     function createTag (
         CommunityCollection storage self, 
-        uint32 communityId,
-        uint32 tagId,
+        uint256 communityId,
+        uint256 tagId,
         bytes32 ipfsHash
     ) internal {
-        Community storage community = self.communities[communityId];
-        TagInfo storage newTag = community.tagList[tagId];
+        CommunityContainer storage community = self.communities[communityId];
+        Tag storage newTag = community.tags[tagId];
         require(newTag.ipfsHash == bytes32(0x0), "Tag exists");
         newTag.ipfsHash = ipfsHash;
         community.tagsCount++;
-        emit TagCreated(tagId, communityId, ipfsHash);
+        emit TagCreated(tagId, communityId, ipfsHash, bytes32(0x0));
     }
 
     /// @notice Get the number of communities
@@ -95,7 +97,7 @@ library CommunitiesAndTags {
     function getCommunitiesCount(CommunityCollection storage self)
         internal
         view
-        returns (uint32 count)
+        returns (uint256 count)
     {
         return self.communityCount;
     }
@@ -103,10 +105,10 @@ library CommunitiesAndTags {
     /// @notice Get community info by id
     /// @param self The mapping containing all communities
     /// @param id Address of the community to get
-    function getCommunityById(CommunityCollection storage self, uint32 id)
+    function getCommunity(CommunityCollection storage self, uint256 id)
         internal
         view
-        returns (CommunityInfo memory)
+        returns (Community memory)
     {
         return self.communities[id].info;
     }
@@ -114,10 +116,10 @@ library CommunitiesAndTags {
     /// @notice Get the number of tags in community
     /// @param self The mapping containing all communities
     /// @param id Address of the community to get tags count
-    function getTagsCountByCommunityId(CommunityCollection storage self, uint32 id)
+    function getTagsCount(CommunityCollection storage self, uint256 id)
         internal
         view
-        returns (uint32 count)
+        returns (uint256 count)
     {
         return self.communities[id].tagsCount;
     }
@@ -125,15 +127,15 @@ library CommunitiesAndTags {
     /// @notice Get list of tags in community
     /// @param self The mapping containing all communities
     /// @param id Address of the community to get tags
-    function getTagsByCommunityId(CommunityCollection storage self, uint32 id)
+    function getTags(CommunityCollection storage self, uint256 id)
         internal
         view
-        returns (TagInfo[] memory)
+        returns (Tag[] memory)
     {
-        Community storage community = self.communities[id];
-        TagInfo[] memory iterableTags = new TagInfo[](community.tagsCount);
-        for (uint32 i = 1; i <= community.tagsCount; i++) {
-            iterableTags[i - 1] = community.tagList[i];
+        CommunityContainer storage community = self.communities[id];
+        Tag[] memory iterableTags = new Tag[](community.tagsCount);
+        for (uint256 i = 1; i <= community.tagsCount; i++) {
+            iterableTags[i - 1] = community.tags[i];
         }
         return iterableTags;
     }

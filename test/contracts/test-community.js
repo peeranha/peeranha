@@ -14,7 +14,7 @@ describe("Test communities", function() {
         expect(await peeranha.getCommunitiesCount()).to.equal(countOfCommunities)
 
         await Promise.all(communitiesIds.map(async(id) => {
-            const community = await peeranha.getCommunityById(id);
+            const community = await peeranha.getCommunity(id);
             return await expect(community.ipfsHash).to.equal(ipfsHashes[id - 1]);
         }));
     });
@@ -24,11 +24,11 @@ describe("Test communities", function() {
         const ipfsHashes = getHashesContainer(2);
 
         await peeranha.createCommunity(0, ipfsHashes[0], createTags(5));
-        const community = await peeranha.getCommunityById(0);
+        const community = await peeranha.getCommunity(0);
         await expect(community.ipfsHash).to.equal(ipfsHashes[0]);
 
         await peeranha.updateCommunity(0, ipfsHashes[1]);
-        const changedCommunity = await peeranha.getCommunityById(0);
+        const changedCommunity = await peeranha.getCommunity(0);
         await expect(changedCommunity.ipfsHash).to.equal(ipfsHashes[1]);
         expect(await peeranha.getCommunitiesCount()).to.equal(1);
     })
@@ -40,7 +40,7 @@ describe("Test communities", function() {
         const tags = createTags(countOfTags);
 
         await peeranha.createCommunity(1, ipfsHashes[0], tags);
-        const tagList = await peeranha.getTagsByCommunityId(1);
+        const tagList = await peeranha.getTags(1);
 
         expect(tagList.length).to.equal(countOfTags);
         tagList.map((tag, index) => {
@@ -48,8 +48,8 @@ describe("Test communities", function() {
         })
 
         await peeranha.createTag(1, 6, ipfsHashes[1]);
-        const newTagList = await peeranha.getTagsByCommunityId(1);
-        expect(await peeranha.getTagsCountByCommunityId(1)).to.equal(countOfTags + 1);
+        const newTagList = await peeranha.getTags(1);
+        expect(await peeranha.getTagsCount(1)).to.equal(countOfTags + 1);
         expect(newTagList[5].ipfsHash).to.equal(ipfsHashes[1]);
     })
 
@@ -68,6 +68,7 @@ describe("Test communities", function() {
 
     const createTags = (countOfTags) =>
         getHashesContainer(countOfTags).map((ipfsHash) => {
-            return { ipfsHash }
+            const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            return { ipfsHash, ipfsHash2 }
         });
 });
