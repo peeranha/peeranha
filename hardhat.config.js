@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
+require("hardhat-gas-reporter");
 
 
 /**
@@ -14,5 +15,9 @@ module.exports = {
         runs: 1000
       }
     }
+  },
+  gasReporter: {
+    currency: 'CHF',
+    gasPrice: 21
   }
 };
