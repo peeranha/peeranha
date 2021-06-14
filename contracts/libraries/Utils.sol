@@ -4,7 +4,7 @@ pragma solidity >=0.5.0;
 /// @notice Provides information about registered user  //
 /// @dev Users information is stored in the mapping on the main contract  //
 
-library Assert_lib  {
+library AssertLib  {
   struct IpfsHash {
     bytes32 ipfsHash;
     bytes32 ipfsHash2; // Not currently used and added for the future compatibility

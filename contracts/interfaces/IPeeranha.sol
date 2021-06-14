@@ -2,6 +2,7 @@ pragma solidity >=0.5.0;
 
 import './IPeeranhaForum.sol';
 import './IPeeranhaUser.sol';
+import './IPeeranhaQuestion.sol';
 
-interface IPeeranha is IPeeranhaForum, IPeeranhaUser {  
+interface IPeeranha is IPeeranhaForum, IPeeranhaUser, IPeeranhaQuestion {  
 }

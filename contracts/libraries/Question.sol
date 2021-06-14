@@ -4,71 +4,30 @@ import "./Utils.sol";
 /// @title Question
 /// @notice Provides information about operation with questions
 /// @dev Questions information is stored in the mapping on the main contract
-library Question_lib  {//
-  // struct Comment {    //bool isExists?
-  //   uint8 id;
-  //   string name;
-  //   uint256 post_time;
-  //   bool isExists;
-  //   Assert_lib.IpfsHash ipfsHash;
-  //   //std::vector<history_item> history;
-  // }
-
-  // struct Answer { //bool isExists?
-  //   string name;
-  //   uint16 id;
-  //   uint256 post_time;
-  //   bool official_answer;
-  //   Comment[] comments;
-  //   bool isExists;
-  //   Assert_lib.IpfsHash ipfsHash;
-  //   //int16_t rating = 0;
-  //   //std::vector<history_item> history;
-  // }
-
-  // struct Question {
-  //   uint32 id;
-  //   uint16 community_id;
-  //   uint256 post_time;
-  //   string name;
-  //   Answer[] answers;
-  //   Comment[] comments;
-  //   uint16 correct_answer_id;
-  //   bool isExists;
-  //   Assert_lib.IpfsHash ipfsHash;
-  //   //std::vector<uint32_t> tags;
-  //   //int16_t rating;
-  //   // type question 
-  // }
-
-  // struct Collection_question {
-  //   mapping(uint32 => Question) questions;
-  //   uint32 size;
-  // }
-  
-
+library QuestionLib  {
   struct Content {
-    string author;
-    Assert_lib.IpfsHash ipfsHash;
+    address author;
+    AssertLib.IpfsHash ipfsHash;
     uint256 rating;
-    uint256 post_time;
-    mapping(uint256 => bytes32) properties;
-    uint256 size_properties;
+    uint256 postTime;
     bool isDeleted;
   }
 
   struct Comment {
     Content content;
-    mapping(uint256 => Comment) comments;
-    uint256 size_comments;
+    mapping(uint256 => bytes32) properties;
+    uint256 sizeProperties;
   }
 
   struct Reply {
     Content content;
     mapping(uint256 => Reply) replies;
     mapping(uint256 => Comment) comments;
-    uint256 size_replies;
-    uint256 size_comments;
+    mapping(uint256 => bytes32) properties;
+    uint256 sizeReplies;
+    uint256 sizeComments;
+    uint256 sizeProperties;
+    bool officialAnswer;
   }
 
   struct Post {
@@ -84,19 +43,17 @@ library Question_lib  {//
 
   /// @notice Post Question
   /// @param self The mapping containing all questions
-  /// @param name author of the question
-  /// @param communityId community where the question will ask
+  /// @param name Author of the question
+  /// @param communityId Community where the question will be ask
   /// @param ipfsHash IPFS hash of document with question information
   
   function Post_question(
     Collection storage self,
-    string memory name,
-    uint16 communityId,
-    // string memory title, //check?  
-    Assert_lib.IpfsHash storage ipfsHash
+    address name,
+    uint16 communityId, 
+    bytes32 ipfsHash    // bytes32 ipfsHash or Assert_lib.IpfsHash storage ipfsHash?
     //const std::vector<uint32_t> tags
-  ) public {
-    // Assert_lib.Assert_title(title);
+  ) internal {
 
     ///
     //check community, ipfs, tags
@@ -107,9 +64,9 @@ library Question_lib  {//
     ///
 
     Post storage post = self.posts[self.size_posts];
-    post.post.content.ipfsHash = ipfsHash;
+    post.post.content.ipfsHash.ipfsHash = ipfsHash;
     post.post.content.author = name;
-    post.post.content.post_time = block.timestamp;
+    post.post.content.postTime = block.timestamp;
     post.communityId = communityId;
 
     self.size_posts++;
@@ -122,45 +79,45 @@ library Question_lib  {//
 
   /// @notice Post answer
   /// @param self The mapping containing all questions
-  /// @param name author of the answer
-  /// @param question_id question where the answer will post
-  /// @param official_answer flag show                                      //
+  /// @param name Author of the answer
+  /// @param questionId Question where the answer will be post
+  /// @param officialAnswer Flag is showing "official answer" or not
+  /// @param path The path where the answer will be post 
   /// @param ipfsHash IPFS hash of document with answer information
   
   function Post_answer(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    bool official_answer,
+    address name,
+    uint32 questionId,
+    bool officialAnswer,
     uint[] memory path,
-    Assert_lib.IpfsHash storage ipfsHash
+    bytes32 ipfsHash
   ) public {
     ///
     //check ipfs
     ///
-    require(self.posts[question_id].post.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
     
     ///
     //update user statistic + rating
     ///
-    
-    Reply storage reply = self.posts[question_id].post;
-    
-    for(uint256 i = 0; i < path.length; i++) {
 
+    if (path.length > 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        reply = reply.replies[path[i]];
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+      }
     }
 
-    // Post post = self.posts[question_id].content.
-    // self.questions[question_id].answers[answer_id] = Answer(
-    //   name,
-    //   answer_id,
-    //   block.timestamp,
-    //   official_answer,
-    //   new Comment[](0),
-    //   true,
-    //   ipfsHash
-    // );
-
+    reply = reply.replies[reply.sizeReplies++];
+    reply.content.author = name;
+    reply.content.ipfsHash.ipfsHash = ipfsHash;
+    reply.content.postTime = block.timestamp;
+    if (officialAnswer)                          //without if?
+      reply.officialAnswer = officialAnswer;
 
     ///
     // first answer / 15min
@@ -169,157 +126,257 @@ library Question_lib  {//
 
   /// @notice Post comment
   /// @param self The mapping containing all questions
-  /// @param name author of the answer
-  /// @param question_id question where the comment will post
-  /// @param answer_id answer where the comment will post
+  /// @param name Author of the comment
+  /// @param questionId Question where the comment will be post
+  /// @param path The path where the comment will be post 
   /// @param ipfsHash IPFS hash of document with answer information
 
   function Post_comment(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 answer_id,
-    Assert_lib.IpfsHash storage ipfsHash
+    address name,
+    uint32 questionId,
+    uint[] memory path,
+    bytes32 ipfsHash
   ) public {
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
-    // if (answer_id == 0) {
-    //   uint16 comment_id = uint8(self.questions[question_id].comments.length);
-    //   self.questions[question_id].comments[comment_id] = Comment(
-    //     uint8(self.questions[question_id].comments.length),
-    //     name,
-    //     block.timestamp,
-    //     true,
-    //     ipfsHash
-    //   );
-    // } else {
-    //   require(self.questions[question_id].answers.length > answer_id, "answer not found");
-    //   uint8 comment_id = uint8(self.questions[question_id].answers[answer_id].comments.length);
-    //   self.questions[question_id].answers[answer_id].comments.push(Comment(    //push?
-    //     comment_id,
-    //     name,
-    //     block.timestamp,
-    //     true,
-    //     ipfsHash
-    //   ));
-    // }
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+
+    if (path.length != 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        reply = reply.replies[path[i]];
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+      }
+    }
+
+    Content storage comment = reply.comments[reply.sizeComments++].content;
+    comment.author = name;
+    comment.ipfsHash.ipfsHash = ipfsHash;
+    comment.postTime = block.timestamp;
   }
 
-  function Edit_question(     //LAST_MODIFIED?
+  /// @notice Edit question
+  /// @param self The mapping containing all questions
+  /// @param name Author of the comment
+  /// @param questionId Question where the comment will be post
+  /// @param ipfsHash IPFS hash of document with answer information
+
+  function Edit_question(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 community_id,
+    address name,
+    uint32 questionId,
+    uint16 communityId,
     // tags
-    Assert_lib.IpfsHash storage ipfsHash
+    bytes32 ipfsHash
   ) public {
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
     
-    // Question storage question = self.questions[question_id];
-    // question.community_id = community_id;
-    // question.ipfsHash = ipfsHash;    
+    Post storage post = self.posts[questionId];     //inside the question
+    require(post.post.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(post.post.content.isDeleted, "Question has deleted");
+    
+    post.communityId = communityId;
+    post.post.content.ipfsHash.ipfsHash = ipfsHash;    
   }
 
-  function Edit_answer(     //LAST_MODIFIED?
+  /// @notice Edit answer
+  /// @param self The mapping containing all questions
+  /// @param name Author of the comment
+  /// @param questionId Question where the comment will be post
+  /// @param path The path where the comment will be post 
+  /// @param answerId The answer which will be change
+  /// @param officialAnswer Flag is showing "official answer" or not
+  /// @param ipfsHash IPFS hash of document with answer information
+
+  function Edit_answer(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 answer_id,
-    bool official_answer,
-    Assert_lib.IpfsHash storage ipfsHash
+    address name,
+    uint32 questionId,
+    uint[] memory path,
+    uint256 answerId,
+    bool officialAnswer,
+    bytes32 ipfsHash
   ) public {
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
-    // require(self.questions[question_id].answers.length > answer_id, "Answer not found");
-    // require(self.questions[question_id].answers[answer_id].isExists, "Answer isn't existed");
-    
-    // Answer storage answer = self.questions[question_id].answers[answer_id];
-    // answer.ipfsHash = ipfsHash;
-    // if(answer.official_answer != official_answer)   //will check gas?
-    //   answer.official_answer = official_answer;    
+
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(reply.content.isDeleted, "Question has deleted");
+
+    if (path.length > 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        reply = reply.replies[path[i]];
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+        require(reply.content.isDeleted, "Reply has deleted");
+      }
+    }
+
+    reply = reply.replies[answerId];
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+    require(reply.content.isDeleted, "Reply has deleted");
+
+    if (reply.content.ipfsHash.ipfsHash == ipfsHash)
+      reply.content.ipfsHash.ipfsHash = ipfsHash;
+    if (reply.officialAnswer != officialAnswer)                          //will check gas?
+      reply.officialAnswer = officialAnswer;   
   }
+
+  /// @notice Edit comment
+  /// @param self The mapping containing all questions
+  /// @param name Author of the comment
+  /// @param questionId Question where the comment will be post
+  /// @param path The path where the comment will be post
+  /// @param commentId The comment which will be change
+  /// @param ipfsHash IPFS hash of document with answer information
 
   function Edit_comment(    //LAST_MODIFIED?
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 answer_id,
-    uint8 comment_id,
-    Assert_lib.IpfsHash storage ipfsHash
+    address name,
+    uint32 questionId,
+    uint[] memory path,
+    uint8 commentId,
+    bytes32 ipfsHash
   ) public {
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
-    // if (answer_id == 0) {
-    //   require(self.questions[question_id].comments.length > answer_id, "Comment not found");
-    //   require(self.questions[question_id].comments[comment_id].isExists, "Comment isn't existed");
-    //   self.questions[question_id].comments[comment_id].ipfsHash = ipfsHash;
-    // } else {
-    //   require(self.questions[question_id].answers.length > answer_id, "Answer not found");
-    //   require(self.questions[question_id].answers[answer_id].isExists, "Answer isn't existed");
-    //   require(self.questions[question_id].answers[answer_id].comments.length > comment_id, "Comment not found");
-    //   require(self.questions[question_id].answers[answer_id].comments[comment_id].isExists, "Comment isn't existed");
-    //   self.questions[question_id].answers[answer_id].comments[comment_id].ipfsHash = ipfsHash;
-    // }
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(reply.content.isDeleted, "Question has deleted");
+
+    if (path.length != 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        reply = reply.replies[path[i]];
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+        require(reply.content.isDeleted, "Reply has deleted");
+      }
+    }
+
+    Content storage comment = reply.comments[commentId].content;
+    require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
+    require(comment.isDeleted, "Comment has deleted");
+
+    if(comment.ipfsHash.ipfsHash == ipfsHash)
+      comment.ipfsHash.ipfsHash = ipfsHash;
   }
 
-  function Delete_question(     //LAST_MODIFIED?
+  /// @notice Delete question
+  /// @param self The mapping containing all questions
+  /// @param name ?
+  /// @param questionId Question which be delete
+
+  function Delete_question(
     Collection storage self,
-    string memory name,
-    uint32 question_id
+    address name,
+    uint32 questionId
   ) public {
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
-    
-    // Question storage question = self.questions[question_id];
-    // self.questions[question_id].isExists = false;
+    Reply storage post = self.posts[questionId].post;     //inside the question
+    require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(post.content.isDeleted, "Question has already deleted");
+    post.content.isDeleted = true;
+
     ///
-    // -rating
-    // delete answer, - rating
-    // delete comment?
-    ///   
+    // -rating, update user statistic
+    ///
+
+    // for(uint256 i = 0; i < post.sizeComments; i++) {
+    //   require(post.comments[i].content.ipfsHash.ipfsHash != bytes32(0x0), "Comment isn't exist");
+    //   post.comments[i].content.isDeleted = true;
+    //   // update user statistic
+    // }
+    
+    for(uint256 i = 0; i < post.sizeReplies; i++) {
+      if(post.replies[i].content.ipfsHash.ipfsHash == bytes32(0x0) || post.replies[i].content.isDeleted)
+        continue;
+      Reply storage localReply = post.replies[i];
+
+      ///
+      // -rating, update user statistic
+      ///
+
+      // for(uint256 j = 0; j < localReply.sizeComments; j++) {
+      //   require(localReply.comments[j].content.ipfsHash.ipfsHash != bytes32(0x0), "Comment isn't exist");
+      //   localReply.comments[j].content.isDeleted = true;
+      //   //update user statistic
+      // }
+      // localReply.content.isDeleted = true;
+    }  
   }
+
+  /// @notice Delete answer
+  /// @param self The mapping containing all questions
+  /// @param name ?
+  /// @param questionId Question where will be deleted answer
+  /// @param path The path where the answer will be deleted
+  /// @param answerId Answer which will be deleted
 
   function Delete_answer(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 answer_id
+    address name,
+    uint32 questionId,
+    uint[] memory path,
+    uint16 answerId
   ) public {
-    ///
-    //check autor
-    ///
-    // require(self.size <= question_id , "Question not found");
-    // require(self.questions[question_id].isExists, "Question isn't existed");
-    // require(self.questions[question_id].answers.length > answer_id, "Answer not found");
-    // require(self.questions[question_id].answers[answer_id].isExists, "Answer isn't existed");
+    /*
+    check author
+    */
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(reply.content.isDeleted, "Question has deleted");
 
-    // self.questions[question_id].answers[answer_id].isExists = false;
-    ///
-    // - rating
-    // delete comment?
-    /// 
+    if (path.length > 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+        require(reply.content.isDeleted, "Reply has deleted");
+        reply = reply.replies[path[i]];
+      }
+    }
+
+    reply = reply.replies[answerId];
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+    require(reply.content.isDeleted, "Reply has already deleted");
+    reply.content.isDeleted = true;
+    // for(uint256 j = 0; j < reply.sizeComments; j++) {
+    //   if(reply.comments[j].content.ipfsHash.ipfsHash == bytes32(0x0) || reply.comments[j].content.isDeleted) {
+    //     // reply.comments[j].content.isDeleted = true; 
+    //     //update user statistic
+    //   }
+    // }
   }
+
+  /// @notice Delete comment
+  /// @param self The mapping containing all questions
+  /// @param name ?
+  /// @param questionId Question where will be deleted сщььуте
+  /// @param path The path where the answer will be deleted
+  /// @param commentId comment which will be deleted
 
   function Delete_comment(
     Collection storage self,
-    string memory name,
-    uint32 question_id,
-    uint16 answer_id,
-    uint8 comment_id
+    address name,
+    uint32 questionId,
+    uint[] memory path,
+    uint8 commentId
   ) public {
-  //   require(self.size <= question_id , "Question not found");
-  //   require(self.questions[question_id].isExists, "Question isn't existed");
-  //   if (answer_id == 0) {
-  //     require(self.questions[question_id].comments.length > answer_id, "Comment not found");
-  //     require(self.questions[question_id].comments[comment_id].isExists, "Comment isn't existed");
-  //     self.questions[question_id].comments[comment_id].isExists = false;
-  //   } else {
-  //     require(self.questions[question_id].answers.length > answer_id, "Answer not found");
-  //     require(self.questions[question_id].answers[answer_id].isExists, "Answer isn't existed");
-  //     require(self.questions[question_id].answers[answer_id].comments.length > comment_id, "Comment not found");
-  //     require(self.questions[question_id].answers[answer_id].comments[comment_id].isExists, "Comment isn't existed");
-  //     self.questions[question_id].answers[answer_id].comments[comment_id].isExists = false;
-  //   }
+    Reply storage reply = self.posts[questionId].post;     //inside the question
+    require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Question isn't exist");
+    require(reply.content.isDeleted, "Question has deleted");
+
+    if (path.length > 0) {
+      uint256 lenght = path.length;
+      for(uint256 i = 0; i < lenght; i++) {
+        reply = reply.replies[path[i]];
+        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+        require(reply.content.isDeleted, "Reply has deleted");
+      }
+    }
+
+    Content storage comment = reply.comments[commentId].content;
+    require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
+    require(comment.isDeleted, "Comment has already deleted");
+    comment.isDeleted = true;
+    //update user statistic
+  }
+
+  function getQuestionByIndex(Collection storage self, uint index) internal view returns (Post storage) {
+    return self.posts[index];
   }
 }
