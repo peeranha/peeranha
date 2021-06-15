@@ -376,7 +376,8 @@ library QuestionLib  {
     //update user statistic
   }
 
-  function getQuestionByIndex(Collection storage self, uint index) internal view returns (Post storage) {
-    return self.posts[index];
+  function getQuestionByIndex(Collection storage self, uint256 index) internal view returns (Content memory) {
+    Content memory content = self.posts[index].post.content;
+    return content;
   }
 }

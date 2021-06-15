@@ -1,21 +1,27 @@
 const { expect } = require("chai");
 
-describe("Test users", function () {
-	it("Test user creating", async function () {
+describe("Test question", function () {
+	it("Test post question ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
 
-		await peeranha
-			.connect(signers[0])
-			.postQuestion(
-				"user1",
-				5,
-				0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1
-			);
-
-		expect(await peeranha.getUsersCount()).to.equal(hashContainer.length);
-		const question = await peeranha.getQuestionByIndex(0);
-		console.log(question);
+		await Promise.all(
+			hashContainer.map(async (hash, index) => {
+				return await peeranha
+					.connect(signers[index])
+					.postQuestion("0x001d3f1ef827552ae1114027bd3ecf1f086ba0f9", 5, hash);
+			})
+		);
+		console.log("-----------------------------------------------");
+		await Promise.all(
+			hashContainer.map(async (hash, index) => {
+				const question = await peeranha.getQuestionByIndex(index);
+				console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+				console.log(question);
+				// return await expect(user.ipfsHash).to.equal(hash);
+			})
+		);
 	});
 
 	const createContract = async function () {

@@ -1,4 +1,5 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -16,11 +17,11 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
   using User for User.Collection;
   using User for User.Info;
 
-  using Question for Question.Collection;
-  using Question for Question.Post;
+  using QuestionLib for QuestionLib.Content;
+  using QuestionLib for QuestionLib.Collection;
 
   User.Collection users;
-  Question.Collection questions;
+  QuestionLib.Collection questions;
   
   function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
     __AccessControl_init_unchained();
@@ -107,11 +108,13 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
   //description
   ///
 
-  function postQuestion(string memory name, uint16 communityId, bytes32 ipfsHash) external override {
+  function postQuestion(address name, uint16 communityId, bytes32 ipfsHash) external override {
     questions.Post_question(name, communityId, ipfsHash);
   }
 
-  function getQuestionByIndex(uint index) external view returns (Question.Post storage) {
-    return questions.getQuestionByIndex(index);
+  function getQuestionByIndex(uint256 index) external view returns (QuestionLib.Content memory) {
+    QuestionLib.Content memory content = questions.getQuestionByIndex(index);
+    return content;
+    // return "qqqqq";
   }
 }
