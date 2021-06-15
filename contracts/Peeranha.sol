@@ -1,4 +1,5 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -6,15 +7,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
-import "./libraries/User.sol";
+import "./libraries/UserLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
-    using User for User.Collection;
-    using User for User.Info;
+    using UserLib for UserLib.UserCollection;
+    using UserLib for UserLib.User;
 
-    User.Collection users;
+    UserLib.UserCollection users;
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -63,6 +64,35 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      */
     function updateUser(bytes32 ipfsHash) external override {
         users.update(msg.sender, ipfsHash);
+    }
+
+    /**
+     * @dev Get users count.
+     */
+    function getUsersCount() external view returns (uint256 count) {
+        return users.getUsersCount();
+    }
+
+    /**
+     * @dev Get user profile by index.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByIndex(uint256 index) external view returns (UserLib.User memory) {
+        return users.getUserByIndex(index);
+    }
+
+    /**
+     * @dev Get user profile by address.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByAddress(address addr) external view returns (UserLib.User memory) {
+        return users.getUserByAddress(addr);
     }
     
     /**
