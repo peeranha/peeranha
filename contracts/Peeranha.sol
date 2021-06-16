@@ -109,7 +109,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     /**
      * @dev Get communities count.
      */
-    function getCommunitiesCount() external view returns (uint256 count) {
+    function getCommunitiesCount() external view returns (uint8 count) {
         return communities.getCommunitiesCount();
     }
 
@@ -131,7 +131,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.
      */
-    function getTagsCount(uint256 id) external view returns (uint256 count) {
+    function getTagsCount(uint8 id) external view returns (uint256 count) {
         return communities.getTagsCount(id);
     }
 

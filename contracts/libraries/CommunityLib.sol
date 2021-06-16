@@ -19,12 +19,12 @@ library CommunityLib {
     struct CommunityContainer {
         Community info;
         mapping(uint256 => Tag) tags;
-        uint256 tagsCount;
+        uint8 tagsCount;
     }
 
     struct CommunityCollection {
         mapping(uint256 => CommunityContainer) communities;
-        uint256 communityCount;
+        uint8 communityCount;
     }
 
     event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
@@ -45,10 +45,13 @@ library CommunityLib {
             self.communities[id].info.ipfsHash == bytes32(0x0),
             "Community exists"
         );
-
+        require(
+            tags.length >= 5, 
+            "Require at least 5 tags"
+        );
         CommunityContainer storage community = self.communities[id];
         community.info.ipfsHash = ipfsHash;
-        community.tagsCount = uint256(tags.length);
+        community.tagsCount = uint8(tags.length);
         for (uint256 i = 1; i <= uint256(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
@@ -97,7 +100,7 @@ library CommunityLib {
     function getCommunitiesCount(CommunityCollection storage self)
         internal
         view
-        returns (uint256 count)
+        returns (uint8 count)
     {
         return self.communityCount;
     }
@@ -119,7 +122,7 @@ library CommunityLib {
     function getTagsCount(CommunityCollection storage self, uint256 id)
         internal
         view
-        returns (uint256 count)
+        returns (uint8 count)
     {
         return self.communities[id].tagsCount;
     }
