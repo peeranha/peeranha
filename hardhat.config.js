@@ -15,9 +15,5 @@ module.exports = {
         runs: 1000
       }
     }
-  },
-  gasReporter: {
-    currency: 'ETH',
-    gasPrice: 24
   }
 };
