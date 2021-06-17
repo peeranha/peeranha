@@ -8,8 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 import "./libraries/User.sol";
-import "./libraries/Question.sol";
-import "./libraries/Utils.sol";
+import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
@@ -17,11 +16,11 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
   using User for User.Collection;
   using User for User.Info;
 
-  using QuestionLib for QuestionLib.Content;
-  using QuestionLib for QuestionLib.Collection;
+  using PostLib for PostLib.Content;
+  using PostLib for PostLib.PostCollection;
 
   User.Collection users;
-  QuestionLib.Collection questions;
+  PostLib.PostCollection posts;
   
   function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
     __AccessControl_init_unchained();
@@ -104,17 +103,51 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  ///
-  //description
-  ///
-
-  function postQuestion(address name, uint16 communityId, bytes32 ipfsHash) external override {
-    questions.Post_question(name, communityId, ipfsHash);
+  function publicationPost(address name, uint8 communityId, bytes32 ipfsHash) external override {
+    posts.publicationPost(name, communityId, ipfsHash);
   }
 
-  function getQuestionByIndex(uint256 index) external view returns (QuestionLib.Content memory) {
-    QuestionLib.Content memory content = questions.getQuestionByIndex(index);
-    return content;
-    // return "qqqqq";
+  function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash) external override {
+    posts.editPost(name, postId, communityId, ipfsHash);
+  }
+
+  function deletePost(address name, uint32 postId) external override {
+    posts.deletePost(name, postId);
+  }
+
+  function postReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
+    posts.postReply(name, postId, officialReply, path, ipfsHash);
+  }
+
+  function editReply(address name, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
+    posts.editReply(name, postId, path, replyId, officialReply, ipfsHash);
+  }
+
+  function deleteReply(address name, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
+    posts.deleteReply(name, postId, path, replyId);
+  }
+
+  function postComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+    posts.postComment(name, postId, path, ipfsHash);
+  }
+
+  function editComment(address name, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+    posts.editComment(name, postId, path, commentId, ipfsHash);
+  }
+
+  function deleteComment(address name, uint32 postId, uint16[] memory path, uint8 commentId) external override {
+    posts.deleteComment(name, postId, path, commentId);
+  }
+
+  function getPostByIndex(uint32 postId) external view returns (PostLib.Content memory) {
+    return posts.getPostByIndex(postId);
+  }
+
+  function getReplyByPath(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Content memory) {
+    return posts.getReplyByPath(postId, path, replyId);
+  }
+
+  function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
+    return posts.getCommentByPath(postId, path, commentId);
   }
 }
