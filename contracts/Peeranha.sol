@@ -8,14 +8,20 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 import "./libraries/UserLib.sol";
+import "./libraries/CommunityLib.sol";
 
 import "./interfaces/IPeeranha.sol";
+
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
-
+    using CommunityLib for CommunityLib.CommunityCollection;
+    using CommunityLib for CommunityLib.Community;
+    
     UserLib.UserCollection users;
+    CommunityLib.CommunityCollection communities;
+
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -60,7 +66,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * Requirements:
      *
-     * - Must be an existing user.
+     * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
         users.update(msg.sender, ipfsHash);
@@ -93,6 +99,80 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      */
     function getUserByAddress(address addr) external view returns (UserLib.User memory) {
         return users.getUserByAddress(addr);
+    }
+
+    /**
+     * @dev Create new community.
+     *
+     * Requirements:
+     *
+     * - Must be a new community.
+     */
+    function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        communities.createCommunity(communityId, ipfsHash, tags);
+    }
+
+    /**
+     * @dev Edit community info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     */
+    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external {
+        communities.updateCommunity(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Create new tag.
+     *
+     * Requirements:
+     *
+     * - Must be a new tag.
+     * - Must be an existing community. 
+     */
+    function createTag(uint256 communityId, uint256 tagId, bytes32 ipfsHash) external {
+        communities.createTag(communityId, tagId, ipfsHash);
+    }
+
+    /**
+     * @dev Get communities count.
+     */
+    function getCommunitiesCount() external view returns (uint8 count) {
+        return communities.getCommunitiesCount();
+    }
+
+    /**
+     * @dev Get community info by id.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getCommunity(uint256 communityId) external view returns (CommunityLib.Community memory) {
+        return communities.getCommunity(communityId);
+    }
+
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTagsCount(uint8 id) external view returns (uint256 count) {
+        return communities.getTagsCount(id);
+    }
+
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTags(uint256 communityId) external view returns (CommunityLib.Tag[] memory) {
+        return communities.getTags(communityId);
     }
     
     /**
