@@ -49,6 +49,16 @@ library CommunityLib {
             tags.length >= 5, 
             "Require at least 5 tags"
         );
+        for(uint256 i = 0; i < tags.length; i++){
+            for(uint256 j = 0; j < tags.length; j++){
+                if (i != j){
+                    require(
+                        tags[i].ipfsHash != tags[j].ipfsHash,
+                        "Require tags with unique names"
+                    );
+                }
+            }
+        }
         CommunityContainer storage community = self.communities[id];
         community.info.ipfsHash = ipfsHash;
         community.tagsCount = uint8(tags.length);
