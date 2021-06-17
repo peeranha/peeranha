@@ -7,147 +7,254 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
-import "./libraries/User.sol";
+import "./libraries/UserLib.sol";
+import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
+
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
-  using User for User.Collection;
-  using User for User.Info;
+    using UserLib for UserLib.UserCollection;
+    using UserLib for UserLib.User;
+    using CommunityLib for CommunityLib.CommunityCollection;
+    using CommunityLib for CommunityLib.Community;
+    using PostLib for PostLib.Content;
+    using PostLib for PostLib.PostCollection;
+    
+    UserLib.UserCollection users;
+    CommunityLib.CommunityCollection communities;
+    PostLib.PostCollection posts;
+    
+    function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
+        __AccessControl_init_unchained();
+        __ERC20_init_unchained(name, symbol);
+        __Pausable_init_unchained();
+        __ERC20Capped_init_unchained(cap);
+        __ERC20Pausable_init_unchained();
+        __Peeranha_init_unchained(name, symbol, cap);
+    }
 
-  using PostLib for PostLib.Content;
-  using PostLib for PostLib.PostCollection;
+    function __Peeranha_init_unchained(string memory name, string memory symbol, uint256 cap) internal initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(PAUSER_ROLE, msg.sender);
+    }
 
-  User.Collection users;
-  PostLib.PostCollection posts;
-  
-  function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
-    __AccessControl_init_unchained();
-    __ERC20_init_unchained(name, symbol);
-    __Pausable_init_unchained();
-    __ERC20Capped_init_unchained(cap);
-    __ERC20Pausable_init_unchained();
-    __Peeranha_init_unchained(name, symbol, cap);
-  }
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-  function __Peeranha_init_unchained(string memory name, string memory symbol, uint256 cap) internal initializer {
-    _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    _setupRole(PAUSER_ROLE, msg.sender);
-  }
+    function __Peeranha_init() internal initializer {
+        __AccessControl_init_unchained();
+        __Pausable_init_unchained();
+        __Peeranha_init_unchained();
+    }
 
-  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    function __Peeranha_init_unchained() internal initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(PAUSER_ROLE, msg.sender);
+    }
 
-  function __Peeranha_init() internal initializer {
-    __AccessControl_init_unchained();
-    __Pausable_init_unchained();
-    __Peeranha_init_unchained();
-  }
+    /**
+     * @dev Signup for user account.
+     *
+     * Requirements:
+     *
+     * - Must be a new user.
+     */
+    function createUser(bytes32 ipfsHash) external override {
+        users.create(msg.sender, ipfsHash);
+    }
 
-  function __Peeranha_init_unchained() internal initializer {
-    _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    _setupRole(PAUSER_ROLE, msg.sender);
-  }
+    /**
+     * @dev Edit user profile.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.  
+     */
+    function updateUser(bytes32 ipfsHash) external override {
+        users.update(msg.sender, ipfsHash);
+    }
 
-  /**
-   * @dev Signup for user account.
-   *
-   * Requirements:
-   *
-   * - Must be a new user.
-   */
-  function createUser(bytes32 ipfsHash) external override {
-    users.create(msg.sender, ipfsHash);
-  }
+    /**
+     * @dev Get users count.
+     */
+    function getUsersCount() external view returns (uint256 count) {
+        return users.getUsersCount();
+    }
 
-  /**
-   * @dev Edit user profile.
-   *
-   * Requirements:
-   *
-   * - Must be an existing user.
-   */
-  function updateUser(bytes32 ipfsHash) external override {
-    users.update(msg.sender, ipfsHash);
-  }
-  
-  /**
-   * @dev Pauses all token transfers.
-   *
-   * See {ERC20Pausable} and {Pausable-_pause}.
-   *
-   * Requirements:
-   *
-   * - the caller must have the `PAUSER_ROLE`.
-   */
-  function pause() public virtual {
-    require(hasRole(PAUSER_ROLE, msg.sender), "Peeranha: must have pauser role to pause");
-    _pause();
-  }
+    /**
+     * @dev Get user profile by index.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByIndex(uint256 index) external view returns (UserLib.User memory) {
+        return users.getUserByIndex(index);
+    }
 
-  /**
-   * @dev Unpauses all token transfers.
-   *
-   * See {ERC20Pausable} and {Pausable-_unpause}.
-   *
-   * Requirements:
-   *
-   * - the caller must have the `PAUSER_ROLE`.
-   */
-  function unpause() public virtual {
-    require(hasRole(PAUSER_ROLE, msg.sender), "Peeranha: must have pauser role to unpause");
-    _unpause();
-  }
+    /**
+     * @dev Get user profile by address.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserByAddress(address addr) external view returns (UserLib.User memory) {
+        return users.getUserByAddress(addr);
+    }
 
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
-    super._beforeTokenTransfer(from, to, amount);
-  }
+    /**
+     * @dev Create new community.
+     *
+     * Requirements:
+     *
+     * - Must be a new community.
+     */
+    function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        communities.createCommunity(communityId, ipfsHash, tags);
+    }
 
-  function publicationPost(address name, uint8 communityId, bytes32 ipfsHash) external override {
-    posts.publicationPost(name, communityId, ipfsHash);
-  }
+    /**
+     * @dev Edit community info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     */
+    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external {
+        communities.updateCommunity(communityId, ipfsHash);
+    }
 
-  function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash) external override {
-    posts.editPost(name, postId, communityId, ipfsHash);
-  }
+    /**
+     * @dev Create new tag.
+     *
+     * Requirements:
+     *
+     * - Must be a new tag.
+     * - Must be an existing community. 
+     */
+    function createTag(uint256 communityId, uint256 tagId, bytes32 ipfsHash) external {
+        communities.createTag(communityId, tagId, ipfsHash);
+    }
 
-  function deletePost(address name, uint32 postId) external override {
-    posts.deletePost(name, postId);
-  }
+    /**
+     * @dev Get communities count.
+     */
+    function getCommunitiesCount() external view returns (uint8 count) {
+        return communities.getCommunitiesCount();
+    }
 
-  function postReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
-    posts.postReply(name, postId, officialReply, path, ipfsHash);
-  }
+    /**
+     * @dev Get community info by id.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getCommunity(uint256 communityId) external view returns (CommunityLib.Community memory) {
+        return communities.getCommunity(communityId);
+    }
 
-  function editReply(address name, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
-    posts.editReply(name, postId, path, replyId, officialReply, ipfsHash);
-  }
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTagsCount(uint8 id) external view returns (uint256 count) {
+        return communities.getTagsCount(id);
+    }
 
-  function deleteReply(address name, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
-    posts.deleteReply(name, postId, path, replyId);
-  }
+    /**
+     * @dev Get tags count in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     */
+    function getTags(uint256 communityId) external view returns (CommunityLib.Tag[] memory) {
+        return communities.getTags(communityId);
+    }
+    
+    /**
+     * @dev Pauses all token transfers.
+     *
+     * See {ERC20Pausable} and {Pausable-_pause}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function pause() public virtual {
+        require(hasRole(PAUSER_ROLE, msg.sender), "Peeranha: must have pauser role to pause");
+        _pause();
+    }
 
-  function postComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-    posts.postComment(name, postId, path, ipfsHash);
-  }
+    /**
+     * @dev Unpauses all token transfers.
+     *
+     * See {ERC20Pausable} and {Pausable-_unpause}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function unpause() public virtual {
+        require(hasRole(PAUSER_ROLE, msg.sender), "Peeranha: must have pauser role to unpause");
+        _unpause();
+    }
 
-  function editComment(address name, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
-    posts.editComment(name, postId, path, commentId, ipfsHash);
-  }
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
+        super._beforeTokenTransfer(from, to, amount);
+    }
 
-  function deleteComment(address name, uint32 postId, uint16[] memory path, uint8 commentId) external override {
-    posts.deleteComment(name, postId, path, commentId);
-  }
+    function publicationPost(address name, uint8 communityId, bytes32 ipfsHash) external override {
+        posts.publicationPost(name, communityId, ipfsHash);
+    }
 
-  function getPostByIndex(uint32 postId) external view returns (PostLib.Content memory) {
-    return posts.getPostByIndex(postId);
-  }
+    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash) external override {
+        posts.editPost(name, postId, communityId, ipfsHash);
+    }
 
-  function getReplyByPath(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Content memory) {
-    return posts.getReplyByPath(postId, path, replyId);
-  }
+    function deletePost(address name, uint32 postId) external override {
+        posts.deletePost(name, postId);
+    }
 
-  function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
-    return posts.getCommentByPath(postId, path, commentId);
-  }
+    function postReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.postReply(name, postId, officialReply, path, ipfsHash);
+    }
+
+    function editReply(address name, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
+        posts.editReply(name, postId, path, replyId, officialReply, ipfsHash);
+    }
+
+    function deleteReply(address name, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
+        posts.deleteReply(name, postId, path, replyId);
+    }
+
+    function postComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.postComment(name, postId, path, ipfsHash);
+    }
+
+    function editComment(address name, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(name, postId, path, commentId, ipfsHash);
+    }
+
+    function deleteComment(address name, uint32 postId, uint16[] memory path, uint8 commentId) external override {
+        posts.deleteComment(name, postId, path, commentId);
+    }
+
+    function getPostByIndex(uint32 postId) external view returns (PostLib.Content memory) {
+        return posts.getPostByIndex(postId);
+    }
+
+    function getReplyByPath(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Content memory) {
+        return posts.getReplyByPath(postId, path, replyId);
+    }
+
+    function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
+        return posts.getCommentByPath(postId, path, commentId);
+    }
 }
