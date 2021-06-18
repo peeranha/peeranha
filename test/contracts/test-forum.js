@@ -29,7 +29,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postReply(author, 0, false, [], hashContainer[1]);
+		await peeranha.publicationReply(author, 0, false, [], hashContainer[1]);
 
 		const reply = await peeranha.getReplyByPath(0, [], 0);
 		await expect(reply.author).to.equal(author);
@@ -42,7 +42,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postComment(author, 0, [], hashContainer[1]);
+		await peeranha.publicationComment(author, 0, [], hashContainer[1]);
 
 		const comment = await peeranha.getCommentByPath(0, [], 0);
 		await expect(comment.author).to.equal(author);
@@ -68,7 +68,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postReply(author, 0, false, [], hashContainer[1]);
+		await peeranha.publicationReply(author, 0, false, [], hashContainer[1]);
 		await peeranha.editReply(author, 0, [], 0, true, hashContainer[2]);
 
 		const reply = await peeranha.getReplyByPath(0, [], 0);
@@ -82,7 +82,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postComment(author, 0, [], hashContainer[1]);
+		await peeranha.publicationComment(author, 0, [], hashContainer[1]);
 		await peeranha.editComment(author, 0, [], 0, hashContainer[2]);
 
 		const reply = await peeranha.getCommentByPath(0, [], 0);
@@ -108,7 +108,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postReply(author, 0, false, [], hashContainer[1]);
+		await peeranha.publicationReply(author, 0, false, [], hashContainer[1]);
 		await peeranha.deleteReply(author, 0, [], 0);
 
 		const reply = await peeranha.getReplyByPath(0, [], 0);
@@ -121,7 +121,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.publicationPost(author, 1, hashContainer[0]);
-		await peeranha.postComment(author, 0, [], hashContainer[1]);
+		await peeranha.publicationComment(author, 0, [], hashContainer[1]);
 		await peeranha.deleteComment(author, 0, [], 0);
 
 		const reply = await peeranha.getCommentByPath(0, [], 0);

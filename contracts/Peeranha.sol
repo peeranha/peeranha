@@ -222,8 +222,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         posts.deletePost(name, postId);
     }
 
-    function postReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.postReply(name, postId, officialReply, path, ipfsHash);
+    function publicationReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.publicationReply(name, postId, officialReply, path, ipfsHash);
     }
 
     function editReply(address name, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
@@ -234,8 +234,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         posts.deleteReply(name, postId, path, replyId);
     }
 
-    function postComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.postComment(name, postId, path, ipfsHash);
+    function publicationComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.publicationComment(name, postId, path, ipfsHash);
     }
 
     function editComment(address name, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {

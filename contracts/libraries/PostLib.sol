@@ -32,7 +32,13 @@ library PostLib  {
     }
 
     struct Post {
-        Reply post;
+        Content content;
+        mapping(uint16 => Reply) replies;
+        mapping(uint8 => Comment) comments;
+        mapping(uint8 => bytes32) properties;
+        uint16 sizeReplies;
+        uint8 sizeComments;
+        uint8 sizeProperties;
         uint8 communityId;
     }
 
@@ -55,7 +61,6 @@ library PostLib  {
         bytes32 ipfsHash   
         //const std::vector<uint32> tags
     ) internal {
-
         ///
         //check community, ipfs, tags
         ///
@@ -65,9 +70,9 @@ library PostLib  {
         ///
 
         Post storage post = self.posts[self.sizePosts];
-        post.post.content.ipfsHash.ipfsHash = ipfsHash;
-        post.post.content.author = name;
-        post.post.content.postTime = uint32(block.timestamp);
+        post.content.ipfsHash.ipfsHash = ipfsHash;
+        post.content.author = name;
+        post.content.postTime = uint32(block.timestamp);
         post.communityId = communityId;
 
         self.sizePosts++;
@@ -86,7 +91,7 @@ library PostLib  {
     /// @param path The path where the reply will be post 
     /// @param ipfsHash IPFS hash of document with reply information
     
-    function postReply(
+    function publicationReply(
         PostCollection storage self,
         address name,
         uint32 postId,
@@ -98,22 +103,25 @@ library PostLib  {
         //check ipfs
         ///
 
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
         
         ///
         //update user statistic + rating
         ///
-
-        if (path.length > 0) {
-            uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+        Reply storage reply;
+        if (path.length == 0) {
+            reply = post.replies[post.sizeReplies++];
+        } else {
+           uint256 lenght = path.length;
+            reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
             }
+            reply = reply.replies[reply.sizeReplies++]; 
         }
 
-        reply = reply.replies[reply.sizeReplies++];
         reply.content.author = name;
         reply.content.ipfsHash.ipfsHash = ipfsHash;
         reply.content.postTime = uint32(block.timestamp);
@@ -132,25 +140,29 @@ library PostLib  {
     /// @param path The path where the comment will be post 
     /// @param ipfsHash IPFS hash of document with reply information
 
-    function postComment(
+    function publicationComment(
         PostCollection storage self,
         address name,
         uint32 postId,
         uint16[] memory path,
         bytes32 ipfsHash
       ) internal {
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
 
-        if (path.length != 0) {
+        Content storage comment;
+        if (path.length == 0) {
+            comment = post.comments[post.sizeComments++].content;  
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+            Reply storage reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
             }
+            comment = reply.comments[reply.sizeComments++].content;
         }
 
-        Content storage comment = reply.comments[reply.sizeComments++].content;
         comment.author = name;
         comment.ipfsHash.ipfsHash = ipfsHash;
         comment.postTime = uint32(block.timestamp);
@@ -170,12 +182,12 @@ library PostLib  {
         // tags
         bytes32 ipfsHash
       ) internal {
-        Post storage post = self.posts[postId];     //inside the post
-        require(post.post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!post.post.content.isDeleted, "Post has deleted");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
+        require(!post.content.isDeleted, "Post has deleted");
         
         post.communityId = communityId;
-        post.post.content.ipfsHash.ipfsHash = ipfsHash;
+        post.content.ipfsHash.ipfsHash = ipfsHash;
     }
 
     /// @notice Edit reply
@@ -197,20 +209,24 @@ library PostLib  {
         bytes32 ipfsHash
       ) internal {
 
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!reply.content.isDeleted, "Post has deleted");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
+        require(!post.content.isDeleted, "Post has deleted");
 
-        if (path.length > 0) {
+        Reply storage reply;
+        if (path.length == 0) {
+            reply = post.replies[replyId];  
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+            reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
                 require(!reply.content.isDeleted, "Reply has deleted");
             }
+            reply = reply.replies[replyId];
         }
 
-        reply = reply.replies[replyId];
         require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
         require(!reply.content.isDeleted, "Reply has deleted");
 
@@ -236,20 +252,24 @@ library PostLib  {
         uint8 commentId,
         bytes32 ipfsHash
       ) internal {
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!reply.content.isDeleted, "Post has deleted");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
+        require(!post.content.isDeleted, "Post has deleted");
 
-        if (path.length != 0) {
+        Content storage comment;
+        if (path.length == 0) {
+            comment = post.comments[commentId].content;
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+            Reply storage reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
                 require(!reply.content.isDeleted, "Reply has deleted");
             }
+            comment = reply.comments[commentId].content;
         }
 
-        Content storage comment = reply.comments[commentId].content;
         require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
         require(!comment.isDeleted, "Comment has deleted");
 
@@ -267,7 +287,7 @@ library PostLib  {
         address name,
         uint32 postId
       ) internal {
-        Reply storage post = self.posts[postId].post;     //inside the post
+        Post storage post = self.posts[postId];     //inside the post
         require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
         require(!post.content.isDeleted, "Post has already deleted");
         post.content.isDeleted = true;
@@ -317,20 +337,24 @@ library PostLib  {
         /*
         check author
         */
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!reply.content.isDeleted, "Post has deleted");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
+        require(!post.content.isDeleted, "Post has deleted");
 
-        if (path.length > 0) {
+        Reply storage reply;
+        if (path.length == 0) {
+            reply = post.replies[replyId];
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+            reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
                 require(!reply.content.isDeleted, "Reply has deleted");
                 reply = reply.replies[path[i]];
             }
+            reply = reply.replies[replyId];
         }
 
-        reply = reply.replies[replyId];
         require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist.");
         require(!reply.content.isDeleted, "Reply has already deleted");
         reply.content.isDeleted = true;
@@ -356,20 +380,25 @@ library PostLib  {
         uint16[] memory path,
         uint8 commentId
       ) internal {
-        Reply storage reply = self.posts[postId].post;     //inside the post
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
-        require(!reply.content.isDeleted, "Post has deleted");
+        Post storage post = self.posts[postId];
+        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
+        require(!post.content.isDeleted, "Post has deleted");
 
-        if (path.length > 0) {
+        Content storage comment;
+        if (path.length == 0) {
+            comment = post.comments[commentId].content;  
+        } else {
+            Reply storage reply;
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) {
+            reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
                 require(!reply.content.isDeleted, "Reply has deleted");
             }
+            comment = reply.comments[commentId].content;
         }
 
-        Content storage comment = reply.comments[commentId].content;
         require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
         require(!comment.isDeleted, "Comment has already deleted");
         comment.isDeleted = true;
@@ -377,32 +406,42 @@ library PostLib  {
     }
 
     function getPostByIndex(PostCollection storage self, uint32 index) internal view returns (Content memory) {
-        return self.posts[index].post.content;
+        return self.posts[index].content;
     }
 
     function getReplyByPath(PostCollection storage self, uint32 postId, uint16[] memory path, uint16 replyId) internal view returns (Content memory) {
-        Reply storage reply = self.posts[postId].post;     //inside the post
+        Post storage post = self.posts[postId];
 
-        if (path.length > 0) {
+        Content storage content;
+        if (path.length == 0) {
+            content = post.replies[replyId].content;
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) { 
+            Reply storage reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) { 
                 reply = reply.replies[path[i]];
             }
+            content = reply.replies[replyId].content;
         }
 
-        return reply.replies[replyId].content;
+        return content;
     }
 
     function getCommentByPath(PostCollection storage self, uint32 postId, uint16[] memory path, uint8 commentId) internal view returns (Content memory) {
-        Reply storage reply = self.posts[postId].post;     //inside the post
+        Post storage post = self.posts[postId];
 
-        if (path.length > 0) {
+        Content storage comment;
+        if (path.length == 0) {
+            comment = post.comments[commentId].content;
+        } else {
             uint256 lenght = path.length;
-            for(uint256 i = 0; i < lenght; i++) { 
+            Reply storage reply = post.replies[path[0]];
+            for(uint256 i = 1; i < lenght; i++) { 
                 reply = reply.replies[path[i]];
             }
+            comment = reply.comments[commentId].content;
         }
 
-        return reply.comments[commentId].content;
-      }
+        return comment;
+    }
 }
