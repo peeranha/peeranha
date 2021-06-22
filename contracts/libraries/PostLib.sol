@@ -384,11 +384,19 @@ library PostLib  {
         //update user statistic
     }
 
-    function getPostByIndex(PostCollection storage self, uint32 index) internal view returns (Content memory) {
+    function getPostByIndex(
+        PostCollection storage self, 
+        uint32 index
+        ) internal view returns (Content memory) {
         return self.posts[index].content;
     }
 
-    function getReplyByPath(PostCollection storage self, uint32 postId, uint16[] memory path, uint16 replyId) internal view returns (Content memory) {
+    function getReplyByPath(
+        PostCollection storage self, 
+        uint32 postId, 
+        uint16[] memory path, 
+        uint16 replyId
+        ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage content;
@@ -406,7 +414,12 @@ library PostLib  {
         return content;
     }
 
-    function getCommentByPath(PostCollection storage self, uint32 postId, uint16[] memory path, uint8 commentId) internal view returns (Content memory) {
+    function getCommentByPath(
+        PostCollection storage self, 
+        uint32 postId, 
+        uint16[] memory path, 
+        uint8 commentId
+        ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage comment;
