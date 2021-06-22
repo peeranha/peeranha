@@ -1,5 +1,8 @@
 pragma solidity >=0.5.0;
+pragma abicoder v2;
+
 import "./IpfsLib.sol";
+import "./CommunityLib.sol";
 import "hardhat/console.sol";
 
 /// @title PostLib
@@ -8,7 +11,7 @@ import "hardhat/console.sol";
 library PostLib  {
     struct Content {
         address author;
-        IpfsLib.IpfsHash ipfsHash;
+        IpfsLib.IpfsHash ipfsDoc;
         uint16 rating;
         uint32 postTime;
         bool isDeleted;
@@ -36,6 +39,7 @@ library PostLib  {
         mapping(uint16 => Reply) replies;
         mapping(uint8 => Comment) comments;
         mapping(uint8 => bytes32) properties;
+        CommunityLib.Tag[] tags;
         uint16 sizeReplies;
         uint8 sizeComments;
         uint8 sizeProperties;
@@ -52,35 +56,25 @@ library PostLib  {
     /// @param self The mapping containing all posts
     /// @param name Author of the post
     /// @param communityId Community where the post will be ask
-    /// @param ipfsHash IPFS hash of document with post information
+    /// @param hash IPFS hash of document with post information
     
-    function publicationPost(
+    function createPost(
         PostCollection storage self,
         address name,
         uint8 communityId, 
-        bytes32 ipfsHash   
-        //const std::vector<uint32> tags
+        bytes32 hash,
+        CommunityLib.Tag[] memory tags
     ) internal {
         ///
         //check community, ipfs, tags
         ///
 
-        ///
-        //update user statistics + rating
-        ///
-
-        Post storage post = self.posts[self.sizePosts];
-        post.content.ipfsHash.ipfsHash = ipfsHash;
+        Post storage post = self.posts[self.sizePosts++];
+        post.content.ipfsDoc.hash = hash;
         post.content.author = name;
         post.content.postTime = uint32(block.timestamp);
         post.communityId = communityId;
-
-        self.sizePosts++;
-
-        ///
-        //update community statistics
-        //update tag statistics
-        ///
+        post.tags = tags;
     }
 
     /// @notice Post reply
@@ -89,22 +83,22 @@ library PostLib  {
     /// @param postId post where the reply will be post
     /// @param officialReply Flag is showing "official reply" or not
     /// @param path The path where the reply will be post 
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param hash IPFS hash of document with reply information
     
-    function publicationReply(
+    function createReply(
         PostCollection storage self,
         address name,
         uint32 postId,
         bool officialReply,
         uint16[] memory path,
-        bytes32 ipfsHash
+        bytes32 hash
       ) internal {
         ///
         //check ipfs
         ///
 
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
         
         ///
         //update user statistic + rating
@@ -113,19 +107,19 @@ library PostLib  {
         if (path.length == 0) {
             reply = post.replies[post.sizeReplies++];
         } else {
-           uint256 lenght = path.length;
+            uint256 lenght = path.length;
             reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
             }
             reply = reply.replies[reply.sizeReplies++]; 
         }
 
         reply.content.author = name;
-        reply.content.ipfsHash.ipfsHash = ipfsHash;
+        reply.content.ipfsDoc.hash = hash;
         reply.content.postTime = uint32(block.timestamp);
-        if (officialReply)                          //without if?
+        if (officialReply)
             reply.officialReply = officialReply;
 
         ///
@@ -138,17 +132,17 @@ library PostLib  {
     /// @param name Author of the comment
     /// @param postId post where the comment will be post
     /// @param path The path where the comment will be post 
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param hash IPFS hash of document with reply information
 
-    function publicationComment(
+    function createComment(
         PostCollection storage self,
         address name,
         uint32 postId,
         uint16[] memory path,
-        bytes32 ipfsHash
+        bytes32 hash
       ) internal {
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
 
         Content storage comment;
         if (path.length == 0) {
@@ -158,13 +152,13 @@ library PostLib  {
             Reply storage reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
             }
             comment = reply.comments[reply.sizeComments++].content;
         }
 
         comment.author = name;
-        comment.ipfsHash.ipfsHash = ipfsHash;
+        comment.ipfsDoc.hash = hash;
         comment.postTime = uint32(block.timestamp);
     }
 
@@ -172,22 +166,26 @@ library PostLib  {
     /// @param self The mapping containing all posts
     /// @param name Author of the comment
     /// @param postId post where the comment will be post
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param hash IPFS hash of document with reply information
 
     function editPost(
         PostCollection storage self,
         address name,
         uint32 postId,
         uint8 communityId,
-        // tags
-        bytes32 ipfsHash
+        bytes32 hash,
+        CommunityLib.Tag[] memory tags
       ) internal {
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!post.content.isDeleted, "Post has deleted");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
         
-        post.communityId = communityId;
-        post.content.ipfsHash.ipfsHash = ipfsHash;
+        if(post.communityId != communityId)
+            post.communityId = communityId;
+        if(post.content.ipfsDoc.hash != hash)
+            post.content.ipfsDoc.hash = hash;
+        //if(post.tags != tags)     // error, chech one by one?
+        post.tags = tags;
     }
 
     /// @notice Edit reply
@@ -197,7 +195,7 @@ library PostLib  {
     /// @param path The path where the comment will be post 
     /// @param replyId The reply which will be change
     /// @param officialReply Flag is showing "official reply" or not
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param hash IPFS hash of document with reply information
 
     function editReply(
         PostCollection storage self,
@@ -206,12 +204,12 @@ library PostLib  {
         uint16[] memory path,
         uint16 replyId,
         bool officialReply,
-        bytes32 ipfsHash
+        bytes32 hash
       ) internal {
 
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!post.content.isDeleted, "Post has deleted");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
 
         Reply storage reply;
         if (path.length == 0) {
@@ -221,17 +219,17 @@ library PostLib  {
             reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
-                require(!reply.content.isDeleted, "Reply has deleted");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!reply.content.isDeleted, "Reply has been deleted");
             }
             reply = reply.replies[replyId];
         }
 
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
-        require(!reply.content.isDeleted, "Reply has deleted");
+        require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+        require(!reply.content.isDeleted, "Reply has been deleted");
 
-        if (reply.content.ipfsHash.ipfsHash != ipfsHash)
-            reply.content.ipfsHash.ipfsHash = ipfsHash;
+        if (reply.content.ipfsDoc.hash != hash)
+            reply.content.ipfsDoc.hash = hash;
         if (reply.officialReply != officialReply)                          //will check gas?
             reply.officialReply = officialReply;   
     }
@@ -242,7 +240,7 @@ library PostLib  {
     /// @param postId Post where the comment will be post
     /// @param path The path where the comment will be post
     /// @param commentId The comment which will be change
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param hash IPFS hash of document with reply information
 
     function editComment(    //LAST MODIFIED?
         PostCollection storage self,
@@ -250,11 +248,11 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         uint8 commentId,
-        bytes32 ipfsHash
+        bytes32 hash
       ) internal {
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!post.content.isDeleted, "Post has deleted");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
 
         Content storage comment;
         if (path.length == 0) {
@@ -264,17 +262,17 @@ library PostLib  {
             Reply storage reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
-                require(!reply.content.isDeleted, "Reply has deleted");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!reply.content.isDeleted, "Reply has been deleted");
             }
             comment = reply.comments[commentId].content;
         }
 
-        require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
-        require(!comment.isDeleted, "Comment has deleted");
+        require(comment.ipfsDoc.hash != bytes32(0x0), "comment does not exist");
+        require(!comment.isDeleted, "Comment has been deleted");
 
-        if(comment.ipfsHash.ipfsHash != ipfsHash)
-            comment.ipfsHash.ipfsHash = ipfsHash;
+        if(comment.ipfsDoc.hash != hash)
+            comment.ipfsDoc.hash = hash;
     }
 
     /// @notice Delete post
@@ -288,35 +286,22 @@ library PostLib  {
         uint32 postId
       ) internal {
         Post storage post = self.posts[postId];     //inside the post
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has already deleted");
         post.content.isDeleted = true;
 
         ///
-        // -rating, update user statistic
+        // -rating
         ///
-
-        // for(uint256 i = 0; i < post.sizeComments; i++) {
-        //   require(post.comments[i].content.ipfsHash.ipfsHash != bytes32(0x0), "Comment isn't exist");
-        //   post.comments[i].content.isDeleted = true;
-        //   // update user statistic
-        // }
-        
+    
         for(uint16 i = 0; i < post.sizeReplies; i++) {
-            if(post.replies[i].content.ipfsHash.ipfsHash == bytes32(0x0) || post.replies[i].content.isDeleted)
+            if(post.replies[i].content.ipfsDoc.hash == bytes32(0x0) || post.replies[i].content.isDeleted)
                 continue;
             Reply storage localReply = post.replies[i];
 
             ///
-            // -rating, update user statistic
+            // -rating
             ///
-
-            // for(uint256 j = 0; j < localReply.sizeComments; j++) {
-            //   require(localReply.comments[j].content.ipfsHash.ipfsHash != bytes32(0x0), "Comment isn't exist");
-            //   localReply.comments[j].content.isDeleted = true;
-            //   //update user statistic
-            // }
-            // localReply.content.isDeleted = true;
         }  
     }
 
@@ -338,8 +323,8 @@ library PostLib  {
         check author
         */
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "post isn't exist");
-        require(!post.content.isDeleted, "Post has deleted");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
 
         Reply storage reply;
         if (path.length == 0) {
@@ -348,22 +333,16 @@ library PostLib  {
             uint256 lenght = path.length;
             reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
-                require(!reply.content.isDeleted, "Reply has deleted");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!reply.content.isDeleted, "Reply has been deleted");
                 reply = reply.replies[path[i]];
             }
             reply = reply.replies[replyId];
         }
 
-        require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist.");
+        require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist.");
         require(!reply.content.isDeleted, "Reply has already deleted");
         reply.content.isDeleted = true;
-        // for(uint256 j = 0; j < reply.sizeComments; j++) {
-        //   if(reply.comments[j].content.ipfsHash.ipfsHash == bytes32(0x0) || reply.comments[j].content.isDeleted) {
-        //     // reply.comments[j].content.isDeleted = true; 
-        //     //update user statistic
-        //   }
-        // }
     }
 
     /// @notice Delete comment
@@ -381,8 +360,8 @@ library PostLib  {
         uint8 commentId
       ) internal {
         Post storage post = self.posts[postId];
-        require(post.content.ipfsHash.ipfsHash != bytes32(0x0), "Post isn't exist");
-        require(!post.content.isDeleted, "Post has deleted");
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
 
         Content storage comment;
         if (path.length == 0) {
@@ -393,13 +372,13 @@ library PostLib  {
             reply = post.replies[path[0]];
             for(uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
-                require(reply.content.ipfsHash.ipfsHash != bytes32(0x0), "Reply isn't exist");
-                require(!reply.content.isDeleted, "Reply has deleted");
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!reply.content.isDeleted, "Reply has been deleted");
             }
             comment = reply.comments[commentId].content;
         }
 
-        require(comment.ipfsHash.ipfsHash != bytes32(0x0), "comment isn't exist");
+        require(comment.ipfsDoc.hash != bytes32(0x0), "comment does not exist");
         require(!comment.isDeleted, "Comment has already deleted");
         comment.isDeleted = true;
         //update user statistic
