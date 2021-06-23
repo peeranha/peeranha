@@ -12,6 +12,8 @@ import "./libraries/CommunityLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
+import "hardhat/console.sol";
+
 
 contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using UserLib for UserLib.UserCollection;
@@ -38,8 +40,24 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     }
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant COMMUNITY_ADMIN_ROLE = keccak256("COMMUNITY_ADMIN_ROLE");
+    bytes32 public constant COMMUNITY_MODERATOR_ROLE = keccak256("COMMUNITY_MODERATOR_ROLE");
 
-    function __Peeranha_init() internal initializer {
+    modifier onlyCommunityAdmin(uint256 communityId) {
+        require((hasRole(COMMUNITY_ADMIN_ROLE ^ bytes32(communityId), msg.sender) || 
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
+            "Peeranha: must have community admin role");
+        _;
+    }
+
+    modifier onlyCommunityModerator(uint256 communityId) {
+        require((hasRole(COMMUNITY_MODERATOR_ROLE ^ bytes32(communityId), msg.sender) || 
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
+            "Peeranha: must have community moderator role");
+        _;
+    }
+
+    function __Peeranha_init() public initializer {
         __AccessControl_init_unchained();
         __Pausable_init_unchained();
         __Peeranha_init_unchained();
@@ -109,6 +127,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be a new community.
      */
     function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        // grantRole(COMMUNITY_ADMIN_ROLE ^ bytes32(communityId), msg.sender);
         communities.createCommunity(communityId, ipfsHash, tags);
     }
 
@@ -119,8 +138,62 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - Must be an existing community.  
      */
-    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external {
+    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external onlyCommunityModerator(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Give community adminisrator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function giveCommunityAdminPermission(address user, uint256 communityId) external {
+        grantRole(COMMUNITY_ADMIN_ROLE ^ bytes32(communityId), user);
+        grantRole(COMMUNITY_MODERATOR_ROLE ^ bytes32(communityId), user);
+    }
+
+
+    /**
+     * @dev Give community moderator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be community or global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function giveCommunityModeratorPermission(address user, uint256 communityId) external onlyCommunityAdmin(communityId) {
+        grantRole(COMMUNITY_MODERATOR_ROLE ^ bytes32(communityId), user);
+    }
+
+    /**
+     * @dev Revoke community adminisrator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function revokeCommunityAdminPermission(address user, uint256 communityId) external {
+        revokeRole(COMMUNITY_ADMIN_ROLE ^ bytes32(communityId), user);
+    }
+
+    /**
+     * @dev Revoke community moderator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be community or global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function revokeCommunityModeratorPermission(address user, uint256 communityId) external onlyCommunityAdmin(communityId) {
+        revokeRole(COMMUNITY_MODERATOR_ROLE ^ bytes32(communityId), user);
     }
 
     /**
