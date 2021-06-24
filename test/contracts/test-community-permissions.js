@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const crypto = require("crypto");
 
 describe("Test community permissions", function() {
-    it("Test community creating", async function() {
+    it("Test community moderator", async function() {
         const peeranha = await createContract();
         const signers = await ethers.getSigners();
         const countOfCommunities = 3;
@@ -13,21 +13,87 @@ describe("Test community permissions", function() {
 
         let user = signers[1];
         const userAddress = user.address;
-        console.log(userAddress)
 
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        .to.be.revertedWith("Peeranha: must have community moderator role");
+
+        await peeranha.giveCommunityModeratorPermission(userAddress, communitiesIds[0]);
+
+        expect(peeranha.giveCommunityModeratorPermission(userAddress, 4))
+        .to.be.revertedWith("Peeranha: must be an existing community");
+        expect(peeranha.giveCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
+        .to.be.revertedWith("User does not exist");
+
+        await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
+
+        expect(peeranha.revokeCommunityModeratorPermission(userAddress, 4))
+        .to.be.revertedWith("Peeranha: must be an existing community");
+        expect(peeranha.revokeCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
+        .to.be.revertedWith("User does not exist");
+
+        await peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
+
+        await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        .to.be.revertedWith("Peeranha: must have community moderator role");
+
+        await peeranha.giveCommunityModeratorPermission(signers[2].address, communitiesIds[1]);
+        await peeranha.connect(signers[2]).updateCommunity(communitiesIds[1], getHash());
+
+        //pause
+    });
+
+    it("Test community administrator", async function() {
+        const peeranha = await createContract();
+        const signers = await ethers.getSigners();
+        const countOfCommunities = 3;
+        const countOfUsers = 3;
+        const communitiesIds = getIdsContainer(countOfCommunities);
+        await createCommunities(peeranha, countOfCommunities, communitiesIds);
+        await ceateUsers(peeranha, signers, countOfUsers);
+
+        let user = signers[1];
+        const userAddress = user.address;
+
+        await expect(peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[1]))
+        .to.be.revertedWith("Peeranha: must have community admin role");
+        await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Peeranha: must have community moderator role");
 
         peeranha.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
+
+        expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
+        .to.be.revertedWith("Peeranha: must be an existing community");
+        expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
+        .to.be.revertedWith("User does not exist");
+
+        await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
+        
+        await peeranha.connect(user).freezeCommunity(communitiesIds[0]);
+        await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        .to.be.revertedWith("Community is frozen");
+        await peeranha.connect(user).unfreezeCommunity(communitiesIds[0]);
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
 
-        peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
+        await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
+
+        expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
+        .to.be.revertedWith("Peeranha: must be an existing community");
+        expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
+        .to.be.revertedWith("User does not exist");
+
+        await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
+        .to.be.revertedWith("Peeranha: must have community moderator role");
+
         peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
+        peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
 
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Peeranha: must have community moderator role");
-    });
 
+        //pause
+    });
 
     const createContract = async function() {
         const Peeranha = await ethers.getContractFactory("Peeranha");

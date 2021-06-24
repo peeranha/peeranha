@@ -57,6 +57,17 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         _;
     }
 
+    modifier onlyExisitingCommunity(uint256 communityId) {
+        require(communities.getCommunitiesCount() > communityId, "Peeranha: must be an existing community");
+        _;
+    }
+
+    modifier onlyExisitingUser(address user) {
+        users.getUserByAddress(user);
+        // require(communities.getCommunitiesCount() > communityId, "Peeranha: must be an existing community");
+        _;
+    }
+
     function __Peeranha_init() public initializer {
         __AccessControl_init_unchained();
         __Pausable_init_unchained();
@@ -137,9 +148,34 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * Requirements:
      *
      * - Must be an existing community.  
+     * - Sender must be community moderator.
      */
     function updateCommunity(uint256 communityId, bytes32 ipfsHash) external onlyCommunityModerator(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Freeze community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     * - Sender must be community moderator.
+     */
+    function freezeCommunity(uint256 communityId) external onlyCommunityModerator(communityId) {
+        communities.freeze(communityId);
+    }
+
+    /**
+     * @dev Unfreeze community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     * - Sender must be community moderator.
+     */
+    function unfreezeCommunity(uint256 communityId) external onlyCommunityModerator(communityId) {
+        communities.unfreeze(communityId);
     }
 
     /**
@@ -151,11 +187,11 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityAdminPermission(address user, uint256 communityId) external {
+    function giveCommunityAdminPermission(address user, uint256 communityId) external 
+    onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
         grantRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), user);
         grantRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
     }
-
 
     /**
      * @dev Give community moderator permission.
@@ -166,8 +202,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address user, uint256 communityId) external onlyCommunityAdmin(communityId) {
-        grantRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
+    function giveCommunityModeratorPermission(address user, uint256 communityId) external 
+    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
+        _setupRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
     }
 
     /**
@@ -179,7 +216,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function revokeCommunityAdminPermission(address user, uint256 communityId) external {
+    function revokeCommunityAdminPermission(address user, uint256 communityId) external 
+    onlyExisitingCommunity(communityId) onlyExisitingUser(user) {
         revokeRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), user);
     }
 
@@ -192,7 +230,10 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function revokeCommunityModeratorPermission(address user, uint256 communityId) external onlyCommunityAdmin(communityId) {
+
+     //should do something with AccessControlUpgradeable(revoke only for default admin)
+    function revokeCommunityModeratorPermission(address user, uint256 communityId) external 
+    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
         revokeRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
     }
 

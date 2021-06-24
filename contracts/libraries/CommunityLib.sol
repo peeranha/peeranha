@@ -20,6 +20,7 @@ library CommunityLib {
         Community info;
         mapping(uint256 => Tag) tags;
         uint8 tagsCount;
+        bool isFrozen;
     }
 
     struct CommunityCollection {
@@ -27,9 +28,22 @@ library CommunityLib {
         uint8 communityCount;
     }
 
+    modifier onlyExistedAndNotFrozen(CommunityCollection storage self, uint256 id){
+        require(
+            self.communities[id].info.ipfsHash != bytes32(0x0),
+            "Community does not exist"
+        );
+        require(!self.communities[id].isFrozen,
+            "Community is frozen"
+        );
+        _;
+    }
+
     event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
     event CommunityUpdated(uint256 id, bytes32 ipfsHash);
     event TagCreated(uint256 communityId, uint256 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
+    event Freeze(uint256 commintyId);
+    event Unfreeze(uint256 commintyId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -62,6 +76,7 @@ library CommunityLib {
         CommunityContainer storage community = self.communities[id];
         community.info.ipfsHash = ipfsHash;
         community.tagsCount = uint8(tags.length);
+        community.isFrozen = false;
         for (uint256 i = 1; i <= uint256(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
@@ -71,19 +86,15 @@ library CommunityLib {
 
     /// @notice Update community info record
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to update
+    /// @param communityId Address of the community to update
     /// @param ipfsHash IPFS hash of document with user information
-    function updateCommunity(
+    function updateCommunity (
         CommunityCollection storage self,
-        uint256 id,
+        uint256 communityId,
         bytes32 ipfsHash
-    ) internal {
-        require(
-            self.communities[id].info.ipfsHash != bytes32(0x0),
-            "Community does not exist"
-        );
-        self.communities[id].info.ipfsHash = ipfsHash;
-        emit CommunityUpdated(id, ipfsHash);
+    ) internal onlyExistedAndNotFrozen(self, communityId) {
+        self.communities[communityId].info.ipfsHash = ipfsHash;
+        emit CommunityUpdated(communityId, ipfsHash);
     }
 
     /// @notice Create new tag info record
@@ -96,7 +107,7 @@ library CommunityLib {
         uint256 communityId,
         uint256 tagId,
         bytes32 ipfsHash
-    ) internal {
+    ) internal onlyExistedAndNotFrozen(self, communityId) {
         CommunityContainer storage community = self.communities[communityId];
         Tag storage newTag = community.tags[tagId];
         require(newTag.ipfsHash == bytes32(0x0), "Tag exists");
@@ -117,39 +128,57 @@ library CommunityLib {
 
     /// @notice Get community info by id
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to get
-    function getCommunity(CommunityCollection storage self, uint256 id)
+    /// @param communityId Address of the community to get
+    function getCommunity(CommunityCollection storage self, uint256 communityId)
         internal
         view
+        onlyExistedAndNotFrozen(self, communityId) 
         returns (Community memory)
     {
-        return self.communities[id].info;
+        return self.communities[communityId].info;
     }
 
     /// @notice Get the number of tags in community
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to get tags count
-    function getTagsCount(CommunityCollection storage self, uint256 id)
+    /// @param communityId Address of the community to get tags count
+    function getTagsCount(CommunityCollection storage self, uint256 communityId)
         internal
         view
-        returns (uint8 count)
+        onlyExistedAndNotFrozen(self, communityId) 
+        returns (uint8 count) 
     {
-        return self.communities[id].tagsCount;
+        return self.communities[communityId].tagsCount;
     }
 
     /// @notice Get list of tags in community
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to get tags
-    function getTags(CommunityCollection storage self, uint256 id)
+    /// @param communityId Address of the community to get tags
+    function getTags(CommunityCollection storage self, uint256 communityId)
         internal
         view
+        onlyExistedAndNotFrozen(self, communityId)
         returns (Tag[] memory)
     {
-        CommunityContainer storage community = self.communities[id];
+        CommunityContainer storage community = self.communities[communityId];
         Tag[] memory iterableTags = new Tag[](community.tagsCount);
         for (uint256 i = 1; i <= community.tagsCount; i++) {
             iterableTags[i - 1] = community.tags[i];
         }
         return iterableTags;
+    }
+
+    function freeze(CommunityCollection storage self, uint256 communityId) 
+    internal onlyExistedAndNotFrozen(self, communityId) {
+        self.communities[communityId].isFrozen = true;
+        emit Freeze(communityId);
+    }
+
+    function unfreeze(CommunityCollection storage self, uint256 id) internal {
+        require(
+            self.communities[id].info.ipfsHash != bytes32(0x0),
+            "Community does not exist"
+        );
+        self.communities[id].isFrozen = false;
+        emit Unfreeze(id);
     }
 }
