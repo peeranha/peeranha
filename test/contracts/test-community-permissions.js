@@ -67,7 +67,7 @@ describe("Test community permissions", function() {
         .to.be.revertedWith("User does not exist");
 
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
-        
+
         await peeranha.connect(user).freezeCommunity(communitiesIds[0]);
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Community is frozen");
@@ -76,6 +76,8 @@ describe("Test community permissions", function() {
 
         await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
+        await peeranha.connect(signers[2]).freezeCommunity(communitiesIds[0]);
+        await peeranha.connect(signers[2]).unfreezeCommunity(communitiesIds[0]);
 
         expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
         .to.be.revertedWith("Peeranha: must be an existing community");
@@ -91,6 +93,37 @@ describe("Test community permissions", function() {
 
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Peeranha: must have community moderator role");
+
+        //pause
+    });
+
+    it("Test grant while creating", async function() {
+        const peeranha = await createContract();
+        const signers = await ethers.getSigners();
+        const countOfCommunities = 3;
+        const countOfUsers = 3;
+        const communitiesIds = getIdsContainer(countOfCommunities);
+        await ceateUsers(peeranha, signers, countOfUsers);
+
+        let user = signers[1];
+        const userAddress = user.address;
+
+        await peeranha.connect(user).createCommunity(communitiesIds[0], getHash(), createTags(5))
+        await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
+        // await peeranha.connect(user).freezeCommunity(communitiesIds[0]);
+        // await peeranha.connect(user).unfreezeCommunity(communitiesIds[0]);
+
+        // await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        // await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
+        // await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        // await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
+        // .to.be.revertedWith("Peeranha: must have community moderator role");
+
+        // peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
+        // peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
+
+        // await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        // .to.be.revertedWith("Peeranha: must have community moderator role");
 
         //pause
     });

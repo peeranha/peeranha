@@ -137,7 +137,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be a new community.
      */
     function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
-        grantRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), msg.sender);
+        _setupRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), msg.sender);
+        _setupRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), msg.sender);
         communities.createCommunity(communityId, ipfsHash, tags);
     }
 
