@@ -64,7 +64,6 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
 
     modifier onlyExisitingUser(address user) {
         users.getUserByAddress(user);
-        // require(communities.getCommunitiesCount() > communityId, "Peeranha: must be an existing community");
         _;
     }
 
