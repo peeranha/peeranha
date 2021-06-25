@@ -28,7 +28,7 @@ library CommunityLib {
         uint8 communityCount;
     }
 
-    modifier onlyExistedAndNotFrozen(CommunityCollection storage self, uint256 id){
+    modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint256 id){
         require(
             self.communities[id].info.ipfsHash != bytes32(0x0),
             "Community does not exist"
@@ -42,8 +42,8 @@ library CommunityLib {
     event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
     event CommunityUpdated(uint256 id, bytes32 ipfsHash);
     event TagCreated(uint256 communityId, uint256 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
-    event Freeze(uint256 commintyId);
-    event Unfreeze(uint256 commintyId);
+    event CommunityFrozen(uint256 commintyId);
+    event CommunityUnfrozen(uint256 commintyId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -92,7 +92,7 @@ library CommunityLib {
         CommunityCollection storage self,
         uint256 communityId,
         bytes32 ipfsHash
-    ) internal onlyExistedAndNotFrozen(self, communityId) {
+    ) internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].info.ipfsHash = ipfsHash;
         emit CommunityUpdated(communityId, ipfsHash);
     }
@@ -107,7 +107,7 @@ library CommunityLib {
         uint256 communityId,
         uint256 tagId,
         bytes32 ipfsHash
-    ) internal onlyExistedAndNotFrozen(self, communityId) {
+    ) internal onlyExistingAndNotFrozen(self, communityId) {
         CommunityContainer storage community = self.communities[communityId];
         Tag storage newTag = community.tags[tagId];
         require(newTag.ipfsHash == bytes32(0x0), "Tag exists");
@@ -132,7 +132,7 @@ library CommunityLib {
     function getCommunity(CommunityCollection storage self, uint256 communityId)
         internal
         view
-        onlyExistedAndNotFrozen(self, communityId) 
+        onlyExistingAndNotFrozen(self, communityId) 
         returns (Community memory)
     {
         return self.communities[communityId].info;
@@ -144,7 +144,7 @@ library CommunityLib {
     function getTagsCount(CommunityCollection storage self, uint256 communityId)
         internal
         view
-        onlyExistedAndNotFrozen(self, communityId) 
+        onlyExistingAndNotFrozen(self, communityId) 
         returns (uint8 count) 
     {
         return self.communities[communityId].tagsCount;
@@ -156,7 +156,7 @@ library CommunityLib {
     function getTags(CommunityCollection storage self, uint256 communityId)
         internal
         view
-        onlyExistedAndNotFrozen(self, communityId)
+        onlyExistingAndNotFrozen(self, communityId)
         returns (Tag[] memory)
     {
         CommunityContainer storage community = self.communities[communityId];
@@ -168,9 +168,9 @@ library CommunityLib {
     }
 
     function freeze(CommunityCollection storage self, uint256 communityId) 
-    internal onlyExistedAndNotFrozen(self, communityId) {
+    internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].isFrozen = true;
-        emit Freeze(communityId);
+        emit CommunityFrozen(communityId);
     }
 
     function unfreeze(CommunityCollection storage self, uint256 id) internal {
@@ -179,6 +179,6 @@ library CommunityLib {
             "Community does not exist"
         );
         self.communities[id].isFrozen = false;
-        emit Unfreeze(id);
+        emit CommunityUnfrozen(id);
     }
 }

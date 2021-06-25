@@ -2,7 +2,6 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
@@ -11,11 +10,12 @@ import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
 
 import "./interfaces/IPeeranha.sol";
+import "./Sequrity.sol";
 
 import "hardhat/console.sol";
 
 
-contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
+contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
@@ -23,7 +23,6 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
-
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -39,26 +38,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         _setupRole(PAUSER_ROLE, msg.sender);
     }
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
-    uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
-    modifier onlyCommunityAdmin(uint256 communityId) {
-        require((hasRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), msg.sender) || 
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
-            "Peeranha: must have community admin role");
-        _;
-    }
-
-    modifier onlyCommunityModerator(uint256 communityId) {
-        require((hasRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), msg.sender) || 
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
-            "Peeranha: must have community moderator role");
-        _;
-    }
-
-    modifier onlyExisitingCommunity(uint256 communityId) {
-        require(communities.getCommunitiesCount() > communityId, "Peeranha: must be an existing community");
+    modifier onlyExistingAndNotFrozenCommunity(uint256 communityId) {
+        require(communities.getCommunitiesCount() >= communityId, "Peeranha: must be an existing community");
         _;
     }
 
@@ -137,8 +118,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be a new community.
      */
     function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
-        _setupRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), msg.sender);
-        _setupRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), msg.sender);
+        _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
         communities.createCommunity(communityId, ipfsHash, tags);
     }
 
@@ -162,7 +143,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint256 communityId) external onlyCommunityModerator(communityId) {
+    function freezeCommunity(uint256 communityId) external 
+    onlyCommunityModerator(communityId) {
         communities.freeze(communityId);
     }
 
@@ -174,7 +156,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function unfreezeCommunity(uint256 communityId) external onlyCommunityModerator(communityId) {
+    function unfreezeCommunity(uint256 communityId) external 
+    onlyCommunityModerator(communityId) {
         communities.unfreeze(communityId);
     }
 
@@ -188,9 +171,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address user, uint256 communityId) external 
-    onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
-        grantRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), user);
-        grantRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
+    onlyExisitingUser(user) onlyExistingAndNotFrozenCommunity(communityId) {
+        grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
+        grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -203,8 +186,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing user. 
      */
     function giveCommunityModeratorPermission(address user, uint256 communityId) external 
-    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
-        _setupRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
+    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExistingAndNotFrozenCommunity(communityId) {
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -217,8 +200,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be an existing user. 
      */
     function revokeCommunityAdminPermission(address user, uint256 communityId) external 
-    onlyExisitingCommunity(communityId) onlyExisitingUser(user) {
-        revokeRole(bytes32(COMMUNITY_ADMIN_ROLE + communityId), user);
+    onlyExistingAndNotFrozenCommunity(communityId) onlyExisitingUser(user) {
+        _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
     /**
@@ -233,8 +216,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
 
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeCommunityModeratorPermission(address user, uint256 communityId) external 
-    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExisitingCommunity(communityId) {
-        revokeRole(bytes32(COMMUNITY_MODERATOR_ROLE + communityId), user);
+    onlyCommunityAdmin(communityId) onlyExisitingUser(user) onlyExistingAndNotFrozenCommunity(communityId) {
+        _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
