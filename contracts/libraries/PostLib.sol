@@ -3,12 +3,16 @@ pragma abicoder v2;
 
 import "./IpfsLib.sol";
 import "./CommunityLib.sol";
+import "./VoteLib.sol";
 import "hardhat/console.sol";
 
 /// @title PostLib
 /// @notice Provides information about operation with posts
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
+    enum TypePost { ExpertPost, CommonPost, Tutorial }
+    enum TypeAction { Post, Reply, Comment }                // ?? 
+
     struct Content {
         address author;
         IpfsLib.IpfsHash ipfsDoc;
@@ -20,6 +24,7 @@ library PostLib  {
     struct Comment {
         Content content;
         mapping(uint8 => bytes32) properties;
+        mapping(address => int256) historyVotes;
         uint8 sizeProperties;
     }
 
@@ -28,6 +33,7 @@ library PostLib  {
         mapping(uint16 => Reply) replies;
         mapping(uint8 => Comment) comments;
         mapping(uint8 => bytes32) properties;
+        mapping(address => int256) historyVotes;
         uint16 sizeReplies;
         uint8 sizeComments;
         uint8 sizeProperties;
@@ -39,7 +45,9 @@ library PostLib  {
         mapping(uint16 => Reply) replies;
         mapping(uint8 => Comment) comments;
         mapping(uint8 => bytes32) properties;
+        mapping(address => int256) historyVotes;
         CommunityLib.Tag[] tags;
+        TypePost typePost;                          //will add to create/edit post
         uint16 sizeReplies;
         uint8 sizeComments;
         uint8 sizeProperties;
@@ -92,7 +100,7 @@ library PostLib  {
         bool officialReply,
         uint16[] memory path,
         bytes32 hash
-      ) internal {
+    ) internal {
         ///
         //check ipfs
         ///
@@ -109,7 +117,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
             }
@@ -140,7 +148,7 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         bytes32 hash
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
 
@@ -150,7 +158,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
             }
@@ -175,16 +183,16 @@ library PostLib  {
         uint8 communityId,
         bytes32 hash,
         CommunityLib.Tag[] memory tags
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
         
-        if(post.communityId != communityId)
+        if (post.communityId != communityId)
             post.communityId = communityId;
-        if(post.content.ipfsDoc.hash != hash)
+        if (post.content.ipfsDoc.hash != hash)
             post.content.ipfsDoc.hash = hash;
-        //if(post.tags != tags)     // error, chech one by one?
+        //if (post.tags != tags)     // error, chech one by one?
         post.tags = tags;
     }
 
@@ -205,7 +213,7 @@ library PostLib  {
         uint16 replyId,
         bool officialReply,
         bytes32 hash
-      ) internal {
+    ) internal {
 
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
@@ -217,7 +225,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
                 require(!reply.content.isDeleted, "Reply has been deleted");
@@ -249,7 +257,7 @@ library PostLib  {
         uint16[] memory path,
         uint8 commentId,
         bytes32 hash
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -260,7 +268,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
                 require(!reply.content.isDeleted, "Reply has been deleted");
@@ -271,7 +279,7 @@ library PostLib  {
         require(comment.ipfsDoc.hash != bytes32(0x0), "comment does not exist");
         require(!comment.isDeleted, "Comment has been deleted");
 
-        if(comment.ipfsDoc.hash != hash)
+        if (comment.ipfsDoc.hash != hash)
             comment.ipfsDoc.hash = hash;
     }
 
@@ -284,7 +292,7 @@ library PostLib  {
         PostCollection storage self,
         address name,
         uint32 postId
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];     //inside the post
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has already deleted");
@@ -294,8 +302,8 @@ library PostLib  {
         // -rating
         ///
     
-        for(uint16 i = 0; i < post.sizeReplies; i++) {
-            if(post.replies[i].content.ipfsDoc.hash == bytes32(0x0) || post.replies[i].content.isDeleted)
+        for (uint16 i = 0; i < post.sizeReplies; i++) {
+            if (post.replies[i].content.ipfsDoc.hash == bytes32(0x0) || post.replies[i].content.isDeleted)
                 continue;
             Reply storage localReply = post.replies[i];
 
@@ -332,7 +340,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
                 require(!reply.content.isDeleted, "Reply has been deleted");
                 reply = reply.replies[path[i]];
@@ -358,7 +366,7 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         uint8 commentId
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -370,7 +378,7 @@ library PostLib  {
             Reply storage reply;
             uint256 lenght = path.length;
             reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
+            for (uint256 i = 1; i < lenght; i++) {
                 reply = reply.replies[path[i]];
                 require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
                 require(!reply.content.isDeleted, "Reply has been deleted");
@@ -387,7 +395,7 @@ library PostLib  {
     function getPostByIndex(
         PostCollection storage self, 
         uint32 index
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         return self.posts[index].content;
     }
 
@@ -396,7 +404,7 @@ library PostLib  {
         uint32 postId, 
         uint16[] memory path, 
         uint16 replyId
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage content;
@@ -405,7 +413,7 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) { 
+            for (uint256 i = 1; i < lenght; i++) { 
                 reply = reply.replies[path[i]];
             }
             content = reply.replies[replyId].content;
@@ -419,7 +427,7 @@ library PostLib  {
         uint32 postId, 
         uint16[] memory path, 
         uint8 commentId
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage comment;
@@ -428,12 +436,67 @@ library PostLib  {
         } else {
             uint256 lenght = path.length;
             Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) { 
+            for (uint256 i = 1; i < lenght; i++) { 
                 reply = reply.replies[path[i]];
             }
             comment = reply.comments[commentId].content;
         }
 
         return comment;
+    }
+
+    function voteForumItem(
+        PostCollection storage self,
+        uint32 postId,
+        int16[] memory path, 
+        uint8 commentId,
+        TypePost typePost,
+        bool isUpvote
+    ) internal {
+        TypeAction typeAction;
+        Post storage post = self.posts[postId];
+
+        Content memory content;
+        int256 historyVote;
+
+        if (path.length == 0) {
+            if (commentId == 0) {
+                content = post.content;
+                typeAction = TypeAction.Post;
+                historyVote = VoteLib.getHistoryVote(post.historyVotes);
+            } else {
+                content = post.comments[commentId].content;
+                typeAction = TypeAction.Comment;
+                historyVote = VoteLib.getHistoryVote(post.comments[commentId].historyVotes);
+            }
+        } else {
+            Reply storage reply;
+            uint256 lenght = path.length;
+            reply = post.replies[uint16(path[0])];
+            for (uint256 i = 1; i < lenght; i++) {
+                reply = reply.replies[uint16(path[i])];
+                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!reply.content.isDeleted, "Reply has been deleted");
+            }
+            
+            if (commentId == 0) {
+                content = reply.content;
+                typeAction = TypeAction.Reply;
+                historyVote = VoteLib.getHistoryVote(reply.historyVotes);             
+            } else {
+                content = reply.comments[commentId].content;
+                typeAction = TypeAction.Reply;
+                historyVote = VoteLib.getHistoryVote(reply.comments[commentId].historyVotes);
+            }
+        }
+
+
+        if (isUpvote) {     ///////////////////////
+            VoteLib.upVote(content, historyVote);
+        } else {
+
+        }
+
+        //uint8 changeRating = VoteLib.getActionRating(typePost, /* upvote / downvote */);
     }
 }

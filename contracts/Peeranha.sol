@@ -21,7 +21,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using CommunityLib for CommunityLib.Community;
     using PostLib for PostLib.Content;
     using PostLib for PostLib.PostCollection;
-    
+
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
@@ -350,5 +350,12 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     */
     function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
         return posts.getCommentByPath(postId, path, commentId);
+    }
+
+
+
+
+    function vote(uint typee) external {
+        posts.voteForumItem(typee);
     }
 }
