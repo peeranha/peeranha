@@ -121,7 +121,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external onlyCommunityModerator(communityId) {
+    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external onlyCommunityAdmin(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -134,7 +134,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Sender must be community moderator.
      */
     function freezeCommunity(uint256 communityId) external 
-    onlyCommunityModerator(communityId) {
+    onlyCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
 
@@ -147,7 +147,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Sender must be community moderator.
      */
     function unfreezeCommunity(uint256 communityId) external 
-    onlyCommunityModerator(communityId) {
+    onlyCommunityAdmin(communityId) {
         communities.unfreeze(communityId);
     }
 
@@ -162,8 +162,8 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      */
     function giveCommunityAdminPermission(address user, uint256 communityId) external 
     onlyExisitingUser(users, user) onlyExistingAndNotFrozenCommunity(communities, communityId) {
-        grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
-        grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+        _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
