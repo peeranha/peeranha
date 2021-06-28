@@ -23,14 +23,14 @@ describe("Test community permissions", function() {
         expect(peeranha.giveCommunityModeratorPermission(userAddress, 4))
         .to.be.revertedWith("Peeranha: must be an existing community");
         expect(peeranha.giveCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
-        .to.be.revertedWith("User does not exist");
+        .to.be.revertedWith("Peeranha: must be an existing user");
 
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
 
         expect(peeranha.revokeCommunityModeratorPermission(userAddress, 4))
         .to.be.revertedWith("Peeranha: must be an existing community");
         expect(peeranha.revokeCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
-        .to.be.revertedWith("User does not exist");
+        .to.be.revertedWith("Peeranha: must be an existing user");
 
         await peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
 
@@ -65,7 +65,7 @@ describe("Test community permissions", function() {
         expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
         .to.be.revertedWith("Peeranha: must be an existing community");
         expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
-        .to.be.revertedWith("User does not exist");
+        .to.be.revertedWith("Peeranha: must be an existing user");
 
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
 
@@ -83,7 +83,7 @@ describe("Test community permissions", function() {
         expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
         .to.be.revertedWith("Peeranha: must be an existing community");
         expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
-        .to.be.revertedWith("User does not exist");
+        .to.be.revertedWith("Peeranha: must be an existing user");
 
         await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))

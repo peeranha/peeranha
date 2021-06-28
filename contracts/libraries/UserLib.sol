@@ -68,4 +68,8 @@ library UserLib {
     require(user.ipfsHash != bytes32(0x0), "User does not exist");
     return user;
   }
+
+  function isExists(UserCollection storage self, address addr) internal view returns (bool) {
+    return self.users[addr].ipfsHash != bytes32(0x0);
+  }
 }
