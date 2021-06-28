@@ -39,8 +39,6 @@ describe("Test community permissions", function() {
 
         await peeranha.giveCommunityModeratorPermission(signers[2].address, communitiesIds[1]);
         await peeranha.connect(signers[2]).updateCommunity(communitiesIds[1], getHash());
-
-        //pause
     });
 
     it("Test community administrator", async function() {
@@ -94,8 +92,6 @@ describe("Test community permissions", function() {
 
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Peeranha: must have community moderator role");
-
-        //pause
     });
 
     it("Test grant while creating", async function() {
@@ -113,7 +109,6 @@ describe("Test community permissions", function() {
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
         await peeranha.connect(user).freezeCommunity(communitiesIds[0]);
         await peeranha.connect(user).unfreezeCommunity(communitiesIds[0]);
-        // await peeranha.freezeCommunity(communitiesIds[0])
 
         await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
@@ -126,17 +121,10 @@ describe("Test community permissions", function() {
 
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("Peeranha: must have community moderator role");
-
-        //pause
     });
 
     const createContract = async function() {
-        const Peeranha = await ethers.getContractFactory("Peeranha",
-        {
-            // libraries: {
-            //     SequrityLib: ('SequrityLib').address
-            // }
-        });
+        const Peeranha = await ethers.getContractFactory("Peeranha");
        
         const peeranha = await Peeranha.deploy();
         await peeranha.deployed();
