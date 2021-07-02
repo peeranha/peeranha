@@ -16,7 +16,7 @@ library PostLib  {
     struct Content {
         address author;
         IpfsLib.IpfsHash ipfsDoc;
-        uint16 rating;
+        int16 rating;
         uint32 postTime;
         bool isDeleted;
     }
@@ -46,7 +46,7 @@ library PostLib  {
         mapping(uint8 => Comment) comments;
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
-        CommunityLib.Tag[] tags;
+        //CommunityLib.Tag[] tags;
         TypePost typePost;                          //will add to create/edit post
         uint16 sizeReplies;
         uint8 sizeComments;
@@ -70,8 +70,8 @@ library PostLib  {
         PostCollection storage self,
         address name,
         uint8 communityId, 
-        bytes32 hash,
-        CommunityLib.Tag[] memory tags
+        bytes32 hash
+        // CommunityLib.Tag[] memory tags
     ) internal {
         ///
         //check community, ipfs, tags
@@ -82,7 +82,7 @@ library PostLib  {
         post.content.author = name;
         post.content.postTime = uint32(block.timestamp);
         post.communityId = communityId;
-        post.tags = tags;
+        // post.tags = tags;
     }
 
     /// @notice Post reply
@@ -181,8 +181,8 @@ library PostLib  {
         address name,
         uint32 postId,
         uint8 communityId,
-        bytes32 hash,
-        CommunityLib.Tag[] memory tags
+        bytes32 hash
+        //CommunityLib.Tag[] memory tags
     ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
@@ -193,7 +193,7 @@ library PostLib  {
         if (post.content.ipfsDoc.hash != hash)
             post.content.ipfsDoc.hash = hash;
         //if (post.tags != tags)     // error, chech one by one?
-        post.tags = tags;
+       // post.tags = tags;
     }
 
     /// @notice Edit reply
@@ -447,56 +447,83 @@ library PostLib  {
 
     function voteForumItem(
         PostCollection storage self,
+        UserLib.UserCollection storage users,
+        address name,
         uint32 postId,
-        int16[] memory path, 
+        uint16[] memory path,
+        uint16 replyId, 
         uint8 commentId,
-        TypePost typePost,
         bool isUpvote
     ) internal {
-        TypeAction typeAction;
         Post storage post = self.posts[postId];
-
-        Content memory content;
-        int256 historyVote;
+        TypePost typePost = post.typePost;
 
         if (path.length == 0) {
             if (commentId == 0) {
-                content = post.content;
-                typeAction = TypeAction.Post;
-                historyVote = VoteLib.getHistoryVote(post.historyVotes);
+                votePost(users, post, name, typePost, isUpvote);
             } else {
-                content = post.comments[commentId].content;
-                typeAction = TypeAction.Comment;
-                historyVote = VoteLib.getHistoryVote(post.comments[commentId].historyVotes);
+                Comment storage comment = post.comments[commentId];
+                voteComment(users, comment, name, typePost, isUpvote);
             }
         } else {
-            Reply storage reply;
+            Reply storage pathReply;
             uint256 lenght = path.length;
-            reply = post.replies[uint16(path[0])];
+            pathReply = post.replies[uint16(path[0])];
             for (uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[uint16(path[i])];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-                require(!reply.content.isDeleted, "Reply has been deleted");
+                pathReply = pathReply.replies[uint16(path[i])];
+                require(pathReply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+                require(!pathReply.content.isDeleted, "Reply has been deleted");
             }
             
             if (commentId == 0) {
-                content = reply.content;
-                typeAction = TypeAction.Reply;
-                historyVote = VoteLib.getHistoryVote(reply.historyVotes);             
+                Reply storage reply = pathReply.replies[replyId];
+                voteReply(users, reply, name, typePost, isUpvote);        
             } else {
-                content = reply.comments[commentId].content;
-                typeAction = TypeAction.Reply;
-                historyVote = VoteLib.getHistoryVote(reply.comments[commentId].historyVotes);
+                Comment storage comment = pathReply.comments[commentId];
+                voteComment(users, comment, name, typePost, isUpvote);
             }
         }
+    }
 
-
-        if (isUpvote) {     ///////////////////////
-            VoteLib.upVote(content, historyVote);
+    function votePost(
+        UserLib.UserCollection storage users,
+        Post storage post,
+        address votedUser,
+        TypePost typePost,
+        bool isUpvote
+    ) internal {
+        if (isUpvote) {
+            VoteLib.upVote(users, post.content, votedUser, post.content.author, post.historyVotes, TypeAction.Post, typePost);
         } else {
-
+            VoteLib.downVote(users, post.content, votedUser, post.content.author, post.historyVotes, TypeAction.Post, typePost);
         }
+    }
+ 
+    function voteReply(
+        UserLib.UserCollection storage users,
+        Reply storage reply,
+        address votedUser,
+        TypePost typePost,
+        bool isUpvote
+    ) internal {
+        if (isUpvote) {
+            VoteLib.upVote(users, reply.content, votedUser, reply.content.author, reply.historyVotes, TypeAction.Reply, typePost);
+        } else {
+            VoteLib.downVote(users, reply.content, votedUser, reply.content.author, reply.historyVotes, TypeAction.Reply, typePost);
+        }
+    }
 
-        //uint8 changeRating = VoteLib.getActionRating(typePost, /* upvote / downvote */);
+    function voteComment(
+        UserLib.UserCollection storage users,
+        Comment storage comment,
+        address votedUser,
+        TypePost typePost,
+        bool isUpvote
+    ) private {
+        if (isUpvote) {
+            VoteLib.upVote(users, comment.content, votedUser, comment.content.author, comment.historyVotes, TypeAction.Comment, typePost);
+        } else {
+            VoteLib.downVote(users, comment.content, votedUser, comment.content.author, comment.historyVotes, TypeAction.Comment, typePost);
+        }
     }
 }

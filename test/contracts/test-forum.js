@@ -129,12 +129,35 @@ describe("Test post", function () {
 	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	// });
 
-    it("Test vote0", async function () {
-        const peeranha = await createContract();
-    
-        await peeranha.vote(100);
-    });
 
+    // upVoteItem(address name, uint32 postId, uint16[] memory path, uint8 commentId, bool isUpvote)
+
+    it("Test upVote post ", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+        await peeranha.voteItem(author, 0, [], 0, 0, 1);
+
+
+		const post = await peeranha.getPostByIndex(0);
+        console.log(post);
+	});
+
+	// it("Test downVote post ", async function () {
+	// 	const peeranha = await createContract();
+	// 	const hashContainer = getHashContainer();
+
+	// 	await peeranha.createPost(author, 1, hashContainer[0]);
+    //     await peeranha.voteItem(author, 0, [], 0, 0, 0);
+
+
+	// 	const post = await peeranha.getPostByIndex(0);
+    //     console.log(post);
+	// });
+
+
+    // upVoteItem(address name, uint32 postId, uint16[] memory path, uint8 commentId, bool isUpvote)
 
 	const createContract = async function () {
 		const Peeranha = await ethers.getContractFactory("Peeranha");

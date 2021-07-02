@@ -68,4 +68,10 @@ library UserLib {
     require(user.ipfsHash != bytes32(0x0), "User does not exist");
     return user;
   }
+
+  function updateRating(UserCollection storage self, address addr, int256 rating) internal view {
+    ///
+    // will add content
+    ///
+  }
 }

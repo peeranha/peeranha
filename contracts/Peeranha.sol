@@ -219,8 +219,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address name, uint8 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external override {
-        //posts.createPost(name, communityId, ipfsHash, tags);
+    function createPost(address name, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(name, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -233,8 +233,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags
     */
-    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external override {
-        //posts.editPost(name, postId, communityId, ipfsHash, tags);
+    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.editPost(name, postId, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -318,6 +318,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         posts.deleteComment(name, postId, path, commentId);
     }
 
+    function voteItem(address name, uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.voteForumItem(users, name, postId, path, replyId, commentId, isUpvote);
+    }
 
     /**
      * @dev Get a post by index.
@@ -350,12 +353,5 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     */
     function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
         return posts.getCommentByPath(postId, path, commentId);
-    }
-
-
-
-
-    function vote(uint typee) external {
-        posts.voteForumItem(typee);
     }
 }
