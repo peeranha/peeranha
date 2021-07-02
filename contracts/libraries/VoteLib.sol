@@ -178,10 +178,10 @@ library VoteLib  {
             historyVote[actionAddress] = 0;
             content.rating += 1;
         } else if (history == 0) {
-            historyVote[actionAddress] = 1;
+            historyVote[actionAddress] = -1;
             content.rating --;
         } else if (history == 1) {
-            historyVote[actionAddress] = 0;
+            historyVote[actionAddress] = -1;
             content.rating -= 2;
         }
     }

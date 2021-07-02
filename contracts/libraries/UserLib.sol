@@ -69,7 +69,11 @@ library UserLib {
     return user;
   }
 
-  function updateRating(UserCollection storage self, address addr, int256 rating) internal view {
+  /// @notice Add rating to user
+  /// @param self The mapping containing all users
+  /// @param user user's rating will be change
+  /// @param rating value for add to user's rating
+  function updateRating(UserCollection storage self, address user, int256 rating) internal view {
     ///
     // will add content
     ///

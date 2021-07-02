@@ -1,163 +1,133 @@
 const { expect } = require("chai");
 
 describe("Test post", function () {
-	// it("Test post post", async function () {
-	// 	const peeranha = await createContract();
-	// 	const signers = await ethers.getSigners();
-	// 	const hashContainer = getHashContainer();
+	it("Test post post", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
 
-	// 	await Promise.all(
-	// 		hashContainer.map(async (hash, index) => {
-	// 			return await peeranha
-	// 				.connect(signers[index])
-	// 				.createPost(author, 1, hash);
-	// 		})
-	// 	);
+		await Promise.all(
+			hashContainer.map(async (hash, index) => {
+				return await peeranha
+					.connect(signers[index])
+					.createPost(author, 1, hash);
+			})
+		);
 
-	// 	await Promise.all(
-	// 		hashContainer.map(async (hash, index) => {
-	// 			const post = await peeranha.getPostByIndex(index);
-	// 			await expect(post.author).to.equal(author);
-	// 			await expect(post.isDeleted).to.equal(false);
-	// 			return await expect(post.ipfsDoc.hash).to.equal(hash);
-	// 		})
-	// 	);
-	// });
+		await Promise.all(
+			hashContainer.map(async (hash, index) => {
+				const post = await peeranha.getPostByIndex(index);
+				await expect(post.author).to.equal(author);
+				await expect(post.isDeleted).to.equal(false);
+				return await expect(post.ipfsDoc.hash).to.equal(hash);
+			})
+		);
+	});
 
-	// it("Test post reply", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createReply(author, 0, false, [], hashContainer[1]);
-
-	// 	const reply = await peeranha.getReplyByPath(0, [], 0);
-	// 	await expect(reply.author).to.equal(author);
-	// 	await expect(reply.isDeleted).to.equal(false);
-	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
-	// });
-
-	// it("Test post comment", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createComment(author, 0, [], hashContainer[1]);
-
-	// 	const comment = await peeranha.getCommentByPath(0, [], 0);
-	// 	await expect(comment.author).to.equal(author);
-	// 	await expect(comment.isDeleted).to.equal(false);
-	// 	await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
-	// });
-
-	// it("Test edit post", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.editPost(author, 0, 1, hashContainer[2]);
-
-	// 	const post = await peeranha.getPostByIndex(0);
-	// 	await expect(post.author).to.equal(author);
-	// 	await expect(post.isDeleted).to.equal(false);
-	// 	await expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
-	// });
-
-	// it("Test edit reply", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createReply(author, 0, false, [], hashContainer[1]);
-	// 	await peeranha.editReply(author, 0, [], 0, true, hashContainer[2]);
-
-	// 	const reply = await peeranha.getReplyByPath(0, [], 0);
-	// 	await expect(reply.author).to.equal(author);
-	// 	await expect(reply.isDeleted).to.equal(false);
-	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
-	// });
-
-	// it("Test edit comment ", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createComment(author, 0, [], hashContainer[1]);
-	// 	await peeranha.editComment(author, 0, [], 0, hashContainer[2]);
-
-	// 	const reply = await peeranha.getCommentByPath(0, [], 0);
-	// 	await expect(reply.author).to.equal(author);
-	// 	await expect(reply.isDeleted).to.equal(false);
-	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
-	// });
-
-	// it("Test delete post", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.deletePost(author, 0);
-
-	// 	const post = await peeranha.getPostByIndex(0);
-	// 	await expect(post.isDeleted).to.equal(true);
-	// 	await expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
-	// });
-
-	// it("Test delete reply ", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createReply(author, 0, false, [], hashContainer[1]);
-	// 	await peeranha.deleteReply(author, 0, [], 0);
-
-	// 	const reply = await peeranha.getReplyByPath(0, [], 0);
-	// 	await expect(reply.isDeleted).to.equal(true);
-	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
-	// });
-
-	// it("Test delete comment ", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createComment(author, 0, [], hashContainer[1]);
-	// 	await peeranha.deleteComment(author, 0, [], 0);
-
-	// 	const reply = await peeranha.getCommentByPath(0, [], 0);
-	// 	await expect(reply.isDeleted).to.equal(true);
-	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
-	// });
-
-
-    // upVoteItem(address name, uint32 postId, uint16[] memory path, uint8 commentId, bool isUpvote)
-
-    it("Test upVote post ", async function () {
+	it("Test post reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
-        await peeranha.voteItem(author, 0, [], 0, 0, 1);
+		await peeranha.createReply(author, 0, false, [], hashContainer[1]);
 
-
-		const post = await peeranha.getPostByIndex(0);
-        console.log(post);
+		const reply = await peeranha.getReplyByPath(0, [], 0);
+		await expect(reply.author).to.equal(author);
+		await expect(reply.isDeleted).to.equal(false);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
 
-	// it("Test downVote post ", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
+	it("Test post comment", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
 
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-    //     await peeranha.voteItem(author, 0, [], 0, 0, 0);
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createComment(author, 0, [], hashContainer[1]);
 
+		const comment = await peeranha.getCommentByPath(0, [], 0);
+		await expect(comment.author).to.equal(author);
+		await expect(comment.isDeleted).to.equal(false);
+		await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
+	});
 
-	// 	const post = await peeranha.getPostByIndex(0);
-    //     console.log(post);
-	// });
+	it("Test edit post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
 
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.editPost(author, 0, 1, hashContainer[2]);
 
-    // upVoteItem(address name, uint32 postId, uint16[] memory path, uint8 commentId, bool isUpvote)
+		const post = await peeranha.getPostByIndex(0);
+		await expect(post.author).to.equal(author);
+		await expect(post.isDeleted).to.equal(false);
+		await expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
+	});
+
+	it("Test edit reply", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createReply(author, 0, false, [], hashContainer[1]);
+		await peeranha.editReply(author, 0, [], 0, true, hashContainer[2]);
+
+		const reply = await peeranha.getReplyByPath(0, [], 0);
+		await expect(reply.author).to.equal(author);
+		await expect(reply.isDeleted).to.equal(false);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
+	});
+
+	it("Test edit comment ", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createComment(author, 0, [], hashContainer[1]);
+		await peeranha.editComment(author, 0, [], 0, hashContainer[2]);
+
+		const reply = await peeranha.getCommentByPath(0, [], 0);
+		await expect(reply.author).to.equal(author);
+		await expect(reply.isDeleted).to.equal(false);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
+	});
+
+	it("Test delete post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.deletePost(author, 0);
+
+		const post = await peeranha.getPostByIndex(0);
+		await expect(post.isDeleted).to.equal(true);
+		await expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
+	});
+
+	it("Test delete reply ", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createReply(author, 0, false, [], hashContainer[1]);
+		await peeranha.deleteReply(author, 0, [], 0);
+
+		const reply = await peeranha.getReplyByPath(0, [], 0);
+		await expect(reply.isDeleted).to.equal(true);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+	});
+
+	it("Test delete comment ", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createComment(author, 0, [], hashContainer[1]);
+		await peeranha.deleteComment(author, 0, [], 0);
+
+		const reply = await peeranha.getCommentByPath(0, [], 0);
+		await expect(reply.isDeleted).to.equal(true);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+	});
 
 	const createContract = async function () {
 		const Peeranha = await ethers.getContractFactory("Peeranha");
