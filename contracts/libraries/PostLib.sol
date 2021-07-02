@@ -12,7 +12,7 @@ library PostLib  {
     struct Content {
         address author;
         IpfsLib.IpfsHash ipfsDoc;
-        uint16 rating;
+        int16 rating;
         uint32 postTime;
         bool isDeleted;
     }
@@ -39,7 +39,7 @@ library PostLib  {
         mapping(uint16 => Reply) replies;
         mapping(uint8 => Comment) comments;
         mapping(uint8 => bytes32) properties;
-        CommunityLib.Tag[] tags;
+        //CommunityLib.Tag[] tags;
         uint16 sizeReplies;
         uint8 sizeComments;
         uint8 sizeProperties;
@@ -62,19 +62,19 @@ library PostLib  {
         PostCollection storage self,
         address name,
         uint8 communityId, 
-        bytes32 hash,
-        CommunityLib.Tag[] memory tags
+        bytes32 hash
+        //CommunityLib.Tag[] memory tags
     ) internal {
         ///
         //check community, ipfs, tags
         ///
 
-        Post storage post = self.posts[self.sizePosts++];
+        Post storage post = self.posts[++self.sizePosts];
         post.content.ipfsDoc.hash = hash;
         post.content.author = name;
         post.content.postTime = uint32(block.timestamp);
         post.communityId = communityId;
-        post.tags = tags;
+        //post.tags = tags;
     }
 
     /// @notice Post reply
@@ -105,15 +105,10 @@ library PostLib  {
         ///
         Reply storage reply;
         if (path.length == 0) {
-            reply = post.replies[post.sizeReplies++];
+            reply = post.replies[++post.sizeReplies];
         } else {
-            uint256 lenght = path.length;
-            reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[path[i]];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-            }
-            reply = reply.replies[reply.sizeReplies++]; 
+            reply = findReply(post, path);
+            reply = reply.replies[++reply.sizeReplies]; 
         }
 
         reply.content.author = name;
@@ -146,15 +141,10 @@ library PostLib  {
 
         Content storage comment;
         if (path.length == 0) {
-            comment = post.comments[post.sizeComments++].content;  
+            comment = post.comments[++post.sizeComments].content;  
         } else {
-            uint256 lenght = path.length;
-            Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[path[i]];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-            }
-            comment = reply.comments[reply.sizeComments++].content;
+            Reply storage reply = findReply(post, path);
+            comment = reply.comments[++reply.sizeComments].content;
         }
 
         comment.author = name;
@@ -173,8 +163,8 @@ library PostLib  {
         address name,
         uint32 postId,
         uint8 communityId,
-        bytes32 hash,
-        CommunityLib.Tag[] memory tags
+        bytes32 hash
+        //CommunityLib.Tag[] memory tags
       ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
@@ -185,7 +175,7 @@ library PostLib  {
         if(post.content.ipfsDoc.hash != hash)
             post.content.ipfsDoc.hash = hash;
         //if(post.tags != tags)     // error, chech one by one?
-        post.tags = tags;
+        //post.tags = tags;
     }
 
     /// @notice Edit reply
@@ -215,13 +205,7 @@ library PostLib  {
         if (path.length == 0) {
             reply = post.replies[replyId];  
         } else {
-            uint256 lenght = path.length;
-            reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[path[i]];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-                require(!reply.content.isDeleted, "Reply has been deleted");
-            }
+            reply = findReply(post, path);
             reply = reply.replies[replyId];
         }
 
@@ -258,13 +242,7 @@ library PostLib  {
         if (path.length == 0) {
             comment = post.comments[commentId].content;
         } else {
-            uint256 lenght = path.length;
-            Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[path[i]];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-                require(!reply.content.isDeleted, "Reply has been deleted");
-            }
+            Reply storage reply = findReply(post, path);
             comment = reply.comments[commentId].content;
         }
 
@@ -330,13 +308,7 @@ library PostLib  {
         if (path.length == 0) {
             reply = post.replies[replyId];
         } else {
-            uint256 lenght = path.length;
-            reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-                require(!reply.content.isDeleted, "Reply has been deleted");
-                reply = reply.replies[path[i]];
-            }
+            reply = reply = findReply(post, path);
             reply = reply.replies[replyId];
         }
 
@@ -368,13 +340,7 @@ library PostLib  {
             comment = post.comments[commentId].content;  
         } else {
             Reply storage reply;
-            uint256 lenght = path.length;
-            reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) {
-                reply = reply.replies[path[i]];
-                require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
-                require(!reply.content.isDeleted, "Reply has been deleted");
-            }
+            reply = reply = findReply(post, path);
             comment = reply.comments[commentId].content;
         }
 
@@ -403,11 +369,7 @@ library PostLib  {
         if (path.length == 0) {
             content = post.replies[replyId].content;
         } else {
-            uint256 lenght = path.length;
-            Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) { 
-                reply = reply.replies[path[i]];
-            }
+            Reply storage reply = findReply(post, path);
             content = reply.replies[replyId].content;
         }
 
@@ -426,14 +388,27 @@ library PostLib  {
         if (path.length == 0) {
             comment = post.comments[commentId].content;
         } else {
-            uint256 lenght = path.length;
-            Reply storage reply = post.replies[path[0]];
-            for(uint256 i = 1; i < lenght; i++) { 
-                reply = reply.replies[path[i]];
-            }
+            Reply storage reply = findReply(post, path);
             comment = reply.comments[commentId].content;
         }
 
         return comment;
+    }
+
+    function findReply(
+        Post storage post,
+        uint16[] memory path
+    ) private view returns (Reply storage) {
+        Reply storage reply;
+
+        uint256 lenght = path.length;
+        reply = post.replies[path[0]];
+        for(uint256 i = 1; i < lenght; i++) {
+            reply = reply.replies[path[i]];
+            require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+            require(!reply.content.isDeleted, "Reply has been deleted");
+        }
+        
+        return reply;
     }
 }

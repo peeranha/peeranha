@@ -219,8 +219,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address name, uint8 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external override {
-        //posts.createPost(name, communityId, ipfsHash, tags);
+    function createPost(address name, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(name, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -233,8 +233,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags
     */
-    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external override {
-        //posts.editPost(name, postId, communityId, ipfsHash, tags);
+    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.editPost(name, postId, communityId, ipfsHash/*, tags*/);
     }
 
     /**
