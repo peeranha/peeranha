@@ -414,14 +414,19 @@ library PostLib  {
         bool isUpvote
     ) internal {
         Post storage post = self.posts[postId];
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
         TypePost typePost = post.typePost;
-
+ 
         if (path.length == 0) {
-            if (commentId == 0) {
-                votePost(users, post, name, typePost, isUpvote);
-            } else {
+            if (commentId != 0) {
                 Comment storage comment = post.comments[commentId];
                 voteComment(users, comment, name, typePost, isUpvote);
+            } else if (replyId != 0) {
+                Reply storage reply = post.replies[replyId];
+                voteReply(users, reply, name, typePost, isUpvote);
+            } else {
+                votePost(users, post, name, typePost, isUpvote);
             }
         } else {
             Reply storage pathReply;
@@ -433,12 +438,12 @@ library PostLib  {
                 require(!pathReply.content.isDeleted, "Reply has been deleted");
             }
             
-            if (commentId == 0) {
-                Reply storage reply = pathReply.replies[replyId];
-                voteReply(users, reply, name, typePost, isUpvote);        
-            } else {
+            if (commentId != 0) {
                 Comment storage comment = pathReply.comments[commentId];
                 voteComment(users, comment, name, typePost, isUpvote);
+            } else {
+                Reply storage reply = pathReply.replies[replyId];
+                voteReply(users, reply, name, typePost, isUpvote);
             }
         }
     }
@@ -450,6 +455,9 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
+        require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
+        require(!post.content.isDeleted, "Post has been deleted");
+
         if (isUpvote) {
             VoteLib.upVote(users, post.content, votedUser, post.content.author, post.historyVotes, TypeAction.Post, typePost);
         } else {
@@ -464,6 +472,9 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
+        require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
+        require(!reply.content.isDeleted, "Reply has been deleted");
+
         if (isUpvote) {
             VoteLib.upVote(users, reply.content, votedUser, reply.content.author, reply.historyVotes, TypeAction.Reply, typePost);
         } else {
@@ -478,13 +489,16 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) private {
+        require(comment.content.ipfsDoc.hash != bytes32(0x0), "Comment does not exist");
+        require(!comment.content.isDeleted, "Comment has been deleted");
+
         if (isUpvote) {
             VoteLib.upVote(users, comment.content, votedUser, comment.content.author, comment.historyVotes, TypeAction.Comment, typePost);
         } else {
             VoteLib.downVote(users, comment.content, votedUser, comment.content.author, comment.historyVotes, TypeAction.Comment, typePost);
         }
     }
-    
+
     function findReply(
         Post storage post,
         uint16[] memory path
