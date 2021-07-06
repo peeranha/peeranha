@@ -122,7 +122,7 @@ library PostLib  {
         reply.content.author = name;
         reply.content.ipfsDoc.hash = hash;
         reply.content.postTime = uint32(block.timestamp);
-        if (officialReply)
+        if (officialReply != reply.officialReply)           // check permission
             reply.officialReply = officialReply;
 
         ///
@@ -222,7 +222,7 @@ library PostLib  {
 
         if (reply.content.ipfsDoc.hash != hash)
             reply.content.ipfsDoc.hash = hash;
-        if (reply.officialReply != officialReply)                          //will check gas?
+        if (reply.officialReply != officialReply)       //check permission
             reply.officialReply = officialReply;   
     }
 
@@ -457,6 +457,7 @@ library PostLib  {
     ) internal {
         require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
+        require(votedUser != post.content.author, "You can't vote for your post");
 
         if (isUpvote) {
             VoteLib.upVote(users, post.content, votedUser, post.content.author, post.historyVotes, TypeAction.Post, typePost);
@@ -474,6 +475,7 @@ library PostLib  {
     ) internal {
         require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist");
         require(!reply.content.isDeleted, "Reply has been deleted");
+        require(votedUser != reply.content.author, "You can't vote for your reply");
 
         if (isUpvote) {
             VoteLib.upVote(users, reply.content, votedUser, reply.content.author, reply.historyVotes, TypeAction.Reply, typePost);
@@ -491,6 +493,7 @@ library PostLib  {
     ) private {
         require(comment.content.ipfsDoc.hash != bytes32(0x0), "Comment does not exist");
         require(!comment.content.isDeleted, "Comment has been deleted");
+        require(votedUser != comment.content.author, "You can't vote for your comment");
 
         if (isUpvote) {
             VoteLib.upVote(users, comment.content, votedUser, comment.content.author, comment.historyVotes, TypeAction.Comment, typePost);

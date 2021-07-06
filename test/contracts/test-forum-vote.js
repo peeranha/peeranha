@@ -6,7 +6,7 @@ describe("Test vote", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
-        await peeranha.voteItem(author, 1, [], 0, 0, 1);
+        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 
 		const post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(1);
@@ -18,11 +18,11 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
 
-        await peeranha.voteItem(author, 1, [], 0, 0, 1);
+        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 		var post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(1);
 
-		await peeranha.voteItem(author, 1, [], 0, 0, 1);
+		await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 		post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(0);
 	});
@@ -33,7 +33,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
 
-    	await peeranha.voteItem(author, 1, [], 0, 0, 0);
+    	await peeranha.voteItem(author2, 1, [], 0, 0, 0);
 		const post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(-1);
 	});
@@ -44,11 +44,11 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
 		
-        await peeranha.voteItem(author, 1, [], 0, 0, 0);
+        await peeranha.voteItem(author2, 1, [], 0, 0, 0);
 		var post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(-1);
 
-		await peeranha.voteItem(author, 1, [], 0, 0, 0);
+		await peeranha.voteItem(author2, 1, [], 0, 0, 0);
 		post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(0);
 	});
@@ -59,11 +59,11 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
 		
-        await peeranha.voteItem(author, 1, [], 0, 0, 1);
+        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 		var post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(1);
 
-		await peeranha.voteItem(author, 1, [], 0, 0, 0);
+		await peeranha.voteItem(author2, 1, [], 0, 0, 0);
 		post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(-1);
 	});
@@ -74,11 +74,11 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
 		
-        await peeranha.voteItem(author, 1, [], 0, 0, 0);
+        await peeranha.voteItem(author2, 1, [], 0, 0, 0);
 		var post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(-1);
 
-		await peeranha.voteItem(author, 1, [], 0, 0, 1);
+		await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 		post = await peeranha.getPostByIndex(1);
 		await expect(post.rating).to.equal(1);
 	});
@@ -88,9 +88,9 @@ describe("Test vote", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
+		await peeranha.createReply(author, 1, false, [], hashContainer[1]);		//
 		
-        await peeranha.voteItem(author, 1, [], 1, 0, 1);
+        await peeranha.voteItem(author2, 1, [], 1, 0, 1);
 		var reply = await peeranha.getReplyByPath(1, [], 1);
 		await expect(reply.rating).to.equal(1);
 	});
@@ -100,9 +100,9 @@ describe("Test vote", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
+		await peeranha.createReply(author, 1, false, [], hashContainer[1]);		//
 		
-        await peeranha.voteItem(author, 1, [], 1, 0, 0);
+        await peeranha.voteItem(author2, 1, [], 1, 0, 0);
 		var reply = await peeranha.getReplyByPath(1, [], 1);
 		await expect(reply.rating).to.equal(-1);
 	});
@@ -112,24 +112,40 @@ describe("Test vote", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);
+		await peeranha.createComment(author, 1, [], hashContainer[1]);		//
 		
-        await peeranha.voteItem(author, 1, [], 0, 1, 1);
+        await peeranha.voteItem(author2, 1, [], 0, 1, 1);
 		var reply = await peeranha.getCommentByPath(1, [], 1);
 		await expect(reply.rating).to.equal(1);
 	});
 
-	it("Test downvote comment", async function () {
-		const peeranha = await createContract();
-		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);
+
+
+	// it("Test downvote comment", async function () {
+	// 	const peeranha = await createContract();
+	// 	const hashContainer = getHashContainer();
+
+	// 	await peeranha.createPost(author, 1, hashContainer[0]);
+	// 	await peeranha.createComment(author, 1, [], hashContainer[1]);
 		
-        await peeranha.voteItem(author, 1, [], 0, 1, 0);
-		var reply = await peeranha.getCommentByPath(1, [], 1);
-		await expect(reply.rating).to.equal(-1);
-	});
+
+	// 	const aaa = await peeranha.voteItem(author, 1, [], 0, 1, 0)
+	// 	.catch(error => {
+	// 	  console.error(error);
+	// 	//   console.log(fffffff);
+	// 	});
+	// 	// .catch(error => {
+	// 	//   	// console.error(error);
+	// 	// 	// process.exit(0);
+	// 	// });
+
+	// 	// console.log(aaa);
+
+
+	// 	// var reply = await peeranha.getCommentByPath(1, [], 1);
+	// 	// await expect(reply.rating).to.equal(-1);
+	// });
 
 	const createContract = async function () {
 		const Peeranha = await ethers.getContractFactory("Peeranha");
@@ -139,6 +155,9 @@ describe("Test vote", function () {
 	};
 
 	const author = "0x001d3F1ef827552Ae1114027BD3ECF1f086bA0F9";
+	const author2 = "0x111122223333444455556666777788889999aAaa";
+
+	// 0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc
 
 	const getHashContainer = () => {
 		return [
