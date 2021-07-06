@@ -92,7 +92,7 @@ library PostLib  {
         bool officialReply,
         uint16[] memory path,
         bytes32 hash
-      ) internal {
+    ) internal {
         ///
         //check ipfs
         ///
@@ -135,7 +135,7 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         bytes32 hash
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
 
@@ -165,7 +165,7 @@ library PostLib  {
         uint8 communityId,
         bytes32 hash
         //CommunityLib.Tag[] memory tags
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -195,8 +195,7 @@ library PostLib  {
         uint16 replyId,
         bool officialReply,
         bytes32 hash
-      ) internal {
-
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -233,7 +232,7 @@ library PostLib  {
         uint16[] memory path,
         uint8 commentId,
         bytes32 hash
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -262,7 +261,7 @@ library PostLib  {
         PostCollection storage self,
         address name,
         uint32 postId
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];     //inside the post
         require(post.content.ipfsDoc.hash != bytes32(0x0), "post does not exist");
         require(!post.content.isDeleted, "Post has already deleted");
@@ -296,7 +295,7 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         uint16 replyId
-      ) internal {
+    ) internal {
         /*
         check author
         */
@@ -330,7 +329,7 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         uint8 commentId
-      ) internal {
+    ) internal {
         Post storage post = self.posts[postId];
         require(post.content.ipfsDoc.hash != bytes32(0x0), "Post does not exist");
         require(!post.content.isDeleted, "Post has been deleted");
@@ -353,7 +352,7 @@ library PostLib  {
     function getPostByIndex(
         PostCollection storage self, 
         uint32 index
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         return self.posts[index].content;
     }
 
@@ -362,7 +361,7 @@ library PostLib  {
         uint32 postId, 
         uint16[] memory path, 
         uint16 replyId
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage content;
@@ -381,7 +380,7 @@ library PostLib  {
         uint32 postId, 
         uint16[] memory path, 
         uint8 commentId
-        ) internal view returns (Content memory) {
+    ) internal view returns (Content memory) {
         Post storage post = self.posts[postId];
 
         Content storage comment;
