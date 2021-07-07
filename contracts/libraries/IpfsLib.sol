@@ -6,4 +6,11 @@ library IpfsLib  {
         bytes32 hash;
         bytes32 hash2; // Not currently used and added for the future compatibility
     }
+
+    function checkIpfs (
+        bytes32 hash,
+        string memory text
+    ) internal {
+        require(hash != bytes32(0x0), text);
+    }
 }
