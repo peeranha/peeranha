@@ -95,7 +95,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
         
         ///
         //update user statistic + rating
@@ -104,7 +104,7 @@ library PostLib  {
         if (path.length == 0) {
             reply = post.replies[++post.replyCount];
         } else {
-            reply = findReply(post, path);
+            reply = getParentReply(post, path);
             reply = reply.replies[++reply.replyCount]; 
         }
 
@@ -134,13 +134,13 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
 
         Content storage comment;
         if (path.length == 0) {
             comment = post.comments[++post.commentCount].content;  
         } else {
-            Reply storage reply = findReply(post, path);
+            Reply storage reply = getParentReply(post, path);
             comment = reply.comments[++reply.commentCount].content;
         }
 
@@ -164,7 +164,7 @@ library PostLib  {
         //CommunityLib.Tag[] memory tags
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
         
         if(post.communityId != communityId)
             post.communityId = communityId;
@@ -193,18 +193,8 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = findPost(self, postId);
-
-        Reply storage reply;
-        if (path.length == 0) {
-            reply = post.replies[replyId];  
-        } else {
-            reply = findReply(post, path);
-            reply = reply.replies[replyId];
-        }
-
-        IpfsLib.checkIpfs(reply.content.ipfsDoc.hash, "Reply does not exist.");
-        require(!reply.content.isDeleted, "Reply has been deleted.");
+        Post storage post = getPostContainer(self, postId);
+        Reply storage reply = getReplyContainer(post, path, replyId);
 
         if (reply.content.ipfsDoc.hash != ipfsHash)
             reply.content.ipfsDoc.hash = ipfsHash;
@@ -229,9 +219,9 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
+        Comment storage comment = getCommentContainer(post, path, commentId);
 
-        Comment storage comment = findComment(post, path, commentId);
         if (comment.content.ipfsDoc.hash != ipfsHash)
             comment.content.ipfsDoc.hash = ipfsHash;
     }
@@ -246,7 +236,7 @@ library PostLib  {
         address user,
         uint32 postId
     ) internal {
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
 
         require(!post.content.isDeleted, "Reply has already deleted.");
         IpfsLib.checkIpfs(post.content.ipfsDoc.hash, "Reply does not exist.");
@@ -283,18 +273,9 @@ library PostLib  {
         /*
         check author
         */
-        Post storage post = findPost(self, postId);
+        Post storage post = getPostContainer(self, postId);
+        Reply storage reply = getReplyContainer(post, path, replyId);
 
-        Reply storage reply;
-        if (path.length == 0) {
-            reply = post.replies[replyId];
-        } else {
-            reply = reply = findReply(post, path);
-            reply = reply.replies[replyId];
-        }
-
-        require(!reply.content.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(reply.content.ipfsDoc.hash, "Reply does not exist.");
         reply.content.isDeleted = true;
     }
 
@@ -312,8 +293,8 @@ library PostLib  {
         uint16[] memory path,
         uint8 commentId
     ) internal {
-        Post storage post = findPost(self, postId);
-        Comment storage comment = findComment(post, path, commentId);
+        Post storage post = getPostContainer(self, postId);
+        Comment storage comment = getCommentContainer(post, path, commentId);
 
         require(!comment.content.isDeleted, "Reply has already deleted.");
         IpfsLib.checkIpfs(comment.content.ipfsDoc.hash, "Reply does not exist.");
@@ -329,21 +310,14 @@ library PostLib  {
         bool officialReply
     ) internal {
         // check permistion
-        Post storage post = findPost(self, postId);
-
-        Reply storage reply;
-        if (path.length == 0) {
-            reply = post.replies[replyId];
-        } else {
-            reply = reply = findReply(post, path);
-            reply = reply.replies[replyId];
-        }
+        Post storage post = getPostContainer(self, postId);
+        Reply storage reply = getReplyContainer(post, path, replyId);
          
         if (reply.officialReply != officialReply)
             reply.officialReply = officialReply;
     }
 
-    function findPost(
+    function getPostContainer(
         PostCollection storage self,
         uint32 postId
     ) internal returns (Post storage) {
@@ -354,7 +328,7 @@ library PostLib  {
         return post;
     }
 
-    function findReply(
+    function getParentReply(
         Post storage post,
         uint16[] memory path
     ) private view returns (Reply storage) {
@@ -371,7 +345,27 @@ library PostLib  {
         return reply;
     }
 
-    function findComment(
+    function getReplyContainer(
+        Post storage post,
+        uint16[] memory path,
+        uint16 replyId
+    ) internal returns (Reply storage) {
+        Reply storage reply;
+
+        if (path.length == 0) {
+            reply = post.replies[replyId];
+        } else {
+            reply = reply = getParentReply(post, path);
+            reply = reply.replies[replyId];
+        }
+
+        require(!reply.content.isDeleted, "Reply has already deleted.");
+        IpfsLib.checkIpfs(reply.content.ipfsDoc.hash, "Reply does not exist.");
+
+        return reply;
+    }
+
+    function getCommentContainer(
         Post storage post,
         uint16[] memory path,
         uint8 commentId
@@ -381,7 +375,7 @@ library PostLib  {
         if (path.length == 0) {
             comment = post.comments[commentId];  
         } else {
-            Reply storage reply = findReply(post, path);
+            Reply storage reply = getParentReply(post, path);
             comment = reply.comments[commentId];
         }
         require(!comment.content.isDeleted, "Comment has been deleted.");
@@ -393,7 +387,7 @@ library PostLib  {
     function getPost(       //only unit test
         PostCollection storage self,
         uint32 postId
-    ) internal view returns (Content storage) {        
+    ) internal view returns (Content memory) {        
         return self.posts[postId].content;
     }
 
@@ -409,7 +403,7 @@ library PostLib  {
         if (path.length == 0) {
             content = post.replies[replyId].content;
         } else {
-            Reply storage reply = findReply(post, path);
+            Reply storage reply = getParentReply(post, path);
             content = reply.replies[replyId].content;
         }
 
@@ -428,7 +422,7 @@ library PostLib  {
         if (path.length == 0) {
             comment = post.comments[commentId].content;
         } else {
-            Reply storage reply = findReply(post, path);
+            Reply storage reply = getParentReply(post, path);
             comment = reply.comments[commentId].content;
         }
 
