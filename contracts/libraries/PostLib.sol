@@ -3,6 +3,7 @@ pragma abicoder v2;
 
 import "./IpfsLib.sol";
 import "./CommunityLib.sol";
+import "./CommonLib.sol";
 import "hardhat/console.sol";
 
 /// @title PostLib
@@ -91,7 +92,7 @@ library PostLib  {
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;
         post.info.author = user;
-        post.info.postTime = uint32(block.timestamp);
+        post.info.postTime = CommonLib.convertUint256toUint32(block.timestamp);
         post.info.communityId = communityId;
         //post.tags = tags;
     }
@@ -127,7 +128,7 @@ library PostLib  {
 
         reply.info.author = user;
         reply.info.ipfsDoc.hash = ipfsHash;
-        reply.info.postTime = uint32(block.timestamp);
+        reply.info.postTime = CommonLib.convertUint256toUint32(block.timestamp);
         if (officialReply)
             reply.info.officialReply = officialReply;
 
@@ -162,7 +163,7 @@ library PostLib  {
 
         comment.author = user;
         comment.ipfsDoc.hash = ipfsHash;
-        comment.postTime = uint32(block.timestamp);
+        comment.postTime = CommonLib.convertUint256toUint32(block.timestamp);
     }
 
     /// @notice Edit post
