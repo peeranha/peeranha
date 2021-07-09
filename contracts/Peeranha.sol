@@ -19,7 +19,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
-    using PostLib for PostLib.Content;
+    using PostLib for PostLib.Post;
+    using PostLib for PostLib.Reply;
+    using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
     
     UserLib.UserCollection users;
@@ -326,7 +328,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a post.
     */
-    function getPost(uint32 postId) external view returns (PostLib.Content memory) {
+    function getPost(uint32 postId) external view returns (PostLib.Post memory) {
         return posts.getPost(postId);
     }
 
@@ -337,7 +339,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a reply.
     */
-    function getReply(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Content memory) {
+    function getReply(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Reply memory) {
         return posts.getReply(postId, path, replyId);
     }
 
@@ -348,7 +350,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a comment.
     */
-    function getComment(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
+    function getComment(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Comment memory) {
         return posts.getComment(postId, path, commentId);
     }
 }

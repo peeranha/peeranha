@@ -31,6 +31,8 @@ describe("Test post", function () {
 		await peeranha.createPost(author, 1, hashContainer[0]);
 		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
 
+		//await expect(peeranha.createReply(author, 1, false, [], hashContainer[1])).to.be.revertedWith('Post has been deleted.');
+
 		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.author).to.equal(author);
 		await expect(reply.isDeleted).to.equal(false);

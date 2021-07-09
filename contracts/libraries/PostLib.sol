@@ -9,55 +9,73 @@ import "hardhat/console.sol";
 /// @notice Provides information about operation with posts
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
-    struct Content {
-        address author;
+    struct Comment {
         IpfsLib.IpfsHash ipfsDoc;
+        address author;
         int16 rating;
         uint32 postTime;
         bool isDeleted;
+
+        uint8 propertyCount;
     }
 
-    struct Comment {
-        Content content;
+    struct CommentContainer {
+        Comment info;
         mapping(uint8 => bytes32) properties;
-        uint8 propertyCount;
     }
 
     struct Reply {
-        Content content;
-        mapping(uint16 => Reply) replies;
-        mapping(uint8 => Comment) comments;
-        mapping(uint8 => bytes32) properties;
+        IpfsLib.IpfsHash ipfsDoc;
+        address author;
+        int16 rating;
+        uint32 postTime;
+        bool isDeleted;
+
+        bool officialReply;
         uint16 replyCount;
         uint8 commentCount;
         uint8 propertyCount;
-        bool officialReply;
+    }
+
+    struct ReplyContainer {
+        Reply info;
+        mapping(uint16 => ReplyContainer) replies;
+        mapping(uint8 => CommentContainer) comments;
+        mapping(uint8 => bytes32) properties;
     }
 
     struct Post {
-        Content content;
-        mapping(uint16 => Reply) replies;
-        mapping(uint8 => Comment) comments;
-        mapping(uint8 => bytes32) properties;
-        //CommunityLib.Tag[] tags;
+        CommunityLib.Tag[] tags;
+
+        IpfsLib.IpfsHash ipfsDoc;
+        address author;
+        int16 rating;
+        uint32 postTime;
+        bool isDeleted;
+
+        uint8 communityId;
         uint16 replyCount;
         uint8 commentCount;
         uint8 propertyCount;
-        uint8 communityId;
+    }
+
+    struct PostContainer {
+        Post info;
+        mapping(uint16 => ReplyContainer) replies;
+        mapping(uint8 => CommentContainer) comments;
+        mapping(uint8 => bytes32) properties;
     }
 
     struct PostCollection {
-        mapping(uint32 => Post) posts;    // uint32?
+        mapping(uint32 => PostContainer) posts;    // uint32?
         uint32 postCount;
     }
-
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
     /// @param user Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
-    
     function createPost(
         PostCollection storage self,
         address user,
@@ -70,11 +88,11 @@ library PostLib  {
         //check community, tags
         ///
 
-        Post storage post = self.posts[++self.postCount];
-        post.content.ipfsDoc.hash = ipfsHash;
-        post.content.author = user;
-        post.content.postTime = uint32(block.timestamp);
-        post.communityId = communityId;
+        PostContainer storage post = self.posts[++self.postCount];
+        post.info.ipfsDoc.hash = ipfsHash;
+        post.info.author = user;
+        post.info.postTime = uint32(block.timestamp);
+        post.info.communityId = communityId;
         //post.tags = tags;
     }
 
@@ -85,7 +103,6 @@ library PostLib  {
     /// @param officialReply Flag is showing "official reply" or not
     /// @param path The path where the reply will be post 
     /// @param ipfsHash IPFS hash of document with reply information
-    
     function createReply(
         PostCollection storage self,
         address user,
@@ -95,24 +112,24 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = getPostContainer(self, postId);
+        PostContainer storage post = getPostContainer(self, postId);
         
         ///
         //update user statistic + rating
         ///
-        Reply storage reply;
+        ReplyContainer storage reply;
         if (path.length == 0) {
-            reply = post.replies[++post.replyCount];
+            reply = post.replies[++post.info.replyCount];
         } else {
             reply = getParentReply(post, path);
-            reply = reply.replies[++reply.replyCount]; 
+            reply = reply.replies[++reply.info.replyCount]; 
         }
 
-        reply.content.author = user;
-        reply.content.ipfsDoc.hash = ipfsHash;
-        reply.content.postTime = uint32(block.timestamp);
+        reply.info.author = user;
+        reply.info.ipfsDoc.hash = ipfsHash;
+        reply.info.postTime = uint32(block.timestamp);
         if (officialReply)
-            reply.officialReply = officialReply;
+            reply.info.officialReply = officialReply;
 
         ///
         // first reply / 15min
@@ -125,7 +142,6 @@ library PostLib  {
     /// @param postId post where the comment will be post
     /// @param path The path where the comment will be post 
     /// @param ipfsHash IPFS hash of document with reply information
-
     function createComment(
         PostCollection storage self,
         address user,
@@ -134,14 +150,14 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = getPostContainer(self, postId);
+        PostContainer storage post = getPostContainer(self, postId);
 
-        Content storage comment;
+        Comment storage comment;
         if (path.length == 0) {
-            comment = post.comments[++post.commentCount].content;  
+            comment = post.comments[++post.info.commentCount].info;  
         } else {
-            Reply storage reply = getParentReply(post, path);
-            comment = reply.comments[++reply.commentCount].content;
+            ReplyContainer storage reply = getParentReply(post, path);
+            comment = reply.comments[++reply.info.commentCount].info;
         }
 
         comment.author = user;
@@ -154,8 +170,7 @@ library PostLib  {
     /// @param user Author of the comment
     /// @param postId post where the comment will be post
     /// @param ipfsHash IPFS hash of document with reply information
-
-    function editPost(
+    function editPost(                                                  //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint32 postId,
@@ -164,12 +179,12 @@ library PostLib  {
         //CommunityLib.Tag[] memory tags
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = getPostContainer(self, postId);
+        PostContainer storage post = getPostContainer(self, postId);
         
-        if(post.communityId != communityId)
-            post.communityId = communityId;
-        if(post.content.ipfsDoc.hash != ipfsHash)
-            post.content.ipfsDoc.hash = ipfsHash;
+        if(post.info.communityId != communityId)
+            post.info.communityId = communityId;
+        if(post.info.ipfsDoc.hash != ipfsHash)
+            post.info.ipfsDoc.hash = ipfsHash;
         //if(post.tags != tags)     // error, chech one by one?
         //post.tags = tags;
     }
@@ -182,8 +197,7 @@ library PostLib  {
     /// @param replyId The reply which will be change
     /// @param officialReply Flag is showing "official reply" or not
     /// @param ipfsHash IPFS hash of document with reply information
-
-    function editReply(
+    function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint32 postId,
@@ -193,13 +207,13 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = getPostContainer(self, postId);
-        Reply storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage post = getPostContainer(self, postId);
+        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
-        if (reply.content.ipfsDoc.hash != ipfsHash)
-            reply.content.ipfsDoc.hash = ipfsHash;
-        if (reply.officialReply != officialReply)
-            reply.officialReply = officialReply; 
+        if (reply.info.ipfsDoc.hash != ipfsHash)
+            reply.info.ipfsDoc.hash = ipfsHash;
+        if (reply.info.officialReply != officialReply)
+            reply.info.officialReply = officialReply; 
     }
 
     /// @notice Edit comment
@@ -209,8 +223,7 @@ library PostLib  {
     /// @param path The path where the comment will be post
     /// @param commentId The comment which will be change
     /// @param ipfsHash IPFS hash of document with reply information
-
-    function editComment(    //LAST MODIFIED?
+    function editComment(                                           //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint32 postId,
@@ -219,37 +232,36 @@ library PostLib  {
         bytes32 ipfsHash
     ) internal {
         IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
-        Post storage post = getPostContainer(self, postId);
-        Comment storage comment = getCommentContainer(post, path, commentId);
+        PostContainer storage post = getPostContainer(self, postId);
+        CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
-        if (comment.content.ipfsDoc.hash != ipfsHash)
-            comment.content.ipfsDoc.hash = ipfsHash;
+        if (comment.info.ipfsDoc.hash != ipfsHash)
+            comment.info.ipfsDoc.hash = ipfsHash;
     }
 
     /// @notice Delete post
     /// @param self The mapping containing all posts
     /// @param user User which deletes post
     /// @param postId Post which be delete
-
     function deletePost(
         PostCollection storage self,
         address user,
         uint32 postId
     ) internal {
-        Post storage post = getPostContainer(self, postId);
+        PostContainer storage post = getPostContainer(self, postId);
 
-        require(!post.content.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(post.content.ipfsDoc.hash, "Reply does not exist.");
-        post.content.isDeleted = true;
+        require(!post.info.isDeleted, "Reply has already deleted.");
+        IpfsLib.checkIpfs(post.info.ipfsDoc.hash, "Reply does not exist.");
+        post.info.isDeleted = true;
 
         ///
         // -rating
         ///
     
-        for (uint16 i = 0; i < post.replyCount; i++) {
-            if (post.replies[i].content.ipfsDoc.hash == bytes32(0x0) || post.replies[i].content.isDeleted)
+        for (uint16 i = 0; i < post.info.replyCount; i++) {
+            if (post.replies[i].info.ipfsDoc.hash == bytes32(0x0) || post.replies[i].info.isDeleted)
                 continue;
-            Reply storage localReply = post.replies[i];
+            ReplyContainer storage localReply = post.replies[i];
             ///
             // -rating
             ///
@@ -262,7 +274,6 @@ library PostLib  {
     /// @param postId post where will be deleted reply
     /// @param path The path where the reply will be deleted
     /// @param replyId reply which will be deleted
-
     function deleteReply(
         PostCollection storage self,
         address user,
@@ -273,10 +284,10 @@ library PostLib  {
         /*
         check author
         */
-        Post storage post = getPostContainer(self, postId);
-        Reply storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage post = getPostContainer(self, postId);
+        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
-        reply.content.isDeleted = true;
+        reply.info.isDeleted = true;
     }
 
     /// @notice Delete comment
@@ -285,7 +296,6 @@ library PostLib  {
     /// @param postId Post where will be deleted сщььуте
     /// @param path The path where the reply will be deleted
     /// @param commentId comment which will be deleted
-
     function deleteComment(
         PostCollection storage self,
         address user,
@@ -293,64 +303,82 @@ library PostLib  {
         uint16[] memory path,
         uint8 commentId
     ) internal {
-        Post storage post = getPostContainer(self, postId);
-        Comment storage comment = getCommentContainer(post, path, commentId);
+        PostContainer storage post = getPostContainer(self, postId);
+        CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
-        require(!comment.content.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(comment.content.ipfsDoc.hash, "Reply does not exist.");
-        comment.content.isDeleted = true;
+        require(!comment.info.isDeleted, "Reply has already deleted.");
+        IpfsLib.checkIpfs(comment.info.ipfsDoc.hash, "Reply does not exist.");
+        comment.info.isDeleted = true;
         //update user statistic
     }
 
+    /// @notice Change status official answer
+    /// @param self The mapping containing all posts
+    /// @param user The user who changes reply status
+    /// @param postId Post where will be change reply status
+    /// @param path The path where the reply will be change status
+    /// @param replyId Reply which will change status
+    /// @param officialReply Flag swows reply's status
     function changeStatusOfficialAnswer(
         PostCollection storage self,
+        address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
         bool officialReply
     ) internal {
         // check permistion
-        Post storage post = getPostContainer(self, postId);
-        Reply storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage post = getPostContainer(self, postId);
+        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
          
-        if (reply.officialReply != officialReply)
-            reply.officialReply = officialReply;
+        if (reply.info.officialReply != officialReply)
+            reply.info.officialReply = officialReply;
     }
 
+    /// @notice Return post
+    /// @param self The mapping containing all posts
+    /// @param postId The postId which need find
     function getPostContainer(
         PostCollection storage self,
         uint32 postId
-    ) internal returns (Post storage) {
-        Post storage post = self.posts[postId];
-        IpfsLib.checkIpfs(post.content.ipfsDoc.hash, "Post does not exist.");
-        require(!post.content.isDeleted, "Post has been deleted.");
+    ) internal returns (PostContainer storage) {
+        PostContainer storage post = self.posts[postId];
+        IpfsLib.checkIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
+        require(!post.info.isDeleted, "Post has been deleted.");
         
         return post;
     }
 
+    /// @notice Return parent reply
+    /// @param post Post where is the reply
+    /// @param path The path to parent reply
     function getParentReply(
-        Post storage post,
+        PostContainer storage post,
         uint16[] memory path
-    ) private view returns (Reply storage) {
-        Reply storage reply;
+    ) private view returns (ReplyContainer storage) {
+        ReplyContainer storage reply;
 
         uint256 lenght = path.length;
         reply = post.replies[path[0]];
         for(uint256 i = 1; i < lenght; i++) {
             reply = reply.replies[path[i]];
-            require(reply.content.ipfsDoc.hash != bytes32(0x0), "Reply does not exist.");
-            require(!reply.content.isDeleted, "Reply has been deleted.");
+            require(reply.info.ipfsDoc.hash != bytes32(0x0), "Reply does not exist.");
+            require(!reply.info.isDeleted, "Reply has been deleted.");
         }
         
         return reply;
     }
 
+    /// @notice Return reply
+    /// @param post Post where is the reply
+    /// @param path The path to parent reply
+    /// @param replyId The replyId which need find
     function getReplyContainer(
-        Post storage post,
+        PostContainer storage post,
         uint16[] memory path,
         uint16 replyId
-    ) internal returns (Reply storage) {
-        Reply storage reply;
+    ) internal returns (ReplyContainer storage) {
+        ReplyContainer storage reply;
 
         if (path.length == 0) {
             reply = post.replies[replyId];
@@ -359,71 +387,88 @@ library PostLib  {
             reply = reply.replies[replyId];
         }
 
-        require(!reply.content.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(reply.content.ipfsDoc.hash, "Reply does not exist.");
+        require(!reply.info.isDeleted, "Reply has already deleted.");
+        IpfsLib.checkIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
 
         return reply;
     }
 
+    /// @notice Return comment
+    /// @param post Post where is the comment
+    /// @param path The path to parent reply
+    /// @param commentId The commentId which need find
     function getCommentContainer(
-        Post storage post,
+        PostContainer storage post,
         uint16[] memory path,
         uint8 commentId
-    ) private returns (Comment storage) {
-        Comment storage comment;
+    ) private returns (CommentContainer storage) {
+        CommentContainer storage comment;
 
         if (path.length == 0) {
             comment = post.comments[commentId];  
         } else {
-            Reply storage reply = getParentReply(post, path);
+            ReplyContainer storage reply = getParentReply(post, path);
             comment = reply.comments[commentId];
         }
-        require(!comment.content.isDeleted, "Comment has been deleted.");
-        IpfsLib.checkIpfs(comment.content.ipfsDoc.hash, "Comment does not exis.");
+        require(!comment.info.isDeleted, "Comment has been deleted.");
+        IpfsLib.checkIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
 
         return comment;
     }
 
-    function getPost(       //only unit test
+    /// @notice Return post for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId The post which need find
+    function getPost(
         PostCollection storage self,
         uint32 postId
-    ) internal view returns (Content memory) {        
-        return self.posts[postId].content;
+    ) internal view returns (Post memory) {        
+        return self.posts[postId].info;
     }
 
-    function getReply(      //only unit test
+    /// @notice Return reply for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId Post where is the reply
+    /// @param path The path to parent reply
+    /// @param replyId The reply which need find
+    function getReply(
         PostCollection storage self, 
         uint32 postId, 
         uint16[] memory path, 
         uint16 replyId
-    ) internal view returns (Content memory) {
-        Post storage post = self.posts[postId];
+    ) internal view returns (Reply memory) {
+        PostContainer storage post = self.posts[postId];
 
-        Content storage content;
+        Reply storage reply;
         if (path.length == 0) {
-            content = post.replies[replyId].content;
+            reply = post.replies[replyId].info;
         } else {
-            Reply storage reply = getParentReply(post, path);
-            content = reply.replies[replyId].content;
+            ReplyContainer storage replyParent = getParentReply(post, path);
+            reply = replyParent.replies[replyId].info;
         }
 
-        return content;
+        return reply;
     }
 
-    function getComment(        //only unit test
+    /// @notice Return comment for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId Post where is the reply
+    /// @param path The path to parent reply
+    /// @param commentId The comment which need find
+    function getComment(
         PostCollection storage self, 
         uint32 postId, 
         uint16[] memory path, 
         uint8 commentId
-    ) internal view returns (Content memory) {
-        Post storage post = self.posts[postId];
+    ) internal view returns (Comment memory) {
+        PostContainer storage post = self.posts[postId];
 
-        Content storage comment;
+        Comment storage comment;
         if (path.length == 0) {
-            comment = post.comments[commentId].content;
+            comment = post.comments[commentId].info;
         } else {
-            Reply storage reply = getParentReply(post, path);
-            comment = reply.comments[commentId].content;
+            ReplyContainer storage replyParent = getParentReply(post, path);
+            comment = replyParent.comments[commentId].info;
         }
 
         return comment;
