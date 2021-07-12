@@ -128,61 +128,64 @@ library VoteLib  {
 
     function upVote(
         UserLib.UserCollection storage users,
-        PostLib.Content storage content,
         address actionAddress,
         address contentAddress,
-        mapping(address => int256) storage historyVote,
+        mapping(address => int256) storage historyVotes,
         PostLib.TypeAction typeAction,
         PostLib.TypePost typePost
-    ) internal {
-        int history = getHistoryVote(actionAddress, historyVote);
-
-        if (typeAction == PostLib.TypeAction.Post) {
-            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Upvoted));
-        } else if (typeAction == PostLib.TypeAction.Reply) {
-            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Upvoted));
-        }
+    ) internal returns (int8) {
+        int history = getHistoryVote(actionAddress, historyVotes);
+        int8 changeRating = 0;
         
         if (history == -1) {
-            historyVote[actionAddress] = 1;
-            content.rating += 2;
+            historyVotes[actionAddress] = 1;
+            changeRating += 2;
         } else if (history == 0) {
-            historyVote[actionAddress] = 1;
-            content.rating ++;
+            historyVotes[actionAddress] = 1;
+            changeRating ++;
         } else if (history == 1) {
-            historyVote[actionAddress] = 0;
-            content.rating --;
+            historyVotes[actionAddress] = 0;
+            changeRating --;
         }
+
+        if (typeAction == PostLib.TypeAction.Post) {
+            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Upvoted) * changeRating);
+        } else if (typeAction == PostLib.TypeAction.Reply) {
+            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Upvoted) * changeRating);
+        }
+        return changeRating;
     }
 
     function downVote(
         UserLib.UserCollection storage users,
-        PostLib.Content storage content,
         address actionAddress,
         address contentAddress,
         mapping(address => int256) storage historyVote,
         PostLib.TypeAction typeAction,
         PostLib.TypePost typePost
-    ) internal {
+    ) internal returns (int8) {
         int history = getHistoryVote(actionAddress, historyVote);
-
-        if (typeAction == PostLib.TypeAction.Post) {
-            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Downvoted));
-            users.updateRating(actionAddress, getRatingPost(typePost, VoteResource.Downvote));
-        } else if (typeAction == PostLib.TypeAction.Reply) {
-            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Downvoted));
-            users.updateRating(actionAddress, getRatingReply(typePost, VoteResource.Downvote));
-        }
+        int8 changeRating = 0;
         
         if (history == -1) {
             historyVote[actionAddress] = 0;
-            content.rating += 1;
+            changeRating += 1;
         } else if (history == 0) {
             historyVote[actionAddress] = -1;
-            content.rating --;
+            changeRating --;
         } else if (history == 1) {
             historyVote[actionAddress] = -1;
-            content.rating -= 2;
+            changeRating -= 2;
         }
+
+        if (typeAction == PostLib.TypeAction.Post) {
+            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Downvoted) * changeRating);
+            users.updateRating(actionAddress, getRatingPost(typePost, VoteResource.Downvote) * changeRating);
+        } else if (typeAction == PostLib.TypeAction.Reply) {
+            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Downvoted) * changeRating);
+            users.updateRating(actionAddress, getRatingReply(typePost, VoteResource.Downvote) * changeRating);
+        }
+
+        return changeRating;
     }
 }

@@ -8,7 +8,8 @@ describe("Test vote", function () {
 		await peeranha.createPost(author, 1, hashContainer[0]);
         await peeranha.voteItem(author2, 1, [], 0, 0, 1);
 
-		const post = await peeranha.getPostByIndex(1);
+		const post = await peeranha.getPost(1);
+        console.log(post);
 		await expect(post.rating).to.equal(1);
 	});
 

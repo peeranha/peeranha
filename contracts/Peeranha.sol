@@ -19,7 +19,9 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
-    using PostLib for PostLib.Content;
+    using PostLib for PostLib.Post;
+    using PostLib for PostLib.Reply;
+    using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
 
     UserLib.UserCollection users;
@@ -219,8 +221,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address name, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
-        posts.createPost(name, communityId, ipfsHash/*, tags*/);
+    function createPost(address user, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(user, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -233,8 +235,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags
     */
-    function editPost(address name, uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
-        posts.editPost(name, postId, communityId, ipfsHash/*, tags*/);
+    function editPost(address user, uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.editPost(user, postId, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -244,8 +246,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a post.
     */
-    function deletePost(address name, uint32 postId) external override {
-        posts.deletePost(name, postId);
+    function deletePost(address user, uint32 postId) external override {
+        posts.deletePost(user, postId);
     }
 
     /**
@@ -256,8 +258,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(address name, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createReply(name, postId, officialReply, path, ipfsHash);
+    function createReply(address user, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createReply(user, postId, officialReply, path, ipfsHash);
     }
 
     /**
@@ -268,8 +270,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(address name, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
-        posts.editReply(name, postId, path, replyId, officialReply, ipfsHash);
+    function editReply(address user, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
+        posts.editReply(user, postId, path, replyId, officialReply, ipfsHash);
     }
 
     /**
@@ -279,8 +281,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a reply.
     */
-    function deleteReply(address name, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
-        posts.deleteReply(name, postId, path, replyId);
+    function deleteReply(address user, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
+        posts.deleteReply(user, postId, path, replyId);
     }
 
     /**
@@ -291,8 +293,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(address name, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createComment(name, postId, path, ipfsHash);
+    function createComment(address user, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createComment(user, postId, path, ipfsHash);
     }
 
     /**
@@ -303,8 +305,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(address name, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
-        posts.editComment(name, postId, path, commentId, ipfsHash);
+    function editComment(address user, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(user, postId, path, commentId, ipfsHash);
     }
 
     /**
@@ -314,8 +316,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a comment.
     */
-    function deleteComment(address name, uint32 postId, uint16[] memory path, uint8 commentId) external override {
-        posts.deleteComment(name, postId, path, commentId);
+    function deleteComment(address user, uint32 postId, uint16[] memory path, uint8 commentId) external override {
+        posts.deleteComment(user, postId, path, commentId);
     }
 
     function voteItem(address name, uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
@@ -329,8 +331,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a post.
     */
-    function getPostByIndex(uint32 postId) external view returns (PostLib.Content memory) {
-        return posts.getPostByIndex(postId);
+    function getPost(uint32 postId) external view returns (PostLib.Post memory) {
+        return posts.getPost(postId);
     }
 
     /**
@@ -340,8 +342,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a reply.
     */
-    function getReplyByPath(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Content memory) {
-        return posts.getReplyByPath(postId, path, replyId);
+    function getReply(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Reply memory) {
+        return posts.getReply(postId, path, replyId);
     }
 
     /**
@@ -351,7 +353,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a comment.
     */
-    function getCommentByPath(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Content memory) {
-        return posts.getCommentByPath(postId, path, commentId);
+    function getComment(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Comment memory) {
+        return posts.getComment(postId, path, commentId);
     }
 }
