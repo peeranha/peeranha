@@ -57,7 +57,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(1, hashContainer[0]);
-		await peeranha.editPost(author, 1, 1, hashContainer[2]);
+		await peeranha.editPost(1, 1, hashContainer[2]);
 
 		const post = await peeranha.getPost(1);
 		await expect(post.author).to.equal(peeranha.deployTransaction.from);
@@ -71,7 +71,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.editReply(author, 1, [], 1, hashContainer[2], true);
+		await peeranha.editReply(1, [], 1, hashContainer[2], true);
 
 		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
@@ -85,7 +85,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createComment(1, [], hashContainer[1]);
-		await peeranha.editComment(author, 1, [], 1, hashContainer[2]);
+		await peeranha.editComment(1, [], 1, hashContainer[2]);
 
 		const reply = await peeranha.getComment(1, [], 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
@@ -98,7 +98,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 
 		await peeranha.createPost(1, hashContainer[0]);
-		await peeranha.deletePost(author, 1);
+		await peeranha.deletePost(1);
 
 		const post = await peeranha.getPost(1);
 		await expect(post.isDeleted).to.equal(true);
@@ -111,7 +111,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.deleteReply(author, 1, [], 1);
+		await peeranha.deleteReply(1, [], 1);
 
 		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.isDeleted).to.equal(true);
@@ -124,7 +124,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createComment(1, [], hashContainer[1]);
-		await peeranha.deleteComment(author, 1, [], 1);
+		await peeranha.deleteComment(1, [], 1);
 
 		const reply = await peeranha.getComment(1, [], 1);
 		await expect(reply.isDeleted).to.equal(true);

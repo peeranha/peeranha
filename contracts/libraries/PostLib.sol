@@ -311,14 +311,12 @@ library PostLib  {
 
     /// @notice Change status official answer
     /// @param self The mapping containing all posts
-    /// @param user The user who changes reply status
     /// @param postId Post where will be change reply status
     /// @param path The path where the reply will be change status
     /// @param replyId Reply which will change status
     /// @param officialReply Flag swows reply's status
     function changeStatusOfficialAnswer(
         PostCollection storage self,
-        address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
