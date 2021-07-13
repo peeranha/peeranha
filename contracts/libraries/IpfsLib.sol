@@ -7,10 +7,10 @@ library IpfsLib  {
         bytes32 hash2; // Not currently used and added for the future compatibility
     }
 
-    function checkIpfs (
+    function isNotEmptyIpfs (
         bytes32 hash,
-        string memory text
+        string memory errorMessage
     ) internal {
-        require(hash != bytes32(0x0), text);
+        require(hash != bytes32(0x0), errorMessage);
     }
 }

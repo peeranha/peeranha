@@ -221,8 +221,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address user, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
-        posts.createPost(user, communityId, ipfsHash/*, tags*/);
+    function createPost(uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -235,8 +235,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags
     */
-    function editPost(address user, uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
-        posts.editPost(user, postId, communityId, ipfsHash/*, tags*/);
+    function editPost(uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.editPost(msg.sender, postId, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -246,8 +246,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a post.
     */
-    function deletePost(address user, uint32 postId) external override {
-        posts.deletePost(user, postId);
+    function deletePost(uint32 postId) external override {
+        posts.deletePost(msg.sender, postId);
     }
 
     /**
@@ -258,8 +258,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(address user, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createReply(user, postId, officialReply, path, ipfsHash);
+    function createReply(uint32 postId, uint16[] memory path, bytes32 ipfsHash, bool officialReply) external override {
+        posts.createReply(msg.sender, postId, path, ipfsHash, officialReply);
     }
 
     /**
@@ -270,8 +270,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(address user, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
-        posts.editReply(user, postId, path, replyId, officialReply, ipfsHash);
+    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash, bool officialReply) external override { 
+        posts.editReply(msg.sender, postId, path, replyId, ipfsHash, officialReply);
     }
 
     /**
@@ -281,8 +281,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a reply.
     */
-    function deleteReply(address user, uint32 postId, uint16[] memory path, uint16 replyId) external override { 
-        posts.deleteReply(user, postId, path, replyId);
+    function deleteReply(uint32 postId, uint16[] memory path, uint16 replyId) external override { 
+        posts.deleteReply(msg.sender, postId, path, replyId);
     }
 
     /**
@@ -293,8 +293,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(address user, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createComment(user, postId, path, ipfsHash);
+    function createComment(uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createComment(msg.sender, postId, path, ipfsHash);
     }
 
     /**
@@ -305,8 +305,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(address user, uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
-        posts.editComment(user, postId, path, commentId, ipfsHash);
+    function editComment(uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(msg.sender, postId, path, commentId, ipfsHash);
     }
 
     /**
@@ -316,12 +316,24 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      *
      * - must be a comment.
     */
-    function deleteComment(address user, uint32 postId, uint16[] memory path, uint8 commentId) external override {
-        posts.deleteComment(user, postId, path, commentId);
+    function deleteComment(uint32 postId, uint16[] memory path, uint8 commentId) external override {
+        posts.deleteComment(msg.sender, postId, path, commentId);
     }
 
-    function voteItem(address name, uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
-        posts.voteForumItem(users, name, postId, path, replyId, commentId, isUpvote);
+    /**
+     * @dev Change status official answer.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - the user must have right for change status oficial answer.
+    */ 
+    function changeStatusOfficialAnswer(uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
+        posts.changeStatusOfficialAnswer(postId, path, replyId, officialReply);
+    }
+
+    function voteItem(uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.voteForumItem(users, msg.sender, postId, path, replyId, commentId, isUpvote);
     }
 
     /**

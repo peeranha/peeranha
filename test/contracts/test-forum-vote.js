@@ -3,150 +3,143 @@ const { expect } = require("chai");
 describe("Test vote", function () {
     it("Test upVote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
+		await peeranha.createPost(1, hashContainer[0]);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
 
 		const post = await peeranha.getPost(1);
-        console.log(post);
 		await expect(post.rating).to.equal(1);
 	});
 
 	it("Test double upVote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 
-        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
-		var post = await peeranha.getPostByIndex(1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
+		var post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(1);
 
-		await peeranha.voteItem(author2, 1, [], 0, 0, 1);
-		post = await peeranha.getPostByIndex(1);
+		await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
+		post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(0);
 	});
 
 	it("Test downVote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 
-    	await peeranha.voteItem(author2, 1, [], 0, 0, 0);
-		const post = await peeranha.getPostByIndex(1);
+    	await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
+		const post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(-1);
 	});
 
 	it("Test double downVote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 		
-        await peeranha.voteItem(author2, 1, [], 0, 0, 0);
-		var post = await peeranha.getPostByIndex(1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
+		var post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(-1);
 
-		await peeranha.voteItem(author2, 1, [], 0, 0, 0);
-		post = await peeranha.getPostByIndex(1);
+		await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
+		post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(0);
 	});
 
 	it("Test downVote after upvote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 		
-        await peeranha.voteItem(author2, 1, [], 0, 0, 1);
-		var post = await peeranha.getPostByIndex(1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
+		var post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(1);
 
-		await peeranha.voteItem(author2, 1, [], 0, 0, 0);
-		post = await peeranha.getPostByIndex(1);
+		await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
+		post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(-1);
 	});
 
 	it("Test upvote after downvote post", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 		
-        await peeranha.voteItem(author2, 1, [], 0, 0, 0);
-		var post = await peeranha.getPostByIndex(1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
+		var post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(-1);
 
-		await peeranha.voteItem(author2, 1, [], 0, 0, 1);
-		post = await peeranha.getPostByIndex(1);
+		await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
+		post = await peeranha.getPost(1);
 		await expect(post.rating).to.equal(1);
 	});
 
 	it("Test upvote reply", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);		//
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
 		
-        await peeranha.voteItem(author2, 1, [], 1, 0, 1);
-		var reply = await peeranha.getReplyByPath(1, [], 1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 1, 0, 1);
+		var reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.rating).to.equal(1);
 	});
 
 	it("Test downvote reply", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);		//
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
 		
-        await peeranha.voteItem(author2, 1, [], 1, 0, 0);
-		var reply = await peeranha.getReplyByPath(1, [], 1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 1, 0, 0);
+		var reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.rating).to.equal(-1);
 	});
 
 	it("Test upvote comment", async function () {
 		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);		//
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createComment(1, [], hashContainer[1]);
 		
-        await peeranha.voteItem(author2, 1, [], 0, 1, 1);
-		var reply = await peeranha.getCommentByPath(1, [], 1);
+        await peeranha.connect(signers[1]).voteItem(1, [], 0, 1, 1);
+		var reply = await peeranha.getComment(1, [], 1);
 		await expect(reply.rating).to.equal(1);
 	});
 
+	it("Test downvote comment", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
 
-
-
-	// it("Test downvote comment", async function () {
-	// 	const peeranha = await createContract();
-	// 	const hashContainer = getHashContainer();
-
-	// 	await peeranha.createPost(author, 1, hashContainer[0]);
-	// 	await peeranha.createComment(author, 1, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createComment(1, [], hashContainer[1]);
 		
-
-	// 	const aaa = await peeranha.voteItem(author, 1, [], 0, 1, 0)
-	// 	.catch(error => {
-	// 	  console.error(error);
-	// 	//   console.log(fffffff);
-	// 	});
-	// 	// .catch(error => {
-	// 	//   	// console.error(error);
-	// 	// 	// process.exit(0);
-	// 	// });
-
-	// 	// console.log(aaa);
-
-
-	// 	// var reply = await peeranha.getCommentByPath(1, [], 1);
-	// 	// await expect(reply.rating).to.equal(-1);
-	// });
+		await peeranha.connect(signers[1]).voteItem(1, [], 0, 1, 0)
+		var reply = await peeranha.getComment(1, [], 1);
+		await expect(reply.rating).to.equal(-1);  
+	});
 
 	const createContract = async function () {
 		const Peeranha = await ethers.getContractFactory("Peeranha");

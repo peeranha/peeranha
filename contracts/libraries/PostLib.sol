@@ -30,8 +30,7 @@ library PostLib  {
         mapping(address => int256) historyVotes;
     }
 
-
-    struct Reply {
+    struct Reply {                      //1 free byte!
         IpfsLib.IpfsHash ipfsDoc;
         address author;
         int16 rating;
@@ -93,7 +92,7 @@ library PostLib  {
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         ///
         //check community, tags
         ///
@@ -101,7 +100,7 @@ library PostLib  {
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;
         post.info.author = user;
-        post.info.postTime = CommonLib.convertUint256toUint32(block.timestamp);
+        post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
         //post.tags = tags;
     }
@@ -117,11 +116,11 @@ library PostLib  {
         PostCollection storage self,
         address user,
         uint32 postId,
-        bool officialReply,
         uint16[] memory path,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        bool officialReply
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
         ///
@@ -137,7 +136,7 @@ library PostLib  {
 
         reply.info.author = user;
         reply.info.ipfsDoc.hash = ipfsHash;
-        reply.info.postTime = CommonLib.convertUint256toUint32(block.timestamp);
+        reply.info.postTime = CommonLib.getTimestamp();
         if (officialReply)
             reply.info.officialReply = officialReply;
 
@@ -159,7 +158,7 @@ library PostLib  {
         uint16[] memory path,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
 
         Comment storage comment;
@@ -172,7 +171,7 @@ library PostLib  {
 
         comment.author = user;
         comment.ipfsDoc.hash = ipfsHash;
-        comment.postTime = CommonLib.convertUint256toUint32(block.timestamp);
+        comment.postTime = CommonLib.getTimestamp();
     }
 
     /// @notice Edit post
@@ -188,7 +187,7 @@ library PostLib  {
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
         if(post.info.communityId != communityId)
@@ -213,10 +212,10 @@ library PostLib  {
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
-        bool officialReply,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        bool officialReply
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
@@ -241,7 +240,7 @@ library PostLib  {
         uint8 commentId,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.checkIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
@@ -260,15 +259,13 @@ library PostLib  {
     ) internal {
         PostContainer storage post = getPostContainer(self, postId);
 
-        require(!post.info.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(post.info.ipfsDoc.hash, "Reply does not exist.");
         post.info.isDeleted = true;
 
         ///
         // -rating
         ///
     
-        for (uint16 i = 0; i < post.info.replyCount; i++) {
+        for (uint16 i; i < post.info.replyCount; i++) {
             if (post.replies[i].info.ipfsDoc.hash == bytes32(0x0) || post.replies[i].info.isDeleted)
                 continue;
             ReplyContainer storage localReply = post.replies[i];
@@ -316,22 +313,18 @@ library PostLib  {
         PostContainer storage post = getPostContainer(self, postId);
         CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
-        require(!comment.info.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(comment.info.ipfsDoc.hash, "Reply does not exist.");
         comment.info.isDeleted = true;
         //update user statistic
     }
 
     /// @notice Change status official answer
     /// @param self The mapping containing all posts
-    /// @param user The user who changes reply status
     /// @param postId Post where will be change reply status
     /// @param path The path where the reply will be change status
     /// @param replyId Reply which will change status
     /// @param officialReply Flag swows reply's status
     function changeStatusOfficialAnswer(
         PostCollection storage self,
-        address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
@@ -388,7 +381,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
-        IpfsLib.checkIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
+        IpfsLib.isNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted");
         require(votedUser != post.info.author, "You can't vote for your post");
 
@@ -406,7 +399,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
-        IpfsLib.checkIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        IpfsLib.isNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
         require(!reply.info.isDeleted, "Reply has been deleted");
         require(votedUser != reply.info.author, "You can't vote for your reply");
 
@@ -424,7 +417,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) private {
-        IpfsLib.checkIpfs(comment.info.ipfsDoc.hash, "Comment does not exist.");
+        IpfsLib.isNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exist.");
         require(!comment.info.isDeleted, "Comment has been deleted");
         require(votedUser != comment.info.author, "You can't vote for your comment");
 
@@ -444,7 +437,7 @@ library PostLib  {
         uint32 postId
     ) internal returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
-        IpfsLib.checkIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
+        IpfsLib.isNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
         
         return post;
@@ -489,7 +482,7 @@ library PostLib  {
         }
 
         require(!reply.info.isDeleted, "Reply has already deleted.");
-        IpfsLib.checkIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        IpfsLib.isNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
 
         return reply;
     }
@@ -512,7 +505,7 @@ library PostLib  {
             comment = reply.comments[commentId];
         }
         require(!comment.info.isDeleted, "Comment has been deleted.");
-        IpfsLib.checkIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
+        IpfsLib.isNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
 
         return comment;
     }
