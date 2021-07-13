@@ -11,11 +11,8 @@ import "hardhat/console.sol";
 /// @notice
 /// @dev
 library CommonLib {
-    /// @notice Convert uint256 to uint32
-    /// @param value uint256
-    function convertUint256toUint32(
-        uint256 value
-    ) internal view returns (uint32) {
-        return SafeCastUpgradeable.toUint32(value);
+    /// @notice get timestamp in uint32 format
+    function getTimestamp() internal view returns (uint32) {
+        return SafeCastUpgradeable.toUint32(block.timestamp);
     }
 }

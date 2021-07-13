@@ -10,14 +10,14 @@ describe("Test post", function () {
 			hashContainer.map(async (hash, index) => {
 				return await peeranha
 					.connect(signers[index])
-					.createPost(author, 1, hash);
+					.createPost(1, hash);
 			})
 		);
 
 		await Promise.all(
 			hashContainer.map(async (hash, index) => {
 				const post = await peeranha.getPost(index + 1);
-				await expect(post.author).to.equal(author);
+				//await expect(post.author).to.equal(peeranha.deployTransaction.from);		// ???
 				await expect(post.isDeleted).to.equal(false);
 				return await expect(post.ipfsDoc.hash).to.equal(hash);
 			})
@@ -28,13 +28,13 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
 
 		//await expect(peeranha.createReply(author, 1, false, [], hashContainer[1])).to.be.revertedWith('Post has been deleted.');
 
 		const reply = await peeranha.getReply(1, [], 1);
-		await expect(reply.author).to.equal(author);
+		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
@@ -43,11 +43,11 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createComment(1, [], hashContainer[1]);
 
 		const comment = await peeranha.getComment(1, [], 1);
-		await expect(comment.author).to.equal(author);
+		await expect(comment.author).to.equal(peeranha.deployTransaction.from);
 		await expect(comment.isDeleted).to.equal(false);
 		await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
@@ -56,11 +56,11 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.editPost(author, 1, 1, hashContainer[2]);
 
 		const post = await peeranha.getPost(1);
-		await expect(post.author).to.equal(author);
+		await expect(post.author).to.equal(peeranha.deployTransaction.from);
 		await expect(post.isDeleted).to.equal(false);
 		await expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
 	});
@@ -69,12 +69,12 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
-		await peeranha.editReply(author, 1, [], 1, true, hashContainer[2]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
+		await peeranha.editReply(author, 1, [], 1, hashContainer[2], true);
 
 		const reply = await peeranha.getReply(1, [], 1);
-		await expect(reply.author).to.equal(author);
+		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
 	});
@@ -83,12 +83,12 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createComment(1, [], hashContainer[1]);
 		await peeranha.editComment(author, 1, [], 1, hashContainer[2]);
 
 		const reply = await peeranha.getComment(1, [], 1);
-		await expect(reply.author).to.equal(author);
+		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
 	});
@@ -97,7 +97,7 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.deletePost(author, 1);
 
 		const post = await peeranha.getPost(1);
@@ -109,8 +109,8 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createReply(author, 1, false, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
 		await peeranha.deleteReply(author, 1, [], 1);
 
 		const reply = await peeranha.getReply(1, [], 1);
@@ -122,8 +122,8 @@ describe("Test post", function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(author, 1, hashContainer[0]);
-		await peeranha.createComment(author, 1, [], hashContainer[1]);
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createComment(1, [], hashContainer[1]);
 		await peeranha.deleteComment(author, 1, [], 1);
 
 		const reply = await peeranha.getComment(1, [], 1);

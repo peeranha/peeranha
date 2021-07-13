@@ -221,8 +221,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address user, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
-        posts.createPost(user, communityId, ipfsHash/*, tags*/);
+    function createPost(uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash/*, tags*/);
     }
 
     /**
@@ -258,8 +258,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(address user, uint32 postId, bool officialReply, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createReply(user, postId, officialReply, path, ipfsHash);
+    function createReply(uint32 postId, uint16[] memory path, bytes32 ipfsHash, bool officialReply) external override {
+        posts.createReply(msg.sender, postId, path, ipfsHash, officialReply);
     }
 
     /**
@@ -270,8 +270,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(address user, uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply, bytes32 ipfsHash) external override { 
-        posts.editReply(user, postId, path, replyId, officialReply, ipfsHash);
+    function editReply(address user, uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash, bool officialReply) external override { 
+        posts.editReply(user, postId, path, replyId, ipfsHash, officialReply);
     }
 
     /**
@@ -293,8 +293,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(address user, uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createComment(user, postId, path, ipfsHash);
+    function createComment(uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createComment(msg.sender, postId, path, ipfsHash);
     }
 
     /**
