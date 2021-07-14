@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.s
 
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
+import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
@@ -18,10 +19,14 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
+    using PostLib for PostLib.Post;
+    using PostLib for PostLib.Reply;
+    using PostLib for PostLib.Comment;
+    using PostLib for PostLib.PostCollection;
     
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
-
+    PostLib.PostCollection posts;
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -205,5 +210,159 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    /**
+     * @dev Create new post.
+     *
+     * Requirements:
+     *
+     * - must be a new post.
+     * - must be a community.
+     * - must be tags.
+    */
+    function createPost(uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash/*, tags*/);
+    }
+
+    /**
+     * @dev Edit post info.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be new info about post
+     * - must be a community.
+     * - must be tags
+    */
+    function editPost(uint32 postId, uint8 communityId, bytes32 ipfsHash/*, CommunityLib.Tag[] memory tags*/) external override {
+        posts.editPost(msg.sender, postId, communityId, ipfsHash/*, tags*/);
+    }
+
+    /**
+     * @dev delete post.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+    */
+    function deletePost(uint32 postId) external override {
+        posts.deletePost(msg.sender, postId);
+    }
+
+    /**
+     * @dev Create new reply.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be a new reply. 
+    */
+    function createReply(uint32 postId, uint16[] memory path, bytes32 ipfsHash, bool officialReply) external override {
+        posts.createReply(msg.sender, postId, path, ipfsHash, officialReply);
+    }
+
+    /**
+     * @dev Edit reply.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - must be new info about reply.
+    */
+    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash, bool officialReply) external override { 
+        posts.editReply(msg.sender, postId, path, replyId, ipfsHash, officialReply);
+    }
+
+    /**
+     * @dev Delete reply.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+    */
+    function deleteReply(uint32 postId, uint16[] memory path, uint16 replyId) external override { 
+        posts.deleteReply(msg.sender, postId, path, replyId);
+    }
+
+    /**
+     * @dev Create new comment.
+     *
+     * Requirements:
+     *
+     * - must be a new comment.
+     * - must be a post or a reply.
+    */
+    function createComment(uint32 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createComment(msg.sender, postId, path, ipfsHash);
+    }
+
+    /**
+     * @dev Edit comment.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+     * - must be new info about reply.
+    */
+    function editComment(uint32 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(msg.sender, postId, path, commentId, ipfsHash);
+    }
+
+    /**
+     * @dev Delete comment.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+    */
+    function deleteComment(uint32 postId, uint16[] memory path, uint8 commentId) external override {
+        posts.deleteComment(msg.sender, postId, path, commentId);
+    }
+
+    /**
+     * @dev Change status official answer.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - the user must have right for change status oficial answer.
+    */ 
+    function changeStatusOfficialAnswer(uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
+        posts.changeStatusOfficialAnswer(postId, path, replyId, officialReply);
+    }
+
+
+    /**
+     * @dev Get a post by index.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+    */
+    function getPost(uint32 postId) external view returns (PostLib.Post memory) {
+        return posts.getPost(postId);
+    }
+
+    /**
+     * @dev Get a reply by index.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+    */
+    function getReply(uint32 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Reply memory) {
+        return posts.getReply(postId, path, replyId);
+    }
+
+    /**
+     * @dev Get a comment by index.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+    */
+    function getComment(uint32 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Comment memory) {
+        return posts.getComment(postId, path, commentId);
     }
 }
