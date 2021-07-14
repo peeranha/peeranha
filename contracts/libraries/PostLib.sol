@@ -4,6 +4,7 @@ pragma abicoder v2;
 import "./IpfsLib.sol";
 import "./CommunityLib.sol";
 import "./VoteLib.sol";
+import "./UserLib.sol";
 import "./CommonLib.sol";
 import "hardhat/console.sol";
 
@@ -11,6 +12,8 @@ import "hardhat/console.sol";
 /// @notice Provides information about operation with posts
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
+    using UserLib for UserLib.UserCollection;
+
     enum TypePost { ExpertPost, CommonPost, Tutorial }
     enum TypeAction { Post, Reply, Comment }                // ?? 
 
@@ -109,9 +112,9 @@ library PostLib  {
     /// @param self The mapping containing all posts
     /// @param user Author of the reply
     /// @param postId post where the reply will be post
-    /// @param officialReply Flag is showing "official reply" or not
     /// @param path The path where the reply will be post 
     /// @param ipfsHash IPFS hash of document with reply information
+    /// @param officialReply Flag is showing "official reply" or not
     function createReply(
         PostCollection storage self,
         address user,
@@ -204,8 +207,8 @@ library PostLib  {
     /// @param postId post where the comment will be post
     /// @param path The path where the comment will be post 
     /// @param replyId The reply which will be change
-    /// @param officialReply Flag is showing "official reply" or not
     /// @param ipfsHash IPFS hash of document with reply information
+    /// @param officialReply Flag is showing "official reply" or not
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
         address user,
@@ -319,12 +322,14 @@ library PostLib  {
 
     /// @notice Change status official answer
     /// @param self The mapping containing all posts
+    /// @param user Who called action
     /// @param postId Post where will be change reply status
     /// @param path The path where the reply will be change status
     /// @param replyId Reply which will change status
     /// @param officialReply Flag swows reply's status
     function changeStatusOfficialAnswer(
         PostCollection storage self,
+        address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
@@ -338,10 +343,19 @@ library PostLib  {
             reply.info.officialReply = officialReply;
     }
 
+    /// @notice Vote for post, reply or comment
+    /// @param self The mapping containing all posts
+    /// @param users The mapping containing all users
+    /// @param user Who called action
+    /// @param postId Post where will be change rating
+    /// @param path The path where the reply will be change rating
+    /// @param replyId Reply which will be change rating
+    /// @param commentId Comment which will be change rating
+    /// @param isUpvote Upvote or downvote
     function voteForumItem(
         PostCollection storage self,
         UserLib.UserCollection storage users,
-        address name,
+        address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId, 
@@ -351,26 +365,14 @@ library PostLib  {
         PostContainer storage post = getPostContainer(self, postId);
         TypePost typePost = post.info.typePost;
  
-        if (path.length == 0) {
-            if (commentId != 0) {
-                CommentContainer storage comment = post.comments[commentId];
-                voteComment(users, comment, name, typePost, isUpvote);
-            } else if (replyId != 0) {
-                ReplyContainer storage reply = post.replies[replyId];
-                voteReply(users, reply, name, typePost, isUpvote);
-            } else {
-                votePost(users, post, name, typePost, isUpvote);
-            }
+        if (commentId != 0) {
+            CommentContainer storage comment = getCommentContainer(post, path, commentId);
+            voteComment(users, comment, user, typePost, isUpvote);
+        } else if (replyId != 0) {
+            ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+            voteReply(users, reply, user, typePost, isUpvote);
         } else {
-            ReplyContainer storage pathReply = getParentReply(post, path); 
-            
-            if (commentId != 0) {
-                CommentContainer storage comment = pathReply.comments[commentId];
-                voteComment(users, comment, name, typePost, isUpvote);
-            } else {
-                ReplyContainer storage reply = pathReply.replies[replyId];
-                voteReply(users, reply, name, typePost, isUpvote);
-            }
+            votePost(users, post, user, typePost, isUpvote);
         }
     }
 
@@ -380,16 +382,17 @@ library PostLib  {
         address votedUser,
         TypePost typePost,
         bool isUpvote
-    ) internal {
-        IpfsLib.isNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
-        require(!post.info.isDeleted, "Post has been deleted");
+    ) private {
         require(votedUser != post.info.author, "You can't vote for your post");
 
+        int8 changeRating;
+        changeRating = VoteLib.changeHistory(votedUser, post.historyVotes, isUpvote);
         if (isUpvote) {
-            post.info.rating += VoteLib.upVote(users, votedUser, post.info.author, post.historyVotes, TypeAction.Post, typePost);
+            users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
-            post.info.rating += VoteLib.downVote(users, votedUser, post.info.author, post.historyVotes, TypeAction.Post, typePost);
+            users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
         }
+        post.info.rating += changeRating;
     }
  
     function voteReply(
@@ -399,15 +402,16 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
-        IpfsLib.isNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
-        require(!reply.info.isDeleted, "Reply has been deleted");
         require(votedUser != reply.info.author, "You can't vote for your reply");
 
+        int8 changeRating;
+        changeRating = VoteLib.changeHistory(votedUser, reply.historyVotes, isUpvote);
         if (isUpvote) {
-            reply.info.rating += VoteLib.upVote(users, votedUser, reply.info.author, reply.historyVotes, TypeAction.Reply, typePost);
+            users.updateRating(reply.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
-            reply.info.rating += VoteLib.downVote(users, votedUser, reply.info.author, reply.historyVotes, TypeAction.Reply, typePost);
+            users.updateRating(reply.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
         }
+        reply.info.rating += changeRating;
     }
 
     function voteComment(
@@ -417,15 +421,16 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) private {
-        IpfsLib.isNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exist.");
-        require(!comment.info.isDeleted, "Comment has been deleted");
         require(votedUser != comment.info.author, "You can't vote for your comment");
 
+        int8 changeRating;
+        changeRating = VoteLib.changeHistory(votedUser, comment.historyVotes, isUpvote);
         if (isUpvote) {
-            comment.info.rating += VoteLib.upVote(users, votedUser, comment.info.author, comment.historyVotes, TypeAction.Comment, typePost);
+            users.updateRating(comment.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
-            comment.info.rating += VoteLib.downVote(users, votedUser, comment.info.author, comment.historyVotes, TypeAction.Comment, typePost);
+            users.updateRating(comment.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
         }
+        comment.info.rating += changeRating;
     }
 
 

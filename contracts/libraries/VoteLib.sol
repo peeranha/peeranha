@@ -126,64 +126,36 @@ library VoteLib  {
         return historyVote[user];
     }
 
-    function upVote(
-        UserLib.UserCollection storage users,
+    function changeHistory(
         address actionAddress,
-        address contentAddress,
         mapping(address => int256) storage historyVotes,
-        PostLib.TypeAction typeAction,
-        PostLib.TypePost typePost
+        bool isUpvote
     ) internal returns (int8) {
         int history = getHistoryVote(actionAddress, historyVotes);
-        int8 changeRating = 0;
+        int8 changeRating;
         
-        if (history == -1) {
-            historyVotes[actionAddress] = 1;
-            changeRating += 2;
-        } else if (history == 0) {
-            historyVotes[actionAddress] = 1;
-            changeRating ++;
-        } else if (history == 1) {
-            historyVotes[actionAddress] = 0;
-            changeRating --;
-        }
-
-        if (typeAction == PostLib.TypeAction.Post) {
-            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Upvoted) * changeRating);
-        } else if (typeAction == PostLib.TypeAction.Reply) {
-            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Upvoted) * changeRating);
-        }
-        return changeRating;
-    }
-
-    function downVote(
-        UserLib.UserCollection storage users,
-        address actionAddress,
-        address contentAddress,
-        mapping(address => int256) storage historyVote,
-        PostLib.TypeAction typeAction,
-        PostLib.TypePost typePost
-    ) internal returns (int8) {
-        int history = getHistoryVote(actionAddress, historyVote);
-        int8 changeRating = 0;
-        
-        if (history == -1) {
-            historyVote[actionAddress] = 0;
-            changeRating += 1;
-        } else if (history == 0) {
-            historyVote[actionAddress] = -1;
-            changeRating --;
-        } else if (history == 1) {
-            historyVote[actionAddress] = -1;
-            changeRating -= 2;
-        }
-
-        if (typeAction == PostLib.TypeAction.Post) {
-            users.updateRating(contentAddress, getRatingPost(typePost, VoteResource.Downvoted) * changeRating);
-            users.updateRating(actionAddress, getRatingPost(typePost, VoteResource.Downvote) * changeRating);
-        } else if (typeAction == PostLib.TypeAction.Reply) {
-            users.updateRating(contentAddress, getRatingReply(typePost, VoteResource.Downvoted) * changeRating);
-            users.updateRating(actionAddress, getRatingReply(typePost, VoteResource.Downvote) * changeRating);
+        if (isUpvote) {
+            if (history == -1) {
+                historyVotes[actionAddress] = 1;
+                changeRating += 2;
+            } else if (history == 0) {
+                historyVotes[actionAddress] = 1;
+                changeRating ++;
+            } else if (history == 1) {
+                historyVotes[actionAddress] = 0;
+                changeRating --;
+            }
+        } else {
+            if (history == -1) {
+                historyVotes[actionAddress] = 0;
+                changeRating += 1;
+            } else if (history == 0) {
+                historyVotes[actionAddress] = -1;
+                changeRating --;
+            } else if (history == 1) {
+                historyVotes[actionAddress] = -1;
+                changeRating -= 2;
+            }
         }
 
         return changeRating;

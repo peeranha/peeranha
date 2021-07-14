@@ -329,7 +329,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - the user must have right for change status oficial answer.
     */ 
     function changeStatusOfficialAnswer(uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
-        posts.changeStatusOfficialAnswer(postId, path, replyId, officialReply);
+        posts.changeStatusOfficialAnswer(msg.sender, postId, path, replyId, officialReply);
     }
 
     function voteItem(uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
