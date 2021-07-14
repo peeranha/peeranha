@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
 
-
 /// @title Communities
 /// @notice Provides information about created communities
 /// @dev Community information is stored in the mapping on the main contract

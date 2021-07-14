@@ -4,7 +4,6 @@ pragma abicoder v2;
 import "./IpfsLib.sol";
 import "./CommunityLib.sol";
 import "./CommonLib.sol";
-import "hardhat/console.sol";
 
 /// @title PostLib
 /// @notice Provides information about operation with posts
@@ -84,7 +83,7 @@ library PostLib  {
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         ///
         //check community, tags
         ///
@@ -112,7 +111,7 @@ library PostLib  {
         bytes32 ipfsHash,
         bool officialReply
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
         ///
@@ -150,7 +149,7 @@ library PostLib  {
         uint16[] memory path,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
 
         Comment storage comment;
@@ -179,7 +178,7 @@ library PostLib  {
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
         if(post.info.communityId != communityId)
@@ -207,7 +206,7 @@ library PostLib  {
         bytes32 ipfsHash,
         bool officialReply
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
@@ -232,7 +231,7 @@ library PostLib  {
         uint8 commentId,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.isNotEmptyIpfs(ipfsHash, "Wrong ipfsHash.");
+        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
@@ -336,9 +335,9 @@ library PostLib  {
     function getPostContainer(
         PostCollection storage self,
         uint32 postId
-    ) internal returns (PostContainer storage) {
+    ) internal view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
-        IpfsLib.isNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
+        IpfsLib.assertIsNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
         
         return post;
@@ -357,7 +356,7 @@ library PostLib  {
         reply = post.replies[path[0]];
         for(uint256 i = 1; i < lenght; i++) {
             reply = reply.replies[path[i]];
-            require(reply.info.ipfsDoc.hash != bytes32(0x0), "Reply does not exist.");
+            IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Post does not exist.");
             require(!reply.info.isDeleted, "Reply has been deleted.");
         }
         
@@ -372,7 +371,7 @@ library PostLib  {
         PostContainer storage post,
         uint16[] memory path,
         uint16 replyId
-    ) internal returns (ReplyContainer storage) {
+    ) internal view returns (ReplyContainer storage) {
         ReplyContainer storage reply;
 
         if (path.length == 0) {
@@ -382,8 +381,8 @@ library PostLib  {
             reply = reply.replies[replyId];
         }
 
-        require(!reply.info.isDeleted, "Reply has already deleted.");
-        IpfsLib.isNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        require(!reply.info.isDeleted, "Reply has been deleted.");
+        IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
 
         return reply;
     }
@@ -396,7 +395,7 @@ library PostLib  {
         PostContainer storage post,
         uint16[] memory path,
         uint8 commentId
-    ) private returns (CommentContainer storage) {
+    ) private view returns (CommentContainer storage) {
         CommentContainer storage comment;
 
         if (path.length == 0) {
@@ -406,7 +405,7 @@ library PostLib  {
             comment = reply.comments[commentId];
         }
         require(!comment.info.isDeleted, "Comment has been deleted.");
-        IpfsLib.isNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
+        IpfsLib.assertIsNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
 
         return comment;
     }
@@ -433,16 +432,7 @@ library PostLib  {
         uint16 replyId
     ) internal view returns (Reply memory) {
         PostContainer storage post = self.posts[postId];
-
-        Reply storage reply;
-        if (path.length == 0) {
-            reply = post.replies[replyId].info;
-        } else {
-            ReplyContainer storage replyParent = getParentReply(post, path);
-            reply = replyParent.replies[replyId].info;
-        }
-
-        return reply;
+        return getReplyContainer(post, path, replyId).info;
     }
 
     /// @notice Return comment for unit tests
@@ -457,15 +447,6 @@ library PostLib  {
         uint8 commentId
     ) internal view returns (Comment memory) {
         PostContainer storage post = self.posts[postId];
-
-        Comment storage comment;
-        if (path.length == 0) {
-            comment = post.comments[commentId].info;
-        } else {
-            ReplyContainer storage replyParent = getParentReply(post, path);
-            comment = replyParent.comments[commentId].info;
-        }
-
-        return comment;
+        return getCommentContainer(post, path, commentId).info;
     }
 }
