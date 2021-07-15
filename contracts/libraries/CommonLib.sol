@@ -3,10 +3,6 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 
-import "./IpfsLib.sol";
-import "./CommunityLib.sol";
-import "hardhat/console.sol";
-
 /// @title CommonLib
 /// @notice
 /// @dev
