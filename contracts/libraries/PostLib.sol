@@ -382,7 +382,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) private {
-        require(votedUser != post.info.author, "You can't vote for your post");
+        require(votedUser != post.info.author, "You can't vote for own post");
 
         int8 changeRating;
         changeRating = VoteLib.changeHistory(votedUser, post.historyVotes, isUpvote);
@@ -401,7 +401,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) internal {
-        require(votedUser != reply.info.author, "You can't vote for your reply");
+        require(votedUser != reply.info.author, "You can't vote for own reply");
 
         int8 changeRating;
         changeRating = VoteLib.changeHistory(votedUser, reply.historyVotes, isUpvote);
@@ -420,7 +420,7 @@ library PostLib  {
         TypePost typePost,
         bool isUpvote
     ) private {
-        require(votedUser != comment.info.author, "You can't vote for your comment");
+        require(votedUser != comment.info.author, "You can't vote for own comment");
 
         int8 changeRating;
         changeRating = VoteLib.changeHistory(votedUser, comment.historyVotes, isUpvote);

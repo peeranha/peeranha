@@ -2,18 +2,12 @@ pragma solidity >=0.5.0;
 pragma abicoder v2;
 
 import "./PostLib.sol";
-import "./UserLib.sol";
-
-import "hardhat/console.sol";
 
 /// @title VoteLib
 /// @notice Provides information about operation with posts                     //
 /// @dev posts information is stored in the mapping on the main contract        ///
 library VoteLib  {
     enum VoteResource { Downvote, Upvoted, Downvoted, CorrecReply, FirstReply, Reply15Minutes }
-
-    using UserLib for UserLib.UserCollection;
-    using UserLib for UserLib.User;
 
     //expert post
     int8 constant DownvoteExpertPost = -1;
@@ -48,32 +42,13 @@ library VoteLib  {
     int8 constant FirstCommonReply = 0;
     int8 constant Reply15MinutesCommon = 0;
 
-    //tutorial reply
-    // int8 constant DownvoteTutorialReply = 0;
-    // int8 constant UpvotedTutorialReply = 0;
-    // int8 constant DownvotedTutorialReply = 0;
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-    // //expert comment
-    // int8 constant DownvoteExpertComment = 0;
-    // int8 constant UpvotedExpertComment = 0;
-    // int8 constant DownvotedExpertComment = 0;
-
-    // //common comment 
-    // int8 constant DownvoteCommonComment = 0;
-    // int8 constant UpvotedCommonComment = 0;
-    // int8 constant DownvotedCommonComment = 0;
-
-    //tutorial comment
-    // int8 constant DownvoteTutorialComment = 0;
-    // int8 constant UpvotedTutorialComment = 0;
-    // int8 constant DownvotedTutorialComment = 0;
-
+    /// @notice Publication post
+    /// @param typePost Type post: expertPost, commonPost, tutorial
+    /// @param voteResource Author of the post
     function getRatingPost(
         PostLib.TypePost typePost,
         VoteResource voteResource
-    ) internal pure returns (int8) {     //internal?
+    ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (VoteResource.Downvote == voteResource) return DownvoteExpertPost;
@@ -97,7 +72,7 @@ library VoteLib  {
     function getRatingReply(
         PostLib.TypePost typePost,
         VoteResource voteResource
-    ) internal pure returns (int8) {     //internal?
+    ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (VoteResource.Downvote == voteResource) return DownvoteExpertReply;
