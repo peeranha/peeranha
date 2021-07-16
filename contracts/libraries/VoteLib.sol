@@ -42,9 +42,9 @@ library VoteLib  {
     int8 constant FirstCommonReply = 0;
     int8 constant Reply15MinutesCommon = 0;
 
-    /// @notice Publication post
+    /// @notice Get value Rating for post
     /// @param typePost Type post: expertPost, commonPost, tutorial
-    /// @param voteResource Author of the post
+    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted
     function getRatingPost(
         PostLib.TypePost typePost,
         VoteResource voteResource
@@ -62,13 +62,16 @@ library VoteLib  {
 
         } else if (PostLib.TypePost.Tutorial == typePost) {
             if (VoteResource.Downvote == voteResource) return DownvoteTutorial;
-            else if (VoteResource.Upvoted == voteResource) return DownvoteTutorial;
-            else if (VoteResource.Downvoted == voteResource) return DownvoteTutorial;
+            else if (VoteResource.Upvoted == voteResource) return UpvotedTutorial;
+            else if (VoteResource.Downvoted == voteResource) return DownvotedTutorial;
 
         }
         require(false, "TypePost or voteResource dont found");      
     }
 
+    /// @notice Get value Rating for rating
+    /// @param typePost Type post: expertPost, commonPost, tutorial
+    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted, CorrecReply...
     function getRatingReply(
         PostLib.TypePost typePost,
         VoteResource voteResource
@@ -94,6 +97,9 @@ library VoteLib  {
         return 0;    
     }
 
+    /// @notice Get vote history
+    /// @param typePost Type post: expertPost, commonPost, tutorial
+    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted, CorrecReply...
     function getHistoryVote(
         address user,
         mapping(address => int256) storage historyVote

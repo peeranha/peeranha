@@ -14,7 +14,7 @@ library PostLib  {
     using UserLib for UserLib.UserCollection;
 
     enum TypePost { ExpertPost, CommonPost, Tutorial }
-    enum TypeAction { Post, Reply, Comment }                // ?? 
+    enum TypeContent { Post, Reply, Comment }
 
     struct Comment {
         IpfsLib.IpfsHash ipfsDoc;
@@ -384,13 +384,15 @@ library PostLib  {
     ) private {
         require(votedUser != post.info.author, "You can't vote for own post");
 
-        int8 changeRating;
-        changeRating = VoteLib.changeHistory(votedUser, post.historyVotes, isUpvote);
+        int8 changeRating = VoteLib.changeHistory(votedUser, post.historyVotes, isUpvote);
+
         if (isUpvote) {
             users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
+            users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvoted) * changeRating);
             users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
         }
+
         post.info.rating += changeRating;
     }
  
@@ -403,13 +405,14 @@ library PostLib  {
     ) internal {
         require(votedUser != reply.info.author, "You can't vote for own reply");
 
-        int8 changeRating;
-        changeRating = VoteLib.changeHistory(votedUser, reply.historyVotes, isUpvote);
+        int8 changeRating = VoteLib.changeHistory(votedUser, reply.historyVotes, isUpvote);
         if (isUpvote) {
-            users.updateRating(reply.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
+            users.updateRating(reply.info.author, VoteLib.getRatingReply(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
-            users.updateRating(reply.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
+            users.updateRating(reply.info.author, VoteLib.getRatingReply(typePost, VoteLib.VoteResource.Downvoted) * changeRating);
+            users.updateRating(votedUser, VoteLib.getRatingReply(typePost, VoteLib.VoteResource.Downvote) * changeRating);
         }
+
         reply.info.rating += changeRating;
     }
 
@@ -422,13 +425,8 @@ library PostLib  {
     ) private {
         require(votedUser != comment.info.author, "You can't vote for own comment");
 
-        int8 changeRating;
-        changeRating = VoteLib.changeHistory(votedUser, comment.historyVotes, isUpvote);
-        if (isUpvote) {
-            users.updateRating(comment.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
-        } else {
-            users.updateRating(comment.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Downvote) * changeRating);
-        }
+        int8 changeRating = VoteLib.changeHistory(votedUser, comment.historyVotes, isUpvote);
+
         comment.info.rating += changeRating;
     }
 
