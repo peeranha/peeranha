@@ -385,7 +385,6 @@ library PostLib  {
         require(votedUser != post.info.author, "You can't vote for own post");
 
         int8 changeRating = VoteLib.changeHistory(votedUser, post.historyVotes, isUpvote);
-
         if (isUpvote) {
             users.updateRating(post.info.author, VoteLib.getRatingPost(typePost, VoteLib.VoteResource.Upvoted) * changeRating);
         } else {
@@ -426,7 +425,6 @@ library PostLib  {
         require(votedUser != comment.info.author, "You can't vote for own comment");
 
         int8 changeRating = VoteLib.changeHistory(votedUser, comment.historyVotes, isUpvote);
-
         comment.info.rating += changeRating;
     }
 

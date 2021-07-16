@@ -332,6 +332,14 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         posts.changeStatusOfficialAnswer(msg.sender, postId, path, replyId, officialReply);
     }
 
+    /**
+     * @dev Vote post or reply or comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - rating user. ?
+    */ 
     function voteItem(uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
         posts.voteForumItem(users, msg.sender, postId, path, replyId, commentId, isUpvote);
     }
