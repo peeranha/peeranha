@@ -98,8 +98,8 @@ library VoteLib  {
     }
 
     /// @notice Get vote history
-    /// @param typePost Type post: expertPost, commonPost, tutorial
-    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted, CorrecReply...
+    /// @param user user who voted for content
+    /// @param historyVote history vote all users
     function getHistoryVote(
         address user,
         mapping(address => int256) storage historyVote
