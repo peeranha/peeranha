@@ -19,11 +19,10 @@ library PostLib  {
     struct Comment {
         IpfsLib.IpfsHash ipfsDoc;
         address author;
-        int16 rating;
+        int32 rating;
         uint32 postTime;
-        bool isDeleted;
-
         uint8 propertyCount;
+        bool isDeleted;
     }
 
     struct CommentContainer {
@@ -32,17 +31,17 @@ library PostLib  {
         mapping(address => int256) historyVotes;
     }
 
-    struct Reply {                      //1 free byte!
+    struct Reply {
         IpfsLib.IpfsHash ipfsDoc;
         address author;
-        int16 rating;
+        int32 rating;
         uint32 postTime;
-        bool isDeleted;
-
-        bool officialReply;
         uint16 replyCount;
         uint8 commentCount;
         uint8 propertyCount;
+
+        bool officialReply;
+        bool isDeleted;
     }
 
     struct ReplyContainer {
@@ -54,19 +53,18 @@ library PostLib  {
     }
 
     struct Post {
-        CommunityLib.Tag[] tags;
-
+        uint8[] tags;
         IpfsLib.IpfsHash ipfsDoc;
         TypePost typePost;
         address author;
-        int16 rating;
+        int32 rating;
         uint32 postTime;
-        bool isDeleted;
+        uint32 communityId;
 
-        uint8 communityId;
-        uint16 replyCount;
-        uint8 commentCount;
         uint8 propertyCount;
+        uint8 commentCount;
+        uint16 replyCount;
+        bool isDeleted;
     }
 
     struct PostContainer {
@@ -78,8 +76,8 @@ library PostLib  {
     }
 
     struct PostCollection {
-        mapping(uint32 => PostContainer) posts;    // uint32?
-        uint32 postCount;
+        mapping(uint256 => PostContainer) posts;
+        uint256 postCount;
     }
 
     /// @notice Publication post
@@ -90,7 +88,7 @@ library PostLib  {
     function createPost(
         PostCollection storage self,
         address user,
-        uint8 communityId, 
+        uint32 communityId, 
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
@@ -117,7 +115,7 @@ library PostLib  {
     function createReply(
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         bytes32 ipfsHash,
         bool officialReply
@@ -156,7 +154,7 @@ library PostLib  {
     function createComment(
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         bytes32 ipfsHash
     ) internal {
@@ -184,8 +182,8 @@ library PostLib  {
     function editPost(                                                  //LAST MODIFIED?
         PostCollection storage self,
         address user,
-        uint32 postId,
-        uint8 communityId,
+        uint256 postId,
+        uint32 communityId,
         bytes32 ipfsHash
         //CommunityLib.Tag[] memory tags
     ) internal {
@@ -211,7 +209,7 @@ library PostLib  {
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint16 replyId,
         bytes32 ipfsHash,
@@ -237,7 +235,7 @@ library PostLib  {
     function editComment(                                           //LAST MODIFIED?
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint8 commentId,
         bytes32 ipfsHash
@@ -257,7 +255,7 @@ library PostLib  {
     function deletePost(
         PostCollection storage self,
         address user,
-        uint32 postId
+        uint256 postId
     ) internal {
         PostContainer storage post = getPostContainer(self, postId);
 
@@ -286,7 +284,7 @@ library PostLib  {
     function deleteReply(
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint16 replyId
     ) internal {
@@ -308,7 +306,7 @@ library PostLib  {
     function deleteComment(
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint8 commentId
     ) internal {
@@ -329,7 +327,7 @@ library PostLib  {
     function changeStatusOfficialAnswer(
         PostCollection storage self,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint16 replyId,
         bool officialReply
@@ -355,7 +353,7 @@ library PostLib  {
         PostCollection storage self,
         UserLib.UserCollection storage users,
         address user,
-        uint32 postId,
+        uint256 postId,
         uint16[] memory path,
         uint16 replyId, 
         uint8 commentId,
@@ -434,7 +432,7 @@ library PostLib  {
     /// @param postId The postId which need find
     function getPostContainer(
         PostCollection storage self,
-        uint32 postId
+        uint256 postId
     ) internal view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
         IpfsLib.assertIsNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
@@ -515,7 +513,7 @@ library PostLib  {
     /// @param postId The post which need find
     function getPost(
         PostCollection storage self,
-        uint32 postId
+        uint256 postId
     ) internal view returns (Post memory) {        
         return self.posts[postId].info;
     }
@@ -527,7 +525,7 @@ library PostLib  {
     /// @param replyId The reply which need find
     function getReply(
         PostCollection storage self, 
-        uint32 postId, 
+        uint256 postId, 
         uint16[] memory path, 
         uint16 replyId
     ) internal view returns (Reply memory) {
@@ -542,7 +540,7 @@ library PostLib  {
     /// @param commentId The comment which need find
     function getComment(
         PostCollection storage self, 
-        uint32 postId, 
+        uint256 postId, 
         uint16[] memory path, 
         uint8 commentId
     ) internal view returns (Comment memory) {

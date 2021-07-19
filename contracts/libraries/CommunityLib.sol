@@ -23,7 +23,7 @@ library CommunityLib {
 
     struct CommunityCollection {
         mapping(uint256 => CommunityContainer) communities;
-        uint8 communityCount;
+        uint32 communityCount;
     }
 
     event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
@@ -36,7 +36,7 @@ library CommunityLib {
     /// @param ipfsHash IPFS hash of document with community information
     function createCommunity(
         CommunityCollection storage self,
-        uint256 id,
+        uint32 id,
         bytes32 ipfsHash,
         Tag[] memory tags
     ) internal {
@@ -74,7 +74,7 @@ library CommunityLib {
     /// @param ipfsHash IPFS hash of document with user information
     function updateCommunity(
         CommunityCollection storage self,
-        uint256 id,
+        uint32 id,
         bytes32 ipfsHash
     ) internal {
         require(
@@ -92,7 +92,7 @@ library CommunityLib {
     /// @param ipfsHash IPFS hash of document with community information
     function createTag (
         CommunityCollection storage self, 
-        uint256 communityId,
+        uint32 communityId,
         uint256 tagId,
         bytes32 ipfsHash
     ) internal {
@@ -109,7 +109,7 @@ library CommunityLib {
     function getCommunitiesCount(CommunityCollection storage self)
         internal
         view
-        returns (uint8 count)
+        returns (uint32 count)
     {
         return self.communityCount;
     }
@@ -117,7 +117,7 @@ library CommunityLib {
     /// @notice Get community info by id
     /// @param self The mapping containing all communities
     /// @param id Address of the community to get
-    function getCommunity(CommunityCollection storage self, uint256 id)
+    function getCommunity(CommunityCollection storage self, uint32 id)
         internal
         view
         returns (Community memory)
@@ -127,26 +127,26 @@ library CommunityLib {
 
     /// @notice Get the number of tags in community
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to get tags count
-    function getTagsCount(CommunityCollection storage self, uint256 id)
+    /// @param communityId Address of the community to get tags count
+    function getTagsCount(CommunityCollection storage self, uint32 communityId)
         internal
         view
         returns (uint8 count)
     {
-        return self.communities[id].tagsCount;
+        return self.communities[communityId].tagsCount;
     }
 
     /// @notice Get list of tags in community
     /// @param self The mapping containing all communities
-    /// @param id Address of the community to get tags
-    function getTags(CommunityCollection storage self, uint256 id)
+    /// @param communityId Address of the community to get tags
+    function getTags(CommunityCollection storage self, uint32 communityId)
         internal
         view
         returns (Tag[] memory)
     {
-        CommunityContainer storage community = self.communities[id];
+        CommunityContainer storage community = self.communities[communityId];
         Tag[] memory iterableTags = new Tag[](community.tagsCount);
-        for (uint256 i = 1; i <= community.tagsCount; i++) {
+        for (uint8 i = 1; i <= community.tagsCount; i++) {
             iterableTags[i - 1] = community.tags[i];
         }
         return iterableTags;
