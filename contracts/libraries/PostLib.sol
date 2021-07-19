@@ -530,7 +530,16 @@ library PostLib  {
         uint16 replyId
     ) internal view returns (Reply memory) {
         PostContainer storage post = self.posts[postId];
-        return getReplyContainer(post, path, replyId).info;
+        ReplyContainer storage reply;
+
+        if (path.length == 0) {
+            reply = post.replies[replyId];
+        } else {
+            reply = reply = getParentReply(post, path);
+            reply = reply.replies[replyId];
+        }
+        return reply.info;
+
     }
 
     /// @notice Return comment for unit tests
@@ -545,6 +554,15 @@ library PostLib  {
         uint8 commentId
     ) internal view returns (Comment memory) {
         PostContainer storage post = self.posts[postId];
-        return getCommentContainer(post, path, commentId).info;
+        CommentContainer storage comment;
+
+        if (path.length == 0) {
+            comment = post.comments[commentId];  
+        } else {
+            ReplyContainer storage reply = getParentReply(post, path);
+            comment = reply.comments[commentId];
+        }
+
+        return comment.info;
     }
 }

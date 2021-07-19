@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 
 describe("Test post", function () {
-	it("Test post post", async function () {
+	it("Test create post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -24,7 +24,7 @@ describe("Test post", function () {
 		);
 	});
 
-	it("Test post reply", async function () {
+	it("Test create reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
@@ -39,7 +39,24 @@ describe("Test post", function () {
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
 
-	it("Test post comment", async function () {
+	it("Test create reply, post has been deleted", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.deletePost(1);
+
+		await expect(peeranha.createReply(1, [], hashContainer[1], false)).to.be.revertedWith('Post has been deleted.');
+	});
+
+	it("Test create reply without post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await expect(peeranha.createReply(1, [], hashContainer[1], false)).to.be.revertedWith('Post does not exist.');
+	});
+
+	it("Test create comment", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 
@@ -105,6 +122,12 @@ describe("Test post", function () {
 		await expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
 	});
 
+	it("Test create reply, post has been deleted", async function () {
+		const peeranha = await createContract();
+
+		await expect(peeranha.deletePost(1)).to.be.revertedWith('Post has been deleted.');
+	});
+
 	it("Test delete reply ", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
@@ -131,18 +154,18 @@ describe("Test post", function () {
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
 
-	it("Test delete reply ", async function () {
-		const peeranha = await createContract();
-		const hashContainer = getHashContainer();
+	// it("Test delete reply ", async function () {
+	// 	const peeranha = await createContract();
+	// 	const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.deleteReply(1, [], 1);
+	// 	await peeranha.createPost(1, hashContainer[0]);
+	// 	await peeranha.createReply(1, [], hashContainer[1], false);
+	// 	await peeranha.deleteReply(1, [], 1);
 
-		const reply = await peeranha.getReply(1, [], 1);
-		await expect(reply.isDeleted).to.equal(true);
-		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
-	});
+	// 	const reply = await peeranha.getReply(1, [], 1);
+	// 	await expect(reply.isDeleted).to.equal(true);
+	// 	await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+	// });
 
 	const createContract = async function () {
 		const Peeranha = await ethers.getContractFactory("Peeranha");
