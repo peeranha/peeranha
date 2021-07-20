@@ -71,7 +71,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.editReply(1, [], 1, hashContainer[2], true);
+		await peeranha.editReply(1, [], 1, hashContainer[2]);
 
 		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);

@@ -66,7 +66,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "TypePost or voteResource is not found");      
+        require(false, "TypePost or voteResource is not found");
     }
 
     /// @notice Get value Rating for rating action
@@ -93,8 +93,11 @@ library VoteLib  {
             else if (ResourceAction.FirstReply == resourceAction) return FirstCommonReply;
             else if (ResourceAction.Reply15Minutes == resourceAction) return Reply15MinutesCommon;
 
+        } else if (PostLib.TypePost.Tutorial == typePost) {
+            return 0;
         }
-        return 0;    
+        
+        require(false, "TypePost or voteResource is not found"); 
     }
 
     /// @notice Get vote history

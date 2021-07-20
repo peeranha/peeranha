@@ -82,6 +82,18 @@ library PostLib  {
         uint32 postCount;
     }
 
+    event PostCreated(address user, uint8 communityId, uint256 postId, bytes32 ipfsHash);
+    event ReplyCreated(address user, uint256 postId, uint16[] path, uint256 replyId, bytes32 ipfsHash);
+    event CommentCreated(address user, uint256 postId, uint16[] path, uint256 commentId, bytes32 ipfsHash);
+    event PostEditeded(address user, uint256 communityId, uint256 postId, bytes32 ipfsHash);
+    event ReplyEditeded(address user, uint256 postId, uint16[] path, uint256 replyId, bytes32 ipfsHash);
+    event CommentEdit(address user, uint256 postId, uint16[] path, uint256 commentId, bytes32 ipfsHash);
+    event PostDeleted(address user, uint256 postId);
+    event ReplyDeleted(address user, uint256 postId, uint16[] path, uint256 replyId);
+    event CommentDeleted(address user, uint256 postId, uint16[] path, uint256 commentId);
+    event StatusOfficialAnswerChanged(address user, uint256 postId, uint16[] path, uint256 replyId, bool flagOfficialReply);
+    event ForumItemVoted(address user, uint32 postId, uint16[] path, uint16 replyId, uint8 commentId, bool isUpvote);
+
     /// @notice Publication post
     /// @param self The mapping containing all posts
     /// @param user Author of the post
@@ -105,6 +117,7 @@ library PostLib  {
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
         //post.tags = tags;
+        emit PostCreated(user, communityId, self.postCount, ipfsHash);
     }
 
     /// @notice Post reply
@@ -145,6 +158,8 @@ library PostLib  {
         ///
         // first reply / 15min
         ///
+
+        emit ReplyCreated(user, postId, path, reply.info.replyCount, ipfsHash);
     }
 
     /// @notice Post comment
@@ -164,16 +179,21 @@ library PostLib  {
         PostContainer storage post = getPostContainer(self, postId);
 
         Comment storage comment;
+        uint8 commentId;
         if (path.length == 0) {
-            comment = post.comments[++post.info.commentCount].info;  
+            commentId = ++post.info.commentCount;
+            comment = post.comments[commentId].info;  
         } else {
             ReplyContainer storage reply = getParentReply(post, path);
-            comment = reply.comments[++reply.info.commentCount].info;
+            commentId = ++reply.info.commentCount;
+            comment = reply.comments[commentId].info;
         }
 
         comment.author = user;
         comment.ipfsDoc.hash = ipfsHash;
         comment.postTime = CommonLib.getTimestamp();
+
+        emit CommentCreated(user, postId, path, commentId, ipfsHash);
     }
 
     /// @notice Edit post
@@ -198,6 +218,8 @@ library PostLib  {
             post.info.ipfsDoc.hash = ipfsHash;
         //if(post.tags != tags)     // error, chech one by one?
         //post.tags = tags;
+
+        emit PostEditeded(user, communityId, postId, ipfsHash);
     }
 
     /// @notice Edit reply
@@ -207,15 +229,13 @@ library PostLib  {
     /// @param path The path where the comment will be post 
     /// @param replyId The reply which will be change
     /// @param ipfsHash IPFS hash of document with reply information
-    /// @param officialReply Flag is showing "official reply" or not
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint32 postId,
         uint16[] memory path,
         uint16 replyId,
-        bytes32 ipfsHash,
-        bool officialReply
+        bytes32 ipfsHash
     ) internal {
         IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
@@ -223,8 +243,8 @@ library PostLib  {
 
         if (reply.info.ipfsDoc.hash != ipfsHash)
             reply.info.ipfsDoc.hash = ipfsHash;
-        if (reply.info.officialReply != officialReply)
-            reply.info.officialReply = officialReply;
+        
+        emit ReplyEditeded(user, postId, path, replyId, ipfsHash);
     }
 
     /// @notice Edit comment
@@ -248,6 +268,8 @@ library PostLib  {
 
         if (comment.info.ipfsDoc.hash != ipfsHash)
             comment.info.ipfsDoc.hash = ipfsHash;
+        
+        emit CommentEdit(user, postId, path, commentId, ipfsHash);
     }
 
     /// @notice Delete post
@@ -274,7 +296,9 @@ library PostLib  {
             ///
             // -rating
             ///
-        }  
+        }
+
+        emit PostDeleted(user, postId);
     }
 
     /// @notice Delete reply
@@ -297,6 +321,8 @@ library PostLib  {
         ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
         reply.info.isDeleted = true;
+
+        emit ReplyDeleted(user, postId, path, replyId);
     }
 
     /// @notice Delete comment
@@ -317,6 +343,8 @@ library PostLib  {
 
         comment.info.isDeleted = true;
         //update user statistic
+
+        emit CommentDeleted(user, postId, path, commentId);
     }
 
     /// @notice Change status official answer
@@ -340,6 +368,8 @@ library PostLib  {
          
         if (reply.info.officialReply != officialReply)
             reply.info.officialReply = officialReply;
+        
+        emit StatusOfficialAnswerChanged(user, postId, path, replyId, officialReply);
     }
 
     /// @notice Vote for post, reply or comment
@@ -357,7 +387,7 @@ library PostLib  {
         address user,
         uint32 postId,
         uint16[] memory path,
-        uint16 replyId, 
+        uint16 replyId,
         uint8 commentId,
         bool isUpvote
     ) internal {
@@ -373,6 +403,8 @@ library PostLib  {
         } else {
             votePost(users, post, user, typePost, isUpvote);
         }
+
+        emit ForumItemVoted(user, postId, path, replyId, commentId, isUpvote);
     }
 
     function votePost(

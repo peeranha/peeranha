@@ -270,8 +270,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash, bool officialReply) external override { 
-        posts.editReply(msg.sender, postId, path, replyId, ipfsHash, officialReply);
+    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash) external override { 
+        posts.editReply(msg.sender, postId, path, replyId, ipfsHash);
     }
 
     /**
