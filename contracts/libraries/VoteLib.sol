@@ -7,7 +7,7 @@ import "./PostLib.sol";
 /// @notice Provides information about operation with posts                     //
 /// @dev posts information is stored in the mapping on the main contract        ///
 library VoteLib  {
-    enum VoteResource { Downvote, Upvoted, Downvoted, CorrecReply, FirstReply, Reply15Minutes }
+    enum ResourceAction { Downvote, Upvoted, Downvoted, BestReply, FirstReply, Reply15Minutes }
 
     //expert post
     int8 constant DownvoteExpertPost = -1;
@@ -30,7 +30,7 @@ library VoteLib  {
     int8 constant DownvoteExpertReply = 0;
     int8 constant UpvotedExpertReply = 0;
     int8 constant DownvotedExpertReply = 0;
-    int8 constant CorrectExpertReply = 0;
+    int8 constant AcceptExpertReply = 0;
     int8 constant FirstExpertReply = 0;
     int8 constant Reply15MinutesExpert = 0;
 
@@ -38,63 +38,66 @@ library VoteLib  {
     int8 constant DownvoteCommonReply = 0;
     int8 constant UpvotedCommonReply = 0;
     int8 constant DownvotedCommonReply = 0;
-    int8 constant CorrectCommonReply = 0;
+    int8 constant AcceptCommonReply = 0;
     int8 constant FirstCommonReply = 0;
     int8 constant Reply15MinutesCommon = 0;
 
-    /// @notice Get value Rating for post
+    /// @notice Get value Rating for post action
     /// @param typePost Type post: expertPost, commonPost, tutorial
-    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted
-    function getRatingPost(
+    /// @param resourceAction Rating action: Downvote, Upvoted, Downvoted
+    function getUserRatingChangeForPostAction(
         PostLib.TypePost typePost,
-        VoteResource voteResource
+        ResourceAction resourceAction
     ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
-            if (VoteResource.Downvote == voteResource) return DownvoteExpertPost;
-            else if (VoteResource.Upvoted == voteResource) return UpvotedExpertPost;
-            else if (VoteResource.Downvoted == voteResource) return DownvotedExpertPost;
+            if (ResourceAction.Downvote == resourceAction) return DownvoteExpertPost;
+            else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertPost;
+            else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertPost;
 
         } else if (PostLib.TypePost.CommonPost == typePost) {
-            if (VoteResource.Downvote == voteResource) return DownvoteCommonPost;
-            else if (VoteResource.Upvoted == voteResource) return UpvotedCommonPost;
-            else if (VoteResource.Downvoted == voteResource) return DownvotedCommonPost;
+            if (ResourceAction.Downvote == resourceAction) return DownvoteCommonPost;
+            else if (ResourceAction.Upvoted == resourceAction) return UpvotedCommonPost;
+            else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonPost;
 
         } else if (PostLib.TypePost.Tutorial == typePost) {
-            if (VoteResource.Downvote == voteResource) return DownvoteTutorial;
-            else if (VoteResource.Upvoted == voteResource) return UpvotedTutorial;
-            else if (VoteResource.Downvoted == voteResource) return DownvotedTutorial;
+            if (ResourceAction.Downvote == resourceAction) return DownvoteTutorial;
+            else if (ResourceAction.Upvoted == resourceAction) return UpvotedTutorial;
+            else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "TypePost or voteResource dont found");      
+        require(false, "TypePost or voteResource is not found");
     }
 
-    /// @notice Get value Rating for rating
+    /// @notice Get value Rating for rating action
     /// @param typePost Type post: expertPost, commonPost, tutorial
-    /// @param voteResource Rating action: Downvote, Upvoted, Downvoted, CorrecReply...
-    function getRatingReply(
+    /// @param resourceAction Rating action: Downvote, Upvoted, Downvoted, BestReply...
+    function getUserRatingChangeForReplyAction(
         PostLib.TypePost typePost,
-        VoteResource voteResource
+        ResourceAction resourceAction
     ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
-            if (VoteResource.Downvote == voteResource) return DownvoteExpertReply;
-            else if (VoteResource.Upvoted == voteResource) return UpvotedExpertReply;
-            else if (VoteResource.Downvoted == voteResource) return DownvotedExpertReply;
-            else if (VoteResource.CorrecReply == voteResource) return CorrectExpertReply;
-            else if (VoteResource.FirstReply == voteResource) return FirstExpertReply;
-            else if (VoteResource.Reply15Minutes == voteResource) return Reply15MinutesExpert;
+            if (ResourceAction.Downvote == resourceAction) return DownvoteExpertReply;
+            else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertReply;
+            else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertReply;
+            else if (ResourceAction.BestReply == resourceAction) return AcceptExpertReply;
+            else if (ResourceAction.FirstReply == resourceAction) return FirstExpertReply;
+            else if (ResourceAction.Reply15Minutes == resourceAction) return Reply15MinutesExpert;
 
         } else if (PostLib.TypePost.CommonPost == typePost) {
-            if (VoteResource.Downvote == voteResource) return DownvoteCommonReply;
-            else if (VoteResource.Upvoted == voteResource) return UpvotedCommonReply;
-            else if (VoteResource.Downvoted == voteResource) return DownvotedCommonReply;
-            else if (VoteResource.CorrecReply == voteResource) return CorrectCommonReply;
-            else if (VoteResource.FirstReply == voteResource) return FirstCommonReply;
-            else if (VoteResource.Reply15Minutes == voteResource) return Reply15MinutesCommon;
+            if (ResourceAction.Downvote == resourceAction) return DownvoteCommonReply;
+            else if (ResourceAction.Upvoted == resourceAction) return UpvotedCommonReply;
+            else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonReply;
+            else if (ResourceAction.BestReply == resourceAction) return AcceptCommonReply;
+            else if (ResourceAction.FirstReply == resourceAction) return FirstCommonReply;
+            else if (ResourceAction.Reply15Minutes == resourceAction) return Reply15MinutesCommon;
 
+        } else if (PostLib.TypePost.Tutorial == typePost) {
+            return 0;
         }
-        return 0;    
+        
+        require(false, "TypePost or voteResource is not found"); 
     }
 
     /// @notice Get vote history
@@ -107,7 +110,7 @@ library VoteLib  {
         return historyVote[user];
     }
 
-    function changeHistory(
+    function getForumItemRatingChange(
         address actionAddress,
         mapping(address => int256) storage historyVotes,
         bool isUpvote
