@@ -80,17 +80,17 @@ library PostLib  {
         uint256 postCount;
     }
 
-    event PostCreated(address user, uint8 communityId, uint256 postId, bytes32 ipfsHash);
-    event ReplyCreated(address user, uint256 postId, uint16[] path, uint256 replyId, bytes32 ipfsHash);
-    event CommentCreated(address user, uint256 postId, uint16[] path, uint256 commentId, bytes32 ipfsHash);
-    event PostEditeded(address user, uint256 communityId, uint256 postId, bytes32 ipfsHash);
-    event ReplyEditeded(address user, uint256 postId, uint16[] path, uint256 replyId, bytes32 ipfsHash);
-    event CommentEdit(address user, uint256 postId, uint16[] path, uint256 commentId, bytes32 ipfsHash);
+    event PostCreated(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
+    event ReplyCreated(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
+    event CommentCreated(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
+    event PostEditeded(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
+    event ReplyEditeded(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
+    event CommentEdit(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
     event PostDeleted(address user, uint256 postId);
-    event ReplyDeleted(address user, uint256 postId, uint16[] path, uint256 replyId);
-    event CommentDeleted(address user, uint256 postId, uint16[] path, uint256 commentId);
-    event StatusOfficialAnswerChanged(address user, uint256 postId, uint16[] path, uint256 replyId, bool flagOfficialReply);
-    event ForumItemVoted(address user, uint32 postId, uint16[] path, uint16 replyId, uint8 commentId, bool isUpvote);
+    event ReplyDeleted(address user, uint256 postId, uint16[] path, uint16 replyId);
+    event CommentDeleted(address user, uint256 postId, uint16[] path, uint8 commentId);
+    event StatusOfficialAnswerChanged(address user, uint256 postId, uint16[] path, uint16 replyId, bool flagOfficialReply);
+    event ForumItemVoted(address user, uint256 postId, uint16[] path, uint16 replyId, uint8 commentId, bool isUpvote);
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
@@ -484,9 +484,11 @@ library PostLib  {
 
         uint256 lenght = path.length;
         reply = post.replies[path[0]];
+        IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        require(!reply.info.isDeleted, "Reply has been deleted.");
         for(uint256 i = 1; i < lenght; i++) {
             reply = reply.replies[path[i]];
-            IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Post does not exist.");
+            IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
             require(!reply.info.isDeleted, "Reply has been deleted.");
         }
         
@@ -535,7 +537,7 @@ library PostLib  {
             comment = reply.comments[commentId];
         }
         require(!comment.info.isDeleted, "Comment has been deleted.");
-        IpfsLib.assertIsNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exis.");
+        IpfsLib.assertIsNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exist.");
 
         return comment;
     }
