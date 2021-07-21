@@ -23,7 +23,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
-    
+
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
@@ -270,8 +270,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash, bool officialReply) external override { 
-        posts.editReply(msg.sender, postId, path, replyId, ipfsHash, officialReply);
+    function editReply(uint32 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash) external override { 
+        posts.editReply(msg.sender, postId, path, replyId, ipfsHash);
     }
 
     /**
@@ -329,9 +329,20 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - the user must have right for change status oficial answer.
     */ 
     function changeStatusOfficialAnswer(uint32 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
-        posts.changeStatusOfficialAnswer(postId, path, replyId, officialReply);
+        posts.changeStatusOfficialAnswer(msg.sender, postId, path, replyId, officialReply);
     }
 
+    /**
+     * @dev Vote post or reply or comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - rating user. ?
+    */ 
+    function voteItem(uint32 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.voteForumItem(users, msg.sender, postId, path, replyId, commentId, isUpvote);
+    }
 
     /**
      * @dev Get a post by index.

@@ -71,7 +71,7 @@ describe("Test post", function () {
 
 		await peeranha.createPost(1, hashContainer[0]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.editReply(1, [], 1, hashContainer[2], true);
+		await peeranha.editReply(1, [], 1, hashContainer[2]);
 
 		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
@@ -127,6 +127,19 @@ describe("Test post", function () {
 		await peeranha.deleteComment(1, [], 1);
 
 		const reply = await peeranha.getComment(1, [], 1);
+		await expect(reply.isDeleted).to.equal(true);
+		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+	});
+
+	it("Test delete reply ", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+
+		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createReply(1, [], hashContainer[1], false);
+		await peeranha.deleteReply(1, [], 1);
+
+		const reply = await peeranha.getReply(1, [], 1);
 		await expect(reply.isDeleted).to.equal(true);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
