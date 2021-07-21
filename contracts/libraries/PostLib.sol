@@ -83,8 +83,8 @@ library PostLib  {
     event PostCreated(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
     event ReplyCreated(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
     event CommentCreated(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
-    event PostEditeded(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
-    event ReplyEditeded(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
+    event PostEdited(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
+    event ReplyEdited(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
     event CommentEdit(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
     event PostDeleted(address user, uint256 postId);
     event ReplyDeleted(address user, uint256 postId, uint16[] path, uint16 replyId);
