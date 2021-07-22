@@ -85,7 +85,7 @@ library PostLib  {
     event CommentCreated(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
     event PostEdited(address user, uint32 communityId, uint256 postId, bytes32 ipfsHash);
     event ReplyEdited(address user, uint256 postId, uint16[] path, uint16 replyId, bytes32 ipfsHash);
-    event CommentEdit(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
+    event CommentEdited(address user, uint256 postId, uint16[] path, uint8 commentId, bytes32 ipfsHash);
     event PostDeleted(address user, uint256 postId);
     event ReplyDeleted(address user, uint256 postId, uint16[] path, uint16 replyId);
     event CommentDeleted(address user, uint256 postId, uint16[] path, uint8 commentId);
@@ -101,10 +101,11 @@ library PostLib  {
         PostCollection storage self,
         address user,
         uint32 communityId, 
-        bytes32 ipfsHash
-        //CommunityLib.Tag[] memory tags
+        bytes32 ipfsHash,
+        uint8[] memory tags
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
+        require(IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!bool(tags.length > 0), "Invalid tags size.");
         ///
         //check community, tags
         ///
@@ -114,7 +115,7 @@ library PostLib  {
         post.info.author = user;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
-        //post.tags = tags;
+        post.info.tags = tags;
         emit PostCreated(user, communityId, self.postCount, ipfsHash);
     }
 
@@ -133,7 +134,7 @@ library PostLib  {
         bytes32 ipfsHash,
         bool officialReply
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
+        require(IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
         ///
@@ -173,7 +174,7 @@ library PostLib  {
         uint16[] memory path,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
+        require(IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
 
         Comment storage comment;
@@ -204,20 +205,19 @@ library PostLib  {
         address user,
         uint256 postId,
         uint32 communityId,
-        bytes32 ipfsHash
-        //CommunityLib.Tag[] memory tags
+        bytes32 ipfsHash,
+        uint8[] memory tags
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         
-        if(post.info.communityId != communityId)
+        if(communityId != 0 && post.info.communityId != communityId)
             post.info.communityId = communityId;
-        if(post.info.ipfsDoc.hash != ipfsHash)
+        if(!IpfsLib.isEmptyIpfs(ipfsHash) && post.info.ipfsDoc.hash != ipfsHash)
             post.info.ipfsDoc.hash = ipfsHash;
-        //if(post.tags != tags)     // error, chech one by one?
-        //post.tags = tags;
+        if (tags.length > 0)
+            post.info.tags = tags;
 
-        emit PostEditeded(user, communityId, postId, ipfsHash);
+        emit PostEdited(user, communityId, postId, ipfsHash);
     }
 
     /// @notice Edit reply
@@ -235,14 +235,14 @@ library PostLib  {
         uint16 replyId,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
+        require(IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         ReplyContainer storage reply = getReplyContainer(post, path, replyId);
 
         if (reply.info.ipfsDoc.hash != ipfsHash)
             reply.info.ipfsDoc.hash = ipfsHash;
         
-        emit ReplyEditeded(user, postId, path, replyId, ipfsHash);
+        emit ReplyEdited(user, postId, path, replyId, ipfsHash);
     }
 
     /// @notice Edit comment
@@ -260,14 +260,14 @@ library PostLib  {
         uint8 commentId,
         bytes32 ipfsHash
     ) internal {
-        IpfsLib.assertIsNotEmptyIpfs(ipfsHash, "Invalid ipfsHash.");
+        require(IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
         CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
         if (comment.info.ipfsDoc.hash != ipfsHash)
             comment.info.ipfsDoc.hash = ipfsHash;
         
-        emit CommentEdit(user, postId, path, commentId, ipfsHash);
+        emit CommentEdited(user, postId, path, commentId, ipfsHash);
     }
 
     /// @notice Delete post
@@ -467,7 +467,7 @@ library PostLib  {
         uint256 postId
     ) internal view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
-        IpfsLib.assertIsNotEmptyIpfs(post.info.ipfsDoc.hash, "Post does not exist.");
+        require(IpfsLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
         
         return post;
@@ -484,11 +484,11 @@ library PostLib  {
 
         uint256 lenght = path.length;
         reply = post.replies[path[0]];
-        IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        require(IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
         require(!reply.info.isDeleted, "Reply has been deleted.");
         for(uint256 i = 1; i < lenght; i++) {
             reply = reply.replies[path[i]];
-            IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+            require(IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
             require(!reply.info.isDeleted, "Reply has been deleted.");
         }
         
@@ -514,7 +514,7 @@ library PostLib  {
         }
 
         require(!reply.info.isDeleted, "Reply has been deleted.");
-        IpfsLib.assertIsNotEmptyIpfs(reply.info.ipfsDoc.hash, "Reply does not exist.");
+        require(IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
 
         return reply;
     }
@@ -537,8 +537,7 @@ library PostLib  {
             comment = reply.comments[commentId];
         }
         require(!comment.info.isDeleted, "Comment has been deleted.");
-        IpfsLib.assertIsNotEmptyIpfs(comment.info.ipfsDoc.hash, "Comment does not exist.");
-
+        require(IpfsLib.isEmptyIpfs(comment.info.ipfsDoc.hash), "Comment does not exist.");
         return comment;
     }
 

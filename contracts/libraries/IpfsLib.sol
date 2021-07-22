@@ -6,10 +6,13 @@ library IpfsLib  {
         bytes32 hash2; // Not currently used and added for the future compatibility
     }
 
-    function assertIsNotEmptyIpfs (
-        bytes32 hash,
-        string memory errorMessage
-    ) internal view {
-        require(hash != bytes32(0x0), errorMessage);
+    function isEmptyIpfs (
+        bytes32 hash
+    ) internal view returns(bool) {
+        if (hash == bytes32(0x0)) {
+            return true;
+        }
+
+        return false;
     }
 }
