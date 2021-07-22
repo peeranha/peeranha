@@ -9,10 +9,6 @@ library IpfsLib  {
     function isEmptyIpfs (
         bytes32 hash
     ) internal view returns(bool) {
-        if (hash == bytes32(0x0)) {
-            return true;
-        }
-
-        return false;
+        return hash == bytes32(0x0);
     }
 }

@@ -6,7 +6,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
 
 		const post = await peeranha.getPost(1);
@@ -18,7 +18,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
 		var post = await peeranha.getPost(1);
@@ -34,7 +34,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 
     	await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
 		const post = await peeranha.getPost(1);
@@ -46,7 +46,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
 		var post = await peeranha.getPost(1);
@@ -62,7 +62,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 1);
 		var post = await peeranha.getPost(1);
@@ -78,7 +78,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 0, 0);
 		var post = await peeranha.getPost(1);
@@ -94,7 +94,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 1, 0, 1);
@@ -107,7 +107,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		await peeranha.createReply(1, [], hashContainer[1], false);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 1, 0, 0);
@@ -120,7 +120,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		await peeranha.createComment(1, [], hashContainer[1]);
 		
         await peeranha.connect(signers[1]).voteItem(1, [], 0, 1, 1);
@@ -133,7 +133,7 @@ describe("Test vote", function () {
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
 
-		await peeranha.createPost(1, hashContainer[0]);
+		await peeranha.createPost(1, hashContainer[0], [1]);
 		await peeranha.createComment(1, [], hashContainer[1]);
 		
 		await peeranha.connect(signers[1]).voteItem(1, [], 0, 1, 0)
@@ -148,8 +148,8 @@ describe("Test vote", function () {
 		return peeranha;
 	};
 
-	const author = "0x001d3F1ef827552Ae1114027BD3ECF1f086bA0F9";
-	const author2 = "0x111122223333444455556666777788889999aAaa";
+	// const author = "0x001d3F1ef827552Ae1114027BD3ECF1f086bA0F9";
+	// const author2 = "0x111122223333444455556666777788889999aAaa";
 
 	// 0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc
 
