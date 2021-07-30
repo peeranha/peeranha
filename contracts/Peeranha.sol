@@ -221,8 +221,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a community.
      * - must be tags.
     */
-    function createPost(uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external override {
-        posts.createPost(msg.sender, communityId, ipfsHash, tags);
+    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.TypePost typePost, uint8[] memory tags) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash, typePost, tags);
     }
 
     /**
@@ -247,7 +247,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a post.
     */
     function deletePost(uint256 postId) external override {
-        posts.deletePost(msg.sender, postId);
+        posts.deletePost(users, msg.sender, postId);
     }
 
     /**
@@ -258,8 +258,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(uint256 postId, uint16[] memory path, bytes32 ipfsHash, bool officialReply) external override {
-        posts.createReply(msg.sender, postId, path, ipfsHash, officialReply);
+    function createReply(uint256 postId, uint16[] memory path, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.createReply(users, msg.sender, postId, path, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -270,7 +270,6 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - must be new info about reply.
     */
-
     function editReply(uint256 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash) external override { 
         posts.editReply(msg.sender, postId, path, replyId, ipfsHash);
     }
@@ -283,7 +282,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
     */
     function deleteReply(uint256 postId, uint16[] memory path, uint16 replyId) external override { 
-        posts.deleteReply(msg.sender, postId, path, replyId);
+        posts.deleteReply(users, msg.sender, postId, path, replyId);
     }
 
     /**
@@ -329,8 +328,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - must be a reply.
      * - the user must have right for change status oficial answer.
     */ 
-    function changeStatusOfficialAnswer(uint256 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
-        posts.changeStatusOfficialAnswer(msg.sender, postId, path, replyId, officialReply);
+    function changeStatusOfficialReply(uint256 postId, uint16[] memory path, uint16 replyId, bool isOfficialReply) external override {
+        posts.changeStatusOfficialReply(msg.sender, postId, path, replyId, isOfficialReply);
     }
 
     /**

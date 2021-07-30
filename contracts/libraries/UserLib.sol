@@ -1,5 +1,7 @@
 pragma solidity >=0.5.0;
 
+import "./PostLib.sol";
+
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
@@ -7,6 +9,7 @@ library UserLib {
   struct User {
     bytes32 ipfsHash;
     bytes32 ipfsHash2; // Not currently used and added for the future compatibility
+    int32 rating;
   }
   
   struct UserCollection {
@@ -55,7 +58,7 @@ library UserLib {
   /// @notice Get user info by index
   /// @param self The mapping containing all users
   /// @param index Index of the user to get
-  function getUserByIndex(UserCollection storage self, uint256 index) internal view returns (User memory) {
+  function getUserByIndex(UserCollection storage self, uint256 index) internal view returns (User storage) {
     address addr = self.userList[index];
     return self.users[addr];
   }
@@ -63,7 +66,7 @@ library UserLib {
   /// @notice Get user info by address
   /// @param self The mapping containing all users
   /// @param addr Address of the user to get
-  function getUserByAddress(UserCollection storage self, address addr) internal view returns (User memory) {
+  function getUserByAddress(UserCollection storage self, address addr) internal view returns (User storage) {
     User storage user = self.users[addr];
     require(user.ipfsHash != bytes32(0x0), "User does not exist");
     return user;
@@ -71,11 +74,20 @@ library UserLib {
 
   /// @notice Add rating to user
   /// @param self The mapping containing all users
-  /// @param user user's rating will be change
+  /// @param addr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateRating(UserCollection storage self, address user, int256 rating) internal {
-    ///
-    // will add content
-    ///
+  function updateRating(UserCollection storage self, address addr, int rating) internal {
+    User storage user = getUserByAddress(self, addr);
+    user.rating += int32(rating);
+  }
+
+  function updateUsersRating(UserCollection storage self, PostLib.VotedUser[] memory usersRating) internal {
+    for (uint i; i < usersRating.length; i++) {
+      if (usersRating[i].rating != 0) {
+        User storage user = getUserByAddress(self, usersRating[i].user);
+        user.rating += usersRating[i].rating;
+        usersRating[i].rating = 0;
+      }
+    }
   }
 }

@@ -11,36 +11,58 @@ library VoteLib  {
 
     //expert post
     int8 constant DownvoteExpertPost = -1;
-    int8 constant UpvotedExpertPost = 0;
-    int8 constant DownvotedExpertPost = 0;
+    int8 constant UpvotedExpertPost = 5;
+    int8 constant DownvotedExpertPost = -2;
+    int8 constant AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
 
     //common post 
     int8 constant DownvoteCommonPost = -1;
-    int8 constant UpvotedCommonPost = 0;
-    int8 constant DownvotedCommonPost = 0;
+    int8 constant UpvotedCommonPost = 1;
+    int8 constant DownvotedCommonPost = -1;
+    int8 constant AcceptCommonPost = 1;
 
     //tutorial 
-    int8 constant DownvoteTutorial = -1;    //autorAction
-    int8 constant UpvotedTutorial = 0;
-    int8 constant DownvotedTutorial = 0;
+    int8 constant DownvoteTutorial = -1;    //autorAction       //??
+    int8 constant UpvotedTutorial = 1;                          //??
+    int8 constant DownvotedTutorial = -1 ;                        //??
+
+    int8 constant DeleteOwnPost = -1;
+    int8 constant ModeratorDeletePost = -2;
 
 /////////////////////////////////////////////////////////////////////////////
 
     //expert reply
-    int8 constant DownvoteExpertReply = 0;
-    int8 constant UpvotedExpertReply = 0;
-    int8 constant DownvotedExpertReply = 0;
-    int8 constant AcceptExpertReply = 0;
-    int8 constant FirstExpertReply = 0;
-    int8 constant Reply15MinutesExpert = 0;
+    int8 constant DownvoteExpertReply = -1;
+    int8 constant UpvotedExpertReply = 10;                                                      //post 10 reply 5?
+    int8 constant DownvotedExpertReply = -2;
+    int8 constant AcceptExpertReply = 15;
+    int8 constant FirstExpertReply = 5;
+    int8 constant Reply15MinutesExpert = 5;
+
+    int8 constant FirstExpertReplyNegetiveRating = -5;
+    int8 constant Reply15MinutesExpertNegetiveRating = -5;
+    int8 constant DeleteFirstExpertReply = -5;
+    int8 constant DeleteReply15MinutesExpert = -5;
 
     //common reply 
-    int8 constant DownvoteCommonReply = 0;
-    int8 constant UpvotedCommonReply = 0;
-    int8 constant DownvotedCommonReply = 0;
-    int8 constant AcceptCommonReply = 0;
-    int8 constant FirstCommonReply = 0;
-    int8 constant Reply15MinutesCommon = 0;
+    int8 constant DownvoteCommonReply = -1;
+    int8 constant UpvotedCommonReply = 2;
+    int8 constant DownvotedCommonReply = -1;
+    int8 constant AcceptCommonReply = 3;
+    int8 constant FirstCommonReply = 1;
+    int8 constant Reply15MinutesCommon = 1;
+
+    int8 constant FirstCommonReplyNegetiveRating = -1;          //
+    int8 constant Reply15MinutesCommonNegetiveRating = -1;      //
+    int8 constant DeleteFirstCommonReply = -1;                  //to do
+    int8 constant DeleteReply15MinutesCommon = -1;              //
+    
+    int8 constant DeleteOwnReply = -1;
+    int8 constant ModeratorDeleteReply = -2;            // to do
+
+/////////////////////////////////////////////////////////////////////////////////
+
+    int8 constant ModeratorDeleteComment = -1;
 
     /// @notice Get value Rating for post action
     /// @param typePost Type post: expertPost, commonPost, tutorial
@@ -48,7 +70,7 @@ library VoteLib  {
     function getUserRatingChangeForPostAction(
         PostLib.TypePost typePost,
         ResourceAction resourceAction
-    ) internal pure returns (int8) {
+    ) private pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertPost;
@@ -75,7 +97,7 @@ library VoteLib  {
     function getUserRatingChangeForReplyAction(
         PostLib.TypePost typePost,
         ResourceAction resourceAction
-    ) internal pure returns (int8) {
+    ) private pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertReply;
@@ -100,6 +122,18 @@ library VoteLib  {
         require(false, "TypePost or voteResource is not found"); 
     }
 
+    function getUserRatingChange(
+        PostLib.TypePost typePost,
+        ResourceAction resourceAction,
+        PostLib.TypeContent typeContent
+    ) internal returns (int8) {
+        if (PostLib.TypeContent.Post == typeContent) {
+            return getUserRatingChangeForPostAction(typePost, resourceAction);
+        } else if (PostLib.TypeContent.Reply == typeContent) {
+            return getUserRatingChangeForReplyAction(typePost, resourceAction);
+        }
+    }
+
     /// @notice Get vote history
     /// @param user user who voted for content
     /// @param historyVote history vote all users
@@ -113,7 +147,8 @@ library VoteLib  {
     function getForumItemRatingChange(
         address actionAddress,
         mapping(address => int256) storage historyVotes,
-        bool isUpvote
+        bool isUpvote,
+        address[] storage usersVoted                              /// for comment
     ) internal returns (int8) {
         int history = getHistoryVote(actionAddress, historyVotes);
         int8 changeRating;
@@ -125,6 +160,7 @@ library VoteLib  {
             } else if (history == 0) {
                 historyVotes[actionAddress] = 1;
                 changeRating ++;
+                usersVoted.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = 0;
                 changeRating --;
@@ -136,6 +172,7 @@ library VoteLib  {
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
                 changeRating --;
+                usersVoted.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = -1;
                 changeRating -= 2;

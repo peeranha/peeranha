@@ -8,7 +8,7 @@ library IpfsLib  {
 
     function isEmptyIpfs (
         bytes32 hash
-    ) internal view returns(bool) {
+    ) internal pure returns(bool) {
         return hash == bytes32(0x0);
     }
 }
