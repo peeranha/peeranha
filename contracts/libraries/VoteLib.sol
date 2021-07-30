@@ -89,6 +89,7 @@ library VoteLib  {
 
         }
         require(false, "TypePost or voteResource is not found");
+        return 0;
     }
 
     /// @notice Get value Rating for rating action
@@ -119,19 +120,21 @@ library VoteLib  {
             return 0;
         }
         
-        require(false, "TypePost or voteResource is not found"); 
+        require(false, "TypePost or voteResource is not found");
+        return 0;
     }
 
     function getUserRatingChange(
         PostLib.TypePost typePost,
         ResourceAction resourceAction,
         PostLib.TypeContent typeContent
-    ) internal returns (int8) {
+    ) internal pure returns (int8) {
         if (PostLib.TypeContent.Post == typeContent) {
             return getUserRatingChangeForPostAction(typePost, resourceAction);
         } else if (PostLib.TypeContent.Reply == typeContent) {
             return getUserRatingChangeForReplyAction(typePost, resourceAction);
         }
+        return 0;
     }
 
     /// @notice Get vote history
@@ -178,7 +181,6 @@ library VoteLib  {
                 changeRating -= 2;
             }
         }
-
         return changeRating;
     }
 }

@@ -433,7 +433,7 @@ library PostLib  {
  
         if (commentId != 0) {
             CommentContainer storage comment = getCommentContainer(post, path, commentId);
-            voteComment(users, comment, user, typePost, isUpvote);
+            voteComment(comment, user, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage reply = getReplyContainer(post, path, replyId);
             voteReply(users, reply, user, typePost, isUpvote);
@@ -524,10 +524,8 @@ library PostLib  {
     }
 
     function voteComment(
-        UserLib.UserCollection storage users,
         CommentContainer storage comment,
         address votedUser,
-        TypePost typePost,
         bool isUpvote
     ) private {
         require(votedUser != comment.info.author, "You can't vote for own comment");
