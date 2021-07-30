@@ -35,14 +35,9 @@ library VoteLib  {
     int8 constant DownvoteExpertReply = -1;
     int8 constant UpvotedExpertReply = 10;                                                      //post 10 reply 5?
     int8 constant DownvotedExpertReply = -2;
-    int8 constant AcceptExpertReply = 15;
+    int8 constant AcceptExpertReply = 15;                           ///
     int8 constant FirstExpertReply = 5;
     int8 constant Reply15MinutesExpert = 5;
-
-    int8 constant FirstExpertReplyNegetiveRating = -5;
-    int8 constant Reply15MinutesExpertNegetiveRating = -5;
-    int8 constant DeleteFirstExpertReply = -5;
-    int8 constant DeleteReply15MinutesExpert = -5;
 
     //common reply 
     int8 constant DownvoteCommonReply = -1;
@@ -51,11 +46,6 @@ library VoteLib  {
     int8 constant AcceptCommonReply = 3;
     int8 constant FirstCommonReply = 1;
     int8 constant Reply15MinutesCommon = 1;
-
-    int8 constant FirstCommonReplyNegetiveRating = -1;          //
-    int8 constant Reply15MinutesCommonNegetiveRating = -1;      //
-    int8 constant DeleteFirstCommonReply = -1;                  //to do
-    int8 constant DeleteReply15MinutesCommon = -1;              //
     
     int8 constant DeleteOwnReply = -1;
     int8 constant ModeratorDeleteReply = -2;            // to do

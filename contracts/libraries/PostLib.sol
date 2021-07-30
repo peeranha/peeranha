@@ -87,6 +87,11 @@ library PostLib  {
         uint256 postCount;
     }
 
+    struct VotedUser {
+        address user;
+        int8 rating;
+    }
+
     event PostCreated(address user, uint32 communityId, uint256 postId);
     event ReplyCreated(address user, uint256 postId, uint16[] path, uint16 replyId);
     event CommentCreated(address user, uint256 postId, uint16[] path, uint8 commentId);
@@ -444,11 +449,6 @@ library PostLib  {
         emit ForumItemVoted(user, postId, path, replyId, commentId, isUpvote);
     }
 
-    struct VotedUser {
-        address user;
-        int8 rating;
-    }
-
     function vote (
         UserLib.UserCollection storage users,
         address author,
@@ -520,7 +520,17 @@ library PostLib  {
 
         vote(users, reply.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Reply);
 
+        int32 oldRating = reply.info.rating;
         reply.info.rating += changeRating;
+        int32 newRating = reply.info.rating; // or oldRating + changeRating gas
+
+        if (reply.info.isFirstReply) {
+            if (oldRating < 0 && newRating >= 0) {
+                //+ rating
+            } else if (oldRating >= 0 && newRating < 0) {
+                // - rating
+            }
+        }
     }
 
     function voteComment(
