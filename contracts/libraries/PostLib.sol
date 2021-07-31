@@ -350,7 +350,7 @@ library PostLib  {
     }
 
     /// @notice Take reply rating from the author
-    /// @param self The mapping containing all users
+    /// @param users The mapping containing all users
     /// @param typePost Type post: expert, common, tutorial
     /// @param replyContainer Reply from which the rating is taken
     function takeReplyRating (

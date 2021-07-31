@@ -87,9 +87,9 @@ library UserLib {
     }
   }
 
-  function updateUserRating(UserCollection storage self, address user, int8 rating) internal {
+  function updateUserRating(UserCollection storage self, address userAdrr, int8 rating) internal {
     if (rating == 0) return;
-    User storage user = getUserByAddress(self, user);
+    User storage user = getUserByAddress(self, userAdrr);
     user.rating += rating;
   }
 }
