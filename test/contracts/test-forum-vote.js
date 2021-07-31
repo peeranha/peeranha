@@ -506,12 +506,12 @@ describe("Test vote", function () {
     const DownvotedExpertReply = -2;
     const AcceptExpertReply = 15;
     const FirstExpertReply = 5;
-    const Reply15MinutesExpert = 5;
+    const QuickExpertReply = 5;
 
     const FirstExpertReplyNegetiveRating = -5;
-    const Reply15MinutesExpertNegetiveRating = -5;
+    const QuickExpertReplyNegetiveRating = -5;
     const DeleteFirstExpertReply = -5;
-    const DeleteReply15MinutesExpert = -5;
+    const DeleteQuickExpertReply = -5;
 
     //common reply 
     const DownvoteCommonReply = -1;
@@ -519,12 +519,12 @@ describe("Test vote", function () {
     const DownvotedCommonReply = -1;
     const AcceptCommonReply = 3;
     const FirstCommonReply = 1;
-    const Reply15MinutesCommon = 1;
+    const QuickReplyCommon = 1;
 
     const FirstCommonReplyNegetiveRating = -1;
-    const Reply15MinutesCommonNegetiveRating = -1;
+    const QuickReplyCommonNegetiveRating = -1;
     const DeleteFirstCommonReply = -1;
-    const DeleteReply15MinutesCommon = -1;
+    const DeleteQuickReplyCommon = -1;
     
     const DeleteOwnReply = -1;
     const ModeratorDeleteReply = -2;

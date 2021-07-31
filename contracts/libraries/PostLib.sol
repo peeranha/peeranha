@@ -44,7 +44,7 @@ library PostLib  {
         uint8 propertyCount;
 
         bool isFirstReply;
-        bool is15Minutes;
+        bool isQuickReply;
         bool isOfficialReply;
         bool isDeleted;
     }
@@ -176,8 +176,8 @@ library PostLib  {
         }
 
         if (post.info.postTime - reply.info.postTime < CommonLib.fifteenMinutes) {
-            reply.info.is15Minutes = true;
-            users.updateRating(user, VoteLib.getUserRatingChange(post.info.typePost, VoteLib.ResourceAction.Reply15Minutes, TypeContent.Reply));
+            reply.info.isQuickReply = true;
+            users.updateRating(user, VoteLib.getUserRatingChange(post.info.typePost, VoteLib.ResourceAction.QuickReply, TypeContent.Reply));
         }
 
         emit ReplyCreated(user, postId, path, reply.info.replyCount);
@@ -349,6 +349,10 @@ library PostLib  {
         emit ReplyDeleted(user, postId, path, replyId);
     }
 
+    /// @notice Take reply rating from the author
+    /// @param self The mapping containing all users
+    /// @param typePost Type post: expert, common, tutorial
+    /// @param replyContainer Reply from which the rating is taken
     function takeReplyRating (
         UserLib.UserCollection storage users,
         TypePost typePost,
@@ -449,6 +453,88 @@ library PostLib  {
         emit ForumItemVoted(user, postId, path, replyId, commentId, isUpvote);
     }
 
+    // @notice Vote for post
+    /// @param users The mapping containing all users
+    /// @param post Post where will be change rating
+    /// @param votedUser User which voted
+    /// @param typePost Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
+    function votePost(
+        UserLib.UserCollection storage users,
+        PostContainer storage post,
+        address votedUser,
+        TypePost typePost,
+        bool isUpvote
+    ) private {
+        require(votedUser != post.info.author, "You can't vote for own post");
+        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote, post.usersVoted);
+
+        vote(users, post.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Post);
+        post.info.rating += changeRating;
+    }
+ 
+    // @notice Vote for reply
+    /// @param users The mapping containing all users
+    /// @param reply Reply where will be change rating
+    /// @param votedUser User which voted
+    /// @param typePost Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
+    function voteReply(
+        UserLib.UserCollection storage users,
+        ReplyContainer storage reply,
+        address votedUser,
+        TypePost typePost,
+        bool isUpvote
+    ) private {
+        require(votedUser != reply.info.author, "You can't vote for own reply");
+        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.usersVoted);
+
+        vote(users, reply.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Reply);
+        int32 oldRating = reply.info.rating;
+        reply.info.rating += changeRating;
+        int32 newRating = reply.info.rating; // or oldRating + changeRating gas
+
+        if (reply.info.isFirstReply) {
+            if (oldRating < 0 && newRating >= 0) {
+                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.FirstReply));
+            } else if (oldRating >= 0 && newRating < 0) {
+                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.FirstReply));
+            }
+        }
+
+        if (reply.info.isQuickReply) {
+            if (oldRating < 0 && newRating >= 0) {
+                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.QuickReply));
+            } else if (oldRating >= 0 && newRating < 0) {
+                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.QuickReply));
+            }
+        }
+    }
+
+    // @notice Vote for comment
+    /// @param comment Comment where will be change rating
+    /// @param votedUser User which voted
+    /// @param isUpvote Upvote or downvote
+    function voteComment(
+        CommentContainer storage comment,
+        address votedUser,
+        bool isUpvote
+    ) private {
+        require(votedUser != comment.info.author, "You can't vote for own comment");
+        //check user
+        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote, comment.usersVoted);
+        
+        comment.info.rating += changeRating;
+    }
+
+    // @notice              ??????
+    /// @param users The mapping containing all users
+    /// @param author Author post, reply or comment where voted
+    /// @param votedUser User which voted
+    /// @param typePost Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
+    /// @param changeRatingPost                                             ///
+    /// @param typeContent Type content post, reply or comment
     function vote (
         UserLib.UserCollection storage users,
         address author,
@@ -493,58 +579,6 @@ library PostLib  {
         }
         users.updateUsersRating(usersRating); 
     }
-
-    function votePost(
-        UserLib.UserCollection storage users,
-        PostContainer storage post,
-        address votedUser,
-        TypePost typePost,
-        bool isUpvote
-    ) private {
-        require(votedUser != post.info.author, "You can't vote for own post");
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote, post.usersVoted);
-
-        vote(users, post.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Post);
-        post.info.rating += changeRating;
-    }
- 
-    function voteReply(
-        UserLib.UserCollection storage users,
-        ReplyContainer storage reply,
-        address votedUser,
-        TypePost typePost,
-        bool isUpvote
-    ) private {
-        require(votedUser != reply.info.author, "You can't vote for own reply");
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.usersVoted);
-
-        vote(users, reply.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Reply);
-
-        int32 oldRating = reply.info.rating;
-        reply.info.rating += changeRating;
-        int32 newRating = reply.info.rating; // or oldRating + changeRating gas
-
-        if (reply.info.isFirstReply) {
-            if (oldRating < 0 && newRating >= 0) {
-                //+ rating
-            } else if (oldRating >= 0 && newRating < 0) {
-                // - rating
-            }
-        }
-    }
-
-    function voteComment(
-        CommentContainer storage comment,
-        address votedUser,
-        bool isUpvote
-    ) private {
-        require(votedUser != comment.info.author, "You can't vote for own comment");
-        //check user
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote, comment.usersVoted);
-        
-        comment.info.rating += changeRating;
-    }
-
 
     /// @notice Return post
     /// @param self The mapping containing all posts

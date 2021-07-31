@@ -7,7 +7,7 @@ import "./PostLib.sol";
 /// @notice Provides information about operation with posts                     //
 /// @dev posts information is stored in the mapping on the main contract        ///
 library VoteLib  {
-    enum ResourceAction { Downvote, Upvoted, Downvoted, BestReply, FirstReply, Reply15Minutes }
+    enum ResourceAction { Downvote, Upvoted, Downvoted, BestReply, FirstReply, QuickReply }
 
     //expert post
     int8 constant DownvoteExpertPost = -1;
@@ -22,9 +22,9 @@ library VoteLib  {
     int8 constant AcceptCommonPost = 1;
 
     //tutorial 
-    int8 constant DownvoteTutorial = -1;    //autorAction       //??
-    int8 constant UpvotedTutorial = 1;                          //??
-    int8 constant DownvotedTutorial = -1 ;                        //??
+    int8 constant DownvoteTutorial = -1;
+    int8 constant UpvotedTutorial = 1;
+    int8 constant DownvotedTutorial = -1 ;
 
     int8 constant DeleteOwnPost = -1;
     int8 constant ModeratorDeletePost = -2;
@@ -33,11 +33,11 @@ library VoteLib  {
 
     //expert reply
     int8 constant DownvoteExpertReply = -1;
-    int8 constant UpvotedExpertReply = 10;                                                      //post 10 reply 5?
+    int8 constant UpvotedExpertReply = 10;
     int8 constant DownvotedExpertReply = -2;
     int8 constant AcceptExpertReply = 15;                           ///
     int8 constant FirstExpertReply = 5;
-    int8 constant Reply15MinutesExpert = 5;
+    int8 constant QuickExpertReply = 5;
 
     //common reply 
     int8 constant DownvoteCommonReply = -1;
@@ -45,7 +45,7 @@ library VoteLib  {
     int8 constant DownvotedCommonReply = -1;
     int8 constant AcceptCommonReply = 3;
     int8 constant FirstCommonReply = 1;
-    int8 constant Reply15MinutesCommon = 1;
+    int8 constant QuickReplyCommon = 1;
     
     int8 constant DeleteOwnReply = -1;
     int8 constant ModeratorDeleteReply = -2;            // to do
@@ -60,7 +60,7 @@ library VoteLib  {
     function getUserRatingChangeForPostAction(
         PostLib.TypePost typePost,
         ResourceAction resourceAction
-    ) private pure returns (int8) {
+    ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertPost;
@@ -88,7 +88,7 @@ library VoteLib  {
     function getUserRatingChangeForReplyAction(
         PostLib.TypePost typePost,
         ResourceAction resourceAction
-    ) private pure returns (int8) {
+    ) internal pure returns (int8) {
  
         if (PostLib.TypePost.ExpertPost == typePost) {          //switch, gas?
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertReply;
@@ -96,7 +96,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertReply;
             else if (ResourceAction.BestReply == resourceAction) return AcceptExpertReply;
             else if (ResourceAction.FirstReply == resourceAction) return FirstExpertReply;
-            else if (ResourceAction.Reply15Minutes == resourceAction) return Reply15MinutesExpert;
+            else if (ResourceAction.QuickReply == resourceAction) return QuickExpertReply;
 
         } else if (PostLib.TypePost.CommonPost == typePost) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteCommonReply;
@@ -104,7 +104,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonReply;
             else if (ResourceAction.BestReply == resourceAction) return AcceptCommonReply;
             else if (ResourceAction.FirstReply == resourceAction) return FirstCommonReply;
-            else if (ResourceAction.Reply15Minutes == resourceAction) return Reply15MinutesCommon;
+            else if (ResourceAction.QuickReply == resourceAction) return QuickReplyCommon;
 
         } else if (PostLib.TypePost.Tutorial == typePost) {
             return 0;

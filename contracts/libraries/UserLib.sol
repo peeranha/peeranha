@@ -83,11 +83,13 @@ library UserLib {
 
   function updateUsersRating(UserCollection storage self, PostLib.VotedUser[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      if (usersRating[i].rating != 0) {
-        User storage user = getUserByAddress(self, usersRating[i].user);
-        user.rating += usersRating[i].rating;
-        usersRating[i].rating = 0;
-      }
+      updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
+  }
+
+  function updateUserRating(UserCollection storage self, address user, int8 rating) internal {
+    if (rating == 0) return;
+    User storage user = getUserByAddress(self, user);
+    user.rating += rating;
   }
 }
