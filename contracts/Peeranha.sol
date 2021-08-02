@@ -27,6 +27,12 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
+
+    uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
+    
+    function initialize(string memory name, string memory symbol) public initializer {
+        __Peeranha_init(name, symbol, TOTAL_SUPPLY);
+    }
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -34,12 +40,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         __Pausable_init_unchained();
         __ERC20Capped_init_unchained(cap);
         __ERC20Pausable_init_unchained();
-        __Peeranha_init_unchained(name, symbol, cap);
-    }
-
-    function __Peeranha_init_unchained(string memory name, string memory symbol, uint256 cap) internal initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(PAUSER_ROLE, msg.sender);
+        __Peeranha_init_unchained();
     }
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");

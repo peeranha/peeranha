@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "npx hardhat compile"
+    "compile": "npx hardhat compile",
+    "deploy-goerli": "npx hardhat run --network goerli scripts/deploy.js",
+    "post-action-goerli": "npx hardhat run --network goerli scripts/post-action.js",
+    "query-data-goerli": "npx hardhat run --network goerli scripts/query-data.js"
   },
   "keywords": [],
   "author": "",
