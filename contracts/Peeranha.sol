@@ -139,7 +139,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint256 communityId) external 
+    function freezeCommunity(uint32 communityId) external 
     onlyCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
@@ -152,7 +152,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function unfreezeCommunity(uint256 communityId) external 
+    function unfreezeCommunity(uint32 communityId) external 
     onlyCommunityAdmin(communityId) {
         communities.unfreeze(communityId);
     }
@@ -166,7 +166,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityAdminPermission(address user, uint256 communityId) external 
+    function giveCommunityAdminPermission(address user, uint32 communityId) external 
     onlyExisitingUser(users, user) onlyExistingAndNotFrozenCommunity(communities, communityId) {
         _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
@@ -181,7 +181,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address user, uint256 communityId) external 
+    function giveCommunityModeratorPermission(address user, uint32 communityId) external 
     onlyCommunityAdmin(communityId) 
     onlyExisitingUser(users, user) 
     onlyExistingAndNotFrozenCommunity(communities, communityId) {
@@ -197,7 +197,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function revokeCommunityAdminPermission(address user, uint256 communityId) external 
+    function revokeCommunityAdminPermission(address user, uint32 communityId) external 
     onlyExistingAndNotFrozenCommunity(communities, communityId) 
     onlyExisitingUser(users, user) {
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
@@ -214,7 +214,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      */
 
      //should do something with AccessControlUpgradeable(revoke only for default admin)
-    function revokeCommunityModeratorPermission(address user, uint256 communityId) external 
+    function revokeCommunityModeratorPermission(address user, uint32 communityId) external 
     onlyCommunityAdmin(communityId) 
     onlyExisitingUser(users, user) 
     onlyExistingAndNotFrozenCommunity(communities, communityId) {
