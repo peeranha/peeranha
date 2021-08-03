@@ -27,7 +27,7 @@ library CommunityLib {
         uint32 communityCount;
     }
 
-    modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint256 id){
+    modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint32 id){
         require(
             self.communities[id].info.ipfsHash != bytes32(0x0),
             "Community does not exist"
@@ -166,18 +166,24 @@ library CommunityLib {
         return iterableTags;
     }
 
-    function freeze(CommunityCollection storage self, uint256 communityId) 
+    /// @notice Freeze the community
+    /// @param self The mapping containing all communities
+    /// @param communityId Address of the community to freeze
+    function freeze(CommunityCollection storage self, uint32 communityId) 
     internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].isFrozen = true;
         emit CommunityFrozen(communityId);
     }
 
-    function unfreeze(CommunityCollection storage self, uint256 id) internal {
+    /// @notice Unfreeze the community
+    /// @param self The mapping containing all communities
+    /// @param communityId Address of the community to unfreeze
+    function unfreeze(CommunityCollection storage self, uint32 communityId) internal {
         require(
-            self.communities[id].info.ipfsHash != bytes32(0x0),
+            self.communities[communityId].info.ipfsHash != bytes32(0x0),
             "Community does not exist"
         );
-        self.communities[id].isFrozen = false;
-        emit CommunityUnfrozen(id);
+        self.communities[communityId].isFrozen = false;
+        emit CommunityUnfrozen(communityId);
     }
 }

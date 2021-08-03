@@ -69,6 +69,9 @@ library UserLib {
     return user;
   }
 
+  /// @notice Check user existence
+  /// @param self The mapping containing all users
+  /// @param addr Address of the user to check
   function isExists(UserCollection storage self, address addr) internal view returns (bool) {
     return self.users[addr].ipfsHash != bytes32(0x0);
   }

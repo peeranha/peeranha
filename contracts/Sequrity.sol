@@ -45,21 +45,21 @@ contract Sequrity is Initializable, ContextUpgradeable {
         _;
     }
 
-    modifier onlyCommunityAdmin(uint256 communityId) {
+    modifier onlyCommunityAdmin(uint32 communityId) {
         require((hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender) || 
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
             "Peeranha: must have community admin role");
         _;
     }
 
-    modifier onlyCommunityModerator(uint256 communityId) {
+    modifier onlyCommunityModerator(uint32 communityId) {
         require((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) || 
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender)), 
             "Peeranha: must have community moderator role");
         _;
     }
 
-    function getCommunityRole(uint256 role, uint256 communityId) internal pure returns (bytes32) {
+    function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
         return bytes32(role + communityId);
     }
 
