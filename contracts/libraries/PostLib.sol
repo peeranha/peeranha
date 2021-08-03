@@ -46,6 +46,7 @@ library PostLib  {
         bool isFirstReply;
         bool isQuickReply;
         bool isOfficialReply;
+        bool isBestReply;
         bool isDeleted;
     }
 
@@ -165,19 +166,19 @@ library PostLib  {
 
         reply.info.author = user;
         reply.info.ipfsDoc.hash = ipfsHash;
-        reply.info.postTime = CommonLib.getTimestamp();
+        uint32 timestamp = CommonLib.getTimestamp();
+        reply.info.postTime = timestamp;
         if (isOfficialReply)
             reply.info.isOfficialReply = isOfficialReply;
 
-
-        if (reply.info.replyCount == 1) {
+        if (post.info.replyCount == 1) {
             reply.info.isFirstReply = true;
-            users.updateRating(user, VoteLib.getUserRatingChange(post.info.typePost, VoteLib.ResourceAction.FirstReply, TypeContent.Reply));
+            users.updateRating(user, VoteLib.getUserRatingChangeForReplyAction(post.info.typePost, VoteLib.ResourceAction.FirstReply));
         }
 
-        if (post.info.postTime - reply.info.postTime < CommonLib.fifteenMinutes) {
+        if (timestamp - post.info.postTime < CommonLib.fifteenMinutes) {
             reply.info.isQuickReply = true;
-            users.updateRating(user, VoteLib.getUserRatingChange(post.info.typePost, VoteLib.ResourceAction.QuickReply, TypeContent.Reply));
+            users.updateRating(user, VoteLib.getUserRatingChangeForReplyAction(post.info.typePost, VoteLib.ResourceAction.QuickReply));
         }
 
         emit ReplyCreated(user, postId, path, reply.info.replyCount);
@@ -361,11 +362,17 @@ library PostLib  {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
 
-        if (replyContainer.info.rating > 0) {
-            users.updateRating(replyContainer.info.author, 
-                                -VoteLib.getUserRatingChange(   typePost, 
-                                                                VoteLib.ResourceAction.Upvoted, 
-                                                                TypeContent.Reply) * replyContainer.info.rating);
+        if (replyContainer.info.rating >= 0) {
+            users.updateRating(replyContainer.info.author,              // users -> UserLib
+                                -VoteLib.getUserRatingChangeForReplyAction( typePost,
+                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
+            
+            if (replyContainer.info.isFirstReply) {
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.FirstReply));
+            }
+            if (replyContainer.info.isQuickReply) {
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.QuickReply));
+            }
         }
 
         for (uint16 i = 1; i <= replyContainer.info.replyCount; i++) {
@@ -409,13 +416,33 @@ library PostLib  {
         bool isOfficialReply
     ) internal {
         // check permistion
-        PostContainer storage post = getPostContainer(self, postId);
-        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, path, replyId);
          
-        if (reply.info.isOfficialReply != isOfficialReply)
-            reply.info.isOfficialReply = isOfficialReply;
+        if (replyContainer.info.isOfficialReply != isOfficialReply)
+            replyContainer.info.isOfficialReply = isOfficialReply;
         
         emit StatusOfficialAnswerChanged(user, postId, path, replyId, isOfficialReply);
+    }
+
+    function changeStatusBestReply (
+        PostCollection storage self,
+        UserLib.UserCollection storage users,
+        address user,
+        uint256 postId,
+        uint16[] memory path,
+        uint16 replyId,
+        bool isBestReply
+    ) internal {
+        PostContainer storage post = getPostContainer(self, postId);
+        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+        require(reply.info.isBestReply != isBestReply, "Wrong status best reply");
+
+        if (isBestReply) {
+            UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(post.info.typePost, VoteLib.ResourceAction.BestReply));  
+        } else {
+            UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(post.info.typePost, VoteLib.ResourceAction.BestReply));  
+        }
     }
 
     /// @notice Vote for post, reply or comment
@@ -488,6 +515,7 @@ library PostLib  {
     ) private {
         require(votedUser != reply.info.author, "You can't vote for own reply");
         int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.usersVoted);
+        if (typePost == TypePost.Tutorial) return;
 
         vote(users, reply.info.author, votedUser, typePost, isUpvote, changeRating, TypeContent.Reply);
         int32 oldRating = reply.info.rating;
