@@ -72,4 +72,14 @@ library UserLib {
   function isExists(UserCollection storage self, address addr) internal view returns (bool) {
     return self.users[addr].ipfsHash != bytes32(0x0);
   }
+
+  /// @notice Add rating to user
+  /// @param self The mapping containing all users
+  /// @param user user's rating will be change
+  /// @param rating value for add to user's rating
+  function updateRating(UserCollection storage self, address user, int256 rating) internal {
+    ///
+    // will add content
+    ///
+  }
 }

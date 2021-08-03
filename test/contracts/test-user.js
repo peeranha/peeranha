@@ -79,5 +79,3 @@ describe("Test users", function() {
     })
   }
 });
-
-

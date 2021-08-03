@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.s
 
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
+import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 import "./Sequrity.sol";
@@ -20,9 +21,14 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
-    
+    using PostLib for PostLib.Post;
+    using PostLib for PostLib.Reply;
+    using PostLib for PostLib.Comment;
+    using PostLib for PostLib.PostCollection;
+
     UserLib.UserCollection users;
     CommunityLib.CommunityCollection communities;
+    PostLib.PostCollection posts;
     
     function __Peeranha_init(string memory name, string memory symbol, uint256 cap) internal initializer {
         __AccessControl_init_unchained();
@@ -107,7 +113,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      *
      * - Must be a new community.
      */
-    function createCommunity(uint256 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+    function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
         _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
         communities.createCommunity(communityId, ipfsHash, tags);
@@ -121,7 +127,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint256 communityId, bytes32 ipfsHash) external onlyCommunityAdmin(communityId) {
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external onlyCommunityAdmin(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -223,14 +229,14 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - Must be a new tag.
      * - Must be an existing community. 
      */
-    function createTag(uint256 communityId, uint256 tagId, bytes32 ipfsHash) external {
+    function createTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external {
         communities.createTag(communityId, tagId, ipfsHash);
     }
 
     /**
      * @dev Get communities count.
      */
-    function getCommunitiesCount() external view returns (uint8 count) {
+    function getCommunitiesCount() external view returns (uint32 count) {
         return communities.getCommunitiesCount();
     }
 
@@ -241,7 +247,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      *
      * - Must be an existing community.
      */
-    function getCommunity(uint256 communityId) external view returns (CommunityLib.Community memory) {
+    function getCommunity(uint32 communityId) external view returns (CommunityLib.Community memory) {
         return communities.getCommunity(communityId);
     }
 
@@ -252,8 +258,8 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      *
      * - Must be an existing community.
      */
-    function getTagsCount(uint8 id) external view returns (uint256 count) {
-        return communities.getTagsCount(id);
+    function getTagsCount(uint32 communityId) external view returns (uint8 count) {
+        return communities.getTagsCount(communityId);
     }
 
     /**
@@ -263,7 +269,7 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      *
      * - Must be an existing community.
      */
-    function getTags(uint256 communityId) external view returns (CommunityLib.Tag[] memory) {
+    function getTags(uint32 communityId) external view returns (CommunityLib.Tag[] memory) {
         return communities.getTags(communityId);
     }
     
@@ -297,5 +303,171 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    /**
+     * @dev Create new post.
+     *
+     * Requirements:
+     *
+     * - must be a new post.
+     * - must be a community.
+     * - must be tags.
+    */
+    function createPost(uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash, tags);
+    }
+
+    /**
+     * @dev Edit post info.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be new info about post
+     * - must be a community.
+     * - must be tags
+    */
+    function editPost(uint256 postId, uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external override {
+        posts.editPost(msg.sender, postId, communityId, ipfsHash, tags);
+    }
+
+    /**
+     * @dev delete post.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+    */
+    function deletePost(uint256 postId) external override {
+        posts.deletePost(msg.sender, postId);
+    }
+
+    /**
+     * @dev Create new reply.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be a new reply. 
+    */
+    function createReply(uint256 postId, uint16[] memory path, bytes32 ipfsHash, bool officialReply) external override {
+        posts.createReply(msg.sender, postId, path, ipfsHash, officialReply);
+    }
+
+    /**
+     * @dev Edit reply.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - must be new info about reply.
+    */
+
+    function editReply(uint256 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash) external override { 
+        posts.editReply(msg.sender, postId, path, replyId, ipfsHash);
+    }
+
+    /**
+     * @dev Delete reply.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+    */
+    function deleteReply(uint256 postId, uint16[] memory path, uint16 replyId) external override { 
+        posts.deleteReply(msg.sender, postId, path, replyId);
+    }
+
+    /**
+     * @dev Create new comment.
+     *
+     * Requirements:
+     *
+     * - must be a new comment.
+     * - must be a post or a reply.
+    */
+    function createComment(uint256 postId, uint16[] memory path, bytes32 ipfsHash) external override {
+        posts.createComment(msg.sender, postId, path, ipfsHash);
+    }
+
+    /**
+     * @dev Edit comment.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+     * - must be new info about reply.
+    */
+    function editComment(uint256 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(msg.sender, postId, path, commentId, ipfsHash);
+    }
+
+    /**
+     * @dev Delete comment.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+    */
+    function deleteComment(uint256 postId, uint16[] memory path, uint8 commentId) external override {
+        posts.deleteComment(msg.sender, postId, path, commentId);
+    }
+
+    /**
+     * @dev Change status official answer.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - the user must have right for change status oficial answer.
+    */ 
+    function changeStatusOfficialAnswer(uint256 postId, uint16[] memory path, uint16 replyId, bool officialReply) external override {
+        posts.changeStatusOfficialAnswer(msg.sender, postId, path, replyId, officialReply);
+    }
+
+    /**
+     * @dev Vote post or reply or comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - rating user. ?
+    */ 
+    function voteItem(uint256 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.voteForumItem(users, msg.sender, postId, path, replyId, commentId, isUpvote);
+    }
+
+    /**
+     * @dev Get a post by index.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+    */
+    function getPost(uint256 postId) external view returns (PostLib.Post memory) {
+        return posts.getPost(postId);
+    }
+
+    /**
+     * @dev Get a reply by index.
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+    */
+    function getReply(uint256 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Reply memory) {
+        return posts.getReply(postId, path, replyId);
+    }
+
+    /**
+     * @dev Get a comment by index.
+     *
+     * Requirements:
+     *
+     * - must be a comment.
+    */
+    function getComment(uint256 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Comment memory) {
+        return posts.getComment(postId, path, commentId);
     }
 }
