@@ -45,7 +45,7 @@ library VoteLib  {
     int8 constant DownvotedCommonReply = -1;
     int8 constant AcceptCommonReply = 3;
     int8 constant FirstCommonReply = 1;
-    int8 constant QuickReplyCommon = 1;
+    int8 constant QuickCommonReply = 1;
     
     int8 constant DeleteOwnReply = -1;
     int8 constant ModeratorDeleteReply = -2;            // to do
@@ -104,7 +104,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonReply;
             else if (ResourceAction.BestReply == resourceAction) return AcceptCommonReply;
             else if (ResourceAction.FirstReply == resourceAction) return FirstCommonReply;
-            else if (ResourceAction.QuickReply == resourceAction) return QuickReplyCommon;
+            else if (ResourceAction.QuickReply == resourceAction) return QuickCommonReply;
 
         } else if (PostLib.TypePost.Tutorial == typePost) {
             return 0;

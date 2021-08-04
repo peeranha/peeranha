@@ -13,6 +13,7 @@ interface IPeeranhaPost {
     function deletePost(uint256 postId) external;
     function deleteReply(uint256 postId, uint16[] memory path, uint16 replyId) external;
     function deleteComment(uint256 postId, uint16[] memory path, uint8 commentId) external;
-    function changeStatusOfficialReply(uint256 postId, uint16[] memory path, uint16 replyId, bool isOfficialReply) external;
+    function changeStatusOfficialReply(uint256 postId, uint16 replyId) external;
+    function changeStatusBestReply(uint256 postId, uint16 replyId) external;
     function voteItem(uint256 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external;
 }
