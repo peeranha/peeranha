@@ -2,7 +2,6 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
@@ -12,9 +11,12 @@ import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
+import "./Sequrity.sol";
+
+import "hardhat/console.sol";
 
 
-contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
+contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
@@ -43,9 +45,7 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
         __Peeranha_init_unchained();
     }
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-
-    function __Peeranha_init() internal initializer {
+    function __Peeranha_init() public initializer {
         __AccessControl_init_unchained();
         __Pausable_init_unchained();
         __Peeranha_init_unchained();
@@ -115,6 +115,8 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * - Must be a new community.
      */
     function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
         communities.createCommunity(communityId, ipfsHash, tags);
     }
 
@@ -124,9 +126,100 @@ contract Peeranha is IPeeranha, Initializable, AccessControlUpgradeable, ERC20Up
      * Requirements:
      *
      * - Must be an existing community.  
+     * - Sender must be community moderator.
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external {
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external onlyCommunityAdmin(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
+    }
+
+    /**
+     * @dev Freeze community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     * - Sender must be community moderator.
+     */
+    function freezeCommunity(uint32 communityId) external 
+    onlyCommunityAdmin(communityId) {
+        communities.freeze(communityId);
+    }
+
+    /**
+     * @dev Unfreeze community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.  
+     * - Sender must be community moderator.
+     */
+    function unfreezeCommunity(uint32 communityId) external 
+    onlyCommunityAdmin(communityId) {
+        communities.unfreeze(communityId);
+    }
+
+    /**
+     * @dev Give community adminisrator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function giveCommunityAdminPermission(address user, uint32 communityId) external 
+    onlyExisitingUser(users, user) onlyExistingAndNotFrozenCommunity(communities, communityId) {
+        _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+    }
+
+    /**
+     * @dev Give community moderator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be community or global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function giveCommunityModeratorPermission(address user, uint32 communityId) external 
+    onlyCommunityAdmin(communityId) 
+    onlyExisitingUser(users, user) 
+    onlyExistingAndNotFrozenCommunity(communities, communityId) {
+        _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+    }
+
+    /**
+     * @dev Revoke community adminisrator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function revokeCommunityAdminPermission(address user, uint32 communityId) external 
+    onlyExistingAndNotFrozenCommunity(communities, communityId) 
+    onlyExisitingUser(users, user) {
+        _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
+    }
+
+    /**
+     * @dev Revoke community moderator permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be community or global administrator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+
+     //should do something with AccessControlUpgradeable(revoke only for default admin)
+    function revokeCommunityModeratorPermission(address user, uint32 communityId) external 
+    onlyCommunityAdmin(communityId) 
+    onlyExisitingUser(users, user) 
+    onlyExistingAndNotFrozenCommunity(communities, communityId) {
+        _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
