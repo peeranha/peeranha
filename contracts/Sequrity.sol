@@ -64,7 +64,7 @@ contract Sequrity is Initializable, ContextUpgradeable {
     }
 
 
-    modifier onlyExistingAndNotFrozenCommunity(CommunityLib.CommunityCollection storage communities, uint256 communityId) {
+    modifier onlyExistingAndNotFrozenCommunity(CommunityLib.CommunityCollection storage communities, uint32 communityId) {
         require(communities.getCommunitiesCount() >= communityId, "Peeranha: must be an existing community");
         _;
     }

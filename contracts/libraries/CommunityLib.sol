@@ -17,13 +17,13 @@ library CommunityLib {
 
     struct CommunityContainer {
         Community info;
-        mapping(uint256 => Tag) tags;
+        mapping(uint32 => Tag) tags;
         uint8 tagsCount;
         bool isFrozen;
     }
 
     struct CommunityCollection {
-        mapping(uint256 => CommunityContainer) communities;
+        mapping(uint32 => CommunityContainer) communities;
         uint32 communityCount;
     }
 
@@ -38,11 +38,11 @@ library CommunityLib {
         _;
     }
 
-    event CommunityCreated(uint256 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
-    event CommunityUpdated(uint256 id, bytes32 ipfsHash);
-    event TagCreated(uint256 communityId, uint256 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
-    event CommunityFrozen(uint256 commintyId);
-    event CommunityUnfrozen(uint256 commintyId);
+    event CommunityCreated(uint32 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
+    event CommunityUpdated(uint32 id, bytes32 ipfsHash);
+    event TagCreated(uint32 communityId, uint32 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
+    event CommunityFrozen(uint32 commintyId);
+    event CommunityUnfrozen(uint32 commintyId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -62,8 +62,8 @@ library CommunityLib {
             tags.length >= 5, 
             "Require at least 5 tags"
         );
-        for(uint256 i = 0; i < tags.length; i++){
-            for(uint256 j = 0; j < tags.length; j++){
+        for(uint32 i = 0; i < tags.length; i++){
+            for(uint32 j = 0; j < tags.length; j++){
                 if (i != j){
                     require(
                         tags[i].ipfsHash != tags[j].ipfsHash,
@@ -76,7 +76,7 @@ library CommunityLib {
         community.info.ipfsHash = ipfsHash;
         community.tagsCount = uint8(tags.length);
         community.isFrozen = false;
-        for (uint256 i = 1; i <= uint256(tags.length); i++) {
+        for (uint32 i = 1; i <= uint32(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
         self.communityCount++;
@@ -104,7 +104,7 @@ library CommunityLib {
     function createTag (
         CommunityCollection storage self, 
         uint32 communityId,
-        uint256 tagId,
+        uint32 tagId,
         bytes32 ipfsHash
     ) internal onlyExistingAndNotFrozen(self, communityId) {
         CommunityContainer storage community = self.communities[communityId];
