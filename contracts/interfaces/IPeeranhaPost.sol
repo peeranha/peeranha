@@ -4,7 +4,7 @@ pragma abicoder v2;
 import "../libraries/PostLib.sol";
 
 interface IPeeranhaPost {
-    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.TypePost typePost, uint8[] memory tags) external;
+    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external;
     function createReply(uint256 postId, uint16[] memory path, bytes32 ipfsHash, bool isOfficialReply) external;
     function createComment(uint256 postId, uint16[] memory path, bytes32 ipfsHash) external;
     function editPost(uint256 postId, uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external;

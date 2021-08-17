@@ -88,7 +88,7 @@ library UserLib {
     user.rating += int32(rating);
   }
 
-  function updateUsersRating(UserCollection storage self, PostLib.VotedUser[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, PostLib.UserVote[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }

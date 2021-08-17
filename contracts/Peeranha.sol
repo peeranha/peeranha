@@ -315,8 +315,8 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
      * - must be a community.
      * - must be tags.
     */
-    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.TypePost typePost, uint8[] memory tags) external override {
-        posts.createPost(msg.sender, communityId, ipfsHash, typePost, tags);
+    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
+        posts.createPost(msg.sender, communityId, ipfsHash, postType, tags);
     }
 
     /**
