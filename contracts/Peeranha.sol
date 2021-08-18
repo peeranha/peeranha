@@ -11,12 +11,12 @@ import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 
 import "./interfaces/IPeeranha.sol";
-import "./Sequrity.sol";
+import "./Security.sol";
 
 import "hardhat/console.sol";
 
 
-contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
+contract Peeranha is IPeeranha, Initializable, Security, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable  {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
