@@ -167,7 +167,7 @@ library PostLib  {
                     reply.info.isFirstReply = true;
                     UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
-                if (timestamp - post.info.postTime < CommonLib.quickReplyTimeSeconds) {
+                if (timestamp - post.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     reply.info.isQuickReply = true;
                     UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.QuickReply));
                 }
@@ -502,44 +502,44 @@ library PostLib  {
     // @notice Vote for post
     /// @param users The mapping containing all users
     /// @param post Post where will be change rating
-    /// @param userVoted User which voted
+    /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
     function votePost(
         UserLib.UserCollection storage users,
         PostContainer storage post,
-        address userVoted,
+        address votedUser,
         PostType postType,
         bool isUpvote
     ) private {
-        require(userVoted != post.info.author, "You can't vote for own post");
-        int8 changeRating = VoteLib.getForumItemRatingChange(userVoted, post.historyVotes, isUpvote, post.votedUsers);
+        require(votedUser != post.info.author, "You can't vote for own post");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote, post.votedUsers);
 
-        vote(users, post.info.author, userVoted, postType, isUpvote, changeRating, TypeContent.Post);
-        post.info.rating += changeRating;
+        vote(users, post.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
+        post.info.rating += ratingChange;
     }
  
     // @notice Vote for reply
     /// @param users The mapping containing all users
     /// @param reply Reply where will be change rating
-    /// @param userVoted User which voted
+    /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
     function voteReply(
         UserLib.UserCollection storage users,
         ReplyContainer storage reply,
-        address userVoted,
+        address votedUser,
         PostType postType,
         bool isUpvote
     ) private {
-        require(userVoted != reply.info.author, "You can't vote for own reply");
-        int8 changeRating = VoteLib.getForumItemRatingChange(userVoted, reply.historyVotes, isUpvote, reply.votedUsers);
+        require(votedUser != reply.info.author, "You can't vote for own reply");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.votedUsers);
         if (postType == PostType.Tutorial) return;
 
-        vote(users, reply.info.author, userVoted, postType, isUpvote, changeRating, TypeContent.Reply);
+        vote(users, reply.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
         int32 oldRating = reply.info.rating;
-        reply.info.rating += changeRating;
-        int32 newRating = reply.info.rating; // or oldRating + changeRating gas
+        reply.info.rating += ratingChange;
+        int32 newRating = reply.info.rating; // or oldRating + ratingChange gas
 
         if (reply.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
@@ -560,35 +560,35 @@ library PostLib  {
 
     // @notice Vote for comment
     /// @param comment Comment where will be change rating
-    /// @param userVoted User which voted
+    /// @param votedUser User which voted
     /// @param isUpvote Upvote or downvote
     function voteComment(
         CommentContainer storage comment,
-        address userVoted,
+        address votedUser,
         bool isUpvote
     ) private {
-        require(userVoted != comment.info.author, "You can't vote for own comment");
+        require(votedUser != comment.info.author, "You can't vote for own comment");
         //check user
-        int8 changeRating = VoteLib.getForumItemRatingChange(userVoted, comment.historyVotes, isUpvote, comment.votedUsers);
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote, comment.votedUsers);
         
-        comment.info.rating += changeRating;
+        comment.info.rating += ratingChange;
     }
 
     // @notice              ??????
     /// @param users The mapping containing all users
     /// @param author Author post, reply or comment where voted
-    /// @param userVoted User which voted
+    /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
-    /// @param changeRatingPost                                             ///
+    /// @param postRatingChange                                             ///
     /// @param typeContent Type content post, reply or comment
     function vote (
         UserLib.UserCollection storage users,
         address author,
-        address userVoted,
+        address votedUser,
         PostType postType,
         bool isUpvote,
-        int8 changeRatingPost,
+        int8 postRatingChange,
         TypeContent typeContent
     ) private {
        UserVote[] memory usersRating = new UserVote[](2);
@@ -597,14 +597,14 @@ library PostLib  {
             usersRating[0].user = author;
             usersRating[0].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent);
 
-            if (changeRatingPost == 2) {
+            if (postRatingChange == 2) {
                 usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvoted, typeContent) * -1;
 
-                usersRating[1].user = userVoted;
+                usersRating[1].user = votedUser;
                 usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent) * -1; 
             }
 
-            if (changeRatingPost < 0) {
+            if (postRatingChange < 0) {
                 usersRating[0].rating *= -1;
                 usersRating[1].rating *= -1;
             } 
@@ -612,14 +612,14 @@ library PostLib  {
             usersRating[0].user = author;
             usersRating[0].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvoted, typeContent);
 
-            usersRating[1].user = userVoted;
+            usersRating[1].user = votedUser;
             usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent);
 
-            if (changeRatingPost == -2) {
+            if (postRatingChange == -2) {
                 usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent) * -1;
             }
 
-            if (changeRatingPost > 0) {
+            if (postRatingChange > 0) {
                 usersRating[0].rating *= -1;
                 usersRating[1].rating *= -1;  
             }

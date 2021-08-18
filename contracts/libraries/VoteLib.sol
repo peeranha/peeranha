@@ -148,33 +148,33 @@ library VoteLib  {
         address[] storage votedUsers                              /// for comment
     ) internal returns (int8) {
         int history = getHistoryVote(actionAddress, historyVotes);
-        int8 changeRating;
+        int8 ratingChange;
         
         if (isUpvote) {
             if (history == -1) {
                 historyVotes[actionAddress] = 1;
-                changeRating += 2;
+                ratingChange += 2;
             } else if (history == 0) {
                 historyVotes[actionAddress] = 1;
-                changeRating++;
+                ratingChange++;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = 0;
-                changeRating--;
+                ratingChange--;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
-                changeRating++;
+                ratingChange++;
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
-                changeRating--;
+                ratingChange--;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = -1;
-                changeRating -= 2;
+                ratingChange -= 2;
             }
         }
-        return changeRating;
+        return ratingChange;
     }
 }
