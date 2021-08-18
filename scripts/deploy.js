@@ -3,7 +3,7 @@ const { ethers, upgrades } = require("hardhat");
 async function main() {
   const Peeranha = await ethers.getContractFactory("Peeranha");
   console.log("Deploying Peeranha...");
-  const peeranha = await upgrades.deployProxy(Peeranha, ["Peeranha", "PEER"]);
+  const peeranha = await upgrades.deployProxy(Peeranha, []);
   console.log("Peeranha deployed to:", peeranha.address);
 }
 
