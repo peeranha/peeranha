@@ -13,7 +13,7 @@ import "./CommonLib.sol";
 library PostLib  {
     using UserLib for UserLib.UserCollection;
 
-    enum TypePost { ExpertPost, CommonPost, Tutorial }
+    enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
 
     struct Comment {
@@ -29,6 +29,7 @@ library PostLib  {
         Comment info;
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
+        address[] votedUsers;
     }
 
     struct Reply {
@@ -40,7 +41,8 @@ library PostLib  {
         uint8 commentCount;
         uint8 propertyCount;
 
-        bool officialReply;
+        bool isFirstReply;
+        bool isQuickReply;
         bool isDeleted;
     }
 
@@ -50,17 +52,20 @@ library PostLib  {
         mapping(uint8 => CommentContainer) comments;
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
+        address[] votedUsers;
     }
 
     struct Post {
         uint8[] tags;
         IpfsLib.IpfsHash ipfsDoc;
-        TypePost typePost;
+        PostType postType;
         address author;
         int32 rating;
         uint32 postTime;
         uint32 communityId;
 
+        uint16 officialReply;
+        uint16 bestReply;
         uint8 propertyCount;
         uint8 commentCount;
         uint16 replyCount;
@@ -73,11 +78,17 @@ library PostLib  {
         mapping(uint8 => CommentContainer) comments;
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
+        address[] votedUsers;
     }
 
     struct PostCollection {
         mapping(uint256 => PostContainer) posts;
         uint256 postCount;
+    }
+
+    struct UserVote {
+        address user;
+        int8 rating;
     }
 
     event PostCreated(address user, uint32 communityId, uint256 postId);
@@ -89,7 +100,8 @@ library PostLib  {
     event PostDeleted(address user, uint256 postId);
     event ReplyDeleted(address user, uint256 postId, uint16[] path, uint16 replyId);
     event CommentDeleted(address user, uint256 postId, uint16[] path, uint8 commentId);
-    event StatusOfficialAnswerChanged(address user, uint256 postId, uint16[] path, uint16 replyId, bool flagOfficialReply);
+    event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
+    event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
     event ForumItemVoted(address user, uint256 postId, uint16[] path, uint16 replyId, uint8 commentId, bool isUpvote);
 
     /// @notice Publication post
@@ -102,6 +114,7 @@ library PostLib  {
         address user,
         uint32 communityId, 
         bytes32 ipfsHash,
+        PostType postType,
         uint8[] memory tags
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -112,6 +125,7 @@ library PostLib  {
 
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;
+        post.info.postType = postType;
         post.info.author = user;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
@@ -125,14 +139,15 @@ library PostLib  {
     /// @param postId post where the reply will be post
     /// @param path The path where the reply will be post 
     /// @param ipfsHash IPFS hash of document with reply information
-    /// @param officialReply Flag is showing "official reply" or not
+    /// @param isOfficialReply Flag is showing "official reply" or not
     function createReply(
         PostCollection storage self,
+        UserLib.UserCollection storage users,
         address user,
         uint256 postId,
         uint16[] memory path,
         bytes32 ipfsHash,
-        bool officialReply
+        bool isOfficialReply
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage post = getPostContainer(self, postId);
@@ -141,8 +156,22 @@ library PostLib  {
         //update user statistic + rating
         ///
         ReplyContainer storage reply;
+        uint32 timestamp = CommonLib.getTimestamp();
         if (path.length == 0) {
             reply = post.replies[++post.info.replyCount];
+            if (isOfficialReply)
+                post.info.officialReply = post.info.replyCount;
+
+            if (post.info.postType != PostType.Tutorial) {
+                if (post.info.replyCount == 1) {
+                    reply.info.isFirstReply = true;
+                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.FirstReply));
+                }
+                if (timestamp - post.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
+                    reply.info.isQuickReply = true;
+                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.QuickReply));
+                }
+            }
         } else {
             reply = getParentReply(post, path);
             reply = reply.replies[++reply.info.replyCount]; 
@@ -150,13 +179,7 @@ library PostLib  {
 
         reply.info.author = user;
         reply.info.ipfsDoc.hash = ipfsHash;
-        reply.info.postTime = CommonLib.getTimestamp();
-        if (officialReply)
-            reply.info.officialReply = officialReply;
-
-        ///
-        // first reply / 15min
-        ///
+        reply.info.postTime = timestamp;
 
         emit ReplyCreated(user, postId, path, reply.info.replyCount);
     }
@@ -276,26 +299,26 @@ library PostLib  {
     /// @param postId Post which be delete
     function deletePost(
         PostCollection storage self,
+        UserLib.UserCollection storage users,
         address user,
         uint256 postId
     ) internal {
-        PostContainer storage post = getPostContainer(self, postId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
 
-        post.info.isDeleted = true;
-
-        ///
-        // -rating
-        ///
-    
-        for (uint16 i; i < post.info.replyCount; i++) {
-            if (post.replies[i].info.ipfsDoc.hash == bytes32(0x0) || post.replies[i].info.isDeleted)
-                continue;
-            ReplyContainer storage localReply = post.replies[i];
-            ///
-            // -rating
-            ///
+        if (postContainer.info.rating > 0) {
+            UserLib.updateRating(users, postContainer.info.author,
+                                -VoteLib.getUserRatingChange(   postContainer.info.postType, 
+                                                                VoteLib.ResourceAction.Upvoted,
+                                                                TypeContent.Post) * postContainer.info.rating);
         }
+    
+        for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
+            deductReplyRating(users, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
+        }
+        if (user == postContainer.info.author)
+            UserLib.updateRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
 
+        postContainer.info.isDeleted = true;
         emit PostDeleted(user, postId);
     }
 
@@ -307,6 +330,7 @@ library PostLib  {
     /// @param replyId reply which will be deleted
     function deleteReply(
         PostCollection storage self,
+        UserLib.UserCollection storage users,
         address user,
         uint256 postId,
         uint16[] memory path,
@@ -315,12 +339,50 @@ library PostLib  {
         /*
         check author
         */
-        PostContainer storage post = getPostContainer(self, postId);
-        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, path, replyId);
 
-        reply.info.isDeleted = true;
+        deductReplyRating(users, postContainer.info.postType, replyContainer, path.length == 0 && postContainer.info.bestReply == replyId);
+        if (user == replyContainer.info.author)
+            UserLib.updateRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
+        replyContainer.info.isDeleted = true;
         emit ReplyDeleted(user, postId, path, replyId);
+    }
+
+    /// @notice Take reply rating from the author
+    /// @param users The mapping containing all users
+    /// @param postType Type post: expert, common, tutorial
+    /// @param replyContainer Reply from which the rating is taken
+    function deductReplyRating (                                    // add bool level x3 if?
+        UserLib.UserCollection storage users,
+        PostType postType,
+        ReplyContainer storage replyContainer,
+        bool isBestReply
+    ) private {
+        if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
+            return;
+
+        if (replyContainer.info.rating >= 0) {
+            UserLib.updateRating(users, replyContainer.info.author,
+                                -VoteLib.getUserRatingChangeForReplyAction( postType,
+                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
+            
+            if (replyContainer.info.isFirstReply) {
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+            }
+            if (replyContainer.info.isQuickReply) {
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+            }
+            if (isBestReply && postType != PostType.Tutorial) {
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply));
+                UserLib.updateUserRating(users, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply));
+            }
+        }
+
+        for (uint16 i = 1; i <= replyContainer.info.replyCount; i++) {
+            deductReplyRating(users, postType, replyContainer.replies[i], false);
+        }
     }
 
     /// @notice Delete comment
@@ -340,34 +402,66 @@ library PostLib  {
         CommentContainer storage comment = getCommentContainer(post, path, commentId);
 
         comment.info.isDeleted = true;
-        //update user statistic
-
         emit CommentDeleted(user, postId, path, commentId);
     }
 
-    /// @notice Change status official answer
+    /// @notice Change status official reply
     /// @param self The mapping containing all posts
     /// @param user Who called action
     /// @param postId Post where will be change reply status
-    /// @param path The path where the reply will be change status
     /// @param replyId Reply which will change status
-    /// @param officialReply Flag swows reply's status
-    function changeStatusOfficialAnswer(
+    function changeStatusOfficialReply(
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint16[] memory path,
-        uint16 replyId,
-        bool officialReply
+        uint16 replyId
     ) internal {
         // check permistion
-        PostContainer storage post = getPostContainer(self, postId);
-        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        uint16[] memory path;
+        getReplyContainer(postContainer, path, replyId);
          
-        if (reply.info.officialReply != officialReply)
-            reply.info.officialReply = officialReply;
+        if (postContainer.info.officialReply == replyId)
+            postContainer.info.officialReply = 0;
+        else
+            postContainer.info.officialReply = replyId;
         
-        emit StatusOfficialAnswerChanged(user, postId, path, replyId, officialReply);
+        emit StatusOfficialReplyChanged(user, postId, replyId);
+    }
+
+    /// @notice Change status best reply
+    /// @param self The mapping containing all posts
+    /// @param user Who called action
+    /// @param postId Post where will be change reply status
+    /// @param replyId Reply which will change status
+    function changeStatusBestReply (
+        PostCollection storage self,
+        UserLib.UserCollection storage users,
+        address user,
+        uint256 postId,
+        uint16 replyId
+    ) internal {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        uint16[] memory path;
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, path, replyId);
+
+        if (postContainer.info.bestReply == replyId) {
+            users.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+            users.updateUserRating(user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+            postContainer.info.bestReply = 0;
+        } else {
+            if (postContainer.info.bestReply != 0) {
+                ReplyContainer storage oldBestReplyContainer = getReplyContainer(postContainer, path, replyId);
+                users.updateUserRating(oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+                users.updateUserRating(user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+            }
+
+            users.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+            users.updateUserRating(user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+            postContainer.info.bestReply = replyId;
+        }
+
+        emit StatusBestReplyChanged(user, postId, replyId);
     }
 
     /// @notice Vote for post, reply or comment
@@ -390,74 +484,148 @@ library PostLib  {
         bool isUpvote
     ) internal {
         PostContainer storage post = getPostContainer(self, postId);
-        TypePost typePost = post.info.typePost;
+        PostType postType = post.info.postType;
  
         if (commentId != 0) {
             CommentContainer storage comment = getCommentContainer(post, path, commentId);
-            voteComment(users, comment, user, typePost, isUpvote);
+            voteComment(comment, user, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage reply = getReplyContainer(post, path, replyId);
-            voteReply(users, reply, user, typePost, isUpvote);
+            voteReply(users, reply, user, postType, isUpvote);
         } else {
-            votePost(users, post, user, typePost, isUpvote);
+            votePost(users, post, user, postType, isUpvote);
         }
 
         emit ForumItemVoted(user, postId, path, replyId, commentId, isUpvote);
     }
 
+    // @notice Vote for post
+    /// @param users The mapping containing all users
+    /// @param post Post where will be change rating
+    /// @param votedUser User which voted
+    /// @param postType Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
     function votePost(
         UserLib.UserCollection storage users,
         PostContainer storage post,
         address votedUser,
-        TypePost typePost,
+        PostType postType,
         bool isUpvote
     ) private {
         require(votedUser != post.info.author, "You can't vote for own post");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote, post.votedUsers);
 
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote);
-        if (isUpvote) {
-            users.updateRating(post.info.author, VoteLib.getUserRatingChangeForPostAction(typePost, VoteLib.ResourceAction.Upvoted) * changeRating);
-        } else {
-            users.updateRating(post.info.author, VoteLib.getUserRatingChangeForPostAction(typePost, VoteLib.ResourceAction.Downvoted) * changeRating);
-            users.updateRating(post.info.author, VoteLib.getUserRatingChangeForPostAction(typePost, VoteLib.ResourceAction.Downvote) * changeRating);
-        }
-
-        post.info.rating += changeRating;
+        vote(users, post.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
+        post.info.rating += ratingChange;
     }
  
+    // @notice Vote for reply
+    /// @param users The mapping containing all users
+    /// @param reply Reply where will be change rating
+    /// @param votedUser User which voted
+    /// @param postType Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
     function voteReply(
         UserLib.UserCollection storage users,
         ReplyContainer storage reply,
         address votedUser,
-        TypePost typePost,
+        PostType postType,
         bool isUpvote
     ) private {
         require(votedUser != reply.info.author, "You can't vote for own reply");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.votedUsers);
+        if (postType == PostType.Tutorial) return;
 
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote);
-        if (isUpvote) {
-            users.updateRating(reply.info.author, VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.Upvoted) * changeRating);
-        } else {
-            users.updateRating(reply.info.author, VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.Downvoted) * changeRating);
-            users.updateRating(votedUser, VoteLib.getUserRatingChangeForReplyAction(typePost, VoteLib.ResourceAction.Downvote) * changeRating);
+        vote(users, reply.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
+        int32 oldRating = reply.info.rating;
+        reply.info.rating += ratingChange;
+        int32 newRating = reply.info.rating; // or oldRating + ratingChange gas
+
+        if (reply.info.isFirstReply) {
+            if (oldRating < 0 && newRating >= 0) {
+                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+            } else if (oldRating >= 0 && newRating < 0) {
+                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+            }
         }
 
-        reply.info.rating += changeRating;
+        if (reply.info.isQuickReply) {
+            if (oldRating < 0 && newRating >= 0) {
+                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+            } else if (oldRating >= 0 && newRating < 0) {
+                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+            }
+        }
     }
 
+    // @notice Vote for comment
+    /// @param comment Comment where will be change rating
+    /// @param votedUser User which voted
+    /// @param isUpvote Upvote or downvote
     function voteComment(
-        UserLib.UserCollection storage users,
         CommentContainer storage comment,
         address votedUser,
-        TypePost typePost,
         bool isUpvote
     ) private {
         require(votedUser != comment.info.author, "You can't vote for own comment");
-
-        int8 changeRating = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote);
-        comment.info.rating += changeRating;
+        //check user
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote, comment.votedUsers);
+        
+        comment.info.rating += ratingChange;
     }
 
+    // @notice              ??????
+    /// @param users The mapping containing all users
+    /// @param author Author post, reply or comment where voted
+    /// @param votedUser User which voted
+    /// @param postType Type post expert, common, tutorial
+    /// @param isUpvote Upvote or downvote
+    /// @param postRatingChange                                             ///
+    /// @param typeContent Type content post, reply or comment
+    function vote (
+        UserLib.UserCollection storage users,
+        address author,
+        address votedUser,
+        PostType postType,
+        bool isUpvote,
+        int8 postRatingChange,
+        TypeContent typeContent
+    ) private {
+       UserVote[] memory usersRating = new UserVote[](2);
+
+        if (isUpvote) {
+            usersRating[0].user = author;
+            usersRating[0].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent);
+
+            if (postRatingChange == 2) {
+                usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvoted, typeContent) * -1;
+
+                usersRating[1].user = votedUser;
+                usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent) * -1; 
+            }
+
+            if (postRatingChange < 0) {
+                usersRating[0].rating *= -1;
+                usersRating[1].rating *= -1;
+            } 
+        } else {
+            usersRating[0].user = author;
+            usersRating[0].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvoted, typeContent);
+
+            usersRating[1].user = votedUser;
+            usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent);
+
+            if (postRatingChange == -2) {
+                usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent) * -1;
+            }
+
+            if (postRatingChange > 0) {
+                usersRating[0].rating *= -1;
+                usersRating[1].rating *= -1;  
+            }
+        }
+        UserLib.updateUsersRating(users, usersRating); 
+    }
 
     /// @notice Return post
     /// @param self The mapping containing all posts
