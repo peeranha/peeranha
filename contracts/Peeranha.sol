@@ -108,6 +108,13 @@ contract Peeranha is IPeeranha, Initializable, Sequrity, ERC20Upgradeable, ERC20
     }
 
     /**
+     * @dev Check user existence.
+     */
+    function isUserExists(address addr) external view returns (bool) {
+        return users.isExists(addr);
+    }
+
+    /**
      * @dev Create new community.
      *
      * Requirements:
