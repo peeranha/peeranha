@@ -44,13 +44,23 @@ describe("Test users", function() {
         return await peeranha.connect(signers[index]).createUser(hash)
       }
     ))
-
+    
     const usersByIndex = await Promise.all(hashContainer.map(async (hash, index) => {
-      return await peeranha.getUserByIndex(index);
+      const user = await peeranha.getUserByIndex(index);
+      const userToCompare = user.map((entry, index) => {
+        return index !== 3 && index != 7 ? entry : 0;
+      })
+      return userToCompare;
     }));
 
+  
+
     const usersByAddress = await Promise.all(signers.slice(0, 3).map(async (addr) => {
-      return await peeranha.getUserByAddress(addr.address);
+      const user = await peeranha.getUserByAddress(addr.address)
+      const userToCompare = user.map((entry, index) => {
+        return index !== 3 && index != 7 ? entry : 0;
+      })
+      return userToCompare;
     }))
 
     expect(JSON.stringify(usersByAddress)).to.equal(JSON.stringify(getUsers(hashContainer)))
@@ -74,8 +84,10 @@ describe("Test users", function() {
 
   const getUsers = (hashes) => {
     const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const creationTime = 0;
+    const rating = 0;
     return hashes.map((hash) => {
-      return [hash, ipfsHash2];
+      return [hash, ipfsHash2, rating, creationTime, []];
     })
   }
 });
