@@ -7,7 +7,7 @@ let peeranha;
 describe('Peeranha (proxy)', function () {
   beforeEach(async function () {
     Peeranha = await ethers.getContractFactory("Peeranha");
-    peeranha = await upgrades.deployProxy(Peeranha, ["Peeranha", "PEER", 100000000 * (10 ** 18)]);
+    peeranha = await upgrades.deployProxy(Peeranha, []);
   });
  
   // Test case

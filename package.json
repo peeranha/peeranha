@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "deploy-goerli": "npx hardhat run --network goerli scripts/deploy.js",
     "post-action-goerli": "npx hardhat run --network goerli scripts/post-action.js",
@@ -19,10 +19,16 @@
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "@openzeppelin/contracts-upgradeable": "^3.4.0",
     "@openzeppelin/hardhat-upgrades": "^1.8.2",
+    "bs58": "^4.0.1",
     "chai": "^4.3.4",
+    "crypto-js": "^4.1.1",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.2.0",
     "hardhat": "^2.3.0",
-    "hardhat-gas-reporter": "^1.0.4"
+    "hardhat-gas-reporter": "^1.0.4",
+    "ipfs-api": "^26.1.2"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
   }
 }

@@ -22,7 +22,9 @@ module.exports = {
   networks: {
     goerli: {
       url: `https://goerli.infura.io/v3/${infuraApiKey}`,
-      accounts: [adminPrivateKey]
+      accounts: [adminPrivateKey],
+      gas: 2100000,
+      gasPrice: 8000000000
     }
   }
 };
