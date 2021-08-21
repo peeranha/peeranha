@@ -15,7 +15,7 @@ describe("Test communities", function() {
 
         await Promise.all(communitiesIds.map(async(id) => {
             const community = await peeranha.getCommunity(id);
-            return await expect(community.ipfsHash).to.equal(ipfsHashes[id - 1]);
+            return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
         }));
     });
 
@@ -25,11 +25,11 @@ describe("Test communities", function() {
 
         await peeranha.createCommunity(0, ipfsHashes[0], createTags(5));
         const community = await peeranha.getCommunity(0);
-        await expect(community.ipfsHash).to.equal(ipfsHashes[0]);
+        await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[0]);
 
         await peeranha.updateCommunity(0, ipfsHashes[1]);
         const changedCommunity = await peeranha.getCommunity(0);
-        await expect(changedCommunity.ipfsHash).to.equal(ipfsHashes[1]);
+        await expect(changedCommunity.ipfsDoc.hash).to.equal(ipfsHashes[1]);
         expect(await peeranha.getCommunitiesCount()).to.equal(1);
     })
 
@@ -44,13 +44,13 @@ describe("Test communities", function() {
 
         expect(tagList.length).to.equal(countOfTags);
         tagList.map((tag, index) => {
-            expect(tag.ipfsHash).to.equal(tags[index].ipfsHash);
+            expect(tag.ipfsDoc.hash).to.equal(tags[index].ipfsDoc.hash);
         })
 
         await peeranha.createTag(1, 6, ipfsHashes[1]);
         const newTagList = await peeranha.getTags(1);
         expect(await peeranha.getTagsCount(1)).to.equal(countOfTags + 1);
-        expect(newTagList[5].ipfsHash).to.equal(ipfsHashes[1]);
+        expect(newTagList[5].ipfsDoc.hash).to.equal(ipfsHashes[1]);
     })
 
     const createContract = async function() {
@@ -68,8 +68,8 @@ describe("Test communities", function() {
         Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
 
     const createTags = (countOfTags) =>
-        getHashesContainer(countOfTags).map((ipfsHash) => {
-            const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-            return { ipfsHash, ipfsHash2 }
+        getHashesContainer(countOfTags).map((hash) => {
+            const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            return {"ipfsDoc": {hash, hash2}}
         });
 });

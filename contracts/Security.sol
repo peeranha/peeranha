@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./libraries/CommunityLib.sol";
 import "./libraries/UserLib.sol";
 
-contract Sequrity is Initializable, ContextUpgradeable {
+contract Security is Initializable, ContextUpgradeable {
     
     function __AccessControl_init() internal initializer {
         __Context_init_unchained();
