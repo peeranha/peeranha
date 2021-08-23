@@ -16,7 +16,6 @@ library CommunityLib {
 
     struct Tag {
         IpfsLib.IpfsHash ipfsDoc;
-        bool isDeleted;
     }
 
     struct CommunityContainer {

@@ -86,7 +86,7 @@ library PostLib  {
         uint256 postCount;
     }
 
-    struct ChangeUserRating {
+    struct UserRatingChange {
         address user;
         int8 rating;
     }
@@ -591,7 +591,7 @@ library PostLib  {
         int8 ratingChanged,      //name?
         TypeContent typeContent
     ) private {
-       ChangeUserRating[] memory usersRating = new ChangeUserRating[](2);
+       UserRatingChange[] memory usersRating = new UserRatingChange[](2);
 
         if (isUpvote) {
             usersRating[0].user = author;
