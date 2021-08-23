@@ -1,6 +1,8 @@
 pragma solidity >=0.5.0;
 
 import "./PostLib.sol";
+import "./CommonLib.sol";
+import "hardhat/console.sol";
 import "./IpfsLib.sol";
 
 /// @title Users
@@ -10,7 +12,8 @@ library UserLib {
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
-    uint32 timeCreate;
+    uint256 creationTime;
+    bytes32[] roles; 
   }
   
   struct UserCollection {
@@ -18,12 +21,12 @@ library UserLib {
     address[] userList;
   }
   
-  event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
+  event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2, uint256 creationTime);
   event UserUpdated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
 
   /// @notice Create new user info record
   /// @param self The mapping containing all users
-  /// @param userAddress Address of the user to create
+  /// @param userAddress Address of the user to create 
   /// @param ipfsHash IPFS hash of document with user information
   function create(
     UserCollection storage self,
@@ -34,10 +37,10 @@ library UserLib {
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
-    user.timeCreate = CommonLib.getTimestamp();
+    user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    emit UserCreated(userAddress, ipfsHash, bytes32(0x0));
+    emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
   }
 
   /// @notice Update new user info record
@@ -99,9 +102,29 @@ library UserLib {
     }
   }
 
-  function updateUserRating(UserCollection storage self, address userAdrr, int8 rating) internal {
+  function updateUserRating(UserCollection storage self, address userAddr, int8 rating) internal {
     if (rating == 0) return;
-    User storage user = getUserByAddress(self, userAdrr);
+    User storage user = getUserByAddress(self, userAddr);
     user.rating += rating;
+  }
+
+  function getPermissions(UserCollection storage self, address userAddr) internal view returns (bytes32[] memory) {
+    return self.users[userAddr].roles;
+  }
+
+  function givePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
+    self.users[userAddr].roles.push(role);
+  }
+
+  function revokePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
+    uint256 length = self.users[userAddr].roles.length;
+    for(uint32 i = 0; i < length; i++) {
+      if(self.users[userAddr].roles[i] == role) {
+        if (i < length - 1) {
+          self.users[userAddr].roles[i] = self.users[userAddr].roles[length - 1];
+          self.users[userAddr].roles.pop();
+        } else self.users[userAddr].roles.pop();
+      }
+    }
   }
 }

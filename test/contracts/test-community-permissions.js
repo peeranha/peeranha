@@ -111,6 +111,7 @@ describe("Test community permissions", function() {
         await peeranha.connect(user).unfreezeCommunity(communitiesIds[0]);
 
         await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        // console.log(await peeranha.getUserPermissions(signers[2].address))
         // await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
         await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         // await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))

@@ -99,6 +99,18 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     }
 
     /**
+     * @dev Get user permissions by address.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.
+     */
+    function getUserPermissions(address addr) external view
+    onlyExisitingUser(users, addr) returns (bytes32[] memory) {
+        return users.getPermissions(addr);
+    }
+
+    /**
      * @dev Create new community.
      *
      * Requirements:
@@ -108,6 +120,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
         _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
+        users.givePermission(msg.sender, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId));
+        users.givePermission(msg.sender, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId));
         communities.createCommunity(communityId, ipfsHash, tags);
     }
 
@@ -162,6 +176,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     onlyExisitingUser(users, user) onlyExistingAndNotFrozenCommunity(communities, communityId) {
         _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+        users.givePermission(user, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId));
+        users.givePermission(user, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId));
     }
 
     /**
@@ -178,6 +194,7 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     onlyExisitingUser(users, user) 
     onlyExistingAndNotFrozenCommunity(communities, communityId) {
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+        users.givePermission(user, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId));
     }
 
     /**
@@ -193,6 +210,7 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     onlyExistingAndNotFrozenCommunity(communities, communityId) 
     onlyExisitingUser(users, user) {
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), user);
+        users.revokePermission(user, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId));
     }
 
     /**
@@ -211,6 +229,7 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     onlyExisitingUser(users, user) 
     onlyExistingAndNotFrozenCommunity(communities, communityId) {
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user);
+        users.revokePermission(user, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId));
     }
 
     /**
