@@ -117,12 +117,12 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      *
      * - Must be a new community.
      */
-    function createCommunity(uint32 communityId, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+    function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        uint32 communityId = communities.createCommunity(ipfsHash, tags);
         _setupRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
         _setupRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
         users.givePermission(msg.sender, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId));
         users.givePermission(msg.sender, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId));
-        communities.createCommunity(communityId, ipfsHash, tags);
     }
 
     /**
@@ -240,8 +240,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - Must be a new tag.
      * - Must be an existing community. 
      */
-    function createTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external {
-        communities.createTag(communityId, tagId, ipfsHash);
+    function createTag(uint32 communityId, bytes32 ipfsHash) external {
+        communities.createTag(communityId, ipfsHash);
     }
 
     /**
