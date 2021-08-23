@@ -16,7 +16,7 @@ describe("Test users", function() {
 
     await Promise.all(hashContainer.map(async (hash, index) => {
       const user = await peeranha.getUserByIndex(index);
-      return await expect(user.ipfsHash).to.equal(hash);
+      return await expect(user.ipfsDoc.hash).to.equal(hash);
     }))
   });
 
@@ -26,10 +26,10 @@ describe("Test users", function() {
     
     await peeranha.createUser(hashContainer[0]);
     const user = await peeranha.getUserByIndex(0);
-    await expect(user.ipfsHash).to.equal(hashContainer[0]);
+    await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
     await peeranha.updateUser(hashContainer[1]);
     const changedUser = await peeranha.getUserByIndex(0);
-    await expect(changedUser.ipfsHash).to.equal(hashContainer[1]);
+    await expect(changedUser.ipfsDoc.hash).to.equal(hashContainer[1]);
 
     expect(await peeranha.getUsersCount()).to.equal(1);
   })

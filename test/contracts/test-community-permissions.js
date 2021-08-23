@@ -142,9 +142,9 @@ describe("Test community permissions", function() {
     const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
     const createTags = (countOfTags) =>
-        getHashesContainer(countOfTags).map((ipfsHash) => {
-            const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-            return { ipfsHash, ipfsHash2 }
+        getHashesContainer(countOfTags).map((hash) => {
+            const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            return {"ipfsDoc": {hash, hash2}}
         });
 
     const createCommunities = async (peeranha, countOfCommunities, communitiesIds) => {
@@ -157,7 +157,7 @@ describe("Test community permissions", function() {
 
         await Promise.all(communitiesIds.map(async(id) => {
             const community = await peeranha.getCommunity(id);
-            return await expect(community.ipfsHash).to.equal(ipfsHashes[id - 1]);
+            return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
         }));
     }
 

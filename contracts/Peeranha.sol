@@ -11,8 +11,6 @@ import "./libraries/PostLib.sol";
 import "./interfaces/IPeeranha.sol";
 import "./Security.sol";
 
-import "hardhat/console.sol";
-
 
 contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     using UserLib for UserLib.UserCollection;

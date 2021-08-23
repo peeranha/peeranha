@@ -3,14 +3,14 @@ pragma solidity >=0.5.0;
 import "./PostLib.sol";
 import "./CommonLib.sol";
 import "hardhat/console.sol";
+import "./IpfsLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
   struct User {
-    bytes32 ipfsHash;
-    bytes32 ipfsHash2; // Not currently used and added for the future compatibility
+    IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     uint256 creationTime;
     bytes32[] roles; 
@@ -33,9 +33,12 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self.users[userAddress].ipfsHash == bytes32(0x0), "User exists");
-    self.users[userAddress].ipfsHash = ipfsHash;
-    self.users[userAddress].creationTime = CommonLib.getTimestamp();
+    require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "User exists");
+
+    User storage user = self.users[userAddress];
+    user.ipfsDoc.hash = ipfsHash;
+    user.creationTime = CommonLib.getTimestamp();
+
     self.userList.push(userAddress);
     emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
   }
@@ -49,8 +52,8 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self.users[userAddress].ipfsHash != bytes32(0x0), "User does not exist");
-    self.users[userAddress].ipfsHash = ipfsHash;
+    require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
+    self.users[userAddress].ipfsDoc.hash = ipfsHash;
     emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
   }
 
@@ -73,7 +76,7 @@ library UserLib {
   /// @param addr Address of the user to get
   function getUserByAddress(UserCollection storage self, address addr) internal view returns (User storage) {
     User storage user = self.users[addr];
-    require(user.ipfsHash != bytes32(0x0), "User does not exist");
+    require(user.ipfsDoc.hash != bytes32(0x0), "User does not exist");
     return user;
   }
 
@@ -81,7 +84,7 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param addr Address of the user to check
   function isExists(UserCollection storage self, address addr) internal view returns (bool) {
-    return self.users[addr].ipfsHash != bytes32(0x0);
+    return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
   /// @notice Add rating to user
@@ -93,7 +96,7 @@ library UserLib {
     user.rating += int32(rating);
   }
 
-  function updateUsersRating(UserCollection storage self, PostLib.UserVote[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, PostLib.UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
