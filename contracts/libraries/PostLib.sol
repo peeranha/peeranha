@@ -86,7 +86,7 @@ library PostLib  {
         uint256 postCount;
     }
 
-    struct UserVote {
+    struct UserRatingChange {
         address user;
         int8 rating;
     }
@@ -574,13 +574,13 @@ library PostLib  {
         comment.info.rating += ratingChange;
     }
 
-    // @notice              ??????
+    // @notice Сount users' rating after voting per a reply or post
     /// @param users The mapping containing all users
     /// @param author Author post, reply or comment where voted
     /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
-    /// @param postRatingChange                                             ///
+    /// @param ratingChanged The value shows how the rating of a post or reply has changed.
     /// @param typeContent Type content post, reply or comment
     function vote (
         UserLib.UserCollection storage users,
@@ -588,23 +588,23 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote,
-        int8 postRatingChange,
+        int8 ratingChanged,      //name?
         TypeContent typeContent
     ) private {
-       UserVote[] memory usersRating = new UserVote[](2);
+       UserRatingChange[] memory usersRating = new UserRatingChange[](2);
 
         if (isUpvote) {
             usersRating[0].user = author;
             usersRating[0].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent);
 
-            if (postRatingChange == 2) {
+            if (ratingChanged == 2) {
                 usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvoted, typeContent) * -1;
 
                 usersRating[1].user = votedUser;
                 usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent) * -1; 
             }
 
-            if (postRatingChange < 0) {
+            if (ratingChanged < 0) {
                 usersRating[0].rating *= -1;
                 usersRating[1].rating *= -1;
             } 
@@ -615,11 +615,11 @@ library PostLib  {
             usersRating[1].user = votedUser;
             usersRating[1].rating = VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Downvote, typeContent);
 
-            if (postRatingChange == -2) {
+            if (ratingChanged == -2) {
                 usersRating[0].rating += VoteLib.getUserRatingChange(postType, VoteLib.ResourceAction.Upvoted, typeContent) * -1;
             }
 
-            if (postRatingChange > 0) {
+            if (ratingChanged > 0) {
                 usersRating[0].rating *= -1;
                 usersRating[1].rating *= -1;  
             }
