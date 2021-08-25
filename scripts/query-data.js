@@ -1,15 +1,25 @@
 const { ethers, upgrades } = require("hardhat");
-const { IPFS_CDN_HOST, IPFS_PROTOCOL, PEERANHA_ADDRESS } = require('../env.json');
+const { IPFS_API_URL, PEERANHA_ADDRESS } = require('../env.json');
+const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const fetch = require("node-fetch");
 
-async function getText(hash) {
-  const response = await fetch(getFileUrl(hash)).then(x => x.text());
-  return response;
+function getIpfsApi() {
+  return create(IPFS_API_URL);
 }
 
-function getFileUrl(hash) {
-  return `${IPFS_PROTOCOL}://${IPFS_CDN_HOST}/${hash}`;
+async function getText(hash) {
+  console.log("Loading IPFS document by hash - " + hash)
+  const bytesIterator = await getIpfsApi().cat(hash);
+  
+  let resultStr = ""
+  let result;
+  {
+    result = await bytesIterator.next();
+    resultStr += result.value.toString();
+  } 
+  while(!result.done)
+  
+  return resultStr;
 }
 
 function getIpfsHashFromBytes32(bytes32Hex) {
@@ -28,11 +38,14 @@ async function main() {
   console.log("\nUsers count:");
   console.log(userCount);
 
-  const user = await peeranha.getUserByIndex(1);
+  console.log("\nUser data from blockchain:")
+  const user = await peeranha.getUserByIndex(0);
+  console.log(JSON.stringify(user));
+
+  console.log("\nUser data from ipfs:")
   // const user = await peeranha.getUserByAddress("0xA78Ad0bEd0A8A09De82e9B243Ed86D3dC5a9f46e");
-  const userData = await getText(getIpfsHashFromBytes32(user.ipfsHash));
-  console.log("\nUser data:")
-  console.log(JSON.parse(userData));
+  const userData = await getText(getIpfsHashFromBytes32(user.ipfsDoc.hash));
+  console.log(userData);
   
 }
 

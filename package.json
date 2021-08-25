@@ -7,6 +7,7 @@
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "deploy-goerli": "npx hardhat run --network goerli scripts/deploy.js",
+    "upgrade-goerli": "npx hardhat run --network goerli scripts/upgrade.js",
     "post-action-goerli": "npx hardhat run --network goerli scripts/post-action.js",
     "query-data-goerli": "npx hardhat run --network goerli scripts/query-data.js"
   },
@@ -26,7 +27,7 @@
     "ethers": "^5.2.0",
     "hardhat": "^2.3.0",
     "hardhat-gas-reporter": "^1.0.4",
-    "ipfs-api": "^26.1.2"
+    "ipfs-http-client": "^52.0.1"
   },
   "dependencies": {
     "node-fetch": "^2.6.1"

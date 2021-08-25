@@ -1,21 +1,17 @@
 const { ethers } = require("hardhat");
-const IpfsAPI = require('ipfs-api');
+const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_HOST, IPFS_API_PORT, IPFS_PROTOCOL, PEERANHA_ADDRESS } = require('../env.json');
+const { IPFS_API_URL, PEERANHA_ADDRESS } = require('../env.json');
 
 
 function getIpfsApi() {
-  return IpfsAPI({
-    host: IPFS_API_HOST,
-    port: IPFS_API_PORT,
-    protocol: IPFS_PROTOCOL,
-  });
+  return create(IPFS_API_URL);
 }
 
 async function saveText(text) {
   const buf = Buffer.from(text, 'utf8');
   const saveResult = await getIpfsApi().add(buf);
-  return saveResult[0].hash;
+  return saveResult.cid.toString();
 }
 
 function getBytes32FromIpfsHash(ipfsListing) {
@@ -33,6 +29,7 @@ const testAccount = {
 
 async function getBytes32FromData(data) {
   const ipfsHash = await saveText(JSON.stringify(data));
+  console.log("Uploaded file to IPFS - " + ipfsHash);
   return getBytes32FromIpfsHash(ipfsHash)
 }
 
@@ -41,7 +38,8 @@ async function main() {
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");
 
-  await peeranha.createUser(await getBytes32FromData(testAccount));
+  result = await peeranha.createUser(await getBytes32FromData(testAccount));
+  console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
 }
 
