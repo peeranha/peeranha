@@ -19,13 +19,51 @@ function getBytes32FromIpfsHash(ipfsListing) {
 }
 
 const testAccount = {
-  displayName: "testAccount",
+  displayName: "testFreitag",
   company: "Peeranha",
   position: "TestInfo",
   location: "TestInfo",
   about: "TestInfo",
   avatar: "f"
 };
+
+const testCommunity = {
+  title: "testCommunity6",
+  description: "testCommunity",
+  website: "www.",
+  language: "ua",
+};
+
+const testTag = {
+  title: "testTag",
+  description: "testCommunity6",
+};
+
+const testTags = { 
+  ipfsDoc: {
+    hash: testTag,
+    hash2: testTag
+  }
+};
+
+async function getTags(countTags) {
+  let tags = [];
+  for(let i = 0; i < countTags; i++) {
+    let text = testTag
+    text.title = "testTag" + i.toString()
+    console.log(text)
+    await tags.push( 
+    { 
+      ipfsDoc:
+      {
+        hash: await getBytes32FromData(text),
+        hash2: await getBytes32FromData(testTag)
+      }
+    })
+  }
+
+  return tags
+}
 
 async function getBytes32FromData(data) {
   const ipfsHash = await saveText(JSON.stringify(data));
@@ -38,9 +76,10 @@ async function main() {
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");
 
-  result = await peeranha.createUser(await getBytes32FromData(testAccount));
-  console.log(JSON.stringify(result))
+  //  result = await peeranha.createUser(await getBytes32FromData(testAccount));
+  // console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
+  await peeranha.createCommunity(6, await getBytes32FromData(testCommunity), await getTags(5));
 }
 
 main()
