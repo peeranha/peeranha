@@ -373,10 +373,6 @@ library PostLib  {
                 UserLib.updateUserRating(users, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply));
             }
         }
-
-        // for (uint16 i = 1; i <= replyContainer.info.replyCount; i++) {
-        //     deductReplyRating(users, postType, replyContainer.replies[i], false);
-        // }
     }
 
     /// @notice Delete comment
