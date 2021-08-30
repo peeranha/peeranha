@@ -37,7 +37,7 @@ library PostLib  {
         address author;
         int32 rating;
         uint32 postTime;
-        uint16 replyCount;
+        uint16 parentReplyId;
         uint8 commentCount;
         uint8 propertyCount;
 
@@ -48,7 +48,6 @@ library PostLib  {
 
     struct ReplyContainer {
         Reply info;
-        mapping(uint16 => ReplyContainer) replies;
         mapping(uint8 => CommentContainer) comments;
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
@@ -92,17 +91,17 @@ library PostLib  {
     }
 
     event PostCreated(address user, uint32 communityId, uint256 postId);
-    event ReplyCreated(address user, uint256 postId, uint16[] path, uint16 replyId);
-    event CommentCreated(address user, uint256 postId, uint16[] path, uint8 commentId);
+    event ReplyCreated(address user, uint256 postId, uint16 parentReplyId, uint16 replyId);
+    event CommentCreated(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event PostEdited(address user, uint256 postId);
-    event ReplyEdited(address user, uint256 postId, uint16[] path, uint16 replyId);
-    event CommentEdited(address user, uint256 postId, uint16[] path, uint8 commentId);
+    event ReplyEdited(address user, uint256 postId, uint16 replyId);
+    event CommentEdited(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event PostDeleted(address user, uint256 postId);
-    event ReplyDeleted(address user, uint256 postId, uint16[] path, uint16 replyId);
-    event CommentDeleted(address user, uint256 postId, uint16[] path, uint8 commentId);
+    event ReplyDeleted(address user, uint256 postId, uint16 replyId);
+    event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16[] path, uint16 replyId, uint8 commentId, bool isUpvote);
+    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote);
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
@@ -136,8 +135,8 @@ library PostLib  {
     /// @notice Post reply
     /// @param self The mapping containing all posts
     /// @param user Author of the reply
-    /// @param postId post where the reply will be post
-    /// @param path The path where the reply will be post 
+    /// @param postId The post where the reply will be post
+    /// @param parentReplyId The reply where the reply will be post
     /// @param ipfsHash IPFS hash of document with reply information
     /// @param isOfficialReply Flag is showing "official reply" or not
     function createReply(
@@ -145,68 +144,67 @@ library PostLib  {
         UserLib.UserCollection storage users,
         address user,
         uint256 postId,
-        uint16[] memory path,
+        uint16 parentReplyId,
         bytes32 ipfsHash,
         bool isOfficialReply
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        PostContainer storage post = getPostContainer(self, postId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
         
         ///
         //update user statistic + rating
         ///
-        ReplyContainer storage reply;
+        ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
-        if (path.length == 0) {
-            reply = post.replies[++post.info.replyCount];
+        if (parentReplyId == 0) {
             if (isOfficialReply)
-                post.info.officialReply = post.info.replyCount;
+                postContainer.info.officialReply = postContainer.info.replyCount;
 
-            if (post.info.postType != PostType.Tutorial) {
-                if (post.info.replyCount == 1) {
-                    reply.info.isFirstReply = true;
-                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.FirstReply));
+            if (postContainer.info.postType != PostType.Tutorial) {
+                if (postContainer.info.replyCount == 1) {
+                    replyContainer.info.isFirstReply = true;
+                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
-                if (timestamp - post.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
-                    reply.info.isQuickReply = true;
-                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(post.info.postType, VoteLib.ResourceAction.QuickReply));
+                if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
+                    replyContainer.info.isQuickReply = true;
+                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
                 }
             }
         } else {
-            reply = getParentReply(post, path);
-            reply = reply.replies[++reply.info.replyCount]; 
+          getReplyContainer(postContainer, parentReplyId);
+          replyContainer.info.parentReplyId = parentReplyId;  
         }
 
-        reply.info.author = user;
-        reply.info.ipfsDoc.hash = ipfsHash;
-        reply.info.postTime = timestamp;
+        replyContainer.info.author = user;
+        replyContainer.info.ipfsDoc.hash = ipfsHash;
+        replyContainer.info.postTime = timestamp;
 
-        emit ReplyCreated(user, postId, path, reply.info.replyCount);
+        emit ReplyCreated(user, postId, parentReplyId, postContainer.info.replyCount);
     }
 
     /// @notice Post comment
     /// @param self The mapping containing all posts
     /// @param user Author of the comment
-    /// @param postId post where the comment will be post
-    /// @param path The path where the comment will be post 
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param postId The post where the comment will be post
+    /// @param parentReplyId The reply where the comment will be post
+    /// @param ipfsHash IPFS hash of document with comment information
     function createComment(
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint16[] memory path,
+        uint16 parentReplyId,
         bytes32 ipfsHash
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        PostContainer storage post = getPostContainer(self, postId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
 
         Comment storage comment;
         uint8 commentId;
-        if (path.length == 0) {
-            commentId = ++post.info.commentCount;
-            comment = post.comments[commentId].info;  
+        if (parentReplyId == 0) {
+            commentId = ++postContainer.info.commentCount;
+            comment = postContainer.comments[commentId].info;  
         } else {
-            ReplyContainer storage reply = getParentReply(post, path);
+            ReplyContainer storage reply = getReplyContainer(postContainer, parentReplyId);
             commentId = ++reply.info.commentCount;
             comment = reply.comments[commentId].info;
         }
@@ -215,14 +213,14 @@ library PostLib  {
         comment.ipfsDoc.hash = ipfsHash;
         comment.postTime = CommonLib.getTimestamp();
 
-        emit CommentCreated(user, postId, path, commentId);
+        emit CommentCreated(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Edit post
     /// @param self The mapping containing all posts
     /// @param user Author of the comment
-    /// @param postId post where the comment will be post
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param postId The post where the comment will be post
+    /// @param ipfsHash IPFS hash of document with post information
     function editPost(                                                  //LAST MODIFIED?
         PostCollection storage self,
         address user,
@@ -231,14 +229,14 @@ library PostLib  {
         bytes32 ipfsHash,
         uint8[] memory tags
     ) internal {
-        PostContainer storage post = getPostContainer(self, postId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
         
-        if(communityId != 0 && post.info.communityId != communityId)
-            post.info.communityId = communityId;
-        if(!IpfsLib.isEmptyIpfs(ipfsHash) && post.info.ipfsDoc.hash != ipfsHash)
-            post.info.ipfsDoc.hash = ipfsHash;
+        if(communityId != 0 && postContainer.info.communityId != communityId)
+            postContainer.info.communityId = communityId;
+        if(!IpfsLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
+            postContainer.info.ipfsDoc.hash = ipfsHash;
         if (tags.length > 0)
-            post.info.tags = tags;
+            postContainer.info.tags = tags;
 
         emit PostEdited(user, postId);
     }
@@ -246,57 +244,55 @@ library PostLib  {
     /// @notice Edit reply
     /// @param self The mapping containing all posts
     /// @param user Author of the comment
-    /// @param postId post where the comment will be post
-    /// @param path The path where the comment will be post 
+    /// @param postId The post where the comment will be post
     /// @param replyId The reply which will be change
     /// @param ipfsHash IPFS hash of document with reply information
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint16[] memory path,
         uint16 replyId,
         bytes32 ipfsHash
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        PostContainer storage post = getPostContainer(self, postId);
-        ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
 
-        if (reply.info.ipfsDoc.hash != ipfsHash)
-            reply.info.ipfsDoc.hash = ipfsHash;
+        if (replyContainer.info.ipfsDoc.hash != ipfsHash)
+            replyContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit ReplyEdited(user, postId, path, replyId);
+        emit ReplyEdited(user, postId, replyId);
     }
 
     /// @notice Edit comment
     /// @param self The mapping containing all posts
     /// @param user Author of the comment
-    /// @param postId Post where the comment will be post
-    /// @param path The path where the comment will be post
+    /// @param postId The post where the comment will be post
+    /// @param parentReplyId The reply where the reply will be edit                                    ///////
     /// @param commentId The comment which will be change
-    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param ipfsHash IPFS hash of document with comment information
     function editComment(                                           //LAST MODIFIED?
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint16[] memory path,
+        uint16 parentReplyId,
         uint8 commentId,
         bytes32 ipfsHash
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        PostContainer storage post = getPostContainer(self, postId);
-        CommentContainer storage comment = getCommentContainer(post, path, commentId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
 
-        if (comment.info.ipfsDoc.hash != ipfsHash)
-            comment.info.ipfsDoc.hash = ipfsHash;
+        if (commentContainer.info.ipfsDoc.hash != ipfsHash)
+            commentContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit CommentEdited(user, postId, path, commentId);
+        emit CommentEdited(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Delete post
     /// @param self The mapping containing all posts
     /// @param user User which deletes post
-    /// @param postId Post which be delete
+    /// @param postId Post which will be deleted
     function deletePost(
         PostCollection storage self,
         UserLib.UserCollection storage users,
@@ -325,29 +321,27 @@ library PostLib  {
     /// @notice Delete reply
     /// @param self The mapping containing all posts
     /// @param user User which deletes reply
-    /// @param postId post where will be deleted reply
-    /// @param path The path where the reply will be deleted
-    /// @param replyId reply which will be deleted
+    /// @param postId The post where will be deleted reply
+    /// @param replyId Reply which will be deleted
     function deleteReply(
         PostCollection storage self,
         UserLib.UserCollection storage users,
         address user,
         uint256 postId,
-        uint16[] memory path,
         uint16 replyId
     ) internal {
         /*
         check author
         */
         PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainer(postContainer, path, replyId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
 
-        deductReplyRating(users, postContainer.info.postType, replyContainer, path.length == 0 && postContainer.info.bestReply == replyId);
+        deductReplyRating(users, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         if (user == replyContainer.info.author)
             UserLib.updateRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
-        emit ReplyDeleted(user, postId, path, replyId);
+        emit ReplyDeleted(user, postId, replyId);
     }
 
     /// @notice Take reply rating from the author
@@ -380,29 +374,29 @@ library PostLib  {
             }
         }
 
-        for (uint16 i = 1; i <= replyContainer.info.replyCount; i++) {
-            deductReplyRating(users, postType, replyContainer.replies[i], false);
-        }
+        // for (uint16 i = 1; i <= replyContainer.info.replyCount; i++) {
+        //     deductReplyRating(users, postType, replyContainer.replies[i], false);
+        // }
     }
 
     /// @notice Delete comment
     /// @param self The mapping containing all posts
     /// @param user User which deletes comment
-    /// @param postId Post where will be deleted сщььуте
-    /// @param path The path where the reply will be deleted
-    /// @param commentId comment which will be deleted
+    /// @param postId The post where will be deleted comment
+    /// @param parentReplyId The reply where the reply will be deleted
+    /// @param commentId Comment which will be deleted
     function deleteComment(
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint16[] memory path,
+        uint16 parentReplyId,
         uint8 commentId
     ) internal {
-        PostContainer storage post = getPostContainer(self, postId);
-        CommentContainer storage comment = getCommentContainer(post, path, commentId);
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
 
-        comment.info.isDeleted = true;
-        emit CommentDeleted(user, postId, path, commentId);
+        commentContainer.info.isDeleted = true;
+        emit CommentDeleted(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Change status official reply
@@ -418,8 +412,7 @@ library PostLib  {
     ) internal {
         // check permistion
         PostContainer storage postContainer = getPostContainer(self, postId);
-        uint16[] memory path;
-        getReplyContainer(postContainer, path, replyId);
+        getReplyContainer(postContainer, replyId);
          
         if (postContainer.info.officialReply == replyId)
             postContainer.info.officialReply = 0;
@@ -432,7 +425,7 @@ library PostLib  {
     /// @notice Change status best reply
     /// @param self The mapping containing all posts
     /// @param user Who called action
-    /// @param postId Post where will be change reply status
+    /// @param postId The post where will be change reply status
     /// @param replyId Reply which will change status
     function changeStatusBestReply (
         PostCollection storage self,
@@ -442,8 +435,7 @@ library PostLib  {
         uint16 replyId
     ) internal {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        uint16[] memory path;
-        ReplyContainer storage replyContainer = getReplyContainer(postContainer, path, replyId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
 
         if (postContainer.info.bestReply == replyId) {
             users.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
@@ -451,7 +443,7 @@ library PostLib  {
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
-                ReplyContainer storage oldBestReplyContainer = getReplyContainer(postContainer, path, replyId);
+                ReplyContainer storage oldBestReplyContainer = getReplyContainer(postContainer, replyId);
                 users.updateUserRating(oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
                 users.updateUserRating(user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
             }
@@ -469,7 +461,6 @@ library PostLib  {
     /// @param users The mapping containing all users
     /// @param user Who called action
     /// @param postId Post where will be change rating
-    /// @param path The path where the reply will be change rating
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
     /// @param isUpvote Upvote or downvote
@@ -478,100 +469,99 @@ library PostLib  {
         UserLib.UserCollection storage users,
         address user,
         uint256 postId,
-        uint16[] memory path,
         uint16 replyId,
         uint8 commentId,
         bool isUpvote
     ) internal {
-        PostContainer storage post = getPostContainer(self, postId);
-        PostType postType = post.info.postType;
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        PostType postType = postContainer.info.postType;
  
         if (commentId != 0) {
-            CommentContainer storage comment = getCommentContainer(post, path, commentId);
+            CommentContainer storage comment = getCommentContainer(postContainer, replyId, commentId);
             voteComment(comment, user, isUpvote);
         } else if (replyId != 0) {
-            ReplyContainer storage reply = getReplyContainer(post, path, replyId);
+            ReplyContainer storage reply = getReplyContainer(postContainer, replyId);
             voteReply(users, reply, user, postType, isUpvote);
         } else {
-            votePost(users, post, user, postType, isUpvote);
+            votePost(users, postContainer, user, postType, isUpvote);
         }
 
-        emit ForumItemVoted(user, postId, path, replyId, commentId, isUpvote);
+        emit ForumItemVoted(user, postId, replyId, commentId, isUpvote);
     }
 
     // @notice Vote for post
     /// @param users The mapping containing all users
-    /// @param post Post where will be change rating
+    /// @param postContainer Post where will be change rating
     /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
     function votePost(
         UserLib.UserCollection storage users,
-        PostContainer storage post,
+        PostContainer storage postContainer,
         address votedUser,
         PostType postType,
         bool isUpvote
     ) private {
-        require(votedUser != post.info.author, "You can't vote for own post");
-        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, post.historyVotes, isUpvote, post.votedUsers);
+        require(votedUser != postContainer.info.author, "You can't vote for own post");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
 
-        vote(users, post.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
-        post.info.rating += ratingChange;
+        vote(users, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
+        postContainer.info.rating += ratingChange;
     }
  
     // @notice Vote for reply
     /// @param users The mapping containing all users
-    /// @param reply Reply where will be change rating
+    /// @param replyContainer Reply where will be change rating
     /// @param votedUser User which voted
     /// @param postType Type post expert, common, tutorial
     /// @param isUpvote Upvote or downvote
     function voteReply(
         UserLib.UserCollection storage users,
-        ReplyContainer storage reply,
+        ReplyContainer storage replyContainer,
         address votedUser,
         PostType postType,
         bool isUpvote
     ) private {
-        require(votedUser != reply.info.author, "You can't vote for own reply");
-        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, reply.historyVotes, isUpvote, reply.votedUsers);
+        require(votedUser != replyContainer.info.author, "You can't vote for own reply");
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         if (postType == PostType.Tutorial) return;
 
-        vote(users, reply.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
-        int32 oldRating = reply.info.rating;
-        reply.info.rating += ratingChange;
-        int32 newRating = reply.info.rating; // or oldRating + ratingChange gas
+        vote(users, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
+        int32 oldRating = replyContainer.info.rating;
+        replyContainer.info.rating += ratingChange;
+        int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
-        if (reply.info.isFirstReply) {
+        if (replyContainer.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
             }
         }
 
-        if (reply.info.isQuickReply) {
+        if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, reply.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, reply.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             }
         }
     }
 
     // @notice Vote for comment
-    /// @param comment Comment where will be change rating
+    /// @param commentContainer Comment where will be change rating
     /// @param votedUser User which voted
     /// @param isUpvote Upvote or downvote
     function voteComment(
-        CommentContainer storage comment,
+        CommentContainer storage commentContainer,
         address votedUser,
         bool isUpvote
     ) private {
-        require(votedUser != comment.info.author, "You can't vote for own comment");
+        require(votedUser != commentContainer.info.author, "You can't vote for own comment");
         //check user
-        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, comment.historyVotes, isUpvote, comment.votedUsers);
+        int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         
-        comment.info.rating += ratingChange;
+        commentContainer.info.rating += ratingChange;
     }
 
     // @notice Сount users' rating after voting per a reply or post
@@ -640,73 +630,43 @@ library PostLib  {
         
         return post;
     }
-
-    /// @notice Return parent reply
-    /// @param post Post where is the reply
-    /// @param path The path to parent reply
-    function getParentReply(
-        PostContainer storage post,
-        uint16[] memory path
-    ) private view returns (ReplyContainer storage) {
-        ReplyContainer storage reply;
-
-        uint256 lenght = path.length;
-        reply = post.replies[path[0]];
-        require(!IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
-        require(!reply.info.isDeleted, "Reply has been deleted.");
-        for(uint256 i = 1; i < lenght; i++) {
-            reply = reply.replies[path[i]];
-            require(!IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
-            require(!reply.info.isDeleted, "Reply has been deleted.");
-        }
-        
-        return reply;
-    }
-
+    
     /// @notice Return reply
-    /// @param post Post where is the reply
-    /// @param path The path to parent reply
+    /// @param postContainer The post where is the reply
     /// @param replyId The replyId which need find
     function getReplyContainer(
-        PostContainer storage post,
-        uint16[] memory path,
+        PostContainer storage postContainer,
         uint16 replyId
     ) internal view returns (ReplyContainer storage) {
-        ReplyContainer storage reply;
+        ReplyContainer storage replyContainer;
+        replyContainer = postContainer.replies[replyId];
 
-        if (path.length == 0) {
-            reply = post.replies[replyId];
-        } else {
-            reply = reply = getParentReply(post, path);
-            reply = reply.replies[replyId];
-        }
+        require(!replyContainer.info.isDeleted, "Reply has been deleted.");
+        require(!IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply does not exist.");
 
-        require(!reply.info.isDeleted, "Reply has been deleted.");
-        require(!IpfsLib.isEmptyIpfs(reply.info.ipfsDoc.hash), "Reply does not exist.");
-
-        return reply;
+        return replyContainer;
     }
 
     /// @notice Return comment
-    /// @param post Post where is the comment
-    /// @param path The path to parent reply
+    /// @param postContainer The post where is the comment
+    /// @param parentReplyId The parent reply
     /// @param commentId The commentId which need find
     function getCommentContainer(
-        PostContainer storage post,
-        uint16[] memory path,
+        PostContainer storage postContainer,
+        uint16 parentReplyId,
         uint8 commentId
     ) private view returns (CommentContainer storage) {
-        CommentContainer storage comment;
+        CommentContainer storage commentContainer;
 
-        if (path.length == 0) {
-            comment = post.comments[commentId];  
+        if (parentReplyId == 0) {
+            commentContainer = postContainer.comments[commentId];  
         } else {
-            ReplyContainer storage reply = getParentReply(post, path);
-            comment = reply.comments[commentId];
+            ReplyContainer storage reply = getReplyContainer(postContainer, parentReplyId);
+            commentContainer = reply.comments[commentId];
         }
-        require(!comment.info.isDeleted, "Comment has been deleted.");
-        require(!IpfsLib.isEmptyIpfs(comment.info.ipfsDoc.hash), "Comment does not exist.");
-        return comment;
+        require(!commentContainer.info.isDeleted, "Comment has been deleted.");
+        require(!IpfsLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment does not exist.");
+        return commentContainer;
     }
 
     /// @notice Return post for unit tests
@@ -721,31 +681,29 @@ library PostLib  {
 
     /// @notice Return reply for unit tests
     /// @param self The mapping containing all posts
-    /// @param postId Post where is the reply
-    /// @param path The path to parent reply
+    /// @param postId The post where is the reply
     /// @param replyId The reply which need find
     function getReply(
         PostCollection storage self, 
         uint256 postId, 
-        uint16[] memory path, 
         uint16 replyId
     ) internal view returns (Reply memory) {
-        PostContainer storage post = self.posts[postId];
-        return getReplyContainer(post, path, replyId).info;
+        PostContainer storage postContainer = self.posts[postId];
+        return getReplyContainer(postContainer, replyId).info;
     }
 
     /// @notice Return comment for unit tests
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply
-    /// @param path The path to parent reply
+    /// @param parentReplyId The parent reply
     /// @param commentId The comment which need find
     function getComment(
         PostCollection storage self, 
-        uint256 postId, 
-        uint16[] memory path, 
+        uint256 postId,
+        uint16 parentReplyId,
         uint8 commentId
     ) internal view returns (Comment memory) {
-        PostContainer storage post = self.posts[postId];
-        return getCommentContainer(post, path, commentId).info;
+        PostContainer storage postContainer = self.posts[postId];
+        return getCommentContainer(postContainer, parentReplyId, commentId).info;
     }
 }
