@@ -40,9 +40,9 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
 
-		const reply = await peeranha.getReply(1, [], 1);
+		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
@@ -56,7 +56,7 @@ describe("Test post", function () {
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.deletePost(1);
 
-		await expect(peeranha.createReply(1, [], hashContainer[1], false)).to.be.revertedWith('Post has been deleted.');
+		await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Post has been deleted.');
 	});
 
 	it("Test create reply without post", async function () {
@@ -64,7 +64,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 		await peeranha.createUser(hashContainer[1]);
 
-		await expect(peeranha.createReply(1, [], hashContainer[1], false)).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test create comment", async function () {
@@ -73,9 +73,9 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createComment(1, [], hashContainer[1]);
+		await peeranha.createComment(1, 0, hashContainer[1]);
 
-		const comment = await peeranha.getComment(1, [], 1);
+		const comment = await peeranha.getComment(1, 0, 1);
 		await expect(comment.author).to.equal(peeranha.deployTransaction.from);
 		await expect(comment.isDeleted).to.equal(false);
 		await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
@@ -89,7 +89,7 @@ describe("Test post", function () {
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.deletePost(1);
 
-		await expect(peeranha.createComment(1, [], hashContainer[1])).to.be.revertedWith('Post has been deleted.');
+		await expect(peeranha.createComment(1, 0, hashContainer[1])).to.be.revertedWith('Post has been deleted.');
 	});
 
 	it("Test create comment, reply has been deleted", async function () {
@@ -98,10 +98,10 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.deleteReply(1, [], 1);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await peeranha.deleteReply(1, 1);
 		
-		await expect(peeranha.createComment(1, [1], hashContainer[1])).to.be.revertedWith('Reply has been deleted.');
+		await expect(peeranha.createComment(1, 1, hashContainer[1])).to.be.revertedWith('Reply has been deleted.');
 	});
 
 	it("Test create comment without post", async function () {
@@ -109,7 +109,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 		await peeranha.createUser(hashContainer[1]);
 
-		await expect(peeranha.createComment(1, [], hashContainer[1])).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.createComment(1, 0, hashContainer[1])).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test create comment without reply", async function () {
@@ -149,10 +149,10 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.editReply(1, [], 1, hashContainer[2]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await peeranha.editReply(1, 1, hashContainer[2]);
 
-		const reply = await peeranha.getReply(1, [], 1);
+		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
@@ -163,7 +163,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 		await peeranha.createUser(hashContainer[1]);
 
-		await expect(peeranha.editReply(1, [], 1, hashContainer[2])).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.editReply(1, 1, hashContainer[2])).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test edit reply, without reply", async function () {
@@ -172,7 +172,7 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await expect(peeranha.editReply(1, [], 1, hashContainer[2])).to.be.revertedWith('Reply does not exist.');
+		await expect(peeranha.editReply(1, 1, hashContainer[2])).to.be.revertedWith('Reply does not exist.');
 	});
 
 	it("Test edit comment ", async function () {
@@ -181,10 +181,10 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createComment(1, [], hashContainer[1]);
-		await peeranha.editComment(1, [], 1, hashContainer[2]);
+		await peeranha.createComment(1, 0, hashContainer[1]);
+		await peeranha.editComment(1, 0, 1, hashContainer[2]);
 
-		const reply = await peeranha.getComment(1, [], 1);
+		const reply = await peeranha.getComment(1, 0, 1);
 		await expect(reply.author).to.equal(peeranha.deployTransaction.from);
 		await expect(reply.isDeleted).to.equal(false);
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
@@ -195,7 +195,7 @@ describe("Test post", function () {
 		const hashContainer = getHashContainer();
 		await peeranha.createUser(hashContainer[1]);
 
-		await expect(peeranha.editComment(1, [], 1, hashContainer[2])).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test edit comment, without reply", async function () {
@@ -204,7 +204,7 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await expect(peeranha.editComment(1, [1], 1, hashContainer[2])).to.be.revertedWith('Reply does not exist.');
+		await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Reply does not exist.');
 	});
 
 	it("Test edit comment, without comment", async function () {
@@ -213,8 +213,8 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await expect(peeranha.editComment(1, [1], 1, hashContainer[2])).to.be.revertedWith('Comment does not exist.');
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Comment does not exist.');
 	});
 
 	it("Test delete post", async function () {
@@ -239,16 +239,15 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await peeranha.deleteReply(1, [], 1);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await peeranha.deleteReply(1, 1);
 
-		await expect(peeranha.getReply(1, [], 1)).to.be.revertedWith('Reply has been deleted.');
+		await expect(peeranha.getReply(1, 1)).to.be.revertedWith('Reply has been deleted.');
 	});
 
 	it("Test delete reply, without post", async function () {
 		const peeranha = await createContract();
-
-		await expect(peeranha.deleteReply(1, [], 1)).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test delete reply, without reply", async function () {
@@ -257,7 +256,7 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await expect(peeranha.deleteReply(1, [], 1)).to.be.revertedWith('Reply does not exist.');
+		await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('Reply does not exist.');
 	});
 
 	it("Test delete comment ", async function () {
@@ -266,16 +265,15 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.createComment(1, [], hashContainer[1]);
-		await peeranha.deleteComment(1, [], 1);
+		await peeranha.createComment(1, 0, hashContainer[1]);
+		await peeranha.deleteComment(1, 0, 1);
 
-		await expect(peeranha.getComment(1, [], 1)).to.be.revertedWith('Comment has been deleted.');
+		await expect(peeranha.getComment(1, 0, 1)).to.be.revertedWith('Comment has been deleted.');
 	});
 
 	it("Test delete comment, without post", async function () {
 		const peeranha = await createContract();
-
-		await expect(peeranha.deleteComment(1, [], 1)).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.deleteComment(1, 0, 1)).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test delete comment, without reply", async function () {
@@ -293,10 +291,10 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await expect(peeranha.deleteComment(1, [], 1)).to.be.revertedWith('Comment does not exist.');
+		await expect(peeranha.deleteComment(1, 0, 1)).to.be.revertedWith('Comment does not exist.');
 
-		await peeranha.createReply(1, [], hashContainer[1], false);
-		await expect(peeranha.deleteComment(1, [1], 1)).to.be.revertedWith('Comment does not exist.');
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await expect(peeranha.deleteComment(1, 1, 1)).to.be.revertedWith('Comment does not exist.');
 	});
 
 	const createContract = async function () {
