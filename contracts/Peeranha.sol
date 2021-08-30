@@ -358,8 +358,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(uint256 postId, uint16[] memory path, bytes32 ipfsHash, bool isOfficialReply) external override {
-        posts.createReply(users, msg.sender, postId, path, ipfsHash, isOfficialReply);
+    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.createReply(users, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -370,8 +370,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint256 postId, uint16[] memory path, uint16 replyId, bytes32 ipfsHash) external override { 
-        posts.editReply(msg.sender, postId, path, replyId, ipfsHash);
+    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external override { 
+        posts.editReply(msg.sender, postId, replyId, ipfsHash);
     }
 
     /**
@@ -381,8 +381,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      *
      * - must be a reply.
     */
-    function deleteReply(uint256 postId, uint16[] memory path, uint16 replyId) external override { 
-        posts.deleteReply(users, msg.sender, postId, path, replyId);
+    function deleteReply(uint256 postId, uint16 replyId) external override { 
+        posts.deleteReply(users, msg.sender, postId, replyId);
     }
 
     /**
@@ -393,8 +393,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(uint256 postId, uint16[] memory path, bytes32 ipfsHash) external override {
-        posts.createComment(msg.sender, postId, path, ipfsHash);
+    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
+        posts.createComment(msg.sender, postId, parentReplyId, ipfsHash);
     }
 
     /**
@@ -405,8 +405,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(uint256 postId, uint16[] memory path, uint8 commentId, bytes32 ipfsHash) external override {
-        posts.editComment(msg.sender, postId, path, commentId, ipfsHash);
+    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.editComment(msg.sender, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
@@ -416,8 +416,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      *
      * - must be a comment.
     */
-    function deleteComment(uint256 postId, uint16[] memory path, uint8 commentId) external override {
-        posts.deleteComment(msg.sender, postId, path, commentId);
+    function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
+        posts.deleteComment(msg.sender, postId, parentReplyId, commentId);
     }
 
     /**
@@ -444,8 +444,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      * - must be a post/reply/comment.
      * - rating user. ?
     */ 
-    function voteItem(uint256 postId, uint16[] memory path, uint16 replyId, uint8 commentId, bool isUpvote) external override {
-        posts.voteForumItem(users, msg.sender, postId, path, replyId, commentId, isUpvote);
+    function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.voteForumItem(users, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
     /**
@@ -466,8 +466,8 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      *
      * - must be a reply.
     */
-    function getReply(uint256 postId, uint16[] memory path, uint16 replyId) external view returns (PostLib.Reply memory) {
-        return posts.getReply(postId, path, replyId);
+    function getReply(uint256 postId, uint16 replyId) external view returns (PostLib.Reply memory) {
+        return posts.getReply(postId, replyId);
     }
 
     /**
@@ -477,7 +477,7 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
      *
      * - must be a comment.
     */
-    function getComment(uint256 postId, uint16[] memory path, uint8 commentId) external view returns (PostLib.Comment memory) {
-        return posts.getComment(postId, path, commentId);
+    function getComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external view returns (PostLib.Comment memory) {
+        return posts.getComment(postId, parentReplyId, commentId);
     }
 }
