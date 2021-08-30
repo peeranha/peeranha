@@ -28,22 +28,15 @@ const testAccount = {
 };
 
 const testCommunity = {
-  title: "testCommunity6",
-  description: "testCommunity",
-  website: "www.",
-  language: "ua",
+  title: "testCommunity6.new",
+  description: "testCommunity.new",
+  website: "www.new",
+  language: "ua.new",
 };
 
 const testTag = {
   title: "testTag",
   description: "testCommunity6",
-};
-
-const testTags = { 
-  ipfsDoc: {
-    hash: testTag,
-    hash2: testTag
-  }
 };
 
 async function getTags(countTags) {
@@ -79,7 +72,8 @@ async function main() {
   //  result = await peeranha.createUser(await getBytes32FromData(testAccount));
   // console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
-  await peeranha.createCommunity(6, await getBytes32FromData(testCommunity), await getTags(5));
+  // await peeranha.createCommunity(6, await getBytes32FromData(testCommunity), await getTags(5));
+  await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
 }
 
 main()
