@@ -73,7 +73,9 @@ async function main() {
   // console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
   // await peeranha.createCommunity(6, await getBytes32FromData(testCommunity), await getTags(5));
-  await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
+  // await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
+  await peeranha.freezeCommunity(6);
+  // await peeranha.unfreezeCommunity(6);
 }
 
 main()
