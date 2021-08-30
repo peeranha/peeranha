@@ -8,7 +8,7 @@ describe("Test communities", function() {
         const communitiesIds = getIdsContainer(countOfCommunities);
         const ipfsHashes = getHashesContainer(countOfCommunities);
         await Promise.all(communitiesIds.map(async(id) => {
-            return await peeranha.createCommunity(id, ipfsHashes[id - 1], createTags(5));
+            return await peeranha.createCommunity(ipfsHashes[id - 1], createTags(5));
         }));
 
         expect(await peeranha.getCommunitiesCount()).to.equal(countOfCommunities)
@@ -23,12 +23,12 @@ describe("Test communities", function() {
         const peeranha = await createContract();
         const ipfsHashes = getHashesContainer(2);
 
-        await peeranha.createCommunity(0, ipfsHashes[0], createTags(5));
-        const community = await peeranha.getCommunity(0);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+        const community = await peeranha.getCommunity(1);
         await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[0]);
 
-        await peeranha.updateCommunity(0, ipfsHashes[1]);
-        const changedCommunity = await peeranha.getCommunity(0);
+        await peeranha.updateCommunity(1, ipfsHashes[1]);
+        const changedCommunity = await peeranha.getCommunity(1);
         await expect(changedCommunity.ipfsDoc.hash).to.equal(ipfsHashes[1]);
         expect(await peeranha.getCommunitiesCount()).to.equal(1);
     })
@@ -39,7 +39,7 @@ describe("Test communities", function() {
         const countOfTags = 5;
         const tags = createTags(countOfTags);
 
-        await peeranha.createCommunity(1, ipfsHashes[0], tags);
+        await peeranha.createCommunity(ipfsHashes[0], tags);
         const tagList = await peeranha.getTags(1);
 
         expect(tagList.length).to.equal(countOfTags);
@@ -47,7 +47,7 @@ describe("Test communities", function() {
             expect(tag.ipfsDoc.hash).to.equal(tags[index].ipfsDoc.hash);
         })
 
-        await peeranha.createTag(1, 6, ipfsHashes[1]);
+        await peeranha.createTag(1, ipfsHashes[1]);
         const newTagList = await peeranha.getTags(1);
         expect(await peeranha.getTagsCount(1)).to.equal(countOfTags + 1);
         expect(newTagList[5].ipfsDoc.hash).to.equal(ipfsHashes[1]);

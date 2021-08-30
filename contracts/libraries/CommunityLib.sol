@@ -47,18 +47,12 @@ library CommunityLib {
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
-    /// @param id Id of the community to create
     /// @param ipfsHash IPFS hash of document with community information
     function createCommunity(
         CommunityCollection storage self,
-        uint32 id,
         bytes32 ipfsHash,
         Tag[] memory tags
-    ) internal {
-        require(
-            self.communities[id].info.ipfsDoc.hash == bytes32(0x0),
-            "Community exists"
-        );
+    ) internal returns(uint32){
         require(
             tags.length >= 5, 
             "Require at least 5 tags"
@@ -73,7 +67,7 @@ library CommunityLib {
                 }
             }
         }
-        CommunityContainer storage community = self.communities[id];
+        CommunityContainer storage community = self.communities[++self.communityCount];
         community.info.ipfsDoc.hash = ipfsHash;
         community.info.tagsCount = uint8(tags.length);
         community.info.timeCreate = CommonLib.getTimestamp();
@@ -81,8 +75,8 @@ library CommunityLib {
         for (uint32 i = 1; i <= uint32(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
-        self.communityCount++;
-        emit CommunityCreated(id, ipfsHash, bytes32(0x0), tags);
+        emit CommunityCreated(self.communityCount, ipfsHash, bytes32(0x0), tags);
+        return self.communityCount;
     }
 
     /// @notice Update community info record
@@ -101,20 +95,17 @@ library CommunityLib {
     /// @notice Create new tag info record
     /// @param self The mapping containing all communities
     /// @param communityId Id of the community in which tag is creating
-    /// @param tagId Id of the tag to create
     /// @param ipfsHash IPFS hash of document with community information
     function createTag (
         CommunityCollection storage self, 
         uint32 communityId,
-        uint32 tagId,
         bytes32 ipfsHash
     ) internal onlyExistingAndNotFrozen(self, communityId) {
         CommunityContainer storage community = self.communities[communityId];
-        Tag storage newTag = community.tags[tagId];
+        Tag storage newTag = community.tags[++community.info.tagsCount];
         require(newTag.ipfsDoc.hash == bytes32(0x0), "Tag exists");
         newTag.ipfsDoc.hash = ipfsHash;
-        community.info.tagsCount++;
-        emit TagCreated(tagId, communityId, ipfsHash, bytes32(0x0));
+        emit TagCreated(community.info.tagsCount, communityId, ipfsHash, bytes32(0x0));
     }
 
     /// @notice Get the number of communities

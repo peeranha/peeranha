@@ -105,7 +105,7 @@ describe("Test community permissions", function() {
         let user = signers[1];
         const userAddress = user.address;
 
-        await peeranha.connect(user).createCommunity(communitiesIds[0], getHash(), createTags(5))
+        await peeranha.connect(user).createCommunity(getHash(), createTags(5))
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
         await peeranha.connect(user).freezeCommunity(communitiesIds[0]);
         await peeranha.connect(user).unfreezeCommunity(communitiesIds[0]);
@@ -150,7 +150,7 @@ describe("Test community permissions", function() {
     const createCommunities = async (peeranha, countOfCommunities, communitiesIds) => {
         const ipfsHashes = getHashesContainer(countOfCommunities);
         await Promise.all(communitiesIds.map(async(id) => {
-            return await peeranha.createCommunity(id, ipfsHashes[id - 1], createTags(5));
+            return await peeranha.createCommunity(ipfsHashes[id - 1], createTags(5));
         }));
 
         expect(await peeranha.getCommunitiesCount()).to.equal(countOfCommunities)
