@@ -35,8 +35,8 @@ const testCommunity = {
 };
 
 const testTag = {
-  title: "testTag",
-  description: "testCommunity6",
+  title: "testTagNew",
+  description: "testNewTag1",
 };
 
 async function getTags(countTags) {
@@ -72,10 +72,11 @@ async function main() {
   //  result = await peeranha.createUser(await getBytes32FromData(testAccount));
   // console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
-  // await peeranha.createCommunity(6, await getBytes32FromData(testCommunity), await getTags(5));
+  // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
   // await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
-  await peeranha.freezeCommunity(6);
-  // await peeranha.unfreezeCommunity(6);
+  // await peeranha.freezeCommunity(1);
+  // await peeranha.unfreezeCommunity(1);
+  await peeranha.createTag(1, await getBytes32FromData(testTag))
 }
 
 main()

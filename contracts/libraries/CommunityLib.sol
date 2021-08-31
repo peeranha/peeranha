@@ -41,7 +41,7 @@ library CommunityLib {
 
     event CommunityCreated(uint32 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
     event CommunityUpdated(uint32 id, bytes32 ipfsHash);
-    event TagCreated(uint32 communityId, uint32 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
+    event TagCreated(uint32 communityId, uint32 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);    //tagId uint8
     event CommunityFrozen(uint32 commintyId);
     event CommunityUnfrozen(uint32 commintyId);
 
