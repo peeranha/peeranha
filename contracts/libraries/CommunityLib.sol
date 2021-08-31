@@ -163,7 +163,7 @@ library CommunityLib {
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to freeze
     function freeze(CommunityCollection storage self, uint32 communityId)  
-    internal onlyExistingAndNotFrozen(self, communityId) {                          // rename to freezeCommunity
+    internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].info.isFrozen = true;
         emit CommunityFrozen(communityId);
     }
@@ -171,7 +171,7 @@ library CommunityLib {
     /// @notice Unfreeze the community
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to unfreeze
-    function unfreeze(CommunityCollection storage self, uint32 communityId) internal { // rename to unfreezeCommunity
+    function unfreeze(CommunityCollection storage self, uint32 communityId) internal {
         require(
             self.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
             "Community does not exist"
