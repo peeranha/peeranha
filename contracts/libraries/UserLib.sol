@@ -9,11 +9,14 @@ import "./IpfsLib.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
+  using CommunityLib for CommunityLib.CommunityCollection;
+
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     uint256 creationTime;
-    bytes32[] roles; 
+    bytes32[] roles;
+    uint32[] followCommunity; 
   }
   
   struct UserCollection {
@@ -23,6 +26,9 @@ library UserLib {
   
   event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2, uint256 creationTime);
   event UserUpdated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
+  event FollowCommunity(address userAddress, uint32 communityId);
+  // event UnfollowCommunity(address userAddress, uint32 communityId);
+
 
   /// @notice Create new user info record
   /// @param self The mapping containing all users
@@ -55,6 +61,46 @@ library UserLib {
     require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
     self.users[userAddress].ipfsDoc.hash = ipfsHash;
     emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
+  }
+
+  /// @notice User follows community
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to update
+  /// @param communityId User follows om this community
+  function followCommunity(
+    UserCollection storage self,
+    address userAddress,
+    uint32 communityId
+  ) internal {
+    User storage user = self.users[userAddress];
+    for (uint i; i < user.followCommunity.length; i++) {
+      require(user.followCommunity[i] != communityId, "You already follow the community");
+    }
+    user.followCommunity.push(communityId);
+
+    emit FollowCommunity(userAddress, communityId);
+  }
+
+  /// @notice User usfollows community
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to update
+  /// @param communityId User follows om this community
+  function unfollowCommunity(
+    UserCollection storage self,
+    address userAddress,
+    uint32 communityId
+  ) internal {
+    User storage user = self.users[userAddress];
+
+    for (uint i; i < user.followCommunity.length; i++) {
+      if (user.followCommunity[i] == communityId) {
+        delete user.followCommunity[i];
+        
+        // emit UnfollowCommunity(userAddress, communityId);
+        return;
+      }
+    }
+    require(false, "You do not follow the community");
   }
 
   /// @notice Get the number of users
