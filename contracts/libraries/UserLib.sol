@@ -87,22 +87,17 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  /// @notice Add rating to user
-  /// @param self The mapping containing all users
-  /// @param addr user's rating will be change
-  /// @param rating value for add to user's rating
-  function updateRating(UserCollection storage self, address addr, int rating) internal {
-    User storage user = getUserByAddress(self, addr);
-    user.rating += int32(rating);
-  }
-
   function updateUsersRating(UserCollection storage self, PostLib.UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
   }
 
-  function updateUserRating(UserCollection storage self, address userAddr, int8 rating) internal {
+  /// @notice Add rating to user
+  /// @param self The mapping containing all users
+  /// @param userAddr user's rating will be change
+  /// @param rating value for add to user's rating
+  function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
     if (rating == 0) return;
     User storage user = getUserByAddress(self, userAddr);
     user.rating += rating;
