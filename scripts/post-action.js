@@ -3,6 +3,7 @@ const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
 const { IPFS_API_URL, PEERANHA_ADDRESS } = require('../env.json');
 
+const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
 
 function getIpfsApi() {
   return create(IPFS_API_URL);
@@ -19,7 +20,7 @@ function getBytes32FromIpfsHash(ipfsListing) {
 }
 
 const testAccount = {
-  displayName: "testFreitag",
+  displayName: "testMainAcc",
   company: "Peeranha",
   position: "TestInfo",
   location: "TestInfo",
@@ -37,6 +38,19 @@ const testCommunity = {
 const testTag = {
   title: "testTagNew",
   description: "testNewTag1",
+};
+
+const testPost = {
+  title: "Test 1 post edited",
+  content: "Edited"
+};
+
+const testReply = {
+  content: "Second reply postID 1"
+};
+
+const testComment = {
+  content: "Edited First comment postID 1"
 };
 
 async function getTags(countTags) {
@@ -76,7 +90,18 @@ async function main() {
   // await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
   // await peeranha.freezeCommunity(1);
   // await peeranha.unfreezeCommunity(1);
-  await peeranha.createTag(1, await getBytes32FromData(testTag))
+  // await peeranha.createTag(1, await getBytes32FromData(testTag));
+  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
+  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
+  // await peeranha.editPost(1, 1, await getBytes32FromData(testPost), [1, 2]);
+  // await peeranha.deletePost(2);
+  // await peeranha.createReply(1, 0, await getBytes32FromData(testReply), false);  //true
+  // await peeranha.editReply(1, 1, await getBytes32FromData(testReply));
+  // await peeranha.deleteReply(1, 1);
+  // await peeranha.createComment(1, 0, await getBytes32FromData(testComment));
+  // await peeranha.editComment(1, 0, 1, await getBytes32FromData(testComment));
+  // await peeranha.deleteComment(1, 0, 1);
+  await peeranha.voteItem(1, 0, 3, true);
 }
 
 main()
