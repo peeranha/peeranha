@@ -412,7 +412,7 @@ library PostLib  {
         else
             postContainer.info.officialReply = replyId;
         
-        emit StatusOfficialReplyChanged(user, postId, replyId);
+        emit StatusOfficialReplyChanged(user, postId, postContainer.info.officialReply);
     }
 
     /// @notice Change status best reply
@@ -446,7 +446,7 @@ library PostLib  {
             postContainer.info.bestReply = replyId;
         }
 
-        // emit StatusBestReplyChanged(user, postId, replyId);
+        // emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
     }
 
     /// @notice Vote for post, reply or comment
