@@ -39,11 +39,11 @@ library CommunityLib {
         _;
     }
 
-    event CommunityCreated(uint32 id, bytes32 ipfsHash, bytes32 ipfsHash2, Tag[] tags);
-    event CommunityUpdated(uint32 id, bytes32 ipfsHash);
-    event TagCreated(uint32 communityId, uint32 tagId, bytes32 ipfsHash, bytes32 ipfsHash2);
-    event CommunityFrozen(uint32 commintyId);
-    event CommunityUnfrozen(uint32 commintyId);
+    event CommunityCreated(address user, uint32 id);
+    event CommunityUpdated(address user, uint32 id);
+    event TagCreated(address user, uint8 tagId, uint32 communityId);
+    event CommunityFrozen(address user, uint32 commintyId);
+    event CommunityUnfrozen(address user, uint32 commintyId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -75,7 +75,7 @@ library CommunityLib {
         for (uint32 i = 1; i <= uint32(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
-        emit CommunityCreated(self.communityCount, ipfsHash, bytes32(0x0), tags);
+        emit CommunityCreated(msg.sender, self.communityCount);
         return self.communityCount;
     }
 
@@ -89,7 +89,7 @@ library CommunityLib {
         bytes32 ipfsHash
     ) internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].info.ipfsDoc.hash = ipfsHash;
-        emit CommunityUpdated(communityId, ipfsHash);
+        emit CommunityUpdated(msg.sender, communityId);
     }
 
     /// @notice Create new tag info record
@@ -105,7 +105,7 @@ library CommunityLib {
         Tag storage newTag = community.tags[++community.info.tagsCount];
         require(newTag.ipfsDoc.hash == bytes32(0x0), "Tag exists");
         newTag.ipfsDoc.hash = ipfsHash;
-        emit TagCreated(community.info.tagsCount, communityId, ipfsHash, bytes32(0x0));
+        emit TagCreated(msg.sender, community.info.tagsCount, communityId);
     }
 
     /// @notice Get the number of communities
@@ -165,7 +165,7 @@ library CommunityLib {
     function freeze(CommunityCollection storage self, uint32 communityId) 
     internal onlyExistingAndNotFrozen(self, communityId) {
         self.communities[communityId].info.isFrozen = true;
-        emit CommunityFrozen(communityId);
+        emit CommunityFrozen(msg.sender, communityId);
     }
 
     /// @notice Unfreeze the community
@@ -177,6 +177,6 @@ library CommunityLib {
             "Community does not exist"
         );
         self.communities[communityId].info.isFrozen = false;
-        emit CommunityUnfrozen(communityId);
+        emit CommunityUnfrozen(msg.sender, communityId);
     }
 }
