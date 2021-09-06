@@ -24,10 +24,10 @@ library UserLib {
     address[] userList;
   }
   
-  event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2, uint256 creationTime);
-  event UserUpdated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
+  event UserCreated(address userAddress);
+  event UserUpdated(address userAddress);
   event FollowCommunity(address userAddress, uint32 communityId);
-  // event UnfollowCommunity(address userAddress, uint32 communityId);
+  event UnfollowCommunity(address userAddress, uint32 communityId);
 
 
   /// @notice Create new user info record
@@ -46,7 +46,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
+    emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -60,7 +60,7 @@ library UserLib {
   ) internal {
     require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
     self.users[userAddress].ipfsDoc.hash = ipfsHash;
-    emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
+    emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
@@ -96,7 +96,7 @@ library UserLib {
       if (user.followCommunity[i] == communityId) {
         delete user.followCommunity[i];
         
-        // emit UnfollowCommunity(userAddress, communityId);
+        emit UnfollowCommunity(userAddress, communityId);
         return;
       }
     }

@@ -42,8 +42,8 @@ library CommunityLib {
     event CommunityCreated(address user, uint32 id);
     event CommunityUpdated(address user, uint32 id);
     event TagCreated(address user, uint8 tagId, uint32 communityId);
-    event CommunityFrozen(address user, uint32 commintyId);
-    event CommunityUnfrozen(address user, uint32 commintyId);
+    event CommunityFrozen(address user, uint32 communityId);
+    event CommunityUnfrozen(address user, uint32 communityId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
