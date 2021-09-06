@@ -101,7 +101,7 @@ library PostLib  {
     event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote);
+    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 wayVote);
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
@@ -446,7 +446,7 @@ library PostLib  {
             postContainer.info.bestReply = replyId;
         }
 
-        emit StatusBestReplyChanged(user, postId, replyId);
+        // emit StatusBestReplyChanged(user, postId, replyId);
     }
 
     /// @notice Vote for post, reply or comment
@@ -468,18 +468,19 @@ library PostLib  {
     ) internal {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
- 
+
+        int8 wayVote;
         if (commentId != 0) {
             CommentContainer storage comment = getCommentContainer(postContainer, replyId, commentId);
-            voteComment(comment, user, isUpvote);
+            wayVote = voteComment(comment, user, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage reply = getReplyContainer(postContainer, replyId);
-            voteReply(users, reply, user, postType, isUpvote);
+            wayVote = voteReply(users, reply, user, postType, isUpvote);
         } else {
-            votePost(users, postContainer, user, postType, isUpvote);
+            wayVote = votePost(users, postContainer, user, postType, isUpvote);
         }
 
-        emit ForumItemVoted(user, postId, replyId, commentId, isUpvote);
+        emit ForumItemVoted(user, postId, replyId, commentId, wayVote);
     }
 
     // @notice Vote for post
@@ -494,12 +495,13 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) private {
+    ) private returns (int8){
         require(votedUser != postContainer.info.author, "You can't vote for own post");
         int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
 
         vote(users, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
         postContainer.info.rating += ratingChange;
+        return ratingChange;
     }
  
     // @notice Vote for reply
@@ -514,10 +516,10 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) private {
+    ) private returns (int8) {
         require(votedUser != replyContainer.info.author, "You can't vote for own reply");
         int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
-        if (postType == PostType.Tutorial) return;
+        if (postType == PostType.Tutorial) return ratingChange;
 
         vote(users, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
         int32 oldRating = replyContainer.info.rating;
@@ -539,6 +541,8 @@ library PostLib  {
                 UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             }
         }
+
+        return ratingChange;
     }
 
     // @notice Vote for comment
@@ -549,12 +553,13 @@ library PostLib  {
         CommentContainer storage commentContainer,
         address votedUser,
         bool isUpvote
-    ) private {
+    ) private returns (int8) {
         require(votedUser != commentContainer.info.author, "You can't vote for own comment");
         //check user
         int8 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         
         commentContainer.info.rating += ratingChange;
+        return ratingChange;
     }
 
     // @notice Сount users' rating after voting per a reply or post
