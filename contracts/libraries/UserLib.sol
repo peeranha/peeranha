@@ -46,7 +46,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    emit UserCreated(userAddress);
+    // emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -60,7 +60,7 @@ library UserLib {
   ) internal {
     require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
     self.users[userAddress].ipfsDoc.hash = ipfsHash;
-    emit UserUpdated(userAddress);
+    // emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
@@ -73,10 +73,17 @@ library UserLib {
     uint32 communityId
   ) internal {
     User storage user = self.users[userAddress];
+    bool isAdded;
     for (uint i; i < user.followCommunity.length; i++) {
       require(user.followCommunity[i] != communityId, "You already follow the community");
+
+      if (user.followCommunity[i] == 0 && !isAdded) {
+        user.followCommunity[i] = communityId;
+        isAdded = true;
+      }
     }
-    user.followCommunity.push(communityId);
+    if (!isAdded)
+      user.followCommunity.push(communityId);
 
     // emit FollowCommunity(userAddress, communityId);
   }
@@ -94,7 +101,7 @@ library UserLib {
 
     for (uint i; i < user.followCommunity.length; i++) {
       if (user.followCommunity[i] == communityId) {
-        delete user.followCommunity[i];
+        delete user.followCommunity[i];   //method rewrite to 0
         
         // emit UnfollowCommunity(userAddress, communityId);
         return;

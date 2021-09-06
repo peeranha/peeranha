@@ -129,7 +129,7 @@ library PostLib  {
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
         post.info.tags = tags;
-        emit PostCreated(user, communityId, self.postCount);
+        // emit PostCreated(user, communityId, self.postCount);
     }
 
     /// @notice Post reply
