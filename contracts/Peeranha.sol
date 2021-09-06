@@ -63,6 +63,29 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     }
 
     /**
+     * @dev Follow community.
+     *
+     * Requirements:
+     *
+     * - Must be an community.  
+     */
+    function followCommunity(uint32 communityId) external override 
+    onlyExistingAndNotFrozenCommunity(communities, communityId) {
+        users.followCommunity(msg.sender, communityId);
+    }
+
+    /**
+     * @dev Unfollow community.
+     *
+     * Requirements:
+     *
+     * - Must be follow the community.  
+     */
+    function unfollowCommunity(uint32 communityId) external override {
+        users.unfollowCommunity(msg.sender, communityId);
+    }
+
+    /**
      * @dev Get users count.
      */
     function getUsersCount() external view returns (uint256 count) {

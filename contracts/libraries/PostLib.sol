@@ -150,10 +150,7 @@ library PostLib  {
     ) internal {
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         PostContainer storage postContainer = getPostContainer(self, postId);
-        
-        ///
-        //update user statistic + rating
-        ///
+
         ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
         if (parentReplyId == 0) {
@@ -163,11 +160,11 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial) {
                 if (postContainer.info.replyCount == 1) {
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
+                    UserLib.updateUserRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;
-                    UserLib.updateRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
+                    UserLib.updateUserRating(users, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
                 }
             }
         } else {
@@ -302,7 +299,7 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
 
         if (postContainer.info.rating > 0) {
-            UserLib.updateRating(users, postContainer.info.author,
+            UserLib.updateUserRating(users, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                                 VoteLib.ResourceAction.Upvoted,
                                                                 TypeContent.Post) * postContainer.info.rating);
@@ -312,7 +309,7 @@ library PostLib  {
             deductReplyRating(users, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
         }
         if (user == postContainer.info.author)
-            UserLib.updateRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
+            UserLib.updateUserRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(user, postId);
@@ -338,7 +335,7 @@ library PostLib  {
 
         deductReplyRating(users, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         if (user == replyContainer.info.author)
-            UserLib.updateRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
+            UserLib.updateUserRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
         emit ReplyDeleted(user, postId, replyId);
@@ -358,7 +355,7 @@ library PostLib  {
             return;
 
         if (replyContainer.info.rating >= 0) {
-            UserLib.updateRating(users, replyContainer.info.author,
+            UserLib.updateUserRating(users, replyContainer.info.author,
                                 -VoteLib.getUserRatingChangeForReplyAction( postType,
                                                                             VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
             
