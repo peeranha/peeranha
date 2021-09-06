@@ -297,14 +297,27 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     }
 
     /**
-     * @dev Get tags count in community.
+     * @dev Get tags in community.
      *
      * Requirements:
      *
      * - Must be an existing community.
+     * - must be a tags.
      */
     function getTags(uint32 communityId) external view returns (CommunityLib.Tag[] memory) {
         return communities.getTags(communityId);
+    }
+
+    /**
+     * @dev Get tag in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be a tag.
+     */
+    function getTag(uint32 communityId, uint8 tagId) external view returns (CommunityLib.Tag memory) {
+        return communities.getTag(communityId, tagId);
     }
     
     /**

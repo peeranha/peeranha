@@ -159,6 +159,19 @@ library CommunityLib {
         return iterableTags;
     }
 
+    /// @notice Get tag in community
+    /// @param self The mapping containing all communities
+    /// @param communityId Address of the community to get tags
+    /// @param tagId Address of the tag
+    function getTag(CommunityCollection storage self, uint32 communityId, uint8 tagId)
+        internal
+        view
+        // onlyExistingAndNotFrozen(self, communityId)      //uncomment
+        returns (Tag memory)
+    {
+        return self.communities[communityId].tags[tagId - 1];
+    }
+
     /// @notice Freeze the community
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to freeze

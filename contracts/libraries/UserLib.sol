@@ -26,8 +26,8 @@ library UserLib {
   
   event UserCreated(address userAddress);
   event UserUpdated(address userAddress);
-  event FollowCommunity(address userAddress, uint32 communityId);
-  event UnfollowCommunity(address userAddress, uint32 communityId);
+  // event FollowCommunity(address userAddress, uint32 communityId);
+  // event UnfollowCommunity(address userAddress, uint32 communityId);
 
 
   /// @notice Create new user info record
@@ -78,7 +78,7 @@ library UserLib {
     }
     user.followCommunity.push(communityId);
 
-    emit FollowCommunity(userAddress, communityId);
+    // emit FollowCommunity(userAddress, communityId);
   }
 
   /// @notice User usfollows community
@@ -96,7 +96,7 @@ library UserLib {
       if (user.followCommunity[i] == communityId) {
         delete user.followCommunity[i];
         
-        emit UnfollowCommunity(userAddress, communityId);
+        // emit UnfollowCommunity(userAddress, communityId);
         return;
       }
     }
