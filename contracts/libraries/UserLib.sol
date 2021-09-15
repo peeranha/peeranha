@@ -16,18 +16,18 @@ library UserLib {
     int32 rating;
     uint256 creationTime;
     bytes32[] roles;
-    uint32[] followCommunity; 
+    uint32[] followedCommunities; 
   }
   
   struct UserCollection {
     mapping(address => User) users;
     address[] userList;
   }
-  
+
   event UserCreated(address userAddress);
   event UserUpdated(address userAddress);
-  // event FollowCommunity(address userAddress, uint32 communityId);
-  // event UnfollowCommunity(address userAddress, uint32 communityId);
+  event FollowedCommunity(address userAddress, uint32 communityId);
+  // event UnfollowedCommunity(address userAddress, uint32 communityId);
 
 
   /// @notice Create new user info record
@@ -74,18 +74,18 @@ library UserLib {
   ) internal {
     User storage user = self.users[userAddress];
     bool isAdded;
-    for (uint i; i < user.followCommunity.length; i++) {
-      require(user.followCommunity[i] != communityId, "You already follow the community");
+    for (uint i; i < user.followedCommunities.length; i++) {
+      require(user.followedCommunities[i] != communityId, "You already follow the community");
 
-      if (user.followCommunity[i] == 0 && !isAdded) {
-        user.followCommunity[i] = communityId;
+      if (user.followedCommunities[i] == 0 && !isAdded) {
+        user.followedCommunities[i] = communityId;
         isAdded = true;
       }
     }
     if (!isAdded)
-      user.followCommunity.push(communityId);
+      user.followedCommunities.push(communityId);
 
-    // emit FollowCommunity(userAddress, communityId);
+    // emit FollowedCommunity(userAddress, communityId);
   }
 
   /// @notice User usfollows community
@@ -99,15 +99,15 @@ library UserLib {
   ) internal {
     User storage user = self.users[userAddress];
 
-    for (uint i; i < user.followCommunity.length; i++) {
-      if (user.followCommunity[i] == communityId) {
-        delete user.followCommunity[i];   //method rewrite to 0
+    for (uint i; i < user.followedCommunities.length; i++) {
+      if (user.followedCommunities[i] == communityId) {
+        delete user.followedCommunities[i]; //method rewrite to 0
         
-        // emit UnfollowCommunity(userAddress, communityId);
+        // emit UnfollowedCommunity(userAddress, communityId);
         return;
       }
     }
-    require(false, "You do not follow the community");
+    require(false, "You are not following the community");
   }
 
   /// @notice Get the number of users

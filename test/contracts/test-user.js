@@ -78,7 +78,7 @@ describe("Test users", function() {
     await peeranha.followCommunity(1);
     
     const user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
+    expect(user.followedCommunities[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
   })
 
   it("Double follow community", async function() {
@@ -97,7 +97,7 @@ describe("Test users", function() {
     const hashContainer = getHashContainer();
     await peeranha.createUser(hashContainer[0]);
 
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('must be an existing community');
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('community does not exist');
 
   })
 
@@ -109,7 +109,7 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.freezeCommunity(1);
     
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Peeranha: community have freezes');
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Peeranha: community is frozen');
   })
 
   it("Follow on deferent communities", async function() {
@@ -124,8 +124,8 @@ describe("Test users", function() {
     await peeranha.followCommunity(2);
 
     const user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(1);
-    expect(user.followCommunity[1]).to.equal(2);
+    expect(user.followedCommunities[0]).to.equal(1);
+    expect(user.followedCommunities[1]).to.equal(2);
   })
 
   it("Follow on deferent communities -> unfollow from first -> follow on second community", async function() {
@@ -177,7 +177,7 @@ describe("Test users", function() {
     await peeranha.unfollowCommunity(1);
 
     const user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(0);
+    expect(user.followedCommunities[0]).to.equal(0);
   })
 
   it("UnFollow diferent community", async function() {
@@ -209,7 +209,7 @@ describe("Test users", function() {
 
     await peeranha.followCommunity(1);
     await peeranha.unfollowCommunity(1);
-    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You do not follow the community');
+    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
   })
 
   it("Unfollow on not exist community", async function() {
@@ -217,7 +217,7 @@ describe("Test users", function() {
     const hashContainer = getHashContainer();
     await peeranha.createUser(hashContainer[0]);
 
-    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You do not follow the community');
+    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
 
   })
 
