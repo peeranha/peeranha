@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const crypto = require("crypto");
 
 describe("Test users", function() {
   it("Test user creating", async function() {
@@ -67,6 +68,135 @@ describe("Test users", function() {
     expect(JSON.stringify(usersByIndex)).to.equal(JSON.stringify(getUsers(hashContainer)))
   })
 
+  it("Follow community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await peeranha.followCommunity(1);
+    
+    const user = await peeranha.getUserByIndex(0);
+    expect(user.followedCommunities[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
+  })
+
+  it("Double follow community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await peeranha.followCommunity(1);
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('You already follow the community');
+  })
+
+  it("Follow on not exist community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    await peeranha.createUser(hashContainer[0]);
+
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('community does not exist');
+
+  })
+
+  it("Follow on freaze community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.freezeCommunity(1);
+    
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Peeranha: community is frozen');
+  })
+
+  it("Follow on deferent communities", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    
+    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(2);
+
+    const user = await peeranha.getUserByIndex(0);
+    expect(user.followedCommunities[0]).to.equal(1);
+    expect(user.followedCommunities[1]).to.equal(2);
+  })
+
+  it("UnFollow community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+
+    await peeranha.followCommunity(1);
+    await peeranha.unfollowCommunity(1);
+
+    const user = await peeranha.getUserByIndex(0);
+    expect(user.followedCommunities[0]).to.equal(0);
+  })
+
+  it("UnFollow diferent community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+
+    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(2);
+    await peeranha.unfollowCommunity(1);
+    await peeranha.unfollowCommunity(2);
+
+    const user = await peeranha.getUserByIndex(0);
+    expect(user.followCommunity[0]).to.equal(0);
+    expect(user.followCommunity[1]).to.equal(0);
+  })
+
+  it("Double unFollow community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+
+    await peeranha.followCommunity(1);
+    await peeranha.unfollowCommunity(1);
+    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
+  })
+
+  it("Unfollow on not exist community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    await peeranha.createUser(hashContainer[0]);
+
+    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
+
+  })
+
+  it("Unfollow on freaze community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.followCommunity(1);
+    await peeranha.freezeCommunity(1);
+    
+    await peeranha.unfollowCommunity(1)
+  })
+
   const createContract = async function(){
     const Peeranha = await ethers.getContractFactory("Peeranha");
     const peeranha = await Peeranha.deploy();
@@ -90,4 +220,13 @@ describe("Test users", function() {
       return [hash, ipfsHash2, rating, creationTime, []];
     })
   }
+
+  const getHashesContainer = (size) =>
+        Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
+  
+  const createTags = (countOfTags) =>
+  getHashesContainer(countOfTags).map((hash) => {
+    const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+      return {"ipfsDoc": {hash, hash2}}
+  });
 });
