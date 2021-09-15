@@ -128,6 +128,42 @@ describe("Test users", function() {
     expect(user.followedCommunities[1]).to.equal(2);
   })
 
+  it("Follow on deferent communities -> unfollow from first -> follow on second community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    
+    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(2);
+    await peeranha.unfollowCommunity(1);
+    await expect(peeranha.followCommunity(2)).to.be.revertedWith('You already follow the community');
+  })
+
+  it("Follow on two communities -> unfollow from first -> follow on third community", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+    
+    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(2);
+    await peeranha.unfollowCommunity(1);
+    let user = await peeranha.getUserByIndex(0);
+    expect(user.followCommunity[0]).to.equal(0);
+    expect(user.followCommunity[1]).to.equal(2);
+
+    await peeranha.followCommunity(3);
+    user = await peeranha.getUserByIndex(0);
+    expect(user.followCommunity[0]).to.equal(3);
+    expect(user.followCommunity[1]).to.equal(2);
+  })
+
   it("UnFollow community", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();

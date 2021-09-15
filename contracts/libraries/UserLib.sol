@@ -23,9 +23,9 @@ library UserLib {
     mapping(address => User) users;
     address[] userList;
   }
-  
-  event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2, uint256 creationTime);
-  event UserUpdated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
+
+  event UserCreated(address userAddress);
+  event UserUpdated(address userAddress);
   event FollowedCommunity(address userAddress, uint32 communityId);
   // event UnfollowedCommunity(address userAddress, uint32 communityId);
 
@@ -46,7 +46,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
+    // emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -60,7 +60,7 @@ library UserLib {
   ) internal {
     require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
     self.users[userAddress].ipfsDoc.hash = ipfsHash;
-    emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
+    // emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
@@ -73,12 +73,19 @@ library UserLib {
     uint32 communityId
   ) internal {
     User storage user = self.users[userAddress];
+    bool isAdded;
     for (uint i; i < user.followedCommunities.length; i++) {
       require(user.followedCommunities[i] != communityId, "You already follow the community");
-    }
-    user.followedCommunities.push(communityId);
 
-    emit FollowedCommunity(userAddress, communityId);
+      if (user.followedCommunities[i] == 0 && !isAdded) {
+        user.followedCommunities[i] = communityId;
+        isAdded = true;
+      }
+    }
+    if (!isAdded)
+      user.followedCommunities.push(communityId);
+
+    // emit FollowedCommunity(userAddress, communityId);
   }
 
   /// @notice User usfollows community
@@ -94,7 +101,7 @@ library UserLib {
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
-        delete user.followedCommunities[i];
+        delete user.followedCommunities[i]; //method rewrite to 0
         
         // emit UnfollowedCommunity(userAddress, communityId);
         return;
