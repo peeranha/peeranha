@@ -101,7 +101,7 @@ library PostLib  {
     event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 wayVote);
+    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
@@ -469,18 +469,18 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
-        int8 wayVote;
+        int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage comment = getCommentContainer(postContainer, replyId, commentId);
-            wayVote = voteComment(comment, user, isUpvote);
+            voteDirection = voteComment(comment, user, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage reply = getReplyContainer(postContainer, replyId);
-            wayVote = voteReply(users, reply, user, postType, isUpvote);
+            voteDirection = voteReply(users, reply, user, postType, isUpvote);
         } else {
-            wayVote = votePost(users, postContainer, user, postType, isUpvote);
+            voteDirection = votePost(users, postContainer, user, postType, isUpvote);
         }
 
-        emit ForumItemVoted(user, postId, replyId, commentId, wayVote);
+        emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
     }
 
     // @notice Vote for post
