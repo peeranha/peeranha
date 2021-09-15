@@ -7,6 +7,9 @@ describe("Test communities", function() {
         const countOfCommunities = 3;
         const communitiesIds = getIdsContainer(countOfCommunities);
         const ipfsHashes = getHashesContainer(countOfCommunities);
+        const hashContainer = getHashContainer();
+		await peeranha.createUser(hashContainer[1]);
+
         await Promise.all(communitiesIds.map(async(id) => {
             return await peeranha.createCommunity(ipfsHashes[id - 1], createTags(5));
         }));
@@ -22,6 +25,8 @@ describe("Test communities", function() {
     it("Test community editing", async function() {
         const peeranha = await createContract();
         const ipfsHashes = getHashesContainer(2);
+        const hashContainer = getHashContainer();
+		await peeranha.createUser(hashContainer[1]);
 
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
         const community = await peeranha.getCommunity(1);
@@ -37,6 +42,8 @@ describe("Test communities", function() {
         const peeranha = await createContract();
         const ipfsHashes = getHashesContainer(2);
         const countOfTags = 5;
+        const hashContainer = getHashContainer();
+		await peeranha.createUser(hashContainer[1]);
         const tags = createTags(countOfTags);
 
         await peeranha.createCommunity(ipfsHashes[0], tags);
@@ -72,4 +79,12 @@ describe("Test communities", function() {
             const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
             return {"ipfsDoc": {hash, hash2}}
         });
+    
+    const getHashContainer = () => {
+        return [
+            "0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
+            "0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+            "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+        ];
+    };
 });

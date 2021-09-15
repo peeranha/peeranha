@@ -1,8 +1,6 @@
 pragma solidity >=0.5.0;
 
 import "./PostLib.sol";
-import "./CommonLib.sol";
-import "hardhat/console.sol";
 import "./IpfsLib.sol";
 
 /// @title Users
@@ -40,7 +38,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
+    // emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
   }
 
   /// @notice Update new user info record
@@ -52,9 +50,9 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
-    self.users[userAddress].ipfsDoc.hash = ipfsHash;
-    emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
+    User storage user = getUserByAddress(self, userAddress);
+    user.ipfsDoc.hash = ipfsHash;
+    // emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
   }
 
   /// @notice Get the number of users
@@ -102,7 +100,7 @@ library UserLib {
     }
   }
 
-  function updateUserRating(UserCollection storage self, address userAddr, int8 rating) internal {
+  function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
     if (rating == 0) return;
     User storage user = getUserByAddress(self, userAddr);
     user.rating += rating;
@@ -113,6 +111,7 @@ library UserLib {
   }
 
   function givePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
+    getUserByAddress(self, userAddr);
     self.users[userAddr].roles.push(role);
   }
 

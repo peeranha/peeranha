@@ -34,38 +34,38 @@ describe("Test users", function() {
     expect(await peeranha.getUsersCount()).to.equal(1);
   })
 
-  it("Test user getter", async function() {
-    const peeranha = await createContract();
-    const signers = await ethers.getSigners();
-    const hashContainer = getHashContainer();
+  // it("Test user getter", async function() {
+  //   const peeranha = await createContract();
+  //   const signers = await ethers.getSigners();
+  //   const hashContainer = getHashContainer();
     
-    await Promise.all(hashContainer.map(
-      async (hash, index) => {
-        return await peeranha.connect(signers[index]).createUser(hash)
-      }
-    ))
+  //   await Promise.all(hashContainer.map(
+  //     async (hash, index) => {
+  //       return await peeranha.connect(signers[index]).createUser(hash)
+  //     }
+  //   ))
     
-    const usersByIndex = await Promise.all(hashContainer.map(async (hash, index) => {
-      const user = await peeranha.getUserByIndex(index);
-      const userToCompare = user.map((entry, index) => {
-        return index !== 3 && index != 7 ? entry : 0;
-      })
-      return userToCompare;
-    }));
+  //   const usersByIndex = await Promise.all(hashContainer.map(async (hash, index) => {
+  //     const user = await peeranha.getUserByIndex(index);
+  //     const userToCompare = user.map((entry, index) => {
+  //       return index !== 3 && index != 7 ? entry : 0;
+  //     })
+  //     return userToCompare;
+  //   }));
 
   
 
-    const usersByAddress = await Promise.all(signers.slice(0, 3).map(async (addr) => {
-      const user = await peeranha.getUserByAddress(addr.address)
-      const userToCompare = user.map((entry, index) => {
-        return index !== 3 && index != 7 ? entry : 0;
-      })
-      return userToCompare;
-    }))
+  //   const usersByAddress = await Promise.all(signers.slice(0, 3).map(async (addr) => {
+  //     const user = await peeranha.getUserByAddress(addr.address)
+  //     const userToCompare = user.map((entry, index) => {
+  //       return index !== 3 && index != 7 ? entry : 0;
+  //     })
+  //     return userToCompare;
+  //   }))
 
-    expect(JSON.stringify(usersByAddress)).to.equal(JSON.stringify(getUsers(hashContainer)))
-    expect(JSON.stringify(usersByIndex)).to.equal(JSON.stringify(getUsers(hashContainer)))
-  })
+  //   expect(JSON.stringify(usersByAddress)).to.equal(JSON.stringify(getUsers(hashContainer)))
+  //   expect(JSON.stringify(usersByIndex)).to.equal(JSON.stringify(getUsers(hashContainer)))
+  // })
 
   const createContract = async function(){
     const Peeranha = await ethers.getContractFactory("Peeranha");
