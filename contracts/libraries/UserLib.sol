@@ -7,20 +7,26 @@ import "./IpfsLib.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
+  using CommunityLib for CommunityLib.CommunityCollection;
+
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     uint256 creationTime;
-    bytes32[] roles; 
+    bytes32[] roles;
+    uint32[] followedCommunities; 
   }
   
   struct UserCollection {
     mapping(address => User) users;
     address[] userList;
   }
-  
-  event UserCreated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2, uint256 creationTime);
-  event UserUpdated(address userAddress, bytes32 ipfsHash, bytes32 ipfsHash2);
+
+  event UserCreated(address userAddress);
+  event UserUpdated(address userAddress);
+  event FollowedCommunity(address userAddress, uint32 communityId);
+  // event UnfollowedCommunity(address userAddress, uint32 communityId);
+
 
   /// @notice Create new user info record
   /// @param self The mapping containing all users
@@ -38,7 +44,8 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    // emit UserCreated(userAddress, ipfsHash, bytes32(0x0), CommonLib.getTimestamp());
+
+    // emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -52,7 +59,55 @@ library UserLib {
   ) internal {
     User storage user = getUserByAddress(self, userAddress);
     user.ipfsDoc.hash = ipfsHash;
-    // emit UserUpdated(userAddress, ipfsHash, bytes32(0x0));
+
+    // emit UserUpdated(userAddress);
+  }
+
+  /// @notice User follows community
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to update
+  /// @param communityId User follows om this community
+  function followCommunity(
+    UserCollection storage self,
+    address userAddress,
+    uint32 communityId
+  ) internal {
+    User storage user = self.users[userAddress];
+    bool isAdded;
+    for (uint i; i < user.followedCommunities.length; i++) {
+      require(user.followedCommunities[i] != communityId, "You already follow the community");
+
+      if (user.followedCommunities[i] == 0 && !isAdded) {
+        user.followedCommunities[i] = communityId;
+        isAdded = true;
+      }
+    }
+    if (!isAdded)
+      user.followedCommunities.push(communityId);
+
+    // emit FollowedCommunity(userAddress, communityId);
+  }
+
+  /// @notice User usfollows community
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to update
+  /// @param communityId User follows om this community
+  function unfollowCommunity(
+    UserCollection storage self,
+    address userAddress,
+    uint32 communityId
+  ) internal {
+    User storage user = self.users[userAddress];
+
+    for (uint i; i < user.followedCommunities.length; i++) {
+      if (user.followedCommunities[i] == communityId) {
+        delete user.followedCommunities[i]; //method rewrite to 0
+        
+        // emit UnfollowedCommunity(userAddress, communityId);
+        return;
+      }
+    }
+    require(false, "You are not following the community");
   }
 
   /// @notice Get the number of users
@@ -85,21 +140,16 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  /// @notice Add rating to user
-  /// @param self The mapping containing all users
-  /// @param addr user's rating will be change
-  /// @param rating value for add to user's rating
-  function updateRating(UserCollection storage self, address addr, int rating) internal {
-    User storage user = getUserByAddress(self, addr);
-    user.rating += int32(rating);
-  }
-
   function updateUsersRating(UserCollection storage self, PostLib.UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
   }
 
+  /// @notice Add rating to user
+  /// @param self The mapping containing all users
+  /// @param userAddr user's rating will be change
+  /// @param rating value for add to user's rating
   function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
     if (rating == 0) return;
     User storage user = getUserByAddress(self, userAddr);

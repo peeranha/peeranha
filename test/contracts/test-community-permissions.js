@@ -26,14 +26,14 @@ describe("Test community permissions", function() {
         await peeranha.giveCommunityModeratorPermission(userAddress, communitiesIds[0]);
 
         await expect(peeranha.giveCommunityModeratorPermission(userAddress, 4))
-        .to.be.revertedWith("Peeranha: must be an existing community");
+        .to.be.revertedWith("Peeranha: community does not exist");
         await expect(peeranha.giveCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
         .to.be.revertedWith("Peeranha: must be an existing user");
 
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
 
         await expect(peeranha.revokeCommunityModeratorPermission(userAddress, 4))
-        .to.be.revertedWith("Peeranha: must be an existing community");
+        .to.be.revertedWith("Peeranha: community does not exist");
         await expect(peeranha.revokeCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
         .to.be.revertedWith("Peeranha: must be an existing user");
 
@@ -71,7 +71,7 @@ describe("Test community permissions", function() {
         await peeranha.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
 
         await expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
-        .to.be.revertedWith("Peeranha: must be an existing community");
+        .to.be.revertedWith("Peeranha: community does not exist");
         await expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
         .to.be.revertedWith("Peeranha: must be an existing user");
 
@@ -89,7 +89,7 @@ describe("Test community permissions", function() {
         await peeranha.connect(signers[2]).unfreezeCommunity(communitiesIds[0]);
 
         await expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
-        .to.be.revertedWith("Peeranha: must be an existing community");
+        .to.be.revertedWith("Peeranha: community does not exist");
         await expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
         .to.be.revertedWith("Peeranha: must be an existing user");
 

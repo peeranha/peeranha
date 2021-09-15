@@ -67,6 +67,29 @@ contract Peeranha is IPeeranha, Initializable, PausableUpgradeable {
     }
 
     /**
+     * @dev Follow community.
+     *
+     * Requirements:
+     *
+     * - Must be an community.  
+     */
+    function followCommunity(uint32 communityId) external override 
+    onlyExistingAndNotFrozenCommunity(communityId) {
+        users.followCommunity(msg.sender, communityId);
+    }
+
+    /**
+     * @dev Unfollow community.
+     *
+     * Requirements:
+     *
+     * - Must be follow the community.  
+     */
+    function unfollowCommunity(uint32 communityId) external override {
+        users.unfollowCommunity(msg.sender, communityId);
+    }
+
+    /**
      * @dev Get users count.
      */
     function getUsersCount() external view returns (uint256 count) {
@@ -315,14 +338,27 @@ contract Peeranha is IPeeranha, Initializable, PausableUpgradeable {
     }
 
     /**
-     * @dev Get tags count in community.
+     * @dev Get tags in community.
      *
      * Requirements:
      *
      * - Must be an existing community.
+     * - must be a tags.
      */
     function getTags(uint32 communityId) external view returns (CommunityLib.Tag[] memory) {
         return communities.getTags(communityId);
+    }
+
+    /**
+     * @dev Get tag in community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be a tag.
+     */
+    function getTag(uint32 communityId, uint8 tagId) external view returns (CommunityLib.Tag memory) {
+        return communities.getTag(communityId, tagId);
     }
     
     /**

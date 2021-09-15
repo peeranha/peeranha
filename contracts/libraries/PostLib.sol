@@ -101,7 +101,7 @@ library PostLib  {
     event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote);
+    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
@@ -316,7 +316,7 @@ library PostLib  {
         SecurityLib.checkRatingAndCommunityModerator(roles, users, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         if (postContainer.info.rating > 0) {
-            UserLib.updateRating(users, postContainer.info.author,
+            UserLib.updateUserRating(users, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                                 VoteLib.ResourceAction.Upvoted,
                                                                 TypeContent.Post) * postContainer.info.rating);
@@ -326,7 +326,7 @@ library PostLib  {
             deductReplyRating(users, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
         }
         if (user == postContainer.info.author)
-            UserLib.updateRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
+            UserLib.updateUserRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
 
         postContainer.info.isDeleted = true;
         // emit PostDeleted(user, postId);
@@ -354,7 +354,7 @@ library PostLib  {
 
         deductReplyRating(users, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         if (user == replyContainer.info.author)
-            UserLib.updateRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
+            UserLib.updateUserRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
         // emit ReplyDeleted(user, postId, replyId);
@@ -374,7 +374,7 @@ library PostLib  {
             return;
 
         if (replyContainer.info.rating >= 0) {
-            UserLib.updateRating(users, replyContainer.info.author,
+            UserLib.updateUserRating(users, replyContainer.info.author,
                                 -VoteLib.getUserRatingChangeForReplyAction( postType,
                                                                             VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
             
@@ -437,7 +437,7 @@ library PostLib  {
         else
             postContainer.info.officialReply = replyId;
         
-        // emit StatusOfficialReplyChanged(user, postId, replyId);
+        // emit StatusOfficialReplyChanged(user, postId, postContainer.info.officialReply);
     }
 
     /// @notice Change status best reply
@@ -471,7 +471,7 @@ library PostLib  {
             postContainer.info.bestReply = replyId;
         }
 
-        emit StatusBestReplyChanged(user, postId, replyId);
+        // emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
     }
 
     /// @notice Vote for post, reply or comment
@@ -494,21 +494,19 @@ library PostLib  {
     ) internal {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
- 
+
+        int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainer(postContainer, replyId, commentId);
             voteComment(roles, users, commentContainer, postContainer.info.communityId, user, isUpvote);
-            // SecurityLib.checkRatingAndCommunityModerator(roles, users, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
             voteReply(roles, users, replyContainer, postContainer.info.communityId, user, postType, isUpvote);
-            // SecurityLib.checkRatingAndCommunityModerator(roles, users, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
         } else {
             votePost(roles, users, postContainer, user, postType, isUpvote);
-            // SecurityLib.checkRatingAndCommunityModerator(roles, users, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
         }
 
-        emit ForumItemVoted(user, postId, replyId, commentId, isUpvote);
+        // emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
     }
 
     // @notice Vote for post
@@ -584,6 +582,7 @@ library PostLib  {
                 UserLib.updateUserRating(users, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             }
         }
+
     }
 
     // @notice Vote for comment

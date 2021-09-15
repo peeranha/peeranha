@@ -135,6 +135,11 @@ library VoteLib  {
     /// @notice Get vote history
     /// @param user user who voted for content
     /// @param historyVote history vote all users
+    // return value:
+    // fromUpVoteToDownVote = -2
+    // downVote = -1
+    // upVote = 1
+    // fromDownVoteToUpVote = 2
     function getHistoryVote(
         address user,
         mapping(address => int256) storage historyVote
@@ -154,26 +159,26 @@ library VoteLib  {
         if (isUpvote) {
             if (history == -1) {
                 historyVotes[actionAddress] = 1;
-                ratingChange += 2;
+                ratingChange = 2;
             } else if (history == 0) {
                 historyVotes[actionAddress] = 1;
-                ratingChange++;
+                ratingChange = 1;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = 0;
-                ratingChange--;
+                ratingChange = -1;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
-                ratingChange++;
+                ratingChange = 1;
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
-                ratingChange--;
+                ratingChange = -1;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = -1;
-                ratingChange -= 2;
+                ratingChange = -2;
             }
         }
         return ratingChange;
