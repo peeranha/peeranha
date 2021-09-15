@@ -65,8 +65,8 @@ contract Security is Initializable, ContextUpgradeable {
 
 
     modifier onlyExistingAndNotFrozenCommunity(CommunityLib.CommunityCollection storage communitiesCollection, uint32 communityId) {
-        require(communitiesCollection.getCommunitiesCount() >= communityId, "Peeranha: must be an existing community");
-        require(!communitiesCollection.communities[communityId].info.isFrozen, "Peeranha: community have freezes");
+        require(communitiesCollection.getCommunitiesCount() >= communityId, "Peeranha: community does not exist");
+        require(!communitiesCollection.communities[communityId].info.isFrozen, "Peeranha: community is frozen");
         _;
     }
 
