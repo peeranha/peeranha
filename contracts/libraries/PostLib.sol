@@ -623,7 +623,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote,
-        int32 ratingChanged,      //name?
+        int32 ratingChanged,
         TypeContent typeContent
     ) private {
        UserRatingChange[] memory usersRating = new UserRatingChange[](2);
