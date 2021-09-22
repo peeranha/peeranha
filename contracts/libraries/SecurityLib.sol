@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
-// pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "./CommunityLib.sol";
 import "./UserLib.sol";
-// import "./CommonLib.sol";
 
 
 library SecurityLib {
@@ -51,8 +47,11 @@ library SecurityLib {
     mapping (bytes32 => RoleData) _roles;
   }
 
+  struct UserRoles {
+    mapping (address => bytes32[]) userRoles;
+  }
+
   bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
   uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
@@ -79,74 +78,74 @@ library SecurityLib {
 //   }
 
   function checkRatingAndCommunityModerator(
-  Roles storage self, 
-  UserLib.UserCollection storage users, 
+  Roles storage self,
+  UserLib.UserCollection storage users,
   address actionCaller,
   address dataUser,
-  uint32 communityId, 
+  uint32 communityId,
   Action action) internal {
-    // if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) || 
-    //   hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender))) return;
+    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) || 
+      hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender))) return;
     
-    // int16 ratingAllowen;
-    // string memory message;
-    // if (action == Action.publicationPost) {
-    //   ratingAllowen = POST_QUESTION_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 0 ratings";
+    int16 ratingAllowen;
+    string memory message;
+    if (action == Action.publicationPost) {
+      ratingAllowen = POST_QUESTION_ALLOWED;
+      message = "Your rating is too small to upvote. You need 0 ratings";
 
-    // } else if (action == Action.publicationReply) {
-    //   ratingAllowen = POST_REPLY_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 0 ratings";
+    } else if (action == Action.publicationReply) {
+      ratingAllowen = POST_REPLY_ALLOWED;
+      message = "Your rating is too small to upvote. You need 0 ratings";
 
-    // } else if (action == Action.publicationComment) {
-    //   if (actionCaller == dataUser) {
-    //     ratingAllowen = POST_OWN_COMMENT_ALLOWED;
-    //     message = "Your rating is too small to upvote. You need 0 ratings";
-    //   } else {
-    //     ratingAllowen = POST_COMMENT_ALLOWED;
-    //     message = "Your rating is too small to upvote. You need 35 ratings";
-    //   }
+    } else if (action == Action.publicationComment) {
+      if (actionCaller == dataUser) {
+        ratingAllowen = POST_OWN_COMMENT_ALLOWED;
+        message = "Your rating is too small to upvote. You need 0 ratings";
+      } else {
+        ratingAllowen = POST_COMMENT_ALLOWED;
+        message = "Your rating is too small to upvote. You need 35 ratings";
+      }
 
-    // } else if (action == Action.deleteItem) {
-    //   require(actionCaller == dataUser, "You can not delete this item");
-    //   return;
+    } else if (action == Action.deleteItem) {
+      require(actionCaller == dataUser, "You can not delete this item");
+      return;
 
-    // } else if (action == Action.upVotePost) {
-    //   require(actionCaller != dataUser, "You can not vote for own post");
-    //   ratingAllowen = UPVOTE_POST_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 35 ratings";
+    } else if (action == Action.upVotePost) {
+      require(actionCaller != dataUser, "You can not vote for own post");
+      ratingAllowen = UPVOTE_POST_ALLOWED;
+      message = "Your rating is too small to upvote. You need 35 ratings";
 
-    // } else if (action == Action.upVoteReply) {
-    //   require(actionCaller != dataUser, "You can not vote for own reply");
-    //   ratingAllowen = UPVOTE_REPLY_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 35 ratings";
+    } else if (action == Action.upVoteReply) {
+      require(actionCaller != dataUser, "You can not vote for own reply");
+      ratingAllowen = UPVOTE_REPLY_ALLOWED;
+      message = "Your rating is too small to upvote. You need 35 ratings";
 
-    // } else if (action == Action.upVoteComment) {
-    //   require(actionCaller != dataUser, "You can not vote for own comment");
-    //   ratingAllowen = UPVOTE_COMMENT_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 0 ratings";
+    } else if (action == Action.upVoteComment) {
+      require(actionCaller != dataUser, "You can not vote for own comment");
+      ratingAllowen = UPVOTE_COMMENT_ALLOWED;
+      message = "Your rating is too small to upvote. You need 0 ratings";
 
-    // } else if (action == Action.downVotePost) {
-    //   require(actionCaller != dataUser, "You can not vote for own post");
-    //   ratingAllowen = DOWNVOTE_POST_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 35 ratings";
+    } else if (action == Action.downVotePost) {
+      require(actionCaller != dataUser, "You can not vote for own post");
+      ratingAllowen = DOWNVOTE_POST_ALLOWED;
+      message = "Your rating is too small to upvote. You need 35 ratings";
 
-    // } else if (action == Action.downVoteReply) {
-    //   require(actionCaller != dataUser, "You can not vote for own reply");
-    //   ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 35 ratings";
+    } else if (action == Action.downVoteReply) {
+      require(actionCaller != dataUser, "You can not vote for own reply");
+      ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
+      message = "Your rating is too small to upvote. You need 35 ratings";
 
-    // } else if (action == Action.downVoteComment) {
-    //   require(actionCaller != dataUser, "You can not vote for own comment");
-    //   ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
-    //   message = "Your rating is too small to upvote. You need 0 ratings";
+    } else if (action == Action.downVoteComment) {
+      require(actionCaller != dataUser, "You can not vote for own comment");
+      ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
+      message = "Your rating is too small to upvote. You need 0 ratings";
 
-    // } else {
-    //   require(false, "Action not allowed");
-    // }
+    } else {
+      require(false, "Action not allowed");
+    }
 
-    // int32 userRating = UserLib.getUserByAddress(users, actionCaller).rating;
-    // require(userRating <= ratingAllowen, message);    // >=
+    int32 userRating = UserLib.getUserByAddress(users, actionCaller).rating;
+    require(userRating <= ratingAllowen, message);    // >=
   }
 
     /**
@@ -163,7 +162,7 @@ library SecurityLib {
      * @dev Emitted when `account` is granted `role`.
      *
      * `sender` is the account that originated the contract call, an admin role
-     * bearer except when using {_setupRole}.
+     * bearer except when using {setupRole}.
      */
     event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
 
@@ -245,7 +244,7 @@ library SecurityLib {
     // function revokeRole(bytes32 role, address account) public virtual {
     //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to revoke");
 
-    //     _revokeRole(role, account);
+    //     revokeRole(role, account);
     // }
 
     /**
@@ -265,7 +264,7 @@ library SecurityLib {
     // function renounceRole(bytes32 role, address account) public virtual {
     //     require(account == _msgSender(), "AccessControl: can only renounce roles for self");
 
-    //     _revokeRole(role, account);
+    //     revokeRole(role, account);
     // }
 
     /**
@@ -284,8 +283,8 @@ library SecurityLib {
      * system imposed by {AccessControl}.
      * ====
      */
-    function _setupRole(Roles storage self, bytes32 role, address account) internal { //virtual?
-        _grantRole(self, role, account);
+    function setupRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal { //virtual?
+        grantRole(self, userRoles, role, account);
     }
 
     /**
@@ -298,16 +297,31 @@ library SecurityLib {
     //     _roles[role].adminRole = adminRole;
     // }
 
-    function _grantRole(Roles storage self, bytes32 role, address account) private {
-        if (self._roles[role].members.add(account)) {
-            emit RoleGranted(role, account, msg.sender);                            //_msgSender()?
-        }
+    function grantRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) private {
+      if (self._roles[role].members.add(account)) {
+        userRoles.userRoles[account].push(role);   
+        emit RoleGranted(role, account, msg.sender);
+      }
     }
 
-    function _revokeRole(Roles storage self, bytes32 role, address account) internal {
-        if (self._roles[role].members.remove(account)) {
-            emit RoleRevoked(role, account, msg.sender);
+    function revokeRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
+      if (self._roles[role].members.remove(account)) {
+        emit RoleRevoked(role, account, msg.sender);
+
+        uint256 length = userRoles.userRoles[account].length;
+        for(uint32 i = 0; i < length; i++) {
+          if(userRoles.userRoles[account][i] == role) {
+            if (i < length - 1) {
+              userRoles.userRoles[account][i] = userRoles.userRoles[account][length - 1];
+              userRoles.userRoles[account].pop();
+            } else userRoles.userRoles[account].pop();
+          }
         }
+      }
+    }
+
+    function getPermissions(UserRoles storage self, address account) internal view returns (bytes32[] memory) {
+      return self.userRoles[account];
     }
     // uint256[49] private __gap;
 }

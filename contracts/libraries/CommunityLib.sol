@@ -75,7 +75,7 @@ library CommunityLib {
         for (uint32 i = 1; i <= uint32(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
-        // emit CommunityCreated(msg.sender, self.communityCount);
+        emit CommunityCreated(msg.sender, self.communityCount);
         return self.communityCount;
     }
 
@@ -90,7 +90,7 @@ library CommunityLib {
     ) internal {
         self.communities[communityId].info.ipfsDoc.hash = ipfsHash;
 
-        // emit CommunityUpdated(msg.sender, communityId);
+        emit CommunityUpdated(msg.sender, communityId);
     }
 
     /// @notice Create new tag info record
@@ -107,7 +107,7 @@ library CommunityLib {
         require(newTag.ipfsDoc.hash == bytes32(0x0), "Tag exists");
         newTag.ipfsDoc.hash = ipfsHash;
 
-        // emit TagCreated(msg.sender, community.info.tagsCount, communityId);
+        emit TagCreated(msg.sender, community.info.tagsCount, communityId);
     }
 
     /// @notice Get the number of communities
@@ -178,7 +178,7 @@ library CommunityLib {
     internal {
         self.communities[communityId].info.isFrozen = true;
 
-        // emit CommunityFrozen(msg.sender, communityId);
+        emit CommunityFrozen(msg.sender, communityId);
     }
 
     /// @notice Unfreeze the community
@@ -191,6 +191,6 @@ library CommunityLib {
         );
         self.communities[communityId].info.isFrozen = false;
 
-        // emit CommunityUnfrozen(msg.sender, communityId);
+        emit CommunityUnfrozen(msg.sender, communityId);
     }
 }

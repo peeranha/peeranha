@@ -13,7 +13,6 @@ library UserLib {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     uint256 creationTime;
-    bytes32[] roles;
     uint32[] followedCommunities; 
   }
   
@@ -25,7 +24,7 @@ library UserLib {
   event UserCreated(address userAddress);
   event UserUpdated(address userAddress);
   event FollowedCommunity(address userAddress, uint32 communityId);
-  // event UnfollowedCommunity(address userAddress, uint32 communityId);
+  event UnfollowedCommunity(address userAddress, uint32 communityId);
 
 
   /// @notice Create new user info record
@@ -45,7 +44,7 @@ library UserLib {
 
     self.userList.push(userAddress);
 
-    // emit UserCreated(userAddress);
+    emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -60,7 +59,7 @@ library UserLib {
     User storage user = getUserByAddress(self, userAddress);
     user.ipfsDoc.hash = ipfsHash;
 
-    // emit UserUpdated(userAddress);
+    emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
@@ -85,7 +84,7 @@ library UserLib {
     if (!isAdded)
       user.followedCommunities.push(communityId);
 
-    // emit FollowedCommunity(userAddress, communityId);
+    emit FollowedCommunity(userAddress, communityId);
   }
 
   /// @notice User usfollows community
@@ -103,7 +102,7 @@ library UserLib {
       if (user.followedCommunities[i] == communityId) {
         delete user.followedCommunities[i]; //method rewrite to 0
         
-        // emit UnfollowedCommunity(userAddress, communityId);
+        emit UnfollowedCommunity(userAddress, communityId);
         return;
       }
     }
@@ -154,26 +153,5 @@ library UserLib {
     if (rating == 0) return;
     User storage user = getUserByAddress(self, userAddr);
     user.rating += rating;
-  }
-
-  function getPermissions(UserCollection storage self, address userAddr) internal view returns (bytes32[] memory) {
-    return self.users[userAddr].roles;
-  }
-
-  function givePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
-    getUserByAddress(self, userAddr);
-    self.users[userAddr].roles.push(role);
-  }
-
-  function revokePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
-    uint256 length = self.users[userAddr].roles.length;
-    for(uint32 i = 0; i < length; i++) {
-      if(self.users[userAddr].roles[i] == role) {
-        if (i < length - 1) {
-          self.users[userAddr].roles[i] = self.users[userAddr].roles[length - 1];
-          self.users[userAddr].roles.pop();
-        } else self.users[userAddr].roles.pop();
-      }
-    }
   }
 }
