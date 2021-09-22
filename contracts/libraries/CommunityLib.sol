@@ -193,4 +193,14 @@ library CommunityLib {
 
         emit CommunityUnfrozen(msg.sender, communityId);
     }
+
+    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal {
+        require(
+                self.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
+                "Community does not exist"
+            );
+            require(!self.communities[communityId].info.isFrozen,
+                "Community is frozen"
+            );
+    }
 }

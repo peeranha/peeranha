@@ -1,14 +1,13 @@
+pragma abicoder v2;
 pragma solidity >=0.5.0;
 
-import "./PostLib.sol";
+import "./CommonLib.sol";
 import "./IpfsLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
-  using CommunityLib for CommunityLib.CommunityCollection;
-
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
@@ -19,6 +18,11 @@ library UserLib {
   struct UserCollection {
     mapping(address => User) users;
     address[] userList;
+  }
+
+  struct UserRatingChange {
+    address user;
+    int32 rating;
   }
 
   event UserCreated(address userAddress);
@@ -139,7 +143,7 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, PostLib.UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
@@ -153,5 +157,10 @@ library UserLib {
     if (rating == 0) return;
     User storage user = getUserByAddress(self, userAddr);
     user.rating += rating;
+  }
+
+  function onlyExisitingUser(UserCollection storage self, address user) internal {
+    require(isExists(self, user),
+    "Peeranha: must be an existing user");
   }
 }

@@ -131,8 +131,7 @@ contract Peeranha is IPeeranha, Initializable {
      *
      * - Must be an existing user.
      */
-    function getUserPermissions(address addr) external view
-    onlyExisitingUser(addr) returns (bytes32[] memory) {
+    function getUserPermissions(address addr) external view returns (bytes32[] memory) {
         return SecurityLib.getPermissions(userRoles, addr);
     }
 
@@ -522,53 +521,38 @@ contract Peeranha is IPeeranha, Initializable {
         return posts.getComment(postId, parentReplyId, commentId);
     }
 
-
-  modifier onlyExisitingUser(address user) {
-    require(users.isExists(user),
-    "Peeranha: must be an existing user");
-    _;
-  }
-
-  modifier onlyCommunityModerator(uint32 communityId) {
-    require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-      "Peeranha: must have community moderator role");
-    _;
-  }
-
-  modifier onlyCommunityAdmin(uint32 communityId) {
-    require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-      "Peeranha: must have community admin role");
-    _;
-  }
-
-  modifier onlyAdminOrCommunityAdmin(uint32 communityId) {
-    require(SecurityLib.hasRole(roles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender) || 
-      (SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community admin role");
-    _;
-  }
-
-  modifier onlyAdminOrCommunityModerator(uint32 communityId) {
-    require(SecurityLib.hasRole(roles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender) ||
-      (SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community moderator role");
-    _;
-  }
-
-  modifier onlyAdmin() {
-    require(SecurityLib.hasRole(roles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender), 
-      "Peeranha: must have admin role");
-    _;
-  }
-
-  modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
-    require(
-            communities.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
-            "Community does not exist"
-        );
-        require(!communities.communities[communityId].info.isFrozen,
-            "Community is frozen"
-        );
+    modifier onlyExisitingUser(address user) {
+        UserLib.onlyExisitingUser(users, user);
         _;
-  }
+    }
+
+    modifier onlyCommunityModerator(uint32 communityId) {
+        SecurityLib.onlyCommunityModerator(roles, communityId);
+        _;
+    }
+
+    modifier onlyCommunityAdmin(uint32 communityId) {
+        SecurityLib.onlyCommunityAdmin(roles, communityId);
+        _;
+    }
+
+    modifier onlyAdminOrCommunityAdmin(uint32 communityId) {
+        SecurityLib.onlyAdminOrCommunityAdmin(roles, communityId);
+        _;
+    }
+
+    modifier onlyAdminOrCommunityModerator(uint32 communityId) {
+        SecurityLib.onlyAdminOrCommunityModerator(roles, communityId);
+        _;
+    }
+
+    modifier onlyAdmin() {
+        SecurityLib.onlyAdmin(roles);
+        _;
+    }
+
+    modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
+        CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        _;
+    }
 }

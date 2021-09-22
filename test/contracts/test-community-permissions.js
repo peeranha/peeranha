@@ -138,7 +138,13 @@ describe("Test community permissions", function() {
     // });
 
     const createContract = async function() {
-        const Peeranha = await ethers.getContractFactory("Peeranha");
+        const PostLib = await ethers.getContractFactory("PostLib")
+        const postLib = await PostLib.deploy();
+        const Peeranha = await ethers.getContractFactory("Peeranha", {
+        libraries: {
+            PostLib: postLib.address,
+        }
+        });
        
         const peeranha = await Peeranha.deploy();
         await peeranha.deployed();

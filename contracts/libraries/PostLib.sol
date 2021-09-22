@@ -2,7 +2,6 @@ pragma solidity >=0.5.0;
 pragma abicoder v2;
 
 import "./IpfsLib.sol";
-import "./CommunityLib.sol";
 import "./VoteLib.sol";
 import "./UserLib.sol";
 import "./SecurityLib.sol";
@@ -85,11 +84,6 @@ library PostLib  {
         uint256 postCount;
     }
 
-    struct UserRatingChange {
-        address user;
-        int32 rating;
-    }
-
     event PostCreated(address user, uint32 communityId, uint256 postId);
     event ReplyCreated(address user, uint256 postId, uint16 parentReplyId, uint16 replyId);
     event CommentCreated(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
@@ -117,8 +111,9 @@ library PostLib  {
         bytes32 ipfsHash,
         PostType postType,
         uint8[] memory tags
-    ) internal {
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, user, communityId, SecurityLib.Action.publicationPost);
+    ) public {
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, communityId, SecurityLib.Action.publicationPost);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
         ///
@@ -151,9 +146,10 @@ library PostLib  {
         uint16 parentReplyId,
         bytes32 ipfsHash,
         bool isOfficialReply
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, user, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         
         ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
@@ -201,9 +197,10 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, user, postContainer.info.communityId, SecurityLib.Action.publicationComment);
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
         Comment storage comment;
@@ -236,7 +233,7 @@ library PostLib  {
         uint32 communityId,
         bytes32 ipfsHash,
         uint8[] memory tags
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(user == postContainer.info.author, "You can not edit this post. It is not your.");
@@ -263,7 +260,7 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -289,7 +286,7 @@ library PostLib  {
         uint16 parentReplyId,
         uint8 commentId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -311,9 +308,10 @@ library PostLib  {
         UserLib.UserCollection storage users,
         address user,
         uint256 postId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         if (postContainer.info.rating > 0) {
             UserLib.updateUserRating(users, postContainer.info.author,
@@ -344,13 +342,14 @@ library PostLib  {
         address user,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         /*
         check author
         */
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         deductReplyRating(users, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         if (user == replyContainer.info.author)
@@ -369,7 +368,7 @@ library PostLib  {
         PostType postType,
         ReplyContainer storage replyContainer,
         bool isBestReply
-    ) private {
+    ) public {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
 
@@ -405,10 +404,11 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
-        SecurityLib.checkRatingAndCommunityModerator(roles, users, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         commentContainer.info.isDeleted = true;
         emit CommentDeleted(user, postId, parentReplyId, commentId);
@@ -425,7 +425,7 @@ library PostLib  {
         address user,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         // check permistion
         PostContainer storage postContainer = getPostContainer(self, postId);
         require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), user)), 
@@ -451,7 +451,7 @@ library PostLib  {
         address user,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
 
@@ -491,7 +491,7 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId,
         bool isUpvote
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
@@ -522,11 +522,12 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) private {
+    ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
+        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
         SecurityLib.checkRatingAndCommunityModerator(
             roles, 
-            users, 
+            userRating, 
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
@@ -550,11 +551,12 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) private {
+    ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
+        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
         SecurityLib.checkRatingAndCommunityModerator(
             roles, 
-            users, 
+            userRating, 
             votedUser, 
             replyContainer.info.author, 
             communityId, 
@@ -598,9 +600,10 @@ library PostLib  {
         bool isUpvote
     ) private {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
+        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
         SecurityLib.checkRatingAndCommunityModerator(
             roles, 
-            users, 
+            userRating, 
             votedUser, 
             commentContainer.info.author, 
             communityId, 
@@ -626,7 +629,7 @@ library PostLib  {
         int32 ratingChanged,
         TypeContent typeContent
     ) private {
-       UserRatingChange[] memory usersRating = new UserRatingChange[](2);
+       UserLib.UserRatingChange[] memory usersRating = new UserLib.UserRatingChange[](2);
 
         if (isUpvote) {
             usersRating[0].user = author;
@@ -668,7 +671,7 @@ library PostLib  {
     function getPostContainer(
         PostCollection storage self,
         uint256 postId
-    ) internal view returns (PostContainer storage) {
+    ) public view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
         require(!IpfsLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
@@ -682,7 +685,7 @@ library PostLib  {
     function getReplyContainer(
         PostContainer storage postContainer,
         uint16 replyId
-    ) internal view returns (ReplyContainer storage) {
+    ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer;
         replyContainer = postContainer.replies[replyId];
 
@@ -700,7 +703,7 @@ library PostLib  {
         PostContainer storage postContainer,
         uint16 parentReplyId,
         uint8 commentId
-    ) private view returns (CommentContainer storage) {
+    ) public view returns (CommentContainer storage) {
         CommentContainer storage commentContainer;
 
         if (parentReplyId == 0) {
@@ -720,7 +723,7 @@ library PostLib  {
     function getPost(
         PostCollection storage self,
         uint256 postId
-    ) internal view returns (Post memory) {        
+    ) public view returns (Post memory) {        
         return getPostContainer(self, postId).info;
     }
 
@@ -732,7 +735,7 @@ library PostLib  {
         PostCollection storage self, 
         uint256 postId, 
         uint16 replyId
-    ) internal view returns (Reply memory) {
+    ) public view returns (Reply memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getReplyContainer(postContainer, replyId).info;
     }
@@ -747,7 +750,7 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal view returns (Comment memory) {
+    ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
     }

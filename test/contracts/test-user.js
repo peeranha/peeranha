@@ -234,7 +234,13 @@ describe("Test users", function() {
   })
 
   const createContract = async function(){
-    const Peeranha = await ethers.getContractFactory("Peeranha");
+    const PostLib = await ethers.getContractFactory("PostLib")
+    const postLib = await PostLib.deploy();
+    const Peeranha = await ethers.getContractFactory("Peeranha", {
+      libraries: {
+        PostLib: postLib.address,
+      }
+    });
     const peeranha = await Peeranha.deploy();
     await peeranha.deployed();
     await peeranha.__Peeranha_init();
@@ -266,4 +272,4 @@ describe("Test users", function() {
     const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
       return {"ipfsDoc": {hash, hash2}}
   });
-});
+});2
