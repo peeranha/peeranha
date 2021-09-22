@@ -260,7 +260,7 @@ library SecurityLib {
     * system imposed by {AccessControl}.
     * ====
     */
-  function setupRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal { //virtual?
+  function setupRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
       grantRole(self, userRoles, role, account);
   }
 

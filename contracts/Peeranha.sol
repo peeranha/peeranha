@@ -147,7 +147,7 @@ contract Peeranha is IPeeranha, Initializable {
     function giveAdminPermission(address user) external
     onlyAdmin()
     onlyExisitingUser(user) {
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, user);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, user);
     }
 
     /**
@@ -175,8 +175,8 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external onlyExisitingUser(msg.sender) onlyAdmin() {
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
     }
 
     /**
@@ -228,8 +228,8 @@ contract Peeranha is IPeeranha, Initializable {
     onlyAdminOrCommunityAdmin(communityId)
     onlyExisitingUser(user) 
     onlyExistingAndNotFrozenCommunity(communityId) {
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -245,7 +245,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyCommunityAdmin(communityId)
     onlyExisitingUser(user)
     onlyExistingAndNotFrozenCommunity(communityId) {
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
