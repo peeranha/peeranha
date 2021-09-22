@@ -237,6 +237,7 @@ describe("Test users", function() {
     const Peeranha = await ethers.getContractFactory("Peeranha");
     const peeranha = await Peeranha.deploy();
     await peeranha.deployed();
+    await peeranha.__Peeranha_init();
     return peeranha;
   }
 

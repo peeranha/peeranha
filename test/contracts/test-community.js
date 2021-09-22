@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
 
+
 describe("Test communities", function() {
     it("Test community creating", async function() {
         const peeranha = await createContract();
