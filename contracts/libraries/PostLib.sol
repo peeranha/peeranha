@@ -129,7 +129,7 @@ library PostLib  {
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
         post.info.tags = tags;
-        // emit PostCreated(user, communityId, self.postCount);
+        // // emit PostCreated(user, communityId, self.postCount);
     }
 
     /// @notice Post reply
@@ -176,7 +176,7 @@ library PostLib  {
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
 
-        emit ReplyCreated(user, postId, parentReplyId, postContainer.info.replyCount);
+        // // emit ReplyCreated(user, postId, parentReplyId, postContainer.info.replyCount);
     }
 
     /// @notice Post comment
@@ -210,7 +210,7 @@ library PostLib  {
         comment.ipfsDoc.hash = ipfsHash;
         comment.postTime = CommonLib.getTimestamp();
 
-        emit CommentCreated(user, postId, parentReplyId, commentId);
+        // // emit CommentCreated(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Edit post
@@ -235,7 +235,7 @@ library PostLib  {
         if (tags.length > 0)
             postContainer.info.tags = tags;
 
-        emit PostEdited(user, postId);
+        // // emit PostEdited(user, postId);
     }
 
     /// @notice Edit reply
@@ -258,7 +258,7 @@ library PostLib  {
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit ReplyEdited(user, postId, replyId);
+        // emit ReplyEdited(user, postId, replyId);
     }
 
     /// @notice Edit comment
@@ -283,7 +283,7 @@ library PostLib  {
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit CommentEdited(user, postId, parentReplyId, commentId);
+        // emit CommentEdited(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Delete post
@@ -312,7 +312,7 @@ library PostLib  {
             UserLib.updateUserRating(users, postContainer.info.author, VoteLib.DeleteOwnPost);
 
         postContainer.info.isDeleted = true;
-        emit PostDeleted(user, postId);
+        // emit PostDeleted(user, postId);
     }
 
     /// @notice Delete reply
@@ -338,7 +338,7 @@ library PostLib  {
             UserLib.updateUserRating(users, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
-        emit ReplyDeleted(user, postId, replyId);
+        // emit ReplyDeleted(user, postId, replyId);
     }
 
     /// @notice Take reply rating from the author
@@ -389,7 +389,7 @@ library PostLib  {
         CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
 
         commentContainer.info.isDeleted = true;
-        emit CommentDeleted(user, postId, parentReplyId, commentId);
+        // emit CommentDeleted(user, postId, parentReplyId, commentId);
     }
 
     /// @notice Change status official reply
@@ -412,7 +412,7 @@ library PostLib  {
         else
             postContainer.info.officialReply = replyId;
         
-        emit StatusOfficialReplyChanged(user, postId, postContainer.info.officialReply);
+        // emit StatusOfficialReplyChanged(user, postId, postContainer.info.officialReply);
     }
 
     /// @notice Change status best reply
@@ -446,7 +446,7 @@ library PostLib  {
             postContainer.info.bestReply = replyId;
         }
 
-        // emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
+        // // emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
     }
 
     /// @notice Vote for post, reply or comment
@@ -480,7 +480,7 @@ library PostLib  {
             voteDirection = votePost(users, postContainer, user, postType, isUpvote);
         }
 
-        emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
+        // emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
     }
 
     // @notice Vote for post

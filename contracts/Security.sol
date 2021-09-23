@@ -14,11 +14,8 @@ contract Security is Initializable, ContextUpgradeable {
     
     function __AccessControl_init() internal initializer {
         __Context_init_unchained();
-        __AccessControl_init_unchained();
     }
 
-    function __AccessControl_init_unchained() internal initializer {
-    }
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using AddressUpgradeable for address;
 
@@ -215,19 +212,19 @@ contract Security is Initializable, ContextUpgradeable {
      * Emits a {RoleAdminChanged} event.
      */
     function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {
-        emit RoleAdminChanged(role, _roles[role].adminRole, adminRole);
+      // emit RoleAdminChanged(role, _roles[role].adminRole, adminRole);
         _roles[role].adminRole = adminRole;
     }
 
     function _grantRole(bytes32 role, address account) private {
         if (_roles[role].members.add(account)) {
-            emit RoleGranted(role, account, _msgSender());
+          // emit RoleGranted(role, account, _msgSender());
         }
     }
 
     function _revokeRole(bytes32 role, address account) public {
         if (_roles[role].members.remove(account)) {
-            emit RoleRevoked(role, account, _msgSender());
+          // emit RoleRevoked(role, account, _msgSender());
         }
     }
     uint256[49] private __gap;

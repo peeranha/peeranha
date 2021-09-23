@@ -17,4 +17,18 @@ library CommonLib {
     function toInt32(int value) internal view returns (int32) {
         return SafeCastUpgradeable.toInt32(value);
     }
+
+    /**
+     * @dev Returns the largest of two numbers.
+     */
+    function max(int32 a, int32 b) internal pure returns (int32) {
+        return a >= b ? a : b;
+    }
+
+    /**
+     * @dev Returns the smallest of two numbers.
+     */
+    function min(int32 a, int32 b) internal pure returns (int32) {
+        return a < b ? a : b;
+    }
 }

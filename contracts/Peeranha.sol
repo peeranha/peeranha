@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
+import "./libraries/RewardLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 import "./Security.sol";
@@ -31,7 +32,6 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     }
     
     function __Peeranha_init() public initializer {
-        __AccessControl_init_unchained();
         __Peeranha_init_unchained();
     }
 
@@ -40,6 +40,10 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
         _setupRole(PAUSER_ROLE, msg.sender);
     }
 
+    function getReward(address user, uint16 period) external returns(int32) {
+        return RewardLib.getUserPeriod(users.users[user].reward, period).ratingToAward;
+    }
+    
     /**
      * @dev Signup for user account.
      *
