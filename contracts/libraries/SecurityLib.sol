@@ -284,7 +284,7 @@ library SecurityLib {
     return self.userRoles[account];
   }
 
-  function grantRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) private {
+  function grantRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
     if (self._roles[role].members.add(account)) {
       userRoles.userRoles[account].push(role);   
       emit RoleGranted(role, account, msg.sender);
