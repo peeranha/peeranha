@@ -167,8 +167,8 @@ library UserLib {
   function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
     if (rating == 0) return;
     // User storage user = getUserByAddress(self, userAddr);
+    // user.rating += rating;
 
-    // uint16 period = RewardLib.getPeriod();
     updateRatingBase(self, userAddr, rating);
   }
 
@@ -180,7 +180,7 @@ library UserLib {
     if (newRating < MIN_RATING) newRating = MIN_RATING;
     if (newRating > MAX_RATING) newRating = MAX_RATING;
 
-    PeriodRating storage thisWeekRating =  RewardLib.getUserPeriod(user.reward, currentPeriod);
+    PeriodRating storage thisWeekRating = RewardLib.getUserPeriod(user.reward, currentPeriod, false);
     bool isFirstTransactionOnThisWeek = (thisWeekRating.period == 0);
     int32 ratingToAward = isFirstTransactionOnThisWeek
                                   ? 0
@@ -190,7 +190,7 @@ library UserLib {
     int32 payOutRating = user.payOutRating;
   
     // Very bad code.
-    PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(user.reward, currentPeriod);
+    PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(user.reward, currentPeriod -1, false);
     if (previousWeekRating.period == 0) {
       PeriodRating storage riterPreviousWeekRating = user.reward[user.reward.length - 1];
       if (!isFirstTransactionOnThisWeek) {
@@ -199,7 +199,7 @@ library UserLib {
       if (riterPreviousWeekRating.period == 0){      ////??????? 195
         /*previousWeekRating = period_rating_table.end();*/}
       else
-        previousWeekRating = RewardLib.getUserPeriod(user.reward, riterPreviousWeekRating.period);
+        previousWeekRating = RewardLib.getUserPeriod(user.reward, riterPreviousWeekRating.period, false);
     }
     // Very bad code ends
 
@@ -225,10 +225,9 @@ library UserLib {
         //___The same above, Test 2 guarantees the value of
         //___ratnig_to_award_change >= 0;
 
-        PeriodRating storage periodRating = user.reward[user.reward.length];    /// уже созданна переменная?
-        periodRating.period = currentPeriod;
-        periodRating.rating = newRating;
-        periodRating.ratingToAward = ratingToAwardChange;
+        thisWeekRating.period = currentPeriod;
+        thisWeekRating.rating = newRating;
+        thisWeekRating.ratingToAward = ratingToAwardChange;
       } else {
         // The same above, Test 2 guarantees the value of
         // ratnig_to_award_change >= 0;

@@ -41,7 +41,9 @@ contract Peeranha is IPeeranha, Initializable, Security, PausableUpgradeable {
     }
 
     function getReward(address user, uint16 period) external returns(int32) {
-        return RewardLib.getUserPeriod(users.users[user].reward, period).ratingToAward;
+        UserLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(users.users[user].reward, period, true);
+        require(!userPeriod.isPaid, "You already pick up this reward");
+        return userPeriod.ratingToAward * RewardLib.getCoefficientReward();
     }
     
     /**

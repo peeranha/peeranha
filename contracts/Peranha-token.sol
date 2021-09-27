@@ -8,11 +8,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 contract ERC20Basic is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
-  // using RewardLib for RewardLib.Rewards;
-  Peeranha public perranhaAaddress = Peeranha(0x279787A2A5E83DD23f9E5D2cEf1F4846308Ffc1E);
-
-  // RewardLib.Rewards reward;
-
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
   function initialize(string memory name, string memory symbol) public initializer {
     __Token_init(name, symbol, TOTAL_SUPPLY);
@@ -35,22 +30,11 @@ contract ERC20Basic is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUp
   }
 
   function getReward(uint16 period) external {
-    // RewardLib.Rewards storage reward = perranhaAaddress.reward;
-    // perranhaAaddress.reward.getReward(msg.sender, period);
+    Peeranha baseaddress = Peeranha(0x279787A2A5E83DD23f9E5D2cEf1F4846308Ffc1E);
+    int32 ratingToAward = baseaddress.getReward(msg.sender, period);
+    require(ratingToAward > 0, "No reward for you in this period");
+    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
+    
+    _mint(msg.sender, 5);
   }
-  
-  // string public constant name = "ERC20Basic";
-  // string public constant symbol = "ERC";
-  // uint8 public constant decimals = 18;
-  // uint8 priceRating = 10;
-
-  // function pickupReward(address user, int32 userRating, uint8 period) public override {
-  //   PaidRating storage userPaidRating = paidRating[user];
-  //   int32 ratingDifference = userRating - userPaidRating.paidRating;
-  //   if (ratingDifference > 0) {
-  //     userPaidRating.paidRating = userRating;
-  //     userPaidRating.lastPaidWeek = period;
-  //     balances[user] = ratingDifference * priceRating;
-  //   }
-  // }
 }
