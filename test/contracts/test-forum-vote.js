@@ -1,4 +1,6 @@
 const { expect } = require("chai");
+const crypto = require("crypto");
+
 
 describe("Test vote", function () {
 	const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
@@ -7,9 +9,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -24,9 +28,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -41,9 +47,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -58,9 +66,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -76,9 +86,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -94,9 +106,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -112,9 +126,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -131,9 +147,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -150,9 +168,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
     	await peeranha.voteItem(1, 0, 0, 0);
@@ -169,9 +189,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -189,9 +211,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -209,9 +233,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -229,9 +255,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -249,7 +277,10 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await registerTwoUsers(peeranha, signers, hashContainer);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -267,7 +298,10 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await registerTwoUsers(peeranha, signers, hashContainer);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -285,7 +319,10 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await registerTwoUsers(peeranha, signers, hashContainer);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -303,9 +340,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -327,9 +366,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -351,9 +392,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 1);
@@ -375,9 +418,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -399,9 +444,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -423,9 +470,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
         await peeranha.voteItem(1, 0, 0, 0);
@@ -447,10 +496,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -476,10 +527,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -505,10 +558,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -534,10 +589,13 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
         await peeranha.voteItem(1, 1, 0, 0);
@@ -560,10 +618,13 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
         await peeranha.voteItem(1, 1, 0, 0);
@@ -585,9 +646,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
 
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -598,7 +661,7 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(0);
 		await expect(userAction.rating).to.equal(0);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
@@ -609,7 +672,10 @@ describe("Test vote", function () {
 	it("Test delete own post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);	
 		await peeranha.deletePost(1);
@@ -622,8 +688,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false);
@@ -637,8 +706,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false);
@@ -655,8 +727,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false);
@@ -673,8 +748,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false);
@@ -691,9 +769,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -716,9 +797,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -741,9 +825,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -766,9 +853,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -787,9 +877,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -808,9 +901,12 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -829,8 +925,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -845,8 +944,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -861,8 +963,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -877,8 +982,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -894,8 +1002,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -911,8 +1022,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -928,8 +1042,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -945,8 +1062,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -962,8 +1082,11 @@ describe("Test vote", function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
@@ -995,9 +1118,16 @@ describe("Test vote", function () {
 	}
 
 	const createContract = async function () {
-		const Peeranha = await ethers.getContractFactory("Peeranha");
+		const PostLib = await ethers.getContractFactory("PostLib")
+		const postLib = await PostLib.deploy();
+		const Peeranha = await ethers.getContractFactory("Peeranha", {
+		libraries: {
+				PostLib: postLib.address,
+		}
+		});
 		const peeranha = await Peeranha.deploy();
 		await peeranha.deployed();
+        await peeranha.__Peeranha_init();
 		return peeranha;
 	};
 
@@ -1055,4 +1185,13 @@ describe("Test vote", function () {
 			"0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
 		];
 	};
+
+	const getHashesContainer = (size) =>
+        Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
+
+    const createTags = (countOfTags) =>
+        getHashesContainer(countOfTags).map((hash) => {
+            const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            return {"ipfsDoc": {hash, hash2}}
+        });
 });

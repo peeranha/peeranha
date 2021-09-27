@@ -1,8 +1,7 @@
+pragma abicoder v2;
 pragma solidity >=0.5.0;
 
-import "./PostLib.sol";
 import "./CommonLib.sol";
-import "hardhat/console.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
 import "../Peeranha.sol";
@@ -13,8 +12,6 @@ import "../Peeranha.sol";
 library UserLib {
   uint16 constant MIN_RATING = 900;
   uint16 constant MAX_RATING = 900;
-
-  using CommunityLib for CommunityLib.CommunityCollection;
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
@@ -38,10 +35,15 @@ library UserLib {
     address[] userList;
   }
 
+  struct UserRatingChange {
+    address user;
+    int32 rating;
+  }
+
   event UserCreated(address userAddress);
   event UserUpdated(address userAddress);
   event FollowedCommunity(address userAddress, uint32 communityId);
-  // event UnfollowedCommunity(address userAddress, uint32 communityId);
+  event UnfollowedCommunity(address userAddress, uint32 communityId);
 
 
   /// @notice Create new user info record
@@ -60,7 +62,8 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
 
     self.userList.push(userAddress);
-    // emit UserCreated(userAddress);
+
+    emit UserCreated(userAddress);
   }
 
   /// @notice Update new user info record
@@ -72,9 +75,10 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self.users[userAddress].ipfsDoc.hash != bytes32(0x0), "User does not exist");
-    self.users[userAddress].ipfsDoc.hash = ipfsHash;
-    // emit UserUpdated(userAddress);
+    User storage user = getUserByAddress(self, userAddress);
+    user.ipfsDoc.hash = ipfsHash;
+
+    emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
@@ -99,7 +103,7 @@ library UserLib {
     if (!isAdded)
       user.followedCommunities.push(communityId);
 
-    // emit FollowedCommunity(userAddress, communityId);
+    emit FollowedCommunity(userAddress, communityId);
   }
 
   /// @notice User usfollows community
@@ -117,7 +121,7 @@ library UserLib {
       if (user.followedCommunities[i] == communityId) {
         delete user.followedCommunities[i]; //method rewrite to 0
         
-        // emit UnfollowedCommunity(userAddress, communityId);
+        emit UnfollowedCommunity(userAddress, communityId);
         return;
       }
     }
@@ -154,7 +158,7 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, PostLib.UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, usersRating[i].user, usersRating[i].rating);
     }
@@ -241,23 +245,8 @@ library UserLib {
 
   }
 
-  function getPermissions(UserCollection storage self, address userAddr) internal view returns (bytes32[] memory) {
-    return self.users[userAddr].roles;
-  }
-
-  function givePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
-    self.users[userAddr].roles.push(role);
-  }
-
-  function revokePermission(UserCollection storage self, address userAddr, bytes32 role) internal {
-    uint256 length = self.users[userAddr].roles.length;
-    for(uint32 i = 0; i < length; i++) {
-      if(self.users[userAddr].roles[i] == role) {
-        if (i < length - 1) {
-          self.users[userAddr].roles[i] = self.users[userAddr].roles[length - 1];
-          self.users[userAddr].roles.pop();
-        } else self.users[userAddr].roles.pop();
-      }
-    }
+  function onlyExisitingUser(UserCollection storage self, address user) internal {
+    require(isExists(self, user),
+    "Peeranha: must be an existing user");
   }
 }

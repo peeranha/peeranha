@@ -28,16 +28,16 @@ library CommunityLib {
         uint32 communityCount;
     }
 
-    modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint32 id){
-        require(
-            self.communities[id].info.ipfsDoc.hash != bytes32(0x0),
-            "Community does not exist"
-        );
-        require(!self.communities[id].info.isFrozen,
-            "Community is frozen"
-        );
-        _;
-    }
+    // modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint32 id){
+    //     require(
+    //         self.communities[id].info.ipfsDoc.hash != bytes32(0x0),
+    //         "Community does not exist"
+    //     );
+    //     require(!self.communities[id].info.isFrozen,
+    //         "Community is frozen"
+    //     );
+    //     _;
+    // }
 
     event CommunityCreated(address user, uint32 id);
     event CommunityUpdated(address user, uint32 id);
@@ -87,9 +87,10 @@ library CommunityLib {
         CommunityCollection storage self,
         uint32 communityId,
         bytes32 ipfsHash
-    ) internal onlyExistingAndNotFrozen(self, communityId) {
+    ) internal {
         self.communities[communityId].info.ipfsDoc.hash = ipfsHash;
-      // emitCommunityUpdated(msg.sender, communityId);
+
+        emit CommunityUpdated(msg.sender, communityId);
     }
 
     /// @notice Create new tag info record
@@ -100,12 +101,13 @@ library CommunityLib {
         CommunityCollection storage self, 
         uint32 communityId,
         bytes32 ipfsHash
-    ) internal onlyExistingAndNotFrozen(self, communityId) {
+    ) internal {
         CommunityContainer storage community = self.communities[communityId];
         Tag storage newTag = community.tags[++community.info.tagsCount];
         require(newTag.ipfsDoc.hash == bytes32(0x0), "Tag exists");
         newTag.ipfsDoc.hash = ipfsHash;
-      // emitTagCreated(msg.sender, community.info.tagsCount, communityId);
+
+        emit TagCreated(msg.sender, community.info.tagsCount, communityId);
     }
 
     /// @notice Get the number of communities
@@ -124,7 +126,6 @@ library CommunityLib {
     function getCommunity(CommunityCollection storage self, uint32 communityId)
         internal
         view
-        onlyExistingAndNotFrozen(self, communityId) 
         returns (Community memory)
     {
         return self.communities[communityId].info;
@@ -136,7 +137,6 @@ library CommunityLib {
     function getTagsCount(CommunityCollection storage self, uint32 communityId)
         internal
         view
-        onlyExistingAndNotFrozen(self, communityId) 
         returns (uint8 count) 
     {
         return self.communities[communityId].info.tagsCount;
@@ -148,7 +148,6 @@ library CommunityLib {
     function getTags(CommunityCollection storage self, uint32 communityId)
         internal
         view
-        onlyExistingAndNotFrozen(self, communityId)
         returns (Tag[] memory)
     {
         CommunityContainer storage community = self.communities[communityId];
@@ -176,9 +175,10 @@ library CommunityLib {
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to freeze
     function freeze(CommunityCollection storage self, uint32 communityId) 
-    internal onlyExistingAndNotFrozen(self, communityId) {
+    internal {
         self.communities[communityId].info.isFrozen = true;
-      // emitCommunityFrozen(msg.sender, communityId);
+
+        emit CommunityFrozen(msg.sender, communityId);
     }
 
     /// @notice Unfreeze the community
@@ -190,6 +190,17 @@ library CommunityLib {
             "Community does not exist"
         );
         self.communities[communityId].info.isFrozen = false;
-      // emitCommunityUnfrozen(msg.sender, communityId);
+
+        emit CommunityUnfrozen(msg.sender, communityId);
+    }
+
+    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal {
+        require(
+                self.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
+                "Community does not exist"
+            );
+            require(!self.communities[communityId].info.isFrozen,
+                "Community is frozen"
+            );
     }
 }

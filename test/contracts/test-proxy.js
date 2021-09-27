@@ -6,7 +6,13 @@ let peeranha;
 // Start test block
 describe('Peeranha (proxy)', function () {
   beforeEach(async function () {
-    Peeranha = await ethers.getContractFactory("Peeranha");
+    const PostLib = await ethers.getContractFactory("PostLib")
+    const postLib = await PostLib.deploy();
+    const Peeranha = await ethers.getContractFactory("Peeranha", {
+    libraries: {
+        PostLib: postLib.address,
+    }
+    });
     peeranha = await upgrades.deployProxy(Peeranha, []);
   });
  
