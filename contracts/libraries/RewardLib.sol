@@ -10,9 +10,9 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint32 constant PERIOD_LENGTH = 604800;             // 7 day = 1 week //
-  uint256 constant START_PERIOD_TIME = 1576454400;  // December 16th, 2019 00:00:00
-  int32 constant coefficientToken = 10;
+  uint32 constant PERIOD_LENGTH = 3;             // 7 day = 1 week //
+  uint256 constant START_PERIOD_TIME = 1632852461;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant coefficientToken = 10;
 
 
   /// @notice ///
@@ -24,31 +24,33 @@ library RewardLib {
     // require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
   // }
 
-  function getUserPeriod(UserLib.PeriodRating[] storage periodsRating, uint16 period, bool look) internal returns (UserLib.PeriodRating storage) {
-    return findInternal(periodsRating, 0, uint16(periodsRating.length), period, look); // look??
+  function getUserPeriod(UserLib.UsersRewardPerids storage usersRewardPerids, address user, uint16 period) internal view returns (UserLib.PeriodRating storage) {
+    return usersRewardPerids.usersRewardPerids[user][period];
   }
 
-  function findInternal(UserLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (UserLib.PeriodRating storage) {
-    uint16 len = end - begin;
-    if (len == 0 || (len == 1 && periodsRating[begin].period != period)) {
-      require(!look, "No reward for you in this period");
+  // function findInternal(UserLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (UserLib.PeriodRating storage, bool) {
+  //   uint16 len = end - begin;
+  //   // if (len == 0 || (len == 1 && periodsRating[begin].period != period)) {
+  //     require(!look, "No reward for you in this period");
       
-      UserLib.PeriodRating memory periodRating;
-      periodsRating.push(periodRating);
-      return periodsRating[periodsRating.length -1];
-    }
+  //     UserLib.PeriodRating memory periodRating;
+  //     periodsRating.push(periodRating);
+  //     // return periodsRating[periodsRating.length -1];
+  //     return (periodsRating[periodsRating.length -1], false);
+  //     // return (false, false);
+  //   // }
 
-    uint16 mid = begin + len / 2;
-    uint16 v = periodsRating[mid].period;
-    if (period < v)
-      return findInternal(periodsRating, begin, mid, period, look);
-    else if (period > v)
-      return findInternal(periodsRating, mid + 1, end, period, look);
-    else
-      return periodsRating[mid];
-  }
+  //   // uint16 mid = begin + len / 2;
+  //   // uint16 v = periodsRating[mid].period;
+  //   // if (period < v)
+  //   //   return findInternal(periodsRating, begin, mid, period, look);
+  //   // else if (period > v)
+  //   //   return findInternal(periodsRating, mid + 1, end, period, look);
+  //   // else
+  //   //   return periodsRating[mid];
+  // }
 
-  function getCoefficientReward() internal view returns (int32) {
+  function getCoefficientReward() internal view returns (uint256) {
     return coefficientToken;
   }
 

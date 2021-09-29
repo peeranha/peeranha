@@ -34,7 +34,8 @@ contract ERC20Basic is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUp
     int32 ratingToAward = baseaddress.getReward(msg.sender, period);
     require(ratingToAward > 0, "No reward for you in this period");
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
+    uint256 tokenAward = uint256(ratingToAward) * RewardLib.getCoefficientReward();
     
-    _mint(msg.sender, 5);
+    _mint(msg.sender, tokenAward);
   }
 }

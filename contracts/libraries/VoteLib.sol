@@ -65,7 +65,7 @@ library VoteLib  {
         ResourceAction resourceAction
     ) internal pure returns (int32) {
  
-        if (PostLib.PostType.ExpertPost == postType) {          //switch, gas?
+        if (PostLib.PostType.ExpertPost == postType) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertPost;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertPost;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertPost;
@@ -93,7 +93,7 @@ library VoteLib  {
         ResourceAction resourceAction
     ) internal pure returns (int32) {
  
-        if (PostLib.PostType.ExpertPost == postType) {          //switch, gas?
+        if (PostLib.PostType.ExpertPost == postType) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertReply;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertReply;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertReply;

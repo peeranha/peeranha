@@ -10,8 +10,8 @@ import "../Peeranha.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
-  uint16 constant MIN_RATING = 900;
-  uint16 constant MAX_RATING = 900;
+  int32 constant MIN_RATING = -900;
+  int32 constant MAX_RATING = 900;
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
@@ -20,19 +20,23 @@ library UserLib {
     uint256 creationTime;
     bytes32[] roles;
     uint32[] followedCommunities;
-    PeriodRating[] reward;
+    uint16[] rewardPerids;
   }
 
   struct PeriodRating {
     int32 rating;
     int32 ratingToAward;
-    uint16 period;
+    // uint16 period;
     bool isPaid;
   }
   
   struct UserCollection {
     mapping(address => User) users;
     address[] userList;
+  }
+
+  struct UsersRewardPerids {
+    mapping(address => mapping(uint16 => PeriodRating)) usersRewardPerids;
   }
 
   struct UserRatingChange {
@@ -158,9 +162,9 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(self, usersRewardPerids, usersRating[i].user, usersRating[i].rating);
     }
   }
 
@@ -168,15 +172,15 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
+  function updateUserRating(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, address userAddr, int32 rating) internal {
     if (rating == 0) return;
     // User storage user = getUserByAddress(self, userAddr);
     // user.rating += rating;
 
-    updateRatingBase(self, userAddr, rating);
+    updateRatingBase(self, usersRewardPerids, userAddr, rating);
   }
 
-  function updateRatingBase(UserCollection storage self, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     
     User storage user = getUserByAddress(self, userAddr);
@@ -184,8 +188,9 @@ library UserLib {
     if (newRating < MIN_RATING) newRating = MIN_RATING;
     if (newRating > MAX_RATING) newRating = MAX_RATING;
 
-    PeriodRating storage thisWeekRating = RewardLib.getUserPeriod(user.reward, currentPeriod, false);
-    bool isFirstTransactionOnThisWeek = (thisWeekRating.period == 0);
+    PeriodRating storage thisWeekRating = RewardLib.getUserPeriod(usersRewardPerids, userAddr, currentPeriod);
+    
+    bool isFirstTransactionOnThisWeek = !(user.rewardPerids.length > 0 && user.rewardPerids[user.rewardPerids.length - 1] == currentPeriod);    //????
     int32 ratingToAward = isFirstTransactionOnThisWeek
                                   ? 0
                                   : thisWeekRating.ratingToAward;
@@ -194,21 +199,16 @@ library UserLib {
     int32 payOutRating = user.payOutRating;
   
     // Very bad code.
-    PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(user.reward, currentPeriod -1, false);
-    if (previousWeekRating.period == 0) {
-      PeriodRating storage riterPreviousWeekRating = user.reward[user.reward.length - 1];
-      if (!isFirstTransactionOnThisWeek) {
-        riterPreviousWeekRating = user.reward[user.reward.length - 2];
-      }
-      if (riterPreviousWeekRating.period == 0){      ////??????? 195
-        /*previousWeekRating = period_rating_table.end();*/}
-      else
-        previousWeekRating = RewardLib.getUserPeriod(user.reward, riterPreviousWeekRating.period, false);
-    }
-    // Very bad code ends
+    if (user.rewardPerids.length > 0) {
+      PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(usersRewardPerids, userAddr, currentPeriod - 1);
 
-    // Test 1(no information about previous week)
-    if (previousWeekRating.period != user.reward[user.reward.length - 1].period) {
+      uint16 riterPreviousWeekRating = user.rewardPerids[user.rewardPerids.length - 1];
+      if (isFirstTransactionOnThisWeek && user.rewardPerids.length >= 1 && user.rewardPerids[user.rewardPerids.length - 1] != currentPeriod - 1) {
+        riterPreviousWeekRating = user.rewardPerids[user.rewardPerids.length - 1];
+        previousWeekRating = RewardLib.getUserPeriod(usersRewardPerids, userAddr, riterPreviousWeekRating);
+      }
+    
+      // Test 1(no information about previous week)
       int32 paidOutRating = payOutRating - ratingToAward;
       int32 userWeekRatingAfterChange =
         CommonLib.min(previousWeekRating.rating, newRating);
@@ -219,30 +219,31 @@ library UserLib {
       // Test 2
       if (ratingToAwardChange + ratingToAward < 0)
         ratingToAwardChange = -ratingToAward;
-
-      if (isFirstTransactionOnThisWeek) {
-        // means that this is the first transaction on this week
-        // There are two variants:
-        // 1. There is no record about previous week(test 1 failed)
-        //___In this case rating_to_award_change = 0;
-        // 2. Record about previous week exist(test 1 succeed)
-        //___The same above, Test 2 guarantees the value of
-        //___ratnig_to_award_change >= 0;
-
-        thisWeekRating.period = currentPeriod;
-        thisWeekRating.rating = newRating;
-        thisWeekRating.ratingToAward = ratingToAwardChange;
-      } else {
-        // The same above, Test 2 guarantees the value of
-        // ratnig_to_award_change >= 0;
-        
-        thisWeekRating.rating = newRating;
-        thisWeekRating.ratingToAward += ratingToAwardChange;
-      }
     }
-    user.rating += newRating;
-    user.payOutRating += ratingToAwardChange;
+    // Very bad code ends
 
+    if (isFirstTransactionOnThisWeek) {
+      // means that this is the first transaction on this week
+      // There are two variants:
+      // 1. There is no record about previous week(test 1 failed)
+      //___In this case rating_to_award_change = 0;
+      // 2. Record about previous week exist(test 1 succeed)
+      //___The same above, Test 2 guarantees the value of
+      //___ratnig_to_award_change >= 0;
+
+      user.rewardPerids.push(currentPeriod);
+      thisWeekRating.rating = newRating;
+      thisWeekRating.ratingToAward = ratingToAwardChange;
+    } else {
+      // The same above, Test 2 guarantees the value of
+      // ratnig_to_award_change >= 0;
+        
+      thisWeekRating.rating = newRating;
+      thisWeekRating.ratingToAward += ratingToAwardChange;
+    }
+
+    user.rating = newRating;
+    user.payOutRating += ratingToAwardChange;
   }
 
   function onlyExisitingUser(UserCollection storage self, address user) internal {
