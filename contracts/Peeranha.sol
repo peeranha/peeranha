@@ -8,6 +8,7 @@ import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
+// import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
@@ -21,6 +22,7 @@ contract Peeranha is IPeeranha, Initializable {
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
+    // using ConfigurationLib for ConfigurationLib.Configuration;
 
     UserLib.UserCollection users;
     UserLib.UsersRewardPerids usersRewardPerids;
@@ -28,9 +30,11 @@ contract Peeranha is IPeeranha, Initializable {
     PostLib.PostCollection posts;
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
+    // ConfigurationLib.Configuration configuration;
 
     function initialize() public initializer {
         __Peeranha_init();
+        configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
     function __Peeranha_init() public initializer {
