@@ -35,7 +35,6 @@ describe("Test vote", function () {
 		await expect(userRewardPerid.ratingToAward).to.equal(0);
 		await expect(userRewardPerid2.ratingToAward).to.equal(5);
 		await expect(userRewardPerid3.ratingToAward).to.equal(4);
-
 	});
 
 	it("Test add rating in 1 and 3 period", async function () {

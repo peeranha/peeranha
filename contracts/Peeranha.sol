@@ -34,7 +34,7 @@ contract Peeranha is IPeeranha, Initializable {
 
     function initialize() public initializer {
         __Peeranha_init();
-        configuration.setConfiguration(CommonLib.getTimestamp());
+        // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
     function __Peeranha_init() public initializer {

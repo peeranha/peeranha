@@ -515,12 +515,12 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(userRating.rating + UpvotedExpertReply);
 		await expect(userAction.rating).to.equal(userActionRating.rating);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
 	});
 
 	it("Test delete post after upvote common reply", async function () {
@@ -546,12 +546,12 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(userRating.rating + UpvotedCommonReply);
 		await expect(userAction.rating).to.equal(userActionRating.rating);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
 	});
 
 	it("Test delete post after upvote tutorial reply", async function () {
@@ -577,12 +577,12 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(userRating.rating);
 		await expect(userAction.rating).to.equal(userActionRating.rating);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
 	});
 
 	it("Test delete post after downvote expert reply", async function () {
@@ -605,13 +605,13 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(DownvotedExpertReply);
 		await expect(userAction.rating).to.equal(DownvoteExpertReply);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 
 		await expect(newUserRating.rating).to.equal(DownvotedExpertReply);
-		await expect(newUserActionRating.rating).to.equal(DownvoteExpertReply);	
+		await expect(newUserActionRating.rating).to.equal(DownvoteExpertReply + DeleteOwnReply);	
 	});
 
 	it("Test delete post after downvote common reply", async function () {
@@ -634,12 +634,12 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(DownvotedCommonReply);
 		await expect(userAction.rating).to.equal(DownvoteCommonReply);
 
-		await peeranha.connect(signers[2]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(newUserRating.rating).to.equal(DownvotedCommonReply);
-		await expect(newUserActionRating.rating).to.equal(DownvoteCommonReply);
+		await expect(newUserActionRating.rating).to.equal(DownvoteCommonReply + DeleteOwnReply);
 	});
 
 	it("Test delete post after downvote tutorial reply", async function () {
@@ -661,12 +661,12 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(0);
 		await expect(userAction.rating).to.equal(0);
 
-		await peeranha.connect(signers[1]).deletePost(1);
+		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
 	});
 
 	it("Test delete own post", async function () {
