@@ -5,4 +5,9 @@ async function wait(ms) {
     await delay(ms);
 }
 
-module.exports = { wait };
+async function getBalance(contract) {
+    const balance = await contract.getUserBalance();
+	return await parseInt(balance._hex, 16);
+}
+
+module.exports = { wait, getBalance };

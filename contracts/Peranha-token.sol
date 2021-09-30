@@ -16,7 +16,7 @@ contract ERC20Basic is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUp
   function __Token_init(string memory name, string memory symbol, uint256 cap) internal initializer {
     __ERC20_init_unchained(name, symbol);
     __Pausable_init_unchained();
-    // __ERC20Capped_init_unchained(cap);
+    __ERC20Capped_init_unchained(cap);
     // _mint(msg.sender, 100000000 * (10 ** 18));
     __ERC20Pausable_init_unchained();
     __Token_init_unchained();
@@ -29,13 +29,17 @@ contract ERC20Basic is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUp
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function getReward(uint16 period) external {
-    Peeranha baseaddress = Peeranha(0x279787A2A5E83DD23f9E5D2cEf1F4846308Ffc1E);
+  function getRewardd(uint16 period) external {
+    Peeranha baseaddress = Peeranha(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);    // resolvedAddress
     int32 ratingToAward = baseaddress.getReward(msg.sender, period);
     require(ratingToAward > 0, "No reward for you in this period");
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
-    uint256 tokenAward = uint256(ratingToAward) * RewardLib.getCoefficientReward();
+    uint256 tokenAward = uint256(ratingToAward) * RewardLib.getCoefficientReward(); // * 10^18
     
     _mint(msg.sender, tokenAward);
+  }
+
+  function getUserBalance() external view returns (uint256) {
+    return balanceOf(msg.sender);
   }
 }

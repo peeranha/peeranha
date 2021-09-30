@@ -11,7 +11,7 @@ import "./UserLib.sol";
 /// @dev
 library RewardLib {
   uint32 constant PERIOD_LENGTH = 3;             // 7 day = 1 week //
-  uint256 constant START_PERIOD_TIME = 1632852461;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
   uint256 constant coefficientToken = 10;
 
 
