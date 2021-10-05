@@ -14,18 +14,24 @@ library RewardLib {
   uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
   uint256 constant coefficientToken = 10;
 
+  /// @notice Get information about the user's reward
+  /// @param userRewards The mapping containing all user's rewards
+  /// @param user The use who has rewards
+  /// @param period The period which we get reward
+  function getUserPeriod(UserLib.UsersRewardPerids storage userRewards, address user, uint16 period) internal view returns (UserLib.PeriodRating storage) {
+    return userRewards.usersRewardPerids[user][period];
+  }
 
-  /// @notice ///
-  // function getReward(address user, uint16 period) internal {
-    // Peeranha baseaddress = Peeranha(0x279787A2A5E83DD23f9E5D2cEf1F4846308Ffc1E);
-    // int32 ratingToAward = baseaddress.getReward(user, period);
+  /// @notice Get tokens' coefficient to 1 rating
+  function getRewardCoefficient() internal view returns (uint256) {
+    return coefficientToken;
+  }
 
-    // require(ratingToAward > 0, "No reward for you in this period");
-    // require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
-  // }
 
-  function getUserPeriod(UserLib.UsersRewardPerids storage usersRewardPerids, address user, uint16 period) internal view returns (UserLib.PeriodRating storage) {
-    return usersRewardPerids.usersRewardPerids[user][period];
+  /// @notice Get perion
+  /// @param time Unix time. Usual now()
+  function getPeriod(uint32 time) internal view returns (uint16) {
+    return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 
   // function findInternal(UserLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (UserLib.PeriodRating storage, bool) {
@@ -49,13 +55,4 @@ library RewardLib {
   //   // else
   //   //   return periodsRating[mid];
   // }
-
-  function getCoefficientReward() internal view returns (uint256) {
-    return coefficientToken;
-  }
-
-
-  function getPeriod(uint32 time) internal view returns (uint16) {
-    return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
-  }
 }

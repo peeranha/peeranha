@@ -26,7 +26,6 @@ library UserLib {
   struct PeriodRating {
     int32 rating;
     int32 ratingToAward;
-    // uint16 period;
     bool isPaid;
   }
   
@@ -162,9 +161,9 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, UserLib.UsersRewardPerids storage userRewards, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, usersRewardPerids, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating);
     }
   }
 
@@ -172,82 +171,52 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, address userAddr, int32 rating) internal {
+  function updateUserRating(UserCollection storage self, UserLib.UsersRewardPerids storage userRewards, address userAddr, int32 rating) internal {
     if (rating == 0) return;
-    // User storage user = getUserByAddress(self, userAddr);
-    // user.rating += rating;
 
-    updateRatingBase(self, usersRewardPerids, userAddr, rating);
+    updateRatingBase(self, userRewards, userAddr, rating);
   }
 
-  function updateRatingBase(UserCollection storage self, UserLib.UsersRewardPerids storage usersRewardPerids, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserCollection storage self, UserLib.UsersRewardPerids storage userRewards, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    
     User storage user = getUserByAddress(self, userAddr);
     int32 newRating = user.rating += rating;
-    if (newRating < MIN_RATING) newRating = MIN_RATING;
-    if (newRating > MAX_RATING) newRating = MAX_RATING;
-
-    PeriodRating storage thisWeekRating = RewardLib.getUserPeriod(usersRewardPerids, userAddr, currentPeriod);
+    uint256 pastPeriodsCount = user.rewardPerids.length;
     
-    bool isFirstTransactionOnThisWeek = !(user.rewardPerids.length > 0 && user.rewardPerids[user.rewardPerids.length - 1] == currentPeriod);    //????
-    int32 ratingToAward = isFirstTransactionOnThisWeek
-                                  ? 0
-                                  : thisWeekRating.ratingToAward;
-
+    PeriodRating storage currentWeekRating = RewardLib.getUserPeriod(userRewards, userAddr, currentPeriod);
+    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPerids[pastPeriodsCount - 1] != currentPeriod; 
+    if (isFirstTransactionOnThisWeek) {
+      user.rewardPerids.push(currentPeriod);
+    }
+    
+    int32 ratingToAward = currentWeekRating.ratingToAward;
     int32 ratingToAwardChange = 0;
-    int32 payOutRating = user.payOutRating;
   
-    // Very bad code.
-    if (user.rewardPerids.length > 0) {
-      PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(usersRewardPerids, userAddr, currentPeriod - 1);
+    // Reward for current week is ba0sed on rating earned for the previous week. Current week will be rewarded next week.
+    if (pastPeriodsCount > 0) {
+      uint16 previousWeekNumber = user.rewardPerids[pastPeriodsCount - 1]; // period now
+      PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(userRewards, userAddr, previousWeekNumber);
 
-      uint16 riterPreviousWeekRating = user.rewardPerids[user.rewardPerids.length - 1];
-      if (isFirstTransactionOnThisWeek && user.rewardPerids.length >= 1 && user.rewardPerids[user.rewardPerids.length - 1] != currentPeriod - 1) {
-        riterPreviousWeekRating = user.rewardPerids[user.rewardPerids.length - 1];
-        previousWeekRating = RewardLib.getUserPeriod(usersRewardPerids, userAddr, riterPreviousWeekRating);
-      }
-    
-      // Test 1(no information about previous week)
-      int32 paidOutRating = payOutRating - ratingToAward;
-      int32 userWeekRatingAfterChange =
-        CommonLib.min(previousWeekRating.rating, newRating);
+
+      int32 paidOutRating = user.payOutRating - ratingToAward;
+      
+      // If current week rating is smaller then past week reward then use it as base for the past week reward.
+      int32 baseRewardRating =
+        CommonLib.minInt32(previousWeekRating.rating, newRating);
+      
       ratingToAwardChange =
-        (userWeekRatingAfterChange - paidOutRating) -
+        (baseRewardRating - paidOutRating) -
         ratingToAward;  // equal user_week_rating_after_change -
                           // pay_out_rating;
-      // Test 2
+      
+      // If current preiod rating drops to negative reward then rating to award for current period should be 0
       if (ratingToAwardChange + ratingToAward < 0)
         ratingToAwardChange = -ratingToAward;
     }
-    // Very bad code ends
 
-    if (isFirstTransactionOnThisWeek) {
-      // means that this is the first transaction on this week
-      // There are two variants:
-      // 1. There is no record about previous week(test 1 failed)
-      //___In this case rating_to_award_change = 0;
-      // 2. Record about previous week exist(test 1 succeed)
-      //___The same above, Test 2 guarantees the value of
-      //___ratnig_to_award_change >= 0;
-
-      user.rewardPerids.push(currentPeriod);
-      thisWeekRating.rating = newRating;
-      thisWeekRating.ratingToAward = ratingToAwardChange;
-    } else {
-      // The same above, Test 2 guarantees the value of
-      // ratnig_to_award_change >= 0;
-        
-      thisWeekRating.rating = newRating;
-      thisWeekRating.ratingToAward += ratingToAwardChange;
-    }
-
+    currentWeekRating.rating = newRating;
+    currentWeekRating.ratingToAward += ratingToAwardChange;
     user.rating = newRating;
     user.payOutRating += ratingToAwardChange;
-  }
-
-  function onlyExisitingUser(UserCollection storage self, address user) internal {
-    require(isExists(self, user),
-    "Peeranha: must be an existing user");
   }
 }

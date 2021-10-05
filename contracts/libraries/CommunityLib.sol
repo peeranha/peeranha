@@ -75,7 +75,7 @@ library CommunityLib {
         for (uint32 i = 1; i <= uint32(tags.length); i++) {
             community.tags[i] = tags[i - 1];
         }
-      // emitCommunityCreated(msg.sender, self.communityCount);
+        emit CommunityCreated(msg.sender, self.communityCount);
         return self.communityCount;
     }
 

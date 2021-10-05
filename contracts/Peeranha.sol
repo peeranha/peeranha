@@ -25,7 +25,7 @@ contract Peeranha is IPeeranha, Initializable {
     // using ConfigurationLib for ConfigurationLib.Configuration;
 
     UserLib.UserCollection users;
-    UserLib.UsersRewardPerids usersRewardPerids;
+    UserLib.UsersRewardPerids userRewards;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
     SecurityLib.Roles roles;
@@ -48,9 +48,9 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getReward(address user, uint16 period) external returns(int32) {
-        UserLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(usersRewardPerids, user, period);
-        require(!userPeriod.isPaid, "You already pick up this reward");
+    function claimReward(address user, uint16 rewardPeriod) external returns(int32) {
+        UserLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(userRewards, user, rewardPeriod);
+        require(!userPeriod.isPaid, "You already picked up this reward");
         userPeriod.isPaid = true;
         return userPeriod.ratingToAward;
     }
@@ -399,7 +399,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post.
     */
     function deletePost(uint256 postId) external onlyExisitingUser(msg.sender) override {
-        posts.deletePost(roles, users, usersRewardPerids, msg.sender, postId);
+        posts.deletePost(roles, users, userRewards, msg.sender, postId);
     }
 
     /**
@@ -411,7 +411,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external onlyExisitingUser(msg.sender) override {
-        posts.createReply(roles, users, usersRewardPerids, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
+        posts.createReply(roles, users, userRewards, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -434,7 +434,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reply.
     */
     function deleteReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override { 
-        posts.deleteReply(roles, users, usersRewardPerids, msg.sender, postId, replyId);
+        posts.deleteReply(roles, users, userRewards, msg.sender, postId, replyId);
     }
 
     /**
@@ -484,8 +484,16 @@ contract Peeranha is IPeeranha, Initializable {
         posts.changeStatusOfficialReply(roles, msg.sender, postId, replyId);
     }
 
+    /**
+     * @dev Change status best reply
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - must be a role ?
+    */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(users, usersRewardPerids, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId);
     }
 
     /**
@@ -494,10 +502,9 @@ contract Peeranha is IPeeranha, Initializable {
      * Requirements:
      *
      * - must be a post/reply/comment.
-     * - rating user. ?
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external onlyExisitingUser(msg.sender) override {  
-        posts.voteForumItem(roles, users, usersRewardPerids, msg.sender, postId, replyId, commentId, isUpvote);
+        posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
     /**
@@ -533,16 +540,26 @@ contract Peeranha is IPeeranha, Initializable {
         return posts.getComment(postId, parentReplyId, commentId);
     }
 
+    /**
+     * @dev Get a comment by index.
+     *
+     * Requirements:
+     *
+     * - must be a user.
+     * - must be a reward in this period.
+     * - must be a period less then now.
+    */
     function getUserRewardPerid(address user, uint16 period) external view returns (UserLib.PeriodRating memory) {
-        return RewardLib.getUserPeriod(usersRewardPerids, user, period);
+        return RewardLib.getUserPeriod(userRewards, user, period);
     }
 
     function addUserRating(address userAddr, int32 rating) external { // delete?
-        users.updateUserRating(usersRewardPerids, userAddr, rating);
+        users.updateUserRating(userRewards, userAddr, rating);
     }
 
     modifier onlyExisitingUser(address user) {
-        UserLib.onlyExisitingUser(users, user);
+        require(UserLib.isExists(users, user),
+        "Peeranha: must be an existing user");
         _;
     }
 

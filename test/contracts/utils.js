@@ -5,8 +5,8 @@ async function wait(ms) {
     await delay(ms);
 }
 
-async function getBalance(contract) {
-    const balance = await contract.getUserBalance();
+async function getBalance(contract, user) {
+    const balance = await contract.balanceOf(user);
 	return await parseInt(balance._hex, 16);
 }
 
