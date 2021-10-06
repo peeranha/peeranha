@@ -97,7 +97,7 @@ describe("Test users", function() {
     const hashContainer = getHashContainer();
     await peeranha.createUser(hashContainer[0]);
 
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('community does not exist');
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Community does not exist');
 
   })
 
@@ -109,7 +109,7 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.freezeCommunity(1);
     
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Peeranha: community is frozen');
+    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Community is frozen');
   })
 
   it("Follow on deferent communities", async function() {
@@ -155,13 +155,13 @@ describe("Test users", function() {
     await peeranha.followCommunity(2);
     await peeranha.unfollowCommunity(1);
     let user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(0);
-    expect(user.followCommunity[1]).to.equal(2);
+    expect(user.followedCommunities[0]).to.equal(0);
+    expect(user.followedCommunities[1]).to.equal(2);
 
     await peeranha.followCommunity(3);
     user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(3);
-    expect(user.followCommunity[1]).to.equal(2);
+    expect(user.followedCommunities[0]).to.equal(3);
+    expect(user.followedCommunities[1]).to.equal(2);
   })
 
   it("UnFollow community", async function() {
@@ -195,8 +195,8 @@ describe("Test users", function() {
     await peeranha.unfollowCommunity(2);
 
     const user = await peeranha.getUserByIndex(0);
-    expect(user.followCommunity[0]).to.equal(0);
-    expect(user.followCommunity[1]).to.equal(0);
+    expect(user.followedCommunities[0]).to.equal(0);
+    expect(user.followedCommunities[1]).to.equal(0);
   })
 
   it("Double unFollow community", async function() {

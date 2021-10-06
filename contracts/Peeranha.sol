@@ -25,7 +25,7 @@ contract Peeranha is IPeeranha, Initializable {
     // using ConfigurationLib for ConfigurationLib.Configuration;
 
     UserLib.UserCollection users;
-    UserLib.UsersRewardPerids userRewards;
+    RewardLib.UserRewards userRewards;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
     SecurityLib.Roles roles;
@@ -48,10 +48,8 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function claimReward(address user, uint16 rewardPeriod) external returns(int32) {
-        UserLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(userRewards, user, rewardPeriod);
-        require(!userPeriod.isPaid, "You already picked up this reward");
-        userPeriod.isPaid = true;
+    function claimReward(address user, uint16 rewardPeriod) external view returns(int32) {
+        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(userRewards, user, rewardPeriod);
         return userPeriod.ratingToAward;
     }
     
@@ -549,7 +547,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reward in this period.
      * - must be a period less then now.
     */
-    function getUserRewardPerid(address user, uint16 period) external view returns (UserLib.PeriodRating memory) {
+    function getUserRewardPerid(address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
         return RewardLib.getUserPeriod(userRewards, user, period);
     }
 

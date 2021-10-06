@@ -8,6 +8,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
+  RewardLib.StatusRewardContainer statusRewards;
+
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
   function initialize(string memory name, string memory symbol) public initializer {
     __Token_init(name, symbol, TOTAL_SUPPLY);
@@ -39,6 +41,10 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
    * - must be a period less then now.
   */
   function claimReward(uint16 period) external {
+    RewardLib.StatusReward storage statusReward = RewardLib.getStatusReward(statusRewards, msg.sender, period);
+    require(!statusReward.isPaid, "You already picked up this reward.");
+    statusReward.isPaid = true;
+
     Peeranha baseaddress = Peeranha(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);    // resolvedAddress
     int32 ratingToAward = baseaddress.claimReward(msg.sender, period);
     require(ratingToAward > 0, "No reward for you in this period");

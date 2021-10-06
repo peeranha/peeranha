@@ -14,12 +14,33 @@ library RewardLib {
   uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
   uint256 constant coefficientToken = 10;
 
+  struct PeriodRating {
+    int32 rating;
+    int32 ratingToAward;
+  }
+
+  struct StatusRewardContainer {
+    mapping(address => mapping(uint16 => StatusReward)) statusReward;
+  }
+
+  struct StatusReward {
+    bool isPaid;
+  }
+
+  struct UserRewards {
+    mapping(address => mapping(uint16 => PeriodRating)) userRewards;
+  }
+
   /// @notice Get information about the user's reward
   /// @param userRewards The mapping containing all user's rewards
   /// @param user The use who has rewards
   /// @param period The period which we get reward
-  function getUserPeriod(UserLib.UsersRewardPerids storage userRewards, address user, uint16 period) internal view returns (UserLib.PeriodRating storage) {
-    return userRewards.usersRewardPerids[user][period];
+  function getUserPeriod(RewardLib.UserRewards storage userRewards, address user, uint16 period) internal view returns (RewardLib.PeriodRating storage) {
+    return userRewards.userRewards[user][period];
+  }
+
+  function getStatusReward(StatusRewardContainer storage statusReward, address user, uint16 period) internal view returns (StatusReward storage) {
+    return statusReward.statusReward[user][period];
   }
 
   /// @notice Get tokens' coefficient to 1 rating
@@ -34,12 +55,12 @@ library RewardLib {
     return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 
-  // function findInternal(UserLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (UserLib.PeriodRating storage, bool) {
+  // function findInternal(RewardLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (RewardLib.PeriodRating storage, bool) {
   //   uint16 len = end - begin;
   //   // if (len == 0 || (len == 1 && periodsRating[begin].period != period)) {
   //     require(!look, "No reward for you in this period");
       
-  //     UserLib.PeriodRating memory periodRating;
+  //     RewardLib.PeriodRating memory periodRating;
   //     periodsRating.push(periodRating);
   //     // return periodsRating[periodsRating.length -1];
   //     return (periodsRating[periodsRating.length -1], false);

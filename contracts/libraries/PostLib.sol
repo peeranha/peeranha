@@ -142,7 +142,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 parentReplyId,
@@ -308,7 +308,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId
     ) public {
@@ -342,7 +342,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 replyId
@@ -367,9 +367,9 @@ library PostLib  {
     /// @param users The mapping containing all users
     /// @param postType Type post: expert, common, tutorial
     /// @param replyContainer Reply from which the rating is taken
-    function deductReplyRating (                                    // add bool level x3 if?
+    function deductReplyRating (
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         PostType postType,
         ReplyContainer storage replyContainer,
         bool isBestReply
@@ -453,7 +453,7 @@ library PostLib  {
     function changeStatusBestReply (        // roles?
         PostCollection storage self,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 replyId
@@ -492,7 +492,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 replyId,
@@ -525,7 +525,7 @@ library PostLib  {
     function votePost(
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         PostContainer storage postContainer,
         address votedUser,
         PostType postType,
@@ -554,7 +554,7 @@ library PostLib  {
     function voteReply(
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         ReplyContainer storage replyContainer,
         uint32 communityId,
         address votedUser,
@@ -631,7 +631,7 @@ library PostLib  {
     /// @param typeContent Type content post, reply or comment
     function vote (
         UserLib.UserCollection storage users,
-        UserLib.UsersRewardPerids storage userRewards,
+        RewardLib.UserRewards storage userRewards,
         address author,
         address votedUser,
         PostType postType,
