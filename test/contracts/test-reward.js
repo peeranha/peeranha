@@ -170,7 +170,6 @@ describe("Test vote", function () {
 		console.log(balance);
 
 		await expect(token.claimReward(newuserRating.rewardPerids[1])).to.be.revertedWith('You already picked up this reward.');
-
 	});
 
 	const createContract = async function () {

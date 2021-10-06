@@ -10,6 +10,8 @@ import "../Peeranha.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
+  int32 constant START_USER_RATING = 10;
+
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
@@ -50,6 +52,8 @@ library UserLib {
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
     user.creationTime = CommonLib.getTimestamp();
+    user.rating = START_USER_RATING;
+    user.payOutRating = START_USER_RATING;
 
     self.userList.push(userAddress);
 

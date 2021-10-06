@@ -17,6 +17,8 @@ describe("Test users", function() {
 
     await Promise.all(hashContainer.map(async (hash, index) => {
       const user = await peeranha.getUserByIndex(index);
+      await expect(user.rating).to.equal(StartUserRating);
+      await expect(user.payOutRating).to.equal(StartUserRating);
       return await expect(user.ipfsDoc.hash).to.equal(hash);
     }))
   });
@@ -272,4 +274,6 @@ describe("Test users", function() {
     const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
       return {"ipfsDoc": {hash, hash2}}
   });
-});2
+
+  const StartUserRating = 10;
+});
