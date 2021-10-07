@@ -105,7 +105,10 @@ describe("Test vote", function () {
 
 	it("Test get reward", async function () {
 		const peeranha = await createContract();
-		const token = await createContractToken();
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		const token = await createContractToken(peeranhaContractAddress);
 		const hashContainer = getHashContainer();
 
 		await peeranha.createUser(hashContainer[1]);
@@ -137,7 +140,10 @@ describe("Test vote", function () {
 
 	it("Test twice pick up 1 reward", async function () {
 		const peeranha = await createContract();
-		const token = await createContractToken();
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		const token = await createContractToken(peeranhaContractAddress);
 		const hashContainer = getHashContainer();
 
 		await peeranha.createUser(hashContainer[1]);
@@ -186,11 +192,11 @@ describe("Test vote", function () {
 		return peeranha;
 	};
 
-	const createContractToken = async function () {
+	const createContractToken = async function (peeranhaAddress) {
 		const Token = await ethers.getContractFactory("PeeranhaToken");
 		const token = await Token.deploy();
 		await token.deployed();
-        await token.initialize("token", "ecs");
+        await token.initialize("token", "ecs", peeranhaAddress);
 		return token;
 	};
 

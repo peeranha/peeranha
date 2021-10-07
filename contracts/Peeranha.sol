@@ -48,7 +48,7 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getRatingToReward(address user, uint16 rewardPeriod) external view returns(int32) {
+    function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(int32) {
         RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(userRewards, user, rewardPeriod);
         return userPeriod.ratingToReward;
     }
