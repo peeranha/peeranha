@@ -4,7 +4,6 @@ pragma solidity >=0.5.0;
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
-import "../Peeranha.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -19,7 +18,7 @@ library UserLib {
     uint256 creationTime;
     bytes32[] roles;
     uint32[] followedCommunities;
-    uint16[] rewardPerids;
+    uint16[] rewardPeriods;
   }
   
   struct UserCollection {
@@ -172,42 +171,42 @@ library UserLib {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     User storage user = getUserByAddress(self, userAddr);
     int32 newRating = user.rating += rating;
-    uint256 pastPeriodsCount = user.rewardPerids.length;
+    uint256 pastPeriodsCount = user.rewardPeriods.length;
     
     RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriod(userRewards, userAddr, currentPeriod);
-    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPerids[pastPeriodsCount - 1] != currentPeriod; 
+    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
     if (isFirstTransactionOnThisWeek) {
-      user.rewardPerids.push(currentPeriod);
+      user.rewardPeriods.push(currentPeriod);
     }
     
-    int32 ratingToAward = currentWeekRating.ratingToAward;
-    int32 ratingToAwardChange = 0;
+    int32 ratingToReward = currentWeekRating.ratingToReward;
+    int32 ratingToRewardChange = 0;
   
-    // Reward for current week is ba0sed on rating earned for the previous week. Current week will be rewarded next week.
+    // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
     if (pastPeriodsCount > 0) {
-      uint16 previousWeekNumber = user.rewardPerids[pastPeriodsCount - 1]; // period now
+      uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
       RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(userRewards, userAddr, previousWeekNumber);
 
 
-      int32 paidOutRating = user.payOutRating - ratingToAward;
+      int32 paidOutRating = user.payOutRating - ratingToReward;
       
       // If current week rating is smaller then past week reward then use it as base for the past week reward.
       int32 baseRewardRating =
         CommonLib.minInt32(previousWeekRating.rating, newRating);
       
-      ratingToAwardChange =
+      ratingToRewardChange =
         (baseRewardRating - paidOutRating) -
-        ratingToAward;  // equal user_week_rating_after_change -
+        ratingToReward;  // equal user_week_rating_after_change -
                           // pay_out_rating;
       
       // If current preiod rating drops to negative reward then rating to award for current period should be 0
-      if (ratingToAwardChange + ratingToAward < 0)
-        ratingToAwardChange = -ratingToAward;
+      if (ratingToRewardChange + ratingToReward < 0)
+        ratingToRewardChange = -ratingToReward;
     }
 
     currentWeekRating.rating = newRating;
-    currentWeekRating.ratingToAward += ratingToAwardChange;
+    currentWeekRating.ratingToReward += ratingToRewardChange;
     user.rating = newRating;
-    user.payOutRating += ratingToAwardChange;
+    user.payOutRating += ratingToRewardChange;
   }
 }

@@ -16,7 +16,7 @@ library RewardLib {
 
   struct PeriodRating {
     int32 rating;
-    int32 ratingToAward;
+    int32 ratingToReward;
   }
 
   struct StatusRewardContainer {
@@ -39,7 +39,7 @@ library RewardLib {
     return userRewards.userRewards[user][period];
   }
 
-  function getStatusReward(StatusRewardContainer storage statusReward, address user, uint16 period) internal view returns (StatusReward storage) {
+  function getRewardStatus(StatusRewardContainer storage statusReward, address user, uint16 period) internal view returns (StatusReward storage) {
     return statusReward.statusReward[user][period];
   }
 
