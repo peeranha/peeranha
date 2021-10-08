@@ -14,7 +14,21 @@ library CommonLib {
     return SafeCastUpgradeable.toUint32(block.timestamp);
   }
 
-  function toInt32(int value) internal view returns (int32) {
-    return SafeCastUpgradeable.toInt32(value);
-  }
+    function toInt32(int value) internal view returns (int32) {
+        return SafeCastUpgradeable.toInt32(value);
+    }
+
+    /**
+     * @dev Returns the largest of two numbers.
+     */
+    function maxInt32(int32 a, int32 b) internal pure returns (int32) {
+        return a >= b ? a : b;
+    }
+
+    /**
+     * @dev Returns the smallest of two numbers.
+     */
+    function minInt32(int32 a, int32 b) internal pure returns (int32) {
+        return a < b ? a : b;
+    }
 }

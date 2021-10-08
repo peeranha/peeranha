@@ -6,7 +6,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
+import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
+// import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
@@ -20,19 +22,22 @@ contract Peeranha is IPeeranha, Initializable {
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
+    // using ConfigurationLib for ConfigurationLib.Configuration;
 
     UserLib.UserCollection users;
+    RewardLib.UserRewards userRewards;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
+    // ConfigurationLib.Configuration configuration;
 
     function initialize() public initializer {
         __Peeranha_init();
+        // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
     function __Peeranha_init() public initializer {
-        __AccessControl_init_unchained();
         __Peeranha_init_unchained();
     }
 
@@ -43,6 +48,11 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(int32) {
+        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriodRating(userRewards, user, rewardPeriod);
+        return userPeriod.ratingToReward;
+    }
+    
     /**
      * @dev Signup for user account.
      *
@@ -387,7 +397,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post.
     */
     function deletePost(uint256 postId) external onlyExisitingUser(msg.sender) override {
-        posts.deletePost(roles, users, msg.sender, postId);
+        posts.deletePost(roles, users, userRewards, msg.sender, postId);
     }
 
     /**
@@ -399,7 +409,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external onlyExisitingUser(msg.sender) override {
-        posts.createReply(roles, users, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
+        posts.createReply(roles, users, userRewards, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -422,7 +432,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reply.
     */
     function deleteReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override { 
-        posts.deleteReply(roles, users, msg.sender, postId, replyId);
+        posts.deleteReply(roles, users, userRewards, msg.sender, postId, replyId);
     }
 
     /**
@@ -472,8 +482,16 @@ contract Peeranha is IPeeranha, Initializable {
         posts.changeStatusOfficialReply(roles, msg.sender, postId, replyId);
     }
 
+    /**
+     * @dev Change status best reply
+     *
+     * Requirements:
+     *
+     * - must be a reply.
+     * - must be a role ?
+    */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(users, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId);
     }
 
     /**
@@ -482,10 +500,9 @@ contract Peeranha is IPeeranha, Initializable {
      * Requirements:
      *
      * - must be a post/reply/comment.
-     * - rating user. ?
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external onlyExisitingUser(msg.sender) override {  
-        posts.voteForumItem(roles, users, msg.sender, postId, replyId, commentId, isUpvote);
+        posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
     /**
@@ -521,8 +538,26 @@ contract Peeranha is IPeeranha, Initializable {
         return posts.getComment(postId, parentReplyId, commentId);
     }
 
+    /**
+     * @dev Get a comment by index.
+     *
+     * Requirements:
+     *
+     * - must be a user.
+     * - must be a reward in this period.
+     * - must be a period less then now.
+    */
+    function getUserRewardPeriod(address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
+        return RewardLib.getUserPeriodRating(userRewards, user, period);
+    }
+
+    function addUserRating(address userAddr, int32 rating) external { // delete?
+        users.updateUserRating(userRewards, userAddr, rating);
+    }
+
     modifier onlyExisitingUser(address user) {
-        UserLib.onlyExisitingUser(users, user);
+        require(UserLib.isExists(users, user),
+        "Peeranha: must be an existing user");
         _;
     }
 

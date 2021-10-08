@@ -3,16 +3,22 @@ pragma solidity >=0.5.0;
 
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
+import "./RewardLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
+  int32 constant START_USER_RATING = 10;
+
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
+    int32 payOutRating;
     uint256 creationTime;
-    uint32[] followedCommunities; 
+    bytes32[] roles;
+    uint32[] followedCommunities;
+    uint16[] rewardPeriods;
   }
   
   struct UserCollection {
@@ -45,6 +51,8 @@ library UserLib {
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
     user.creationTime = CommonLib.getTimestamp();
+    user.rating = START_USER_RATING;
+    user.payOutRating = START_USER_RATING;
 
     self.userList.push(userAddress);
 
@@ -143,9 +151,9 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating);
     }
   }
 
@@ -153,14 +161,52 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, address userAddr, int32 rating) internal {
+  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
     if (rating == 0) return;
-    User storage user = getUserByAddress(self, userAddr);
-    user.rating += rating;
+
+    updateRatingBase(self, userRewards, userAddr, rating);
   }
 
-  function onlyExisitingUser(UserCollection storage self, address user) internal {
-    require(isExists(self, user),
-    "Peeranha: must be an existing user");
+  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
+    uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
+    User storage user = getUserByAddress(self, userAddr);
+    int32 newRating = user.rating += rating;
+    uint256 pastPeriodsCount = user.rewardPeriods.length;
+    
+    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userRewards, userAddr, currentPeriod);
+    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
+    if (isFirstTransactionOnThisWeek) {
+      user.rewardPeriods.push(currentPeriod);
+    }
+    
+    int32 ratingToReward = currentWeekRating.ratingToReward;
+    int32 ratingToRewardChange = 0;
+  
+    // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
+    if (pastPeriodsCount > 0) {
+      uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
+      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userRewards, userAddr, previousWeekNumber);
+
+
+      int32 paidOutRating = user.payOutRating - ratingToReward;
+      
+      // If current week rating is smaller then past week reward then use it as base for the past week reward.
+      int32 baseRewardRating =
+        CommonLib.minInt32(previousWeekRating.rating, newRating);
+      
+      ratingToRewardChange =
+        (baseRewardRating - paidOutRating) -
+        ratingToReward;  // equal user_week_rating_after_change -
+                          // pay_out_rating;
+      
+      // If current preiod rating drops to negative reward then rating to award for current period should be 0
+      if (ratingToRewardChange + ratingToReward < 0)
+        ratingToRewardChange = -ratingToReward;
+    }
+
+    currentWeekRating.rating = newRating;
+    currentWeekRating.ratingToReward += ratingToRewardChange;
+    user.rating = newRating;
+    user.payOutRating += ratingToRewardChange;
   }
 }
