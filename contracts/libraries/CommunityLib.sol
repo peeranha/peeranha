@@ -168,7 +168,7 @@ library CommunityLib {
         // onlyExistingAndNotFrozen(self, communityId)      //uncomment
         returns (Tag memory)
     {
-        return self.communities[communityId].tags[tagId - 1];
+        return self.communities[communityId].tags[tagId];
     }
 
     /// @notice Freeze the community
