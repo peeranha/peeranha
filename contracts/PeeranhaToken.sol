@@ -11,13 +11,11 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   RewardLib.StatusRewardContainer statusRewards;
 
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
-  address private  contractAddress;
   IPeeranha peeranha;
 
-  function initialize(string memory name, string memory symbol, address _contractAddress) public initializer {
+  function initialize(string memory name, string memory symbol, address peeranhaContractAddress) public initializer {
     __Token_init(name, symbol, TOTAL_SUPPLY);
-    contractAddress = _contractAddress;
-    peeranha = IPeeranha(contractAddress);
+    peeranha = IPeeranha(peeranhaContractAddress);
   }
 
   function __Token_init(string memory name, string memory symbol, uint256 cap) internal initializer {

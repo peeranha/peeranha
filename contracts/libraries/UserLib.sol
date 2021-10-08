@@ -173,7 +173,7 @@ library UserLib {
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
-    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriod(userRewards, userAddr, currentPeriod);
+    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userRewards, userAddr, currentPeriod);
     bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
     if (isFirstTransactionOnThisWeek) {
       user.rewardPeriods.push(currentPeriod);
@@ -185,7 +185,7 @@ library UserLib {
     // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
     if (pastPeriodsCount > 0) {
       uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
-      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriod(userRewards, userAddr, previousWeekNumber);
+      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userRewards, userAddr, previousWeekNumber);
 
 
       int32 paidOutRating = user.payOutRating - ratingToReward;

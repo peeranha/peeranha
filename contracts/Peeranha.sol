@@ -49,7 +49,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(int32) {
-        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriod(userRewards, user, rewardPeriod);
+        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriodRating(userRewards, user, rewardPeriod);
         return userPeriod.ratingToReward;
     }
     
@@ -548,7 +548,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a period less then now.
     */
     function getUserRewardPeriod(address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
-        return RewardLib.getUserPeriod(userRewards, user, period);
+        return RewardLib.getUserPeriodRating(userRewards, user, period);
     }
 
     function addUserRating(address userAddr, int32 rating) external { // delete?

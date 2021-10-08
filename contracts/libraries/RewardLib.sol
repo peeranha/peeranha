@@ -35,7 +35,7 @@ library RewardLib {
   /// @param userRewards The mapping containing all user's rewards
   /// @param user The use who has rewards
   /// @param period The period which we get reward
-  function getUserPeriod(RewardLib.UserRewards storage userRewards, address user, uint16 period) internal view returns (RewardLib.PeriodRating storage) {
+  function getUserPeriodRating(RewardLib.UserRewards storage userRewards, address user, uint16 period) internal view returns (RewardLib.PeriodRating storage) {
     return userRewards.userRewards[user][period];
   }
 
