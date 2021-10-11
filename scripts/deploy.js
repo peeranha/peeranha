@@ -11,6 +11,9 @@ async function main() {
   console.log("Deploying Peeranha...");
   const peeranha = await upgrades.deployProxy(Peeranha, [], {unsafeAllowLinkedLibraries: true});
   console.log("Peeranha deployed to:", peeranha.address);
+  const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
+  const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEER", "PEER", peeranha.address]);
+  console.log("Peeranha token deployed to:", peeranhaToken.address);
 }
 
 main()
