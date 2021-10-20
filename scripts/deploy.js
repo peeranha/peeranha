@@ -2,7 +2,9 @@ const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   const PostLib = await ethers.getContractFactory("PostLib");
+  console.log("Deploying PostLib...");
   const postLib = await PostLib.deploy();
+  console.log("PostLib deployed to:", postLib.address);
   const Peeranha = await ethers.getContractFactory("Peeranha", {
     libraries: {
       PostLib: postLib.address,
