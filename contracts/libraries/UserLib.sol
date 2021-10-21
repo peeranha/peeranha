@@ -4,6 +4,7 @@ pragma solidity >=0.5.0;
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
+import "./NFTLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -151,9 +152,9 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating, achievementsContainer);
     }
   }
 
@@ -161,10 +162,13 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
+  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
     if (rating == 0) return;
 
     updateRatingBase(self, userRewards, userAddr, rating);
+    if (rating > 0) {
+      NFTLib.updateAchievement(achievementsContainer, userAddr, NFTLib.AchievementType.Rating, int64(rating));
+    }
   }
 
   function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {

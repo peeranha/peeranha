@@ -12,7 +12,7 @@ import "./UserLib.sol";
 library RewardLib {
   uint32 constant PERIOD_LENGTH = 3;             // 7 day = 1 week //
   uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
-  uint256 constant coefficientToken = 10;
+  uint256 constant COEFFICIENT_TOKEN = 10;
 
   struct PeriodRating {
     int32 rating;
@@ -45,7 +45,7 @@ library RewardLib {
 
   /// @notice Get tokens' coefficient to 1 rating
   function getRewardCoefficient() internal view returns (uint256) {
-    return coefficientToken;
+    return COEFFICIENT_TOKEN;
   }
 
 

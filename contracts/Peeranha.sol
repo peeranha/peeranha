@@ -8,6 +8,7 @@ import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
+import "./libraries/NFTLib.sol";
 // import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
@@ -31,6 +32,7 @@ contract Peeranha is IPeeranha, Initializable {
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
     // ConfigurationLib.Configuration configuration;
+    NFTLib.AchievementsContainer achievementsContainer;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -397,7 +399,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post.
     */
     function deletePost(uint256 postId) external onlyExisitingUser(msg.sender) override {
-        posts.deletePost(roles, users, userRewards, msg.sender, postId);
+        posts.deletePost(roles, users, userRewards, msg.sender, postId, achievementsContainer);
     }
 
     /**
@@ -409,7 +411,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external onlyExisitingUser(msg.sender) override {
-        posts.createReply(roles, users, userRewards, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
+        posts.createReply(roles, users, userRewards, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply, achievementsContainer);
     }
 
     /**
@@ -432,7 +434,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reply.
     */
     function deleteReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override { 
-        posts.deleteReply(roles, users, userRewards, msg.sender, postId, replyId);
+        posts.deleteReply(roles, users, userRewards, msg.sender, postId, replyId, achievementsContainer);
     }
 
     /**
@@ -491,7 +493,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a role ?
     */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId, achievementsContainer);
     }
 
     /**
@@ -502,7 +504,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post/reply/comment.
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external onlyExisitingUser(msg.sender) override {  
-        posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote);
+        posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote, achievementsContainer);
     }
 
     /**
@@ -552,7 +554,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function addUserRating(address userAddr, int32 rating) external { // delete?
-        users.updateUserRating(userRewards, userAddr, rating);
+        users.updateUserRating(userRewards, userAddr, rating, achievementsContainer);
     }
 
     modifier onlyExisitingUser(address user) {

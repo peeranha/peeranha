@@ -5,6 +5,7 @@ import "./IpfsLib.sol";
 import "./VoteLib.sol";
 import "./UserLib.sol";
 import "./SecurityLib.sol";
+import "./NFTLib.sol";
 
 /// @title PostLib
 /// @notice Provides information about operation with posts
@@ -147,7 +148,8 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
@@ -166,11 +168,11 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial) {
                 if (postContainer.info.replyCount == 1) {
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
+                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), achievementsContainer);
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;
-                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
+                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), achievementsContainer);
                 }
             }
         } else {
@@ -310,7 +312,8 @@ library PostLib  {
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
         address user,
-        uint256 postId
+        uint256 postId,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
@@ -320,14 +323,15 @@ library PostLib  {
             UserLib.updateUserRating(users, userRewards, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                                 VoteLib.ResourceAction.Upvoted,
-                                                                TypeContent.Post) * postContainer.info.rating);
+                                                                TypeContent.Post) * postContainer.info.rating,
+                                                                achievementsContainer);
         }
     
         for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
-            deductReplyRating(users, userRewards, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
+            deductReplyRating(users, userRewards, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, achievementsContainer);
         }
         if (user == postContainer.info.author)
-            UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost);
+            UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost, achievementsContainer);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(user, postId);
@@ -345,7 +349,8 @@ library PostLib  {
         RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
-        uint16 replyId
+        uint16 replyId,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         /*
         check author
@@ -355,9 +360,9 @@ library PostLib  {
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
-        deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
+        deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId, achievementsContainer);
         if (user == replyContainer.info.author)
-            UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
+            UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply, achievementsContainer);
 
         replyContainer.info.isDeleted = true;
         emit ReplyDeleted(user, postId, replyId);
@@ -372,7 +377,8 @@ library PostLib  {
         RewardLib.UserRewards storage userRewards,
         PostType postType,
         ReplyContainer storage replyContainer,
-        bool isBestReply
+        bool isBestReply,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) private {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
@@ -380,17 +386,17 @@ library PostLib  {
         if (replyContainer.info.rating >= 0) {
             UserLib.updateUserRating(users, userRewards, replyContainer.info.author,
                                 -VoteLib.getUserRatingChangeForReplyAction( postType,
-                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
+                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating, achievementsContainer);
             
             if (replyContainer.info.isFirstReply) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), achievementsContainer);
             }
             if (replyContainer.info.isQuickReply) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), achievementsContainer);
             }
             if (isBestReply && postType != PostType.Tutorial) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply));
-                UserLib.updateUserRating(users, userRewards, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply), achievementsContainer);
+                UserLib.updateUserRating(users, userRewards, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply), achievementsContainer);
             }
         }
     }
@@ -456,24 +462,25 @@ library PostLib  {
         RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
-        uint16 replyId
+        uint16 replyId,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
 
         if (postContainer.info.bestReply == replyId) {
-            users.updateUserRating(userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-            users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+            users.updateUserRating(userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), achievementsContainer);  
+            users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), achievementsContainer);
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
                 ReplyContainer storage oldBestReplyContainer = getReplyContainer(postContainer, replyId);
-                users.updateUserRating(userRewards, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-                users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+                users.updateUserRating(userRewards, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), achievementsContainer);  
+                users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), achievementsContainer);  
             }
 
-            users.updateUserRating(userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-            users.updateUserRating(userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+            users.updateUserRating(userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), achievementsContainer);  
+            users.updateUserRating(userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), achievementsContainer);  
             postContainer.info.bestReply = replyId;
         }
 
@@ -497,7 +504,8 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        bool isUpvote
+        bool isUpvote,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
@@ -508,9 +516,9 @@ library PostLib  {
             voteComment(roles, users, commentContainer, postContainer.info.communityId, user, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-            voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, user, postType, isUpvote);
+            voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, user, postType, isUpvote, achievementsContainer);
         } else {
-            votePost(roles, users, userRewards, postContainer, user, postType, isUpvote);
+            votePost(roles, users, userRewards, postContainer, user, postType, isUpvote, achievementsContainer);
         }
 
         emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
@@ -529,7 +537,8 @@ library PostLib  {
         PostContainer storage postContainer,
         address votedUser,
         PostType postType,
-        bool isUpvote
+        bool isUpvote,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
@@ -541,7 +550,7 @@ library PostLib  {
             postContainer.info.communityId, 
             ratingChange > 0 ? SecurityLib.Action.upVotePost : SecurityLib.Action.downVotePost);
 
-        vote(users, userRewards, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
+        vote(users, userRewards, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post, achievementsContainer);
         postContainer.info.rating += ratingChange;
     }
  
@@ -559,7 +568,8 @@ library PostLib  {
         uint32 communityId,
         address votedUser,
         PostType postType,
-        bool isUpvote
+        bool isUpvote,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
@@ -573,24 +583,24 @@ library PostLib  {
 
         if (postType == PostType.Tutorial) return;
 
-        vote(users, userRewards, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
+        vote(users, userRewards, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply, achievementsContainer);
         int32 oldRating = replyContainer.info.rating;
         replyContainer.info.rating += ratingChange;
         int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
         if (replyContainer.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), achievementsContainer);
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), achievementsContainer);
             }
         }
 
         if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), achievementsContainer);
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), achievementsContainer);
             }
         }
 
@@ -637,7 +647,8 @@ library PostLib  {
         PostType postType,
         bool isUpvote,
         int32 ratingChanged,
-        TypeContent typeContent
+        TypeContent typeContent,
+        NFTLib.AchievementsContainer storage achievementsContainer
     ) private {
        UserLib.UserRatingChange[] memory usersRating = new UserLib.UserRatingChange[](2);
 
@@ -672,7 +683,7 @@ library PostLib  {
                 usersRating[1].rating *= -1;  
             }
         }
-        UserLib.updateUsersRating(users, userRewards, usersRating); 
+        UserLib.updateUsersRating(users, userRewards, usersRating, achievementsContainer); 
     }
 
     /// @notice Return post
