@@ -26,6 +26,19 @@ library NFTLib {
     IPeeranhaNFT peeranhaNFT;
   }
 
+
+  struct CountAchievementsNFT {   //
+    uint64 factCount;
+    uint64 maxCount;
+    string achievementURI;
+    AchievementType achievementType;
+  }
+
+  struct AchievementsContainerNFT {
+    mapping(uint64 => CountAchievementsNFT) countAchievementsNFT;
+    uint64 achievementsCount;
+  }
+
   function createAchievemt(AchievementsContainer storage achievementsContainer, AchievementType achievementType, int64 lowerBound, uint64 maxCount) 
   internal {
     require(maxCount != 0, "Max count of achievements must be more than 0");
@@ -50,7 +63,7 @@ library NFTLib {
         if (achievementsContainer.userAchievementsIssued[recipient][i]) continue; //already issued
         countAchievement.factCount++;
         achievementsContainer.userAchievementsIssued[recipient][i] = true;
-        achievementsContainer.peeranhaNFT.mintNFT(recipient, i * 1000000 + countAchievement.factCount); // * 1 000 000 + n
+        achievementsContainer.peeranhaNFT.mintNFT(recipient, i * 1000000 + countAchievement.factCount, i);
       }
     }
   }

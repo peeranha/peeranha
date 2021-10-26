@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
 contract PeeranhaNft is ERC721Upgradeable, IPeeranhaNFT {
-  // NFTLib.AchievementsContainer achievementsContainer;
+  NFTLib.AchievementsContainerNFT achievementsContainerNFT;
   IPeeranha peeranha;
 
   using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -32,16 +32,24 @@ contract PeeranhaNft is ERC721Upgradeable, IPeeranhaNFT {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function setTokenURI(uint64 achievementId, uint64 posAchievement, string memory _tokenURI) external {
-    uint64 tokenId = (achievementId - 1) * 1000000 + posAchievement;
-    _setTokenURI(tokenId, _tokenURI);
+  function setTokenURI(uint64 achievementId, uint64 maxCount, string memory achievementURI, NFTLib.AchievementType achievementType) external {
+    NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
+    achievementNFT.maxCount = maxCount;
+    achievementNFT.achievementURI = achievementURI;
+    achievementNFT.achievementType = achievementType;
   }
 
-  function mintNFT(address recipient, uint64 achievementId)
+  function mintNFT(address recipient, uint64 tokenId, uint64 achievementId)
   external
   override
-  // onlyOwner
-  /*returns (uint256) */ {
+  /* onlyOwner */ {
+    NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
+    achievementNFT.factCount++;
+    uint64 localTokenId = (achievementId - 1) * 1000000 + achievementNFT.factCount;
+    require(tokenId == localTokenId, "Error token ID ??");
+
+    _setTokenURI(tokenId, achievementNFT.achievementURI);
+
     _safeMint(recipient, achievementId);          // || _mint
     // check uri?
   }
