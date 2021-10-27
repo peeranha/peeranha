@@ -174,7 +174,7 @@ library PostLib  {
                 }
             }
         } else {
-          getReplyContainerSave(postContainer, parentReplyId);
+          getReplyContainerSafe(postContainer, parentReplyId);
           replyContainer.info.parentReplyId = parentReplyId;  
         }
 
@@ -211,7 +211,7 @@ library PostLib  {
             comment = postContainer.comments[commentId].info;
             SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         } else {
-            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, parentReplyId);
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
             comment = replyContainer.comments[commentId].info;
             SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
@@ -265,7 +265,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+        ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(user == replyContainer.info.author, "You can not edit this Reply. It is not your.");
 
@@ -352,7 +352,7 @@ library PostLib  {
         check author
         */
         PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+        ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
@@ -436,7 +436,7 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), user)), 
                     "Must have community moderator role");
-        getReplyContainerSave(postContainer, replyId);
+        getReplyContainerSafe(postContainer, replyId);
          
         if (postContainer.info.officialReply == replyId)
             postContainer.info.officialReply = 0;
@@ -460,7 +460,7 @@ library PostLib  {
         uint16 replyId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+        ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
 
         if (postContainer.info.bestReply == replyId) {
             users.updateUserRating(userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
@@ -468,7 +468,7 @@ library PostLib  {
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
-                ReplyContainer storage oldBestReplyContainer = getReplyContainerSave(postContainer, replyId);
+                ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
                 users.updateUserRating(userRewards, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
                 users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
             }
@@ -508,7 +508,7 @@ library PostLib  {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
             voteComment(roles, users, commentContainer, postContainer.info.communityId, user, isUpvote);
         } else if (replyId != 0) {
-            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
             voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, user, postType, isUpvote);
         } else {
             votePost(roles, users, userRewards, postContainer, user, postType, isUpvote);
@@ -706,7 +706,7 @@ library PostLib  {
     /// @notice Return reply, the reply is checked on delete one
     /// @param postContainer The post where is the reply
     /// @param replyId The replyId which need find
-    function getReplyContainerSave(
+    function getReplyContainerSafe(
         PostContainer storage postContainer,
         uint16 replyId
     ) public view returns (ReplyContainer storage) {
@@ -815,7 +815,7 @@ library PostLib  {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
             statusHistory = commentContainer.historyVotes[user];
         } else if (replyId != 0) {
-            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
             statusHistory = replyContainer.historyVotes[user];
         } else {
             statusHistory = postContainer.historyVotes[user];
@@ -842,7 +842,7 @@ library PostLib  {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
             votedUsers = commentContainer.votedUsers;
         } else if (replyId != 0) {
-            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
             votedUsers = replyContainer.votedUsers;
         } else {
             votedUsers = postContainer.votedUsers;
