@@ -122,7 +122,7 @@ library SecurityLib {
       require(false, "Action not allowed");
     }
 
-    require(userRating <= ratingAllowen, message);    // >=
+    require(userRating >= ratingAllowen, message);
   }
 
   /**
