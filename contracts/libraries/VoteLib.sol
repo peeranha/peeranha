@@ -146,8 +146,8 @@ library VoteLib  {
         return historyVote[user];
     }
 
-    /// @notice Get vote history                        ////
-    /// @param address user who voted for content       //
+    /// @notice .
+    /// @param actionAddress user who voted for content
     /// @param historyVotes history vote all users
     /// @param isUpvote Upvote or downvote
     /// @param votedUsers the list users who voted
