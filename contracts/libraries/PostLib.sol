@@ -202,18 +202,19 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
         Comment storage comment;
         uint8 commentId;
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
-            comment = postContainer.comments[commentId].info;  
+            comment = postContainer.comments[commentId].info;
+            SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         } else {
-            ReplyContainer storage reply = getReplyContainerSave(postContainer, parentReplyId);
-            commentId = ++reply.info.commentCount;
-            comment = reply.comments[commentId].info;
+            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, parentReplyId);
+            commentId = ++replyContainer.info.commentCount;
+            comment = replyContainer.comments[commentId].info;
+            SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         }
 
         comment.author = user;

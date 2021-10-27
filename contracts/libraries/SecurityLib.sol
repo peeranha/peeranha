@@ -62,26 +62,26 @@ library SecurityLib {
   address dataUser,
   uint32 communityId,
   Action action) internal {
-    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) || 
+    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) ||  //msg.sender?
       hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender))) return;
     
     int16 ratingAllowen;
     string memory message;
     if (action == Action.publicationPost) {
       ratingAllowen = POST_QUESTION_ALLOWED;
-      message = "Your rating is too small to upvote. You need 0 ratings";
+      message = "Your rating is too small for publication post. You need 0 ratings";
 
     } else if (action == Action.publicationReply) {
       ratingAllowen = POST_REPLY_ALLOWED;
-      message = "Your rating is too small to upvote. You need 0 ratings";
+      message = "Your rating is too small for publication reply. You need 0 ratings";
 
     } else if (action == Action.publicationComment) {
       if (actionCaller == dataUser) {
         ratingAllowen = POST_OWN_COMMENT_ALLOWED;
-        message = "Your rating is too small to upvote. You need 0 ratings";
+        message = "Your rating is too small for publication own comment. You need 35 ratings";
       } else {
         ratingAllowen = POST_COMMENT_ALLOWED;
-        message = "Your rating is too small to upvote. You need 35 ratings";
+        message = "Your rating is too small for publication comment. You need 35 ratings";
       }
 
     } else if (action == Action.deleteItem) {
@@ -91,32 +91,32 @@ library SecurityLib {
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
       ratingAllowen = UPVOTE_POST_ALLOWED;
-      message = "Your rating is too small to upvote. You need 35 ratings";
+      message = "Your rating is too small for upvote post. You need 35 ratings";
 
     } else if (action == Action.upVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
       ratingAllowen = UPVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small to upvote. You need 35 ratings";
+      message = "Your rating is too small for upvote reply. You need 35 ratings";
 
     } else if (action == Action.upVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
       ratingAllowen = UPVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small to upvote. You need 0 ratings";
+      message = "Your rating is too small for upvote comment. You need 0 ratings";
 
     } else if (action == Action.downVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
       ratingAllowen = DOWNVOTE_POST_ALLOWED;
-      message = "Your rating is too small to upvote. You need 35 ratings";
+      message = "Your rating is too small for downvote post. You need 35 ratings";
 
     } else if (action == Action.downVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
       ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small to upvote. You need 35 ratings";
+      message = "Your rating is too small for downvote reply. You need 100 ratings";
 
     } else if (action == Action.downVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
       ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small to upvote. You need 0 ratings";
+      message = "Your rating is too small for downvote comment. You need 0 ratings";
 
     } else {
       require(false, "Action not allowed");
