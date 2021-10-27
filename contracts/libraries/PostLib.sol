@@ -822,4 +822,31 @@ library PostLib  {
 
         return statusHistory;
     }
+
+    /// @notice Get users which voted for post/reply/comment
+    /// @param self The mapping containing all posts
+    /// @param postId The post where need to get users
+    /// @param replyId The reply where need to get users
+    /// @param commentId The comment where need to get users
+    function getVotedUsers(
+        PostCollection storage self, 
+        uint256 postId,
+        uint16 replyId,
+        uint8 commentId
+    ) public view returns (address[] memory) {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+
+        address[] memory votedUsers;
+        if (commentId != 0) {
+            CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
+            votedUsers = commentContainer.votedUsers;
+        } else if (replyId != 0) {
+            ReplyContainer storage replyContainer = getReplyContainerSave(postContainer, replyId);
+            votedUsers = replyContainer.votedUsers;
+        } else {
+            votedUsers = postContainer.votedUsers;
+        }
+
+        return votedUsers;
+    }
 }
