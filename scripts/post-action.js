@@ -27,6 +27,13 @@ const testAccount = {
   avatar: "f"
 };
 
+const NFT = {
+  name: "testAccount",
+  description: "Peeranha",
+  image: "",
+  attributes: "TestInfo",
+};
+
 async function getBytes32FromData(data) {
   const ipfsHash = await saveText(JSON.stringify(data));
   console.log("Uploaded file to IPFS - " + ipfsHash);
