@@ -165,13 +165,10 @@ library UserLib {
   function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
     if (rating == 0) return;
 
-    updateRatingBase(self, userRewards, userAddr, rating);
-    if (rating > 0) {
-      NFTLib.updateAchievement(achievementsContainer, userAddr, NFTLib.AchievementType.Rating, int64(rating));
-    }
+    updateRatingBase(self, userRewards, userAddr, rating, achievementsContainer);
   }
 
-  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     User storage user = getUserByAddress(self, userAddr);
     int32 newRating = user.rating += rating;
@@ -212,5 +209,9 @@ library UserLib {
     currentWeekRating.ratingToReward += ratingToRewardChange;
     user.rating = newRating;
     user.payOutRating += ratingToRewardChange;
+
+    if (rating > 0) {
+      NFTLib.updateAchievement(achievementsContainer, userAddr, NFTLib.AchievementType.Rating, int64(newRating));
+    }
   }
 }

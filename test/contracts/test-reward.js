@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { wait, getBalance } = require('./utils');
 
 
-describe("Test vote", function () {
+describe("Test reward", function () {
 	it("Test add rating in 3 periods", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();

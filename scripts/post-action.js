@@ -41,6 +41,11 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
+  // const buf = Buffer.from("../image/image1.png");
+  // console.log(buf);
+  // const saveResult = await getIpfsApi().add(buf);
+  // console.log(await getBytes32FromData(saveResult));
+
   const Peeranha = await ethers.getContractFactory("Peeranha");
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");

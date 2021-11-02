@@ -34,8 +34,9 @@ contract Peeranha is IPeeranha, Initializable {
     // ConfigurationLib.Configuration configuration;
     NFTLib.AchievementsContainer achievementsContainer;
 
-    function initialize() public initializer {
+    function initialize(address peeranhaContractAddress) public initializer {
         __Peeranha_init();
+        achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaContractAddress);
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
@@ -505,6 +506,20 @@ contract Peeranha is IPeeranha, Initializable {
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external onlyExisitingUser(msg.sender) override {  
         posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote, achievementsContainer);
+    }
+
+    function setTokenURI(uint64 achievementId, uint64 maxCount, int64 lowerBound, string memory achievementURI, NFTLib.AchievementType achievementType) external {
+        NFTLib.CountAchievement storage achievement = achievementsContainer.countAchievements[achievementId];
+        achievement.maxCount = maxCount;
+        achievement.lowerBound = lowerBound;
+        achievement.achievementType = achievementType;
+        achievementsContainer.achievementsCount++;
+
+        achievementsContainer.peeranhaNFT.setTokenURI(achievementId, maxCount, achievementURI, achievementType);
+    }
+
+    function getNFT(uint64 achievementId) external view returns (NFTLib.CountAchievement memory) {
+        return achievementsContainer.countAchievements[achievementId];
     }
 
     /**

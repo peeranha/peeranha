@@ -10,9 +10,9 @@ import "../interfaces/IPeeranhaNFT.sol";
 library NFTLib {
   uint32 constant PERIOD_LENGTH = 3;
 
-  enum AchievementType { Rating }   //
+  enum AchievementType { Rating }
 
-  struct CountAchievement {   //
+  struct CountAchievement {
     uint64 factCount;
     uint64 maxCount;
     int64 lowerBound;
@@ -27,7 +27,7 @@ library NFTLib {
   }
 
 
-  struct CountAchievementsNFT {   //
+  struct CountAchievementsNFT {
     uint64 factCount;
     uint64 maxCount;
     string achievementURI;
@@ -58,12 +58,12 @@ library NFTLib {
       for (uint64 i = 1; i <= achievementsContainer.achievementsCount; i++) {
         countAchievement = achievementsContainer.countAchievements[i];
 
-        if (countAchievement.maxCount >= countAchievement.factCount) continue;    // not exit/max
+        if (countAchievement.maxCount <= countAchievement.factCount) continue;    // not exit/max
         if (countAchievement.lowerBound > lowerBound) continue;
         if (achievementsContainer.userAchievementsIssued[recipient][i]) continue; //already issued
         countAchievement.factCount++;
         achievementsContainer.userAchievementsIssued[recipient][i] = true;
-        achievementsContainer.peeranhaNFT.mintNFT(recipient, i * 1000000 + countAchievement.factCount, i);
+        achievementsContainer.peeranhaNFT.mintNFT(recipient, (i - 1) * 1000000 + countAchievement.factCount, i); // i - 1?
       }
     }
   }
