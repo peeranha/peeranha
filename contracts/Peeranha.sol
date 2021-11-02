@@ -568,6 +568,14 @@ contract Peeranha is IPeeranha, Initializable {
         return RewardLib.getUserPeriodRating(userRewards, user, period);
     }
 
+    function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
+        return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
+    }
+
+    function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) external view returns (address[] memory) {
+        return PostLib.getVotedUsers(posts, postId, replyId, commentId);
+    }
+
     function addUserRating(address userAddr, int32 rating) external { // delete?
         users.updateUserRating(userRewards, userAddr, rating, achievementsContainer);
     }

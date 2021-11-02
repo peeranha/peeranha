@@ -261,7 +261,8 @@ describe("Test post", function () {
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.deletePost(1);
 
-		await expect(peeranha.getPost(1)).to.be.revertedWith('Post has been deleted.');
+		const post = await peeranha.getPost(1);
+		await expect(post.isDeleted).to.equal(true);
 	});
 
 	it("Test delete post, without post", async function () {
@@ -282,7 +283,8 @@ describe("Test post", function () {
 		await peeranha.createReply(1, 0, hashContainer[1], false);
 		await peeranha.deleteReply(1, 1);
 
-		await expect(peeranha.getReply(1, 1)).to.be.revertedWith('Reply has been deleted.');
+		const reply = await peeranha.getReply(1, 1);
+		await expect(reply.isDeleted).to.equal(true);
 	});
 
 	it("Test delete reply, without post", async function () {
@@ -314,7 +316,8 @@ describe("Test post", function () {
 		await peeranha.createComment(1, 0, hashContainer[1]);
 		await peeranha.deleteComment(1, 0, 1);
 
-		await expect(peeranha.getComment(1, 0, 1)).to.be.revertedWith('Comment has been deleted.');
+		const comment = await peeranha.getComment(1, 0, 1);
+		await expect(comment.isDeleted).to.equal(true);
 	});
 
 	it("Test delete comment, without post", async function () {
