@@ -27,7 +27,7 @@ describe("Test vote", function () {
 		await expect(statusHistory._hex).to.equal('0x01');
 	});
 
-	/* - */ it("Test upVote common post", async function () {
+	it("Test upVote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -42,11 +42,11 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(UpvotedCommonPost);
+		await expect(user.rating).to.equal(StartRating + UpvotedCommonPost);
 		await expect(post.rating).to.equal(1);
 	});
 
-	/* - */ it("Test upVote tutorial post", async function () {
+	/* - */ xit("Test upVote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -61,7 +61,7 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(UpvotedTutorial);
+		await expect(user.rating).to.equal(StartRating + UpvotedTutorial);
 		await expect(post.rating).to.equal(1);
 	});
 
@@ -81,14 +81,14 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(StartRating + 0);
+		await expect(user.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 0, 0);
 		await expect(statusHistory._hex).to.equal('0x00');
 	});
 
-	/* - */ it("Test double upVote common post", async function () {
+	it("Test double upVote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -104,11 +104,11 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 	});
 
-	/* - */ it("Test double upVote tytorial post", async function () {
+	/* - */ xit("Test double upVote tytorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -124,7 +124,7 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 	});
 
@@ -152,7 +152,7 @@ describe("Test vote", function () {
 		await expect(statusHistory._hex).to.equal('-0x01');
 	});
 
-	/* - */ it("Test downVote common post", async function () {
+	it("Test downVote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -168,12 +168,12 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const user2 = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(DownvotedCommonPost);
-		await expect(user2.rating).to.equal(DownvoteCommonPost);
+		await expect(user.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(user2.rating).to.equal(StartRating + DownvoteCommonPost);
 		await expect(post.rating).to.equal(-1);
 	});
 
-	/* - */ it("Test downVote tutorial post", async function () {
+	/* - */ xit("Test downVote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -189,8 +189,8 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const user2 = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(DownvotedTutorial);
-		await expect(user2.rating).to.equal(DownvoteTutorial);
+		await expect(user.rating).to.equal(StartRating + DownvotedTutorial);
+		await expect(user2.rating).to.equal(StartRating + DownvoteTutorial);
 		await expect(post.rating).to.equal(-1);
 	});
 
@@ -211,15 +211,15 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(StartRating + 0);
-		await expect(userAction.rating).to.equal(StartRating + 0);
+		await expect(user.rating).to.equal(StartRating);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 0, 0);
 		await expect(statusHistory._hex).to.equal('0x00');
 	});
 
-	/* - */ it("Test double downVote common post", async function () {
+	it("Test double downVote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -236,12 +236,12 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(0);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 	});
 
-	/* - */ it("Test double downVote tytorial post", async function () {
+	/* - */ xit("Test double downVote tytorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -258,8 +258,8 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(0);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(0);
 	});
 
@@ -305,14 +305,35 @@ describe("Test vote", function () {
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
 		await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
-		await expect(userAction.rating).to.equal(StartRating + 0);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(1);
 
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 0, 0);
 		await expect(statusHistory._hex).to.equal('0x01');
 	});
 
-	/* - */ it("Test upvote after downvote common post", async function () {
+	it("Test downvote after upvote common post", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await registerTwoUsers(peeranha, signers, hashContainer);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+        await peeranha.voteItem(1, 0, 0, 1);
+		await peeranha.voteItem(1, 0, 0, 0);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		const post = await peeranha.getPost(1);
+		await expect(user.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteCommonPost);
+		await expect(post.rating).to.equal(-1);
+	});
+	
+	it("Test upvote after downvote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -328,12 +349,12 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(UpvotedCommonPost);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating + UpvotedCommonPost);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(1);
 	});
 
-	/* - */ it("Test upvote after downvote tutorial post", async function () {
+	/* - */ xit("Test upvote after downvote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -349,12 +370,12 @@ describe("Test vote", function () {
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
-		await expect(user.rating).to.equal(UpvotedTutorial);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating + UpvotedTutorial);
+		await expect(userAction.rating).to.equal(StartRating);
 		await expect(post.rating).to.equal(1);
 	});
 
-	/* - */ it("Test delete post after upvote expert post", async function () {
+	it("Test delete post after upvote expert post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -369,18 +390,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(UpvotedExpertPost);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
+		await expect(userAction.rating).to.equal(StartRating);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
-	/* - */ it("Test delete post after upvote common post", async function () {
+	it("Test delete post after upvote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -395,18 +416,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(UpvotedCommonPost);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating + UpvotedCommonPost);
+		await expect(userAction.rating).to.equal(StartRating);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
-	/* - */ it("Test delete post after upvote tutorial ", async function () {
+	/* - */ xit("Test delete post after upvote tutorial ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -421,18 +442,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(UpvotedTutorial);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating + UpvotedTutorial);
+		await expect(userAction.rating).to.equal(StartRating);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(0);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
-	/* - */ it("Test delete post after downvote expert post", async function () {
+	it("Test delete post after downvote expert post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -447,18 +468,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(DownvotedExpertPost);
-		await expect(userAction.rating).to.equal(DownvoteExpertPost);
+		await expect(user.rating).to.equal(StartRating + DownvotedExpertPost);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteExpertPost);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(DownvotedExpertPost);
-		await expect(newUserActionRating.rating).to.equal(DownvoteExpertPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedExpertPost);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteExpertPost);
 	});
 
-	/* - */ it("Test delete post after downvote common post", async function () {
+	it("Test delete post after downvote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -473,18 +494,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(DownvotedCommonPost);
-		await expect(userAction.rating).to.equal(DownvoteCommonPost);
+		await expect(user.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteCommonPost);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(DownvotedCommonPost);
-		await expect(newUserActionRating.rating).to.equal(DownvoteCommonPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteCommonPost);
 	});
 
-	/* - */ it("Test delete post after downvote tutorial", async function () {
+	/* - */ xit("Test delete post after downvote tutorial", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -499,18 +520,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(DownvotedTutorial);
-		await expect(userAction.rating).to.equal(DownvoteTutorial);
+		await expect(user.rating).to.equal(StartRating + DownvotedTutorial);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteTutorial);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(DownvotedCommonPost);
-		await expect(newUserActionRating.rating).to.equal(DownvoteCommonPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteCommonPost);
 	});
 
-	/* - */ it("Test delete post after upvote expert reply", async function () {
+	it("Test delete post after upvote expert reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -537,11 +558,11 @@ describe("Test vote", function () {
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after upvote common reply", async function () {
+	it("Test delete post after upvote common reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -568,11 +589,11 @@ describe("Test vote", function () {
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after upvote tutorial reply", async function () {
+	/* - */ xit("Test delete post after upvote tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -599,11 +620,11 @@ describe("Test vote", function () {
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after downvote expert reply", async function () {
+	it("Test delete post after downvote expert reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -620,19 +641,19 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(DownvotedExpertReply);
-		await expect(userAction.rating).to.equal(DownvoteExpertReply);
+		await expect(user.rating).to.equal(StartRating + DownvotedExpertReply);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteExpertReply);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 
-		await expect(newUserRating.rating).to.equal(DownvotedExpertReply);
-		await expect(newUserActionRating.rating).to.equal(DownvoteExpertReply + DeleteOwnReply);	
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedExpertReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteExpertReply + DeleteOwnReply);	
 	});
 
-	/* - */ it("Test delete post after downvote common reply", async function () {
+	it("Test delete post after downvote common reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -649,18 +670,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(DownvotedCommonReply);
-		await expect(userAction.rating).to.equal(DownvoteCommonReply);
+		await expect(user.rating).to.equal(StartRating + DownvotedCommonReply);
+		await expect(userAction.rating).to.equal(StartRating + DownvoteCommonReply);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(DownvotedCommonReply);
-		await expect(newUserActionRating.rating).to.equal(DownvoteCommonReply + DeleteOwnReply);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteCommonReply + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after downvote tutorial reply", async function () {
+	/* - */ xit("Test delete post after downvote tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -676,18 +697,18 @@ describe("Test vote", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
-		await expect(user.rating).to.equal(0);
-		await expect(userAction.rating).to.equal(0);
+		await expect(user.rating).to.equal(StartRating);
+		await expect(userAction.rating).to.equal(StartRating);
 
 		await peeranha.deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(0);
-		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete own post", async function () {
+	it("Test delete own post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -699,10 +720,10 @@ describe("Test vote", function () {
 		await peeranha.deletePost(1);
 
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(userRating.rating).to.equal(DeleteOwnPost);
+		await expect(userRating.rating).to.equal(StartRating + DeleteOwnPost);
 	});
 
-	/* - */ it("Test delete own reply", async function () {
+	it("Test delete own reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -717,10 +738,10 @@ describe("Test vote", function () {
 
 		await peeranha.deleteReply(1, 1);
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(userRating.rating).to.equal(DeleteOwnReply);
+		await expect(userRating.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test create first and quick expert reply", async function () {
+	it("Test create first and quick expert reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -734,14 +755,14 @@ describe("Test vote", function () {
 		await peeranha.createReply(1, 0, hashContainer[1], false);
 
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(userRating.rating).to.equal(FirstExpertReply + QuickExpertReply);
+		await expect(userRating.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.isFirstReply).to.equal(true);
 		await expect(reply.isQuickReply).to.equal(true);
 	});
 
-	/* - */ it("Test create first and quick common reply", async function () {
+	it("Test create first and quick common reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -755,14 +776,14 @@ describe("Test vote", function () {
 		await peeranha.createReply(1, 0, hashContainer[1], false);
 
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(userRating.rating).to.equal(FirstCommonReply + QuickCommonReply);
+		await expect(userRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.isFirstReply).to.equal(true);
 		await expect(reply.isQuickReply).to.equal(true);
 	});
 
-	/* - */ it("Test create first and quick tutorial reply", async function () {
+	/* - */ xit("Test create first and quick tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -776,14 +797,14 @@ describe("Test vote", function () {
 		await peeranha.createReply(1, 0, hashContainer[1], false);
 
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(userRating.rating).to.equal(0);
+		await expect(userRating.rating).to.equal(StartRating);
 
 		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.isFirstReply).to.equal(false);
 		await expect(reply.isQuickReply).to.equal(false);
 	});
 
-	/* - */ it("Test create 2 expert reply, one first and two quick ", async function () {
+	it("Test create 2 expert reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -800,8 +821,8 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(FirstExpertReply + QuickExpertReply);
-		await expect(userRating2.rating).to.equal(QuickExpertReply);
+		await expect(userRating.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
+		await expect(userRating2.rating).to.equal(StartRating + QuickExpertReply);
 
 		const firstReply = await peeranha.getReply(1, 1);
 		const secondReply = await peeranha.getReply(1, 2);
@@ -811,7 +832,7 @@ describe("Test vote", function () {
 		await expect(secondReply.isQuickReply).to.equal(true);
 	});
 
-	/* - */ it("Test create 2 common reply, one first and two quick ", async function () {
+	it("Test create 2 common reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -828,8 +849,8 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(FirstCommonReply + QuickCommonReply);
-		await expect(userRating2.rating).to.equal(QuickCommonReply);
+		await expect(userRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+		await expect(userRating2.rating).to.equal(StartRating + QuickCommonReply);
 
 		const firstReply = await peeranha.getReply(1, 1);
 		const secondReply = await peeranha.getReply(1, 2);
@@ -839,7 +860,7 @@ describe("Test vote", function () {
 		await expect(secondReply.isQuickReply).to.equal(true);
 	});
 
-	/* - */ it("Test create 2 tutorial reply, one first and two quick ", async function () {
+	/* - */ xit("Test create 2 tutorial reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -856,8 +877,8 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(0);
-		await expect(userRating2.rating).to.equal(0);
+		await expect(userRating.rating).to.equal(StartRating);
+		await expect(userRating2.rating).to.equal(StartRating);
 
 		const firstReply = await peeranha.getReply(1, 1);
 		const secondReply = await peeranha.getReply(1, 2);
@@ -867,7 +888,7 @@ describe("Test vote", function () {
 		await expect(secondReply.isQuickReply).to.equal(false);
 	});
 
-	/* - */ it("Test delete 2 expert reply, one first and two quick ", async function () {
+	it("Test delete 2 expert reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -887,11 +908,11 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(DeleteOwnReply);
-		await expect(userRating2.rating).to.equal(DeleteOwnReply);
+		await expect(userRating.rating).to.equal(StartRating + DeleteOwnReply);
+		await expect(userRating2.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete 2 common reply, one first and two quick ", async function () {
+	it("Test delete 2 common reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -911,11 +932,11 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(DeleteOwnReply);
-		await expect(userRating2.rating).to.equal(DeleteOwnReply);
+		await expect(userRating.rating).to.equal(StartRating + DeleteOwnReply);
+		await expect(userRating2.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete 2 tutorial reply, one first and two quick ", async function () {
+	it("Test delete 2 tutorial reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -935,11 +956,11 @@ describe("Test vote", function () {
 		
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
 		const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-		await expect(userRating.rating).to.equal(DeleteOwnReply);
-		await expect(userRating2.rating).to.equal(DeleteOwnReply);
+		await expect(userRating.rating).to.equal(StartRating + DeleteOwnReply);
+		await expect(userRating2.rating).to.equal(StartRating + DeleteOwnReply);
 	});
 
-	/* - */ it("Test mark expert reply as best", async function () {
+	it("Test mark expert reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -958,7 +979,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating + AcceptExpertReply);
 	});
 
-	/* - */ it("Test mark common reply as best", async function () {
+	it("Test mark common reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -977,7 +998,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating + AcceptCommonReply);
 	});
 
-	/* - */ it("Test mark tutorial reply as best", async function () {
+	/* - */ xit("Test mark tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -996,7 +1017,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 
-	/* - */ it("Test unmark expert reply as best", async function () {
+	it("Test unmark expert reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1016,7 +1037,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 
-	/* - */ it("Test unmark common reply as best", async function () {
+	it("Test unmark common reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1036,7 +1057,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 
-	/* - */ it("Test unmark tutorial reply as best", async function () {
+	/* - */ xit("Test unmark tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1056,7 +1077,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 	
-	/* - */ it("Test delete expert reply as best", async function () {
+	it("Test delete expert reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1073,10 +1094,10 @@ describe("Test vote", function () {
 		await peeranha.deleteReply(1, 1);
 
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(0);
+		await expect(userRating.rating).to.equal(StartRating);
 	});
 
-	/* - */ it("Test delete common reply as best", async function () {
+	it("Test delete common reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1093,10 +1114,10 @@ describe("Test vote", function () {
 		await peeranha.deleteReply(1, 1);
 
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(0);
+		await expect(userRating.rating).to.equal(StartRating);
 	});
 
-	/* - */ it("Test delete tutorial reply as best", async function () {
+	/* - */ xit("Test delete tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1113,7 +1134,7 @@ describe("Test vote", function () {
 		await peeranha.deleteReply(1, 1);
 
 		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(0);
+		await expect(userRating.rating).to.equal(StartRating);
 	});
 
 
@@ -1132,9 +1153,9 @@ describe("Test vote", function () {
         await peeranha.voteItem(1, 1, 0, 1);
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
-		const post = await peeranha.getPost(1);
-		// await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
-		// await expect(post.rating).to.equal(1);
+		const reply = await peeranha.getReply(1, 1);
+		await expect(user.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply + UpvotedExpertReply);
+		await expect(reply.rating).to.equal(1);
 		
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 1, 0);
 		await expect(statusHistory._hex).to.equal('0x01');
@@ -1152,12 +1173,12 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 0, 1, 0);
+        await peeranha.voteItem(1, 1, 0, 0);
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
-		const post = await peeranha.getPost(1);
-		// await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
-		// await expect(post.rating).to.equal(1);
+		const reply = await peeranha.getReply(1, 1);
+		await expect(user.rating).to.equal(StartRating + DownvotedExpertReply);
+		await expect(reply.rating).to.equal(-1);
 		
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 1, 0);
 		await expect(statusHistory._hex).to.equal('-0x01');

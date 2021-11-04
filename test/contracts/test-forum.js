@@ -25,9 +25,9 @@ describe("Test post", function () {
 				hashContainer.map(async (hash, index) => {
 					const post = await peeranha.getPost(index + 1);
 					//await expect(post.author).to.equal(peeranha.deployTransaction.from);		// ???
-					await expect(post.isDeleted).to.equal(false);
-					await expect(post.postType).to.equal(0);
-					return await expect(post.ipfsDoc.hash).to.equal(hash);
+					expect(post.isDeleted).to.equal(false);
+					expect(post.postType).to.equal(PostTypeEnum.ExpertPost);
+					return expect(post.ipfsDoc.hash).to.equal(hash);
 				})
 			);
 		});
@@ -51,9 +51,9 @@ describe("Test post", function () {
 				hashContainer.map(async (hash, index) => {
 					const post = await peeranha.getPost(index + 1);
 					//await expect(post.author).to.equal(peeranha.deployTransaction.from);		// ???
-					await expect(post.isDeleted).to.equal(false);
-					await expect(post.postType).to.equal(1);
-					return await expect(post.ipfsDoc.hash).to.equal(hash);
+					expect(post.isDeleted).to.equal(false);
+					expect(post.postType).to.equal(PostTypeEnum.CommonPost);
+					return expect(post.ipfsDoc.hash).to.equal(hash);
 				})
 			);
 		});
@@ -66,6 +66,16 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
+		});
+
+		xit("Test create post with non-existing tag", async function () { //Need to be fixed
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6])).to.be.revertedWith('');// What message
 		});
 
 		it("Test create post without ipfs hash", async function () {
@@ -127,9 +137,9 @@ describe("Test post", function () {
 			await peeranha.createReply(1, 0, hashContainer[1], false);
 
 			const reply = await peeranha.getReply(1, 1);
-			await expect(reply.author).to.equal(peeranha.deployTransaction.from);
-			await expect(reply.isDeleted).to.equal(false);
-			await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+			expect(reply.author).to.equal(peeranha.deployTransaction.from);
+			expect(reply.isDeleted).to.equal(false);
+			expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
 		it("Test create official reply", async function () {
@@ -265,9 +275,9 @@ describe("Test post", function () {
 			await peeranha.createComment(1, 0, hashContainer[1]);
 
 			const comment = await peeranha.getComment(1, 0, 1);
-			await expect(comment.author).to.equal(peeranha.deployTransaction.from);
-			await expect(comment.isDeleted).to.equal(false);
-			await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
+			expect(comment.author).to.equal(peeranha.deployTransaction.from);
+			expect(comment.isDeleted).to.equal(false);
+			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
 		it("Test create comment to reply", async function () {
@@ -282,9 +292,9 @@ describe("Test post", function () {
 			await peeranha.createComment(1, 1, hashContainer[1]);
 
 			const comment = await peeranha.getComment(1, 1, 1);
-			await expect(comment.author).to.equal(peeranha.deployTransaction.from);
-			await expect(comment.isDeleted).to.equal(false);
-			await expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
+			expect(comment.author).to.equal(peeranha.deployTransaction.from);
+			expect(comment.isDeleted).to.equal(false);
+			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
 		it("Test create comment, post has been deleted", async function () {
@@ -373,12 +383,35 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createPost(1, hashContainer[1], PostTypeEnum.CommonPost, [1]);
 			await peeranha.editPost(1, 1, hashContainer[2], []);
+			await peeranha.editPost(2, 1, hashContainer[0], [2]);
 
 			const post = await peeranha.getPost(1);
-			await expect(post.author).to.equal(peeranha.deployTransaction.from);
-			await expect(post.isDeleted).to.equal(false);
-			await expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
+			const post2 = await peeranha.getPost(2);
+			expect(post.author).to.equal(peeranha.deployTransaction.from);
+			expect(post.isDeleted).to.equal(false);
+			expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
+			expect(post2.ipfsDoc.hash).to.equal(hashContainer[0]);
+			expect(post.tags[0]).to.equal(1);
+			expect(post2.tags[0]).to.equal(2);
+		});
+
+		xit("Test edit post with adding non-existing tags", async function () { //need to be fixed
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranha.editPost(1, 1, hashContainer[2], [2])).to.be.revertedWith(''); //what message?
+
+			const post = await peeranha.getPost(1);
+			console.log(post);
+			expect(post.author).to.equal(peeranha.deployTransaction.from);
+			expect(post.isDeleted).to.equal(false);
+			expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
 		});
 
 		it("Test edit post by not registered user", async function () {
@@ -445,9 +478,9 @@ describe("Test post", function () {
 			await peeranha.editReply(1, 1, hashContainer[2]);
 
 			const reply = await peeranha.getReply(1, 1);
-			await expect(reply.author).to.equal(peeranha.deployTransaction.from);
-			await expect(reply.isDeleted).to.equal(false);
-			await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
+			expect(reply.author).to.equal(peeranha.deployTransaction.from);
+			expect(reply.isDeleted).to.equal(false);
+			expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
 		});
 
 		it("Test edit reply with invalid ipfs hash", async function () {
@@ -531,9 +564,9 @@ describe("Test post", function () {
 			await peeranha.editComment(1, 0, 1, hashContainer[2]);
 
 			const reply = await peeranha.getComment(1, 0, 1);
-			await expect(reply.author).to.equal(peeranha.deployTransaction.from);
-			await expect(reply.isDeleted).to.equal(false);
-			await expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
+			expect(reply.author).to.equal(peeranha.deployTransaction.from);
+			expect(reply.isDeleted).to.equal(false);
+			expect(reply.ipfsDoc.hash).to.equal(hashContainer[2]);
 		});
 
 		it("Test edit comment with invalid ipfs hash", async function () {
@@ -626,7 +659,7 @@ describe("Test post", function () {
 			await peeranha.deletePost(1);
 
 			const post = await peeranha.getPost(1);
-			await expect(post.isDeleted).to.equal(true);
+			expect(post.isDeleted).to.equal(true);
 		});
 
 		it("Test delete post by not registered user", async function () {
@@ -658,6 +691,18 @@ describe("Test post", function () {
 			.to.be.revertedWith('You can not delete this item');
 		});
 
+		xit("Test delete post with reply", async function () { // Need to be fixed
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.deletePost(1)).to.be.revertedWith(''); // what message?
+		});
+
 		it("Test delete post, without post", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
@@ -680,7 +725,7 @@ describe("Test post", function () {
 			await peeranha.deleteReply(1, 1);
 
 			const reply = await peeranha.getReply(1, 1);
-			await expect(reply.isDeleted).to.equal(true);
+			expect(reply.isDeleted).to.equal(true);
 		});
 
 		it("Test delete reply by not registered user", async function () {
@@ -712,6 +757,21 @@ describe("Test post", function () {
 
 			await expect(peeranha.connect(signers[1]).deleteReply(1, 1))
 			.to.be.revertedWith('You can not delete this item');
+		});
+
+		xit("Test delete accepted reply", async function () { // Need to be fixed
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.changeStatusBestReply(1, 1);
+			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith(''); // what message?
 		});
 
 		it("Test delete reply, without post", async function () {
@@ -747,7 +807,7 @@ describe("Test post", function () {
 			await peeranha.deleteComment(1, 0, 1);
 
 			const comment = await peeranha.getComment(1, 0, 1);
-			await expect(comment.isDeleted).to.equal(true);
+			expect(comment.isDeleted).to.equal(true);
 		});
 
 		it("Test delete comment by not registered user", async function () {
@@ -837,7 +897,7 @@ describe("Test post", function () {
 	};
 
 	////
-	//	TO DO AcceptReply
+	//	TO DO AcceptReply, Tutorial posts
 	///
 
 	const author = "0x001d3F1ef827552Ae1114027BD3ECF1f086bA0F9";
