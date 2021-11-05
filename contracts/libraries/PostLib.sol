@@ -99,21 +99,20 @@ library PostLib  {
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
-    /// @param user Author of the post
+    /// @param userAddr Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
     function createPost(
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        address user,
+        address userAddr,
         uint32 communityId, 
         bytes32 ipfsHash,
         PostType postType,
         uint8[] memory tags
     ) public {
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, communityId, SecurityLib.Action.publicationPost);
+        SecurityLib.checkRatingAndEnergy(roles, UserLib.getUserByAddress(users, userAddr), userAddr, userAddr, communityId, SecurityLib.Action.publicationPost);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
         ///
@@ -123,17 +122,17 @@ library PostLib  {
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;
         post.info.postType = postType;
-        post.info.author = user;
+        post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
         post.info.tags = tags;
 
-        emit PostCreated(user, communityId, self.postCount);
+        emit PostCreated(userAddr, communityId, self.postCount);
     }
 
     /// @notice Post reply
     /// @param self The mapping containing all posts
-    /// @param user Author of the reply
+    /// @param userAddr Author of the reply
     /// @param postId The post where the reply will be post
     /// @param parentReplyId The reply where the reply will be post
     /// @param ipfsHash IPFS hash of document with reply information
@@ -143,22 +142,22 @@ library PostLib  {
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash,
         bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
+        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
+        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, userAddr, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         
         ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
         if (parentReplyId == 0) {
             if (isOfficialReply) {
-                require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), user)), 
+                require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
                     "Must have community moderator role");
                 postContainer.info.officialReply = postContainer.info.replyCount;
             }
@@ -166,11 +165,11 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial) {
                 if (postContainer.info.replyCount == 1) {
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
+                    UserLib.updateUserRating(users, userRewards, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;
-                    UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
+                    UserLib.updateUserRating(users, userRewards, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
                 }
             }
         } else {
@@ -178,16 +177,16 @@ library PostLib  {
           replyContainer.info.parentReplyId = parentReplyId;  
         }
 
-        replyContainer.info.author = user;
+        replyContainer.info.author = userAddr;
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
 
-        emit ReplyCreated(user, postId, parentReplyId, postContainer.info.replyCount);
+        emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
 
     /// @notice Post comment
     /// @param self The mapping containing all posts
-    /// @param user Author of the comment
+    /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param parentReplyId The reply where the comment will be post
     /// @param ipfsHash IPFS hash of document with comment information
@@ -195,13 +194,13 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
         Comment storage comment;
@@ -209,29 +208,29 @@ library PostLib  {
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
             comment = postContainer.comments[commentId].info;
-            SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
+            SecurityLib.checkRatingAndEnergy(roles, user, userAddr, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         } else {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
             comment = replyContainer.comments[commentId].info;
-            SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
+            SecurityLib.checkRatingAndEnergy(roles, user, userAddr, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
         }
 
-        comment.author = user;
+        comment.author = userAddr;
         comment.ipfsDoc.hash = ipfsHash;
         comment.postTime = CommonLib.getTimestamp();
 
-        emit CommentCreated(user, postId, parentReplyId, commentId);
+        emit CommentCreated(userAddr, postId, parentReplyId, commentId);
     }
 
     /// @notice Edit post
     /// @param self The mapping containing all posts
-    /// @param user Author of the comment
+    /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param ipfsHash IPFS hash of document with post information
     function editPost(                                                  //LAST MODIFIED?
         PostCollection storage self,
-        address user,
+        address userAddr,
         uint256 postId,
         uint32 communityId,
         bytes32 ipfsHash,
@@ -239,7 +238,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(user == postContainer.info.author, "You can not edit this post. It is not your.");
+        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");
         
         if(communityId != 0 && postContainer.info.communityId != communityId)
             postContainer.info.communityId = communityId;
@@ -248,18 +247,18 @@ library PostLib  {
         if (tags.length > 0)
             postContainer.info.tags = tags;
 
-        emit PostEdited(user, postId);
+        emit PostEdited(userAddr, postId);
     }
 
     /// @notice Edit reply
     /// @param self The mapping containing all posts
-    /// @param user Author of the comment
+    /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param replyId The reply which will be change
     /// @param ipfsHash IPFS hash of document with reply information
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         bytes32 ipfsHash
@@ -267,24 +266,24 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(user == replyContainer.info.author, "You can not edit this Reply. It is not your.");
+        require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit ReplyEdited(user, postId, replyId);
+        emit ReplyEdited(userAddr, postId, replyId);
     }
 
     /// @notice Edit comment
     /// @param self The mapping containing all posts
-    /// @param user Author of the comment
+    /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param parentReplyId The reply where the reply will be edit                                    ///////
     /// @param commentId The comment which will be change
     /// @param ipfsHash IPFS hash of document with comment information
     function editComment(                                           //LAST MODIFIED?
         PostCollection storage self,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId,
@@ -293,32 +292,32 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(user == commentContainer.info.author, "You can not edit this comment. It is not your.");
+        require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;
         
-        emit CommentEdited(user, postId, parentReplyId, commentId);
+        emit CommentEdited(userAddr, postId, parentReplyId, commentId);
     }
 
     /// @notice Delete post
     /// @param self The mapping containing all posts
-    /// @param user User who deletes post
+    /// @param userAddr User who deletes post
     /// @param postId Post which will be deleted
     function deletePost(
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
-        address user,
+        address userAddr,
         uint256 postId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
+        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         if (postContainer.info.rating > 0) {
-            UserLib.updateUserRating(users, userRewards, postContainer.info.author,
+            UserLib.updateUserRating(users, userRewards, user, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                                 VoteLib.ResourceAction.Upvoted,
                                                                 TypeContent.Post) * postContainer.info.rating);
@@ -327,16 +326,16 @@ library PostLib  {
         for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
             deductReplyRating(users, userRewards, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
         }
-        if (user == postContainer.info.author)
-            UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost);
+        if (userAddr == postContainer.info.author)
+            UserLib.updateUserRating(users, userRewards, user, postContainer.info.author, VoteLib.DeleteOwnPost);
 
         postContainer.info.isDeleted = true;
-        emit PostDeleted(user, postId);
+        emit PostDeleted(userAddr, postId);
     }
 
     /// @notice Delete reply
     /// @param self The mapping containing all posts
-    /// @param user User who deletes reply
+    /// @param userAddr User who deletes reply
     /// @param postId The post where will be deleted reply
     /// @param replyId Reply which will be deleted
     function deleteReply(
@@ -344,7 +343,7 @@ library PostLib  {
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId
     ) public {
@@ -353,15 +352,15 @@ library PostLib  {
         */
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
+        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
-        if (user == replyContainer.info.author)
-            UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
+        if (userAddr == replyContainer.info.author)
+            UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
-        emit ReplyDeleted(user, postId, replyId);
+        emit ReplyDeleted(userAddr, postId, replyId);
     }
 
     /// @notice Take reply rating from the author
@@ -378,27 +377,35 @@ library PostLib  {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
 
+        int32 changeReplyAuthorRating;
         if (replyContainer.info.rating >= 0) {
-            UserLib.updateUserRating(users, userRewards, replyContainer.info.author,
-                                -VoteLib.getUserRatingChangeForReplyAction( postType,
-                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating);
+            changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction( postType,
+                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating;
             
             if (replyContainer.info.isFirstReply) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                changeReplyAuthorRating -= -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
             if (replyContainer.info.isQuickReply) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
             if (isBestReply && postType != PostType.Tutorial) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply));
+                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
                 UserLib.updateUserRating(users, userRewards, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply));
             }
+        }
+
+        if (changeReplyAuthorRating != 0) {
+            UserLib.updateUserRating(
+                users, 
+                userRewards, 
+                replyContainer.info.author, 
+                changeReplyAuthorRating);
         }
     }
 
     /// @notice Delete comment
     /// @param self The mapping containing all posts
-    /// @param user User who deletes comment
+    /// @param userAddr User who deletes comment
     /// @param postId The post where will be deleted comment
     /// @param parentReplyId The reply where the reply will be deleted
     /// @param commentId Comment which will be deleted
@@ -406,35 +413,34 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        int32 userRating = UserLib.getUserByAddress(users, user).rating;
-        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        SecurityLib.checkRatingAndEnergy(roles, UserLib.getUserByAddress(users, userAddr), userAddr, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         commentContainer.info.isDeleted = true;
-        emit CommentDeleted(user, postId, parentReplyId, commentId);
+        emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
     }
 
     /// @notice Change status official reply
     /// @param self The mapping containing all posts
-    /// @param user Who called action
+    /// @param userAddr Who called action
     /// @param postId Post where will be change reply status
     /// @param replyId Reply which will change status
     function changeStatusOfficialReply(
         PostCollection storage self,
         SecurityLib.Roles storage roles,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId
     ) public {
         // check permistion
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), user)), 
+        require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
                     "Must have community moderator role");
         getReplyContainerSafe(postContainer, replyId);
          
@@ -443,48 +449,53 @@ library PostLib  {
         else
             postContainer.info.officialReply = replyId;
         
-        emit StatusOfficialReplyChanged(user, postId, postContainer.info.officialReply);
+        emit StatusOfficialReplyChanged(userAddr, postId, postContainer.info.officialReply);
     }
 
     /// @notice Change status best reply
     /// @param self The mapping containing all posts
-    /// @param user Who called action
+    /// @param userAddr Who called action
     /// @param postId The post where will be change reply status
     /// @param replyId Reply which will change status
     function changeStatusBestReply (        // roles?
         PostCollection storage self,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
+
+        ///
+        // checkRatingAndEnergy?
+        ///
 
         if (postContainer.info.bestReply == replyId) {
-            users.updateUserRating(userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-            users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+            users.updateUserRating(userRewards, user, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+            users.updateUserRating(userRewards, user, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
                 ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
-                users.updateUserRating(userRewards, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-                users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+                users.updateUserRating(userRewards, user, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+                users.updateUserRating(userRewards, user, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
             }
 
-            users.updateUserRating(userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
-            users.updateUserRating(userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
+            users.updateUserRating(userRewards, user, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
+            users.updateUserRating(userRewards, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
             postContainer.info.bestReply = replyId;
         }
 
-        emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
+        emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
     }
 
     /// @notice Vote for post, reply or comment
     /// @param self The mapping containing all posts
     /// @param users The mapping containing all users
-    /// @param user Who called action
+    /// @param userAddr Who called action
     /// @param postId Post where will be change rating
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
@@ -494,7 +505,7 @@ library PostLib  {
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
@@ -506,15 +517,15 @@ library PostLib  {
         int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-            voteComment(roles, users, commentContainer, postContainer.info.communityId, user, isUpvote);
+            voteComment(roles, users, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-            voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, user, postType, isUpvote);
+            voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
         } else {
-            votePost(roles, users, userRewards, postContainer, user, postType, isUpvote);
+            votePost(roles, users, userRewards, postContainer, userAddr, postType, isUpvote);
         }
 
-        emit ForumItemVoted(user, postId, replyId, commentId, voteDirection);
+        emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
     }
 
     // @notice Vote for post
@@ -533,10 +544,9 @@ library PostLib  {
         bool isUpvote
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
-        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
-        SecurityLib.checkRatingAndCommunityModerator(
+        SecurityLib.checkRatingAndEnergy(
             roles, 
-            userRating, 
+            UserLib.getUserByAddress(users, votedUser), 
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
@@ -563,10 +573,10 @@ library PostLib  {
         bool isUpvote
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
-        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
-        SecurityLib.checkRatingAndCommunityModerator(
+        UserLib.User storage user = UserLib.getUserByAddress(users, replyContainer.info.author);
+        SecurityLib.checkRatingAndEnergy(
             roles, 
-            userRating, 
+            user, 
             votedUser, 
             replyContainer.info.author, 
             communityId, 
@@ -581,17 +591,17 @@ library PostLib  {
 
         if (replyContainer.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
             }
         }
 
         if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(users, userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             }
         }
 
@@ -610,10 +620,9 @@ library PostLib  {
         bool isUpvote
     ) private {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
-        int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
-        SecurityLib.checkRatingAndCommunityModerator(
+        SecurityLib.checkRatingAndEnergy(
             roles, 
-            userRating, 
+            UserLib.getUserByAddress(users, votedUser), 
             votedUser, 
             commentContainer.info.author, 
             communityId, 
@@ -793,7 +802,7 @@ library PostLib  {
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment
     /// @param self The mapping containing all posts
-    /// @param user Author of the vote
+    /// @param userAddr Author of the vote
     /// @param postId The post where need to get flag status
     /// @param replyId The reply where need to get flag status
     /// @param commentId The comment where need to get flag status
@@ -803,7 +812,7 @@ library PostLib  {
     // upVote = 1
     function getStatusHistory(
         PostCollection storage self, 
-        address user,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId
@@ -813,12 +822,12 @@ library PostLib  {
         int256 statusHistory;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-            statusHistory = commentContainer.historyVotes[user];
+            statusHistory = commentContainer.historyVotes[userAddr];
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-            statusHistory = replyContainer.historyVotes[user];
+            statusHistory = replyContainer.historyVotes[userAddr];
         } else {
-            statusHistory = postContainer.historyVotes[user];
+            statusHistory = postContainer.historyVotes[userAddr];
         }
 
         return statusHistory;

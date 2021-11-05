@@ -10,11 +10,14 @@ import "./RewardLib.sol";
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
   int32 constant START_USER_RATING = 10;
+  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 3; // 259200 - 3 Days
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     int32 payOutRating;
+    uint16 energy;
+    uint32 lastUpdatePeriod;
     uint256 creationTime;
     bytes32[] roles;
     uint32[] followedCommunities;
@@ -53,6 +56,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
     user.rating = START_USER_RATING;
     user.payOutRating = START_USER_RATING;
+    user.energy = getStatusEnergy(START_USER_RATING);
 
     self.userList.push(userAddress);
 
@@ -161,15 +165,26 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
+  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {  // name action?
     if (rating == 0) return;
 
-    updateRatingBase(self, userRewards, userAddr, rating);
+    User storage user = getUserByAddress(self, userAddr);
+    updateRatingBase(self, userRewards, user, userAddr, rating);
   }
 
-  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {
+  /// @notice Add rating to user
+  /// @param self The mapping containing all users
+  /// @param userAddr user's rating will be change
+  /// @param rating value for add to user's rating
+  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, User storage user, address userAddr, int32 rating) internal {
+    if (rating == 0) return;
+
+    updateRatingBase(self, userRewards, user, userAddr, rating);
+  }
+
+  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, User storage user, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    User storage user = getUserByAddress(self, userAddr);
+    // User storage user = getUserByAddress(self, userAddr);
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
@@ -208,5 +223,27 @@ library UserLib {
     currentWeekRating.ratingToReward += ratingToRewardChange;
     user.rating = newRating;
     user.payOutRating += ratingToRewardChange;
+  }
+
+  function getStatusEnergy(int32 rating) internal returns (uint16) {
+    uint16 maxEnergy;
+    if (rating < 0) {
+      maxEnergy = 0;
+    } else if (rating < 100) {
+      maxEnergy = 300;
+    } else if (rating < 500) {
+      maxEnergy = 600;
+    } else if (rating < 1000) {
+      maxEnergy = 900;
+    } else if (rating < 2500) {
+      maxEnergy = 1200;
+    } else if (rating < 5000) {
+      maxEnergy = 1500;
+    } else if (rating < 10000) {
+      maxEnergy = 1800;
+    } else {
+      maxEnergy = 2100;
+    }
+    return maxEnergy;
   }
 }
