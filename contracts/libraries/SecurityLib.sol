@@ -187,9 +187,13 @@ library SecurityLib {
 
 
   function hasModeratorRole(
-  Roles storage self,
-  address user,
-  uint32 communityId) internal returns (bool) {
+    Roles storage self,
+    address user,
+    uint32 communityId
+  ) 
+    internal 
+    returns (bool) 
+  {
     if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
       hasRole(self, DEFAULT_ADMIN_ROLE, user))) return true;
     
