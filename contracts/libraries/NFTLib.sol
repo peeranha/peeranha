@@ -8,8 +8,6 @@ import "../interfaces/IPeeranhaNFT.sol";
 /// @notice
 /// @dev
 library NFTLib {
-  uint32 constant PERIOD_LENGTH = 3;
-
   enum AchievementType { Rating }
 
   struct CountAchievement {
@@ -39,8 +37,14 @@ library NFTLib {
     uint64 achievementsCount;
   }
 
-  function createAchievemt(AchievementsContainer storage achievementsContainer, AchievementType achievementType, int64 lowerBound, uint64 maxCount) 
-  internal {
+  function createAchievemt(
+    AchievementsContainer storage achievementsContainer,
+    AchievementType achievementType,
+    int64 lowerBound,
+    uint64 maxCount
+  ) 
+    internal 
+  {
     require(maxCount != 0, "Max count of achievements must be more than 0");
 
     CountAchievement storage countAchievement = achievementsContainer.countAchievements[++achievementsContainer.achievementsCount];
@@ -50,9 +54,14 @@ library NFTLib {
     countAchievement.achievementType = achievementType;
   }
 
-  function updateAchievement(AchievementsContainer storage achievementsContainer, address recipient, AchievementType achievementType, int64 lowerBound /*<- name?*/)
-  internal
-  /* onlyOwner */ {
+  function updateAchievement(
+    AchievementsContainer storage achievementsContainer,
+    address recipient,
+    AchievementType achievementType,
+    int64 lowerBound /*<- name?*/
+  )
+    internal
+  {
     if (achievementType == AchievementType.Rating) {
       CountAchievement storage countAchievement;
       for (uint64 i = 1; i <= achievementsContainer.achievementsCount; i++) {

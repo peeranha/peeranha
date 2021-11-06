@@ -34,7 +34,15 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function setTokenURI(uint64 achievementId, uint64 maxCount, string memory achievementURI, NFTLib.AchievementType achievementType) external override {
+  function setTokenURI(
+    uint64 achievementId,
+    uint64 maxCount,
+    string memory achievementURI,
+    NFTLib.AchievementType achievementType
+  ) 
+    external 
+    override 
+  {
     NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
     achievementNFT.maxCount = maxCount;
     achievementNFT.achievementURI = achievementURI;
@@ -42,10 +50,14 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
     achievementsContainerNFT.achievementsCount++;
   }
 
-  function mintNFT(address recipient, uint64 tokenId, uint64 achievementId)
-  external
-  override
-  /* onlyOwner */ {
+  function mintNFT(
+    address recipient,
+    uint64 tokenId,
+    uint64 achievementId
+  )
+    external
+    override
+  {
     NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
     achievementNFT.factCount++;
     uint64 localTokenId = (achievementId - 1) * 1000000 + achievementNFT.factCount;
