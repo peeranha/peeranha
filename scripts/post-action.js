@@ -41,11 +41,6 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
-  // const buf = Buffer.from("../image/image1.png");
-  // console.log(buf);
-  // const saveResult = await getIpfsApi().add(buf);
-  // console.log(await getBytes32FromData(saveResult));
-
   const Peeranha = await ethers.getContractFactory("Peeranha");
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");
@@ -53,6 +48,26 @@ async function main() {
   result = await peeranha.createUser(await getBytes32FromData(testAccount));
   console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
+}
+
+const AchievementType = { "Rating": 0 }
+
+const achievements = [
+  { id: 1, type: AchievementType.Rating, path: "../image/image1.png"},
+  { id: 2, type: AchievementType.Rating, path: "../image/image2.png"},
+  { id: 3, type: AchievementType.Rating, path: "../image/image3.png"},
+];
+
+async function initAchievement(peeranha) {
+  for (const { id, type, path } of achievements) {
+    console.loglog("Init achievement:" + id);
+    const buffer = Buffer.from(path);
+    console.log(buffer);
+    const saveResult = await getIpfsApi().add(buffer);
+    const ipfsImage = await getBytes32FromData(saveResult);
+    console.log(ipfsImage);
+		await peeranha.setTokenURI(id, 5, 15, ipfsImage, type);
+  }
 }
 
 main()
