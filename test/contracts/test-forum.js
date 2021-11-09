@@ -38,6 +38,19 @@ describe("Test post", function () {
 		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
 	});
 
+	it("Test create post without tag", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [2, 1, 6])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6, 2])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [0])).to.be.revertedWith('The community does not have tag with 0 id.');
+	});
+
 	it("Test create reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
@@ -147,7 +160,7 @@ describe("Test post", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.editPost(1, 1, hashContainer[2], []);
+		await peeranha.editPost(1, hashContainer[2], []);
 
 		const post = await peeranha.getPost(1);
 		await expect(post.author).to.equal(peeranha.deployTransaction.from);
@@ -162,7 +175,7 @@ describe("Test post", function () {
 		await peeranha.createUser(hashContainer[1]);
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-		await expect(peeranha.editPost(1, 1, hashContainer[2], [])).to.be.revertedWith('Post does not exist.');
+		await expect(peeranha.editPost(1, hashContainer[2], [])).to.be.revertedWith('Post does not exist.');
 	});
 
 	it("Test edit reply", async function () {

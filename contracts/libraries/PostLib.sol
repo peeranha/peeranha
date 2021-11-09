@@ -11,6 +11,7 @@ import "./SecurityLib.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
+    uint256 constant deleteTime = 604800;    //7 days
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -233,16 +234,13 @@ library PostLib  {
         PostCollection storage self,
         address user,
         uint256 postId,
-        uint32 communityId,
         bytes32 ipfsHash,
         uint8[] memory tags
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(user == postContainer.info.author, "You can not edit this post. It is not your.");
-        
-        if(communityId != 0 && postContainer.info.communityId != communityId)
-            postContainer.info.communityId = communityId;
+
         if(!IpfsLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
         if (tags.length > 0)
@@ -317,16 +315,20 @@ library PostLib  {
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
-        if (postContainer.info.rating > 0) {
-            UserLib.updateUserRating(users, userRewards, postContainer.info.author,
+        uint256 time = CommonLib.getTimestamp();
+        if (time - postContainer.info.postTime < deleteTime) {
+            if (postContainer.info.rating > 0) {
+                UserLib.updateUserRating(users, userRewards, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                                 VoteLib.ResourceAction.Upvoted,
                                                                 TypeContent.Post) * postContainer.info.rating);
-        }
+            }
     
-        for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
-            deductReplyRating(users, userRewards, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
+            for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
+                deductReplyRating(users, userRewards, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
+            }
         }
+        
         if (user == postContainer.info.author)
             UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost);
 
@@ -356,7 +358,10 @@ library PostLib  {
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
-        deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
+        uint256 time = CommonLib.getTimestamp();
+        if (time - postContainer.info.postTime < deleteTime) {
+            deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
+        }
         if (user == replyContainer.info.author)
             UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
 

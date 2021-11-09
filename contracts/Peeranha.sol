@@ -370,8 +370,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be tags.
     */
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
-    onlyExisitingUser(msg.sender) 
-    onlyExistingAndNotFrozenCommunity(communityId) override {
+    onlyExisitingUser(msg.sender)
+    onlyExistingAndNotFrozenCommunity(communityId)
+    checkTag(communityId, tags) override {
         posts.createPost(roles, users, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
@@ -385,8 +386,8 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a community.
      * - must be tags
     */
-    function editPost(uint256 postId, uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external onlyExisitingUser(msg.sender) override {
-        posts.editPost(msg.sender, postId, communityId, ipfsHash, tags);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external onlyExisitingUser(msg.sender) override {
+        posts.editPost(msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -596,6 +597,11 @@ contract Peeranha is IPeeranha, Initializable {
 
     modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        _;
+    }
+
+    modifier checkTag(uint32 communityId, uint8[] memory tags) {
+        CommunityLib.checkTag(communities, communityId, tags);
         _;
     }
 }
