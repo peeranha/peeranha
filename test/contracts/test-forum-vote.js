@@ -520,11 +520,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
 		await expect(userAction.rating).to.equal(StartRating);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserRating.rating).to.equal(StartRating + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
@@ -546,11 +546,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + UpvotedCommonPost);
 		await expect(userAction.rating).to.equal(StartRating);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserRating.rating).to.equal(StartRating + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
@@ -572,11 +572,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + UpvotedTutorial);
 		await expect(userAction.rating).to.equal(StartRating);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserRating.rating).to.equal(StartRating + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating);
 	});
 
@@ -598,11 +598,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + DownvotedExpertPost);
 		await expect(userAction.rating).to.equal(StartRating + DownvoteExpertPost);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating + DownvotedExpertPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedExpertPost + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteExpertPost);
 	});
 
@@ -624,11 +624,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + DownvotedCommonPost);
 		await expect(userAction.rating).to.equal(StartRating + DownvoteCommonPost);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteCommonPost);
 	});
 
@@ -650,11 +650,11 @@ describe("Test vote", function () {
 		await expect(user.rating).to.equal(StartRating + DownvotedTutorial);
 		await expect(userAction.rating).to.equal(StartRating + DownvoteTutorial);
 
-		await peeranha.deletePost(1);
+		await peeranha.connect(signers[1]).deletePost(1);
 
 		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
 		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
-		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost);
+		await expect(newUserRating.rating).to.equal(StartRating + DownvotedCommonPost + DeleteOwnPost);
 		await expect(newUserActionRating.rating).to.equal(StartRating + DownvoteCommonPost);
 	});
 
@@ -2338,7 +2338,6 @@ describe("Test vote", function () {
     const DownvotedTutorial = -1;
 
     const DeleteOwnPost = -1;
-    const ModeratorDeletePost = -2;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2359,11 +2358,8 @@ describe("Test vote", function () {
     const QuickCommonReply = 1;
     
     const DeleteOwnReply = -1;
-    const ModeratorDeleteReply = -2;
 
 /////////////////////////////////////////////////////////////////////////////////
-
-    const ModeratorDeleteComment = -1;
 
 	// const author = "0x001d3F1ef827552Ae1114027BD3ECF1f086bA0F9";
 	// const author2 = "0x111122223333444455556666777788889999aAaa";
