@@ -511,11 +511,16 @@ library PostLib  {
         int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
+            require(user != commentContainer.info.author, "You can not vote for own comment.");
             voteComment(roles, users, commentContainer, postContainer.info.communityId, user, isUpvote);
+
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+            require(user != replyContainer.info.author, "You can not vote for own reply.");
             voteReply(roles, users, userRewards, replyContainer, postContainer.info.communityId, user, postType, isUpvote);
+
         } else {
+            require(user != postContainer.info.author, "You can not vote for own post.");
             votePost(roles, users, userRewards, postContainer, user, postType, isUpvote);
         }
 

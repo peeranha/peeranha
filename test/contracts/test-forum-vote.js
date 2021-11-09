@@ -27,6 +27,50 @@ describe("Test vote", function () {
 		await expect(statusHistory._hex).to.equal('0x01');
 	});
 
+	it("Test upVote own post", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await expect(peeranha.voteItem(1, 0, 0, 1)).to.be.revertedWith('You can not vote for own post.');
+	});
+
+	it("Test upVote own reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 1)).to.be.revertedWith('You can not vote for own reply.');
+	});
+
+	it("Test upVote own comment", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.createComment(1, 0, hashContainer[1]);
+		await expect(peeranha.voteItem(1, 0, 1, 1)).to.be.revertedWith('You can not vote for own comment.');
+	});
+
 	/* - */ it("Test upVote common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
