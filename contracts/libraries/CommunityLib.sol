@@ -42,6 +42,7 @@ library CommunityLib {
     event CommunityCreated(address user, uint32 id);
     event CommunityUpdated(address user, uint32 id);
     event TagCreated(address user, uint8 tagId, uint32 communityId);
+    event TagUpdated(address user, uint8 tagId, uint32 communityId);
     event CommunityFrozen(address user, uint32 communityId);
     event CommunityUnfrozen(address user, uint32 communityId);
 
@@ -82,7 +83,7 @@ library CommunityLib {
     /// @notice Update community info record
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to update
-    /// @param ipfsHash IPFS hash of document with user information
+    /// @param ipfsHash IPFS hash of document with community information
     function updateCommunity (
         CommunityCollection storage self,
         uint32 communityId,
@@ -108,6 +109,22 @@ library CommunityLib {
         newTag.ipfsDoc.hash = ipfsHash;
 
         emit TagCreated(msg.sender, community.info.tagsCount, communityId);
+    }
+
+    /// @notice Update tag info record
+    /// @param self The mapping containing all communities
+    /// @param communityId Address of the community to update
+    /// @param tagId Address of the tag to update
+    /// @param ipfsHash IPFS hash of document with tag information
+    function updateTag (
+        CommunityCollection storage self,
+        uint8 tagId,
+        uint32 communityId,
+        bytes32 ipfsHash
+    ) internal {
+        self.communities[communityId].tags[tagId].ipfsDoc.hash = ipfsHash;
+
+        emit TagUpdated(msg.sender, tagId, communityId);
     }
 
     /// @notice Get the number of communities
@@ -165,7 +182,6 @@ library CommunityLib {
     function getTag(CommunityCollection storage self, uint32 communityId, uint8 tagId)
         internal
         view
-        // onlyExistingAndNotFrozen(self, communityId)      //uncomment
         returns (Tag memory)
     {
         return self.communities[communityId].tags[tagId];
@@ -196,11 +212,19 @@ library CommunityLib {
 
     function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal {
         require(
-                self.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
-                "Community does not exist"
-            );
-            require(!self.communities[communityId].info.isFrozen,
-                "Community is frozen"
-            );
+            self.communities[communityId].info.ipfsDoc.hash != bytes32(0x0),
+            "Community does not exist"
+        );
+        require(
+            !self.communities[communityId].info.isFrozen,
+            "Community is frozen"
+        );
+    }
+
+    function onlyExistingTag(CommunityCollection storage self, uint8 tagId, uint32 communityId) internal view {
+        require(
+            self.communities[communityId].tags[tagId].ipfsDoc.hash != bytes32(0x0),
+            "Tag does not exist"
+        );
     }
 }

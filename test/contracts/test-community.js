@@ -61,6 +61,21 @@ describe("Test communities", function() {
         expect(newTagList[5].ipfsDoc.hash).to.equal(ipfsHashes[1]);
     })
 
+    it("Test tag editing", async function() {
+        const peeranha = await createContract();
+        const ipfsHashes = getHashesContainer(2);
+        const hashContainer = getHashContainer();
+		await peeranha.createUser(hashContainer[1]);
+
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+        expect(await peeranha.getTagsCount(1)).to.equal(5);
+
+        await peeranha.updateTag(1, 1, hashContainer[1]);
+        const changedTag = await peeranha.getTag(1, 1);
+        await expect(changedTag.ipfsDoc.hash).to.equal(hashContainer[1]);
+        expect(await peeranha.getTagsCount(1)).to.equal(5);
+    })
+
     const createContract = async function() {
         const PostLib = await ethers.getContractFactory("PostLib")
         const postLib = await PostLib.deploy();

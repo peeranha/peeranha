@@ -197,7 +197,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityModerator(communityId) {
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -209,7 +212,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdmin() {
+    function freezeCommunity(uint32 communityId) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdmin() {
         communities.freeze(communityId);
     }
 
@@ -308,6 +314,22 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     /**
+     * @dev Edit tag info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing commuity. 
+     * - Must be an existing tag.  
+     * - Sender must be community moderator.
+     */
+    function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingTag(tagId, communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
+        communities.updateTag(tagId, communityId, ipfsHash);
+    }
+
+    /**
      * @dev Get communities count.
      */
     function getCommunitiesCount() external view returns (uint32 count) {
@@ -356,7 +378,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.
      * - Must be a tag.
      */
-    function getTag(uint32 communityId, uint8 tagId) external view returns (CommunityLib.Tag memory) {
+    function getTag(uint32 communityId, uint8 tagId) external view
+    onlyExistingTag(tagId, communityId) 
+    returns (CommunityLib.Tag memory) {
         return communities.getTag(communityId, tagId);
     }
 
@@ -596,6 +620,11 @@ contract Peeranha is IPeeranha, Initializable {
 
     modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        _;
+    }
+    
+    modifier onlyExistingTag(uint8 tagId, uint32 communityId) {
+        CommunityLib.onlyExistingTag(communities, tagId, communityId);
         _;
     }
 }
