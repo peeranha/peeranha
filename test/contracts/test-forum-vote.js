@@ -2176,66 +2176,6 @@ describe("Test vote", function () {
 		await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
 		await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptCommonPost);
 	});
-	
-	it("Test delete expert reply as best", async function () {
-		const peeranha = await createContract();
-		const signers = await ethers.getSigners();
-		const hashContainer = getHashContainer();
-        const ipfsHashes = getHashesContainer(2);
-
-		await peeranha.createUser(hashContainer[1]);
-		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
-		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
-		
-		await peeranha.changeStatusBestReply(1, 1);
-		await peeranha.deleteReply(1, 1);
-
-		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(StartRating);
-	});
-
-	it("Test delete common reply as best", async function () {
-		const peeranha = await createContract();
-		const signers = await ethers.getSigners();
-		const hashContainer = getHashContainer();
-        const ipfsHashes = getHashesContainer(2);
-
-		await peeranha.createUser(hashContainer[1]);
-		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
-		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
-		
-		await peeranha.changeStatusBestReply(1, 1);
-		await peeranha.deleteReply(1, 1);
-
-		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(StartRating);
-	});
-
-	/* - */ xit("Test delete tutorial reply as best", async function () {
-		const peeranha = await createContract();
-		const signers = await ethers.getSigners();
-		const hashContainer = getHashContainer();
-        const ipfsHashes = getHashesContainer(2);
-
-		await peeranha.createUser(hashContainer[1]);
-		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
-		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
-		
-		await peeranha.changeStatusBestReply(1, 1);
-		await peeranha.deleteReply(1, 1);
-
-		const userRating = await peeranha.getUserByAddress(signers[1].address);
-		await expect(userRating.rating).to.equal(StartRating);
-	});
 
 
 
