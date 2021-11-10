@@ -164,7 +164,7 @@ library PostLib  {
                 postContainer.info.officialReply = postContainer.info.replyCount;
             }
 
-            if (postContainer.info.postType != PostType.Tutorial) {
+            if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != user) {
                 if (postContainer.info.replyCount == 1) {
                     replyContainer.info.isFirstReply = true;
                     UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));

@@ -785,6 +785,48 @@ describe("Test vote", function () {
 		await expect(reply.isQuickReply).to.equal(true);
 	});
 
+	/* - */ it("Test create first and quick expert reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+
+		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(userRating.rating).to.equal(FirstExpertReply + QuickExpertReply);
+
+		const reply = await peeranha.getReply(1, 1);
+		await expect(reply.isFirstReply).to.equal(true);
+		await expect(reply.isQuickReply).to.equal(true);
+	});
+
+	it("Test create first and quick expert reply (own reply)", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+
+		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(userRating.rating).to.equal(StartRating);
+
+		const reply = await peeranha.getReply(1, 1);
+		await expect(reply.isFirstReply).to.equal(false);
+		await expect(reply.isQuickReply).to.equal(false);
+	});
+
 	/* - */ it("Test create first and quick common reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
@@ -806,6 +848,27 @@ describe("Test vote", function () {
 		await expect(reply.isQuickReply).to.equal(true);
 	});
 
+	it("Test create first and quick common reply (own reply)", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+
+		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(userRating.rating).to.equal(StartRating);
+
+		const reply = await peeranha.getReply(1, 1);
+		await expect(reply.isFirstReply).to.equal(false);
+		await expect(reply.isQuickReply).to.equal(false);
+	});
+
 	/* - */ it("Test create first and quick tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
@@ -821,6 +884,27 @@ describe("Test vote", function () {
 
 		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		await expect(userRating.rating).to.equal(0);
+
+		const reply = await peeranha.getReply(1, 1);
+		await expect(reply.isFirstReply).to.equal(false);
+		await expect(reply.isQuickReply).to.equal(false);
+	});
+
+	it("Test create first and quick tutorial reply (own reply)", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+
+		const userRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(userRating.rating).to.equal(StartRating);
 
 		const reply = await peeranha.getReply(1, 1);
 		await expect(reply.isFirstReply).to.equal(false);
