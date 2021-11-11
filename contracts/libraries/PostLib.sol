@@ -329,6 +329,8 @@ library PostLib  {
         }
         if (user == postContainer.info.author)
             UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost);
+        else 
+            UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.ModeratorDeletePost);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(user, postId);
@@ -359,6 +361,8 @@ library PostLib  {
         deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         if (user == replyContainer.info.author)
             UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
+        else 
+            UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.ModeratorDeleteReply);
 
         replyContainer.info.isDeleted = true;
         emit ReplyDeleted(user, postId, replyId);
@@ -406,6 +410,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 parentReplyId,
@@ -415,6 +420,11 @@ library PostLib  {
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+
+        if (user == commentContainer.info.author)
+            UserLib.updateUserRating(users, userRewards, commentContainer.info.author, VoteLib.DeleteOwnComment);
+        else 
+            UserLib.updateUserRating(users, userRewards, commentContainer.info.author, VoteLib.ModeratorDeleteComment);
 
         commentContainer.info.isDeleted = true;
         emit CommentDeleted(user, postId, parentReplyId, commentId);

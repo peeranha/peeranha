@@ -467,7 +467,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a comment.
     */
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external onlyExisitingUser(msg.sender) override {
-        posts.deleteComment(roles, users, msg.sender, postId, parentReplyId, commentId);
+        posts.deleteComment(roles, users, userRewards, msg.sender, postId, parentReplyId, commentId);
     }
 
     /**
