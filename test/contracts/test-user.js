@@ -83,6 +83,17 @@ describe("Test users", function() {
     expect(user.followedCommunities[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
   })
 
+  it("Follow community not exist user", async function() {
+    const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
+  })
+
   it("Double follow community", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
@@ -180,6 +191,19 @@ describe("Test users", function() {
 
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(0);
+  })
+
+  it("UnFollow community", async function() {
+    const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
   })
 
   it("UnFollow diferent community", async function() {
