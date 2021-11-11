@@ -2,6 +2,7 @@ pragma solidity >=0.5.0;
 pragma abicoder v2;
 import "./IpfsLib.sol";
 import "./CommonLib.sol";
+import "./PostLib.sol";
 
 /// @title Communities
 /// @notice Provides information about created communities
@@ -213,5 +214,11 @@ library CommunityLib {
             require(community.tagsCount >= tags[i], "Wrong tag id.");
             require(tags[i] != 0, "The community does not have tag with 0 id.");
         }
+    }
+
+    function checkTagByPostId(CommunityCollection storage self, PostLib.PostCollection storage posts, uint256 postId, uint8[] memory tags) internal {
+        PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
+        
+        checkTag(self, postContainer.info.communityId, tags);
     }
 }

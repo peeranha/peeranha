@@ -67,6 +67,42 @@ describe("Test post", function () {
 		await expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 	});
 
+	it("Test double replies in export post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+	});
+
+	it("Test double replies in common post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+	});
+
+	it("Test double replies in tutorial post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+		await peeranha.createReply(1, 0, hashContainer[1], false);
+	});
+
 	it("Test create reply, post has been deleted", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
@@ -166,6 +202,21 @@ describe("Test post", function () {
 		await expect(post.author).to.equal(peeranha.deployTransaction.from);
 		await expect(post.isDeleted).to.equal(false);
 		await expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
+	});
+
+	it("Test edit post (wrong tag)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		
+		await expect(peeranha.editPost(1, hashContainer[2], [6])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.editPost(1, hashContainer[2], [2, 1, 6])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.editPost(1, hashContainer[2], [6, 2])).to.be.revertedWith('Wrong tag id.');
+		await expect(peeranha.editPost(1, hashContainer[2], [0])).to.be.revertedWith('The community does not have tag with 0 id.');
 	});
 
 	it("Test edit post, without post", async function () {
