@@ -494,7 +494,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a role ?
     */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(roles, users, userRewards, msg.sender, postId, replyId);
     }
 
     /**

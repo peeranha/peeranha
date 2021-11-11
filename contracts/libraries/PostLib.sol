@@ -416,6 +416,7 @@ library PostLib  {
 
     /// @notice Delete comment
     /// @param self The mapping containing all posts
+    /// @param roles Permissions user
     /// @param user User who deletes comment
     /// @param postId The post where will be deleted comment
     /// @param parentReplyId The reply where the reply will be deleted
@@ -466,11 +467,13 @@ library PostLib  {
 
     /// @notice Change status best reply
     /// @param self The mapping containing all posts
+    /// @param roles Permissions users
     /// @param user Who called action
     /// @param postId The post where will be change reply status
     /// @param replyId Reply which will change status
-    function changeStatusBestReply (        // roles?
+    function changeStatusBestReply (
         PostCollection storage self,
+        SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
         RewardLib.UserRewards storage userRewards,
         address user,
@@ -479,9 +482,10 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+        address replyOwner = replyContainer.info.author;        // mb rewrite
 
         if (postContainer.info.bestReply == replyId) {
-            if (replyContainer.info.author != user) {       // test
+            if (replyContainer.info.author != user) {       // unit test
                 users.updateUserRating(userRewards, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
                 users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
             }
@@ -489,18 +493,22 @@ library PostLib  {
         } else {
             if (postContainer.info.bestReply != 0) {
                 ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
-                if (oldBestReplyContainer.info.author != user) {    // test
+                if (oldBestReplyContainer.info.author != user) {    // unit test
                     users.updateUserRating(userRewards, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
                     users.updateUserRating(userRewards, user, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
                 }
+                replyOwner = oldBestReplyContainer.info.author;
             }
 
-            if (replyContainer.info.author != user) {   // test
+            if (replyContainer.info.author != user) {   // unit test
                 users.updateUserRating(userRewards, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));  
                 users.updateUserRating(userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));  
             }
             postContainer.info.bestReply = replyId;
         }
+
+        int32 userRating = UserLib.getUserByAddress(users, user).rating;
+        SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyOwner, postContainer.info.communityId, SecurityLib.Action.bestReply);    // unit test
 
         emit StatusBestReplyChanged(user, postId, postContainer.info.bestReply);
     }
