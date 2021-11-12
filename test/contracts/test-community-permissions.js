@@ -20,7 +20,7 @@ describe("Test community permissions", function() {
 
         await createCommunities(peeranha, countOfCommunities, communitiesIds);
 
-        // Give Moderator permission for unreal user or community
+        // Give Moderator permission for non-existing user or community
         await expect(peeranha.giveCommunityModeratorPermission(userAddress, 4))
         .to.be.revertedWith("Community does not exist");
         await expect(peeranha.giveCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
@@ -73,7 +73,7 @@ describe("Test community permissions", function() {
 		await peeranha.createUser(hashContainer[1]);
         await createCommunities(peeranha, countOfCommunities, communitiesIds);
 
-        // Give Admin permission for unreal user or community
+        // Give Admin permission for non-existing user or community
         await expect(peeranha.giveCommunityAdminPermission(userAddress, 4))
         .to.be.revertedWith("Community does not exist");
         await expect(peeranha.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))

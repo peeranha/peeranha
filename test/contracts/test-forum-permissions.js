@@ -21,6 +21,19 @@ describe("Test permissions", function () {
             .to.be.revertedWith('Your rating is too small for publication comment. You need 35 ratings');
             await expect(peeranha.connect(signers[1]).createComment(1, 1, hashContainer[0]))
             .to.be.revertedWith('Your rating is too small for publication comment. You need 35 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 24);
+            await expect(peeranha.connect(signers[1]).createComment(1, 0, hashContainer[0]))
+            .to.be.revertedWith('Your rating is too small for publication comment. You need 35 ratings');
+            await expect(peeranha.connect(signers[1]).createComment(1, 1, hashContainer[0]))
+            .to.be.revertedWith('Your rating is too small for publication comment. You need 35 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 1);
+            await peeranha.connect(signers[1]).createComment(1, 0, hashContainer[0]);
+            await peeranha.connect(signers[1]).createComment(1, 1, hashContainer[0]);
+
+            expect((await peeranha.getPost(1)).commentCount).to.be.equal(1);
+            expect((await peeranha.getReply(1, 1)).commentCount).to.be.equal(1);
 		});
 
         it("Test upvote post or reply by common user", async function () {
@@ -40,6 +53,19 @@ describe("Test permissions", function () {
             .to.be.revertedWith('Your rating is too small for upvote post. You need 35 ratings');
             await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('Your rating is too small for upvote reply. You need 35 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 24);
+            await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 1))
+            .to.be.revertedWith('Your rating is too small for upvote post. You need 35 ratings');
+            await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 1))
+            .to.be.revertedWith('Your rating is too small for upvote reply. You need 35 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 1);
+            await peeranha.connect(signers[1]).voteItem(1, 0, 0, 1);
+            await peeranha.connect(signers[1]).voteItem(1, 1, 0, 1);
+
+            expect((await peeranha.getPost(1)).rating).to.be.equal(1);
+            expect((await peeranha.getReply(1, 1)).rating).to.be.equal(1);
 		});
 
         it("Test downvote post or reply by common user", async function () {
@@ -59,6 +85,20 @@ describe("Test permissions", function () {
             .to.be.revertedWith('Your rating is too small for downvote post. You need 100 ratings');
             await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 0))
             .to.be.revertedWith('Your rating is too small for downvote reply. You need 100 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 89);
+            await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 0))
+            .to.be.revertedWith('Your rating is too small for downvote post. You need 100 ratings');
+            await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 0))
+            .to.be.revertedWith('Your rating is too small for downvote reply. You need 100 ratings');
+
+            await peeranha.addUserRating(signers[1].address, 1);
+            await peeranha.connect(signers[1]).voteItem(1, 0, 0, 0);
+            await peeranha.addUserRating(signers[1].address, 1);
+            await peeranha.connect(signers[1]).voteItem(1, 1, 0, 0);
+
+            expect((await peeranha.getPost(1)).rating).to.be.equal(-1);
+            expect((await peeranha.getReply(1, 1)).rating).to.be.equal(-1);
 		});
 
         it("Test create post or reply by user with negative rating", async function () {

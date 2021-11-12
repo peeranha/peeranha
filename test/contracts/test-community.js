@@ -81,7 +81,6 @@ describe("Test communities", function() {
         let tagList = await peeranha.getTags(1);
         await peeranha.createTag(1, tagList[4].ipfsDoc.hash);
         tagList = await peeranha.getTags(1);
-        console.log(tagList);
         
         await Promise.all(tagList.map(async(tag, index) => {
                 const tagHash = tag.ipfsDoc.hash;
