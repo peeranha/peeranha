@@ -98,7 +98,7 @@ library PostLib  {
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
     event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
 
-    /// @notice Publication post
+    /// @notice Publication post 
     /// @param self The mapping containing all posts
     /// @param user Author of the post
     /// @param communityId Community where the post will be ask
