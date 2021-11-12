@@ -117,9 +117,8 @@ library PostLib  {
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, communityId, SecurityLib.Action.publicationPost);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
-        ///
-        //check community, tags
-        ///
+        require(postType != PostType.Tutorial, "At this release you can not publish tutorial.");
+
 
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;

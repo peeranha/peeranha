@@ -28,14 +28,14 @@ describe("Test post", function () {
 		);
 	});
 
-	it("Test create post without tag", async function () {
+	it("Test create post (not be able to post Tutorials)", async function () {		// will delete after first releaseS
 		const peeranha = await createContract();
-		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
+		const hashContainer = getHashContainer();
 		await peeranha.createUser(hashContainer[1]);
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [2])).to.be.revertedWith('At this release you can not publish tutorial.');
 	});
 
 	it("Test create post without tag", async function () {
@@ -49,6 +49,7 @@ describe("Test post", function () {
 		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [2, 1, 6])).to.be.revertedWith('Wrong tag id.');
 		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6, 2])).to.be.revertedWith('Wrong tag id.');
 		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [0])).to.be.revertedWith('The community does not have tag with 0 id.');
+		await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
 	});
 
 	it("Test create reply", async function () {
@@ -91,7 +92,7 @@ describe("Test post", function () {
 		await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
 	});
 
-	it("Test double replies in tutorial post", async function () {
+	xit("Test double replies in tutorial post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);

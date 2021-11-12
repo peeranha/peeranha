@@ -90,7 +90,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(1);
 	});
 
-	/* - */ it("Test upVote tutorial post", async function () {
+	/* - */ xit("Test upVote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -152,7 +152,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	/* - */ it("Test double upVote tytorial post", async function () {
+	/* - */ xit("Test double upVote tytorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -217,7 +217,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(-1);
 	});
 
-	/* - */ it("Test downVote tutorial post", async function () {
+	/* - */ xit("Test downVote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -285,7 +285,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	/* - */ it("Test double downVote tytorial post", async function () {
+	/* - */ xit("Test double downVote tytorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -377,7 +377,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(1);
 	});
 
-	/* - */ it("Test upvote after downvote tutorial post", async function () {
+	/* - */ xit("Test upvote after downvote tutorial post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -450,7 +450,7 @@ describe("Test vote", function () {
 		await expect(newUserActionRating.rating).to.equal(0);
 	});
 
-	/* - */ it("Test delete post after upvote tutorial ", async function () {
+	/* - */ xit("Test delete post after upvote tutorial ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -528,7 +528,7 @@ describe("Test vote", function () {
 		await expect(newUserActionRating.rating).to.equal(DownvoteCommonPost);
 	});
 
-	/* - */ it("Test delete post after downvote tutorial", async function () {
+	/* - */ xit("Test delete post after downvote tutorial", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -616,7 +616,7 @@ describe("Test vote", function () {
 		await expect(newUserActionRating.rating).to.equal(DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after upvote tutorial reply", async function () {
+	/* - */ xit("Test delete post after upvote tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -704,7 +704,7 @@ describe("Test vote", function () {
 		await expect(newUserActionRating.rating).to.equal(DownvoteCommonReply + DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete post after downvote tutorial reply", async function () {
+	/* - */ xit("Test delete post after downvote tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -869,7 +869,7 @@ describe("Test vote", function () {
 		await expect(reply.isQuickReply).to.equal(false);
 	});
 
-	/* - */ it("Test create first and quick tutorial reply", async function () {
+	/* - */ xit("Test create first and quick tutorial reply", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -890,7 +890,7 @@ describe("Test vote", function () {
 		await expect(reply.isQuickReply).to.equal(false);
 	});
 
-	it("Test create first and quick tutorial reply (own reply)", async function () {
+	xit("Test create first and quick tutorial reply (own reply)", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -967,7 +967,7 @@ describe("Test vote", function () {
 		await expect(secondReply.isQuickReply).to.equal(true);
 	});
 
-	/* - */ it("Test create 2 tutorial reply, one first and two quick ", async function () {
+	/* - */ xit("Test create 2 tutorial reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1043,7 +1043,7 @@ describe("Test vote", function () {
 		await expect(userRating2.rating).to.equal(DeleteOwnReply);
 	});
 
-	/* - */ it("Test delete 2 tutorial reply, one first and two quick ", async function () {
+	/* - */ xit("Test delete 2 tutorial reply, one first and two quick ", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1105,7 +1105,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating + AcceptCommonReply);
 	});
 
-	/* - */ it("Test mark tutorial reply as best", async function () {
+	/* - */ xit("Test mark tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1164,7 +1164,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 
-	/* - */ it("Test unmark tutorial reply as best", async function () {
+	/* - */ xit("Test unmark tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1224,7 +1224,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(0);
 	});
 
-	/* - */ it("Test delete tutorial reply as best", async function () {
+	/* - */ xit("Test delete tutorial reply as best", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
