@@ -361,9 +361,6 @@ library PostLib  {
         uint256 postId,
         uint16 replyId
     ) public {
-        /*
-        check author
-        */
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.bestReply != replyId, "You can not delete the best reply."); // unit test
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
