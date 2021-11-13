@@ -68,6 +68,7 @@ library PostLib  {
         uint8 propertyCount;
         uint8 commentCount;
         uint16 replyCount;
+        uint16 deletedReplyCount;
         bool isDeleted;
     }
 
@@ -172,7 +173,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != user) {
-                if (postContainer.info.replyCount == 1) {
+                if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
                     replyContainer.info.isFirstReply = true;
                     UserLib.updateUserRating(users, userRewards, user, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
@@ -376,6 +377,7 @@ library PostLib  {
             UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
 
         replyContainer.info.isDeleted = true;
+        postContainer.info.deletedReplyCount++;
         emit ReplyDeleted(user, postId, replyId);
     }
 
