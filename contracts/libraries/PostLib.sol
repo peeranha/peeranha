@@ -438,7 +438,7 @@ library PostLib  {
         emit CommentDeleted(user, postId, parentReplyId, commentId);
     }
 
-    /// @notice Change status official reply
+    /// @notice Change status official reply 
     /// @param self The mapping containing all posts
     /// @param user Who called action
     /// @param postId Post where will be change reply status
