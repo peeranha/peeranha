@@ -4,6 +4,8 @@ pragma solidity >=0.5.0;
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
+import "./UserLib.sol";
+
 library SecurityLib {
   enum Action {
     publicationPost,
@@ -260,21 +262,21 @@ library SecurityLib {
     * system imposed by {AccessControl}.
     * ====
     */
-  function setupRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
-      grantRole(self, userRoles, role, account);
+  function setupRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+      grantRole(userContext, role, account);
   }
 
-  function revokeRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
-    if (self._roles[role].members.remove(account)) {
+  function revokeRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+    if (userContext.roles._roles[role].members.remove(account)) {
       emit RoleRevoked(role, account, msg.sender);
 
-      uint256 length = userRoles.userRoles[account].length;
+      uint256 length = userContext.userRoles.userRoles[account].length;
       for(uint32 i = 0; i < length; i++) {
-        if(userRoles.userRoles[account][i] == role) {
+        if(userContext.userRoles.userRoles[account][i] == role) {
           if (i < length - 1) {
-            userRoles.userRoles[account][i] = userRoles.userRoles[account][length - 1];
-            userRoles.userRoles[account].pop();
-          } else userRoles.userRoles[account].pop();
+            userContext.userRoles.userRoles[account][i] = userContext.userRoles.userRoles[account][length - 1];
+            userContext.userRoles.userRoles[account].pop();
+          } else userContext.userRoles.userRoles[account].pop();
         }
       }
     }
@@ -284,9 +286,9 @@ library SecurityLib {
     return self.userRoles[account];
   }
 
-  function grantRole(Roles storage self, UserRoles storage userRoles, bytes32 role, address account) internal {
-    if (self._roles[role].members.add(account)) {
-      userRoles.userRoles[account].push(role);   
+  function grantRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+    if (userContext.roles._roles[role].members.add(account)) {
+      userContext.userRoles.userRoles[account].push(role);   
       emit RoleGranted(role, account, msg.sender);
     }
   }

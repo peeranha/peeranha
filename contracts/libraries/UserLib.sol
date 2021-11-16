@@ -4,6 +4,7 @@ pragma solidity >=0.5.0;
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
+import "./SecurityLib.sol";
 import "./AchievementLib.sol";
 
 /// @title Users
@@ -20,6 +21,15 @@ library UserLib {
     bytes32[] roles;
     uint32[] followedCommunities;
     uint16[] rewardPeriods;
+  }
+
+  /// users The mapping containing all users
+  struct UserContext {
+    UserLib.UserCollection users;
+    RewardLib.UserRewards userRewards;
+    SecurityLib.Roles roles;
+    SecurityLib.UserRoles userRoles;
+    AchievementLib.AchievementsContainer achievementsContainer;
   }
   
   struct UserCollection {
@@ -152,29 +162,28 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating, achievementsContainer);
+      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating);
     }
   }
 
   /// @notice Add rating to user
-  /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
     if (rating == 0) return;
 
-    updateRatingBase(self, userRewards, userAddr, rating, achievementsContainer);
+    updateRatingBase(userContext, userAddr, rating);
   }
 
-  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateRatingBase(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    User storage user = getUserByAddress(self, userAddr);
+    User storage user = getUserByAddress(userContext.users, userAddr);
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
-    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userRewards, userAddr, currentPeriod);
+    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, currentPeriod);
     bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
     if (isFirstTransactionOnThisWeek) {
       user.rewardPeriods.push(currentPeriod);
@@ -186,7 +195,7 @@ library UserLib {
     // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
     if (pastPeriodsCount > 0) {
       uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
-      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userRewards, userAddr, previousWeekNumber);
+      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, previousWeekNumber);
 
 
       int32 paidOutRating = user.payOutRating - ratingToReward;
@@ -211,7 +220,7 @@ library UserLib {
     user.payOutRating += ratingToRewardChange;
 
     if (rating > 0) {
-      AchievementLib.updateAchievement(achievementsContainer, userAddr, AchievementLib.AchievementsType.Rating, int64(newRating));
+      AchievementLib.updateAchievement(userContext.achievementsContainer, userAddr, AchievementLib.AchievementsType.Rating, int64(newRating));
     }
   }
 }
