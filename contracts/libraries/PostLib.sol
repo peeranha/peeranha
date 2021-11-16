@@ -100,6 +100,7 @@ library PostLib  {
 
     /// @notice Publication post
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
@@ -133,6 +134,7 @@ library PostLib  {
 
     /// @notice Post reply
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user Author of the reply
     /// @param postId The post where the reply will be post
     /// @param parentReplyId The reply where the reply will be post
@@ -185,6 +187,7 @@ library PostLib  {
 
     /// @notice Post comment
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user Author of the comment
     /// @param postId The post where the comment will be post
     /// @param parentReplyId The reply where the comment will be post
@@ -300,6 +303,7 @@ library PostLib  {
 
     /// @notice Delete post
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user User who deletes post
     /// @param postId Post which will be deleted
     function deletePost(
@@ -331,6 +335,7 @@ library PostLib  {
 
     /// @notice Delete reply
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user User who deletes reply
     /// @param postId The post where will be deleted reply
     /// @param replyId Reply which will be deleted
@@ -358,6 +363,7 @@ library PostLib  {
     }
 
     /// @notice Take reply rating from the author
+    /// @param userContext All information about users
     /// @param postType Type post: expert, common, tutorial
     /// @param replyContainer Reply from which the rating is taken
     function deductReplyRating (
@@ -389,6 +395,7 @@ library PostLib  {
 
     /// @notice Delete comment
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user User who deletes comment
     /// @param postId The post where will be deleted comment
     /// @param parentReplyId The reply where the reply will be deleted
@@ -438,10 +445,11 @@ library PostLib  {
 
     /// @notice Change status best reply
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user Who called action
     /// @param postId The post where will be change reply status
     /// @param replyId Reply which will change status
-    function changeStatusBestReply (        // roles?
+    function changeStatusBestReply (
         PostCollection storage self,
         UserLib.UserContext storage userContext,
         address user,
@@ -472,6 +480,7 @@ library PostLib  {
 
     /// @notice Vote for post, reply or comment
     /// @param self The mapping containing all posts
+    /// @param userContext All information about users
     /// @param user Who called action
     /// @param postId Post where will be change rating
     /// @param replyId Reply which will be change rating
@@ -505,6 +514,7 @@ library PostLib  {
     }
 
     // @notice Vote for post
+    /// @param userContext All information about users
     /// @param postContainer Post where will be change rating
     /// @param votedUser User who voted
     /// @param postType Type post expert, common, tutorial
@@ -531,6 +541,7 @@ library PostLib  {
     }
  
     // @notice Vote for reply
+    /// @param userContext All information about users
     /// @param replyContainer Reply where will be change rating
     /// @param votedUser User who voted
     /// @param postType Type post expert, common, tutorial
@@ -579,6 +590,7 @@ library PostLib  {
     }
 
     // @notice Vote for comment
+    /// @param userContext All information about users
     /// @param commentContainer Comment where will be change rating
     /// @param votedUser User who voted
     /// @param isUpvote Upvote or downvote
@@ -603,6 +615,7 @@ library PostLib  {
     }
 
     // @notice Сount users' rating after voting per a reply or post
+    /// @param userContext All information about users
     /// @param author Author post, reply or comment where voted
     /// @param votedUser User who voted
     /// @param postType Type post expert, common, tutorial
