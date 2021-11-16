@@ -83,7 +83,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      *
      * - Must be an community.  
      */
-    function followCommunity(uint32 communityId) external override 
+    function followCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override 
     onlyExistingAndNotFrozenCommunity(communityId) {
         userContext.users.followCommunity(msg.sender, communityId);
     }
@@ -95,7 +95,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(uint32 communityId) external override {
+    function unfollowCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override {
         userContext.users.unfollowCommunity(msg.sender, communityId);
     }
 
@@ -372,7 +372,8 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
     */
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
     onlyExisitingUser(msg.sender) 
-    onlyExistingAndNotFrozenCommunity(communityId) override {
+    onlyExistingAndNotFrozenCommunity(communityId)
+    checkTag(communityId, tags) override {
         posts.createPost(userContext, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
@@ -386,8 +387,10 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - must be a community.
      * - must be tags
     */
-    function editPost(uint256 postId, uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external onlyExisitingUser(msg.sender) override {
-        posts.editPost(msg.sender, postId, communityId, ipfsHash, tags);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
+    onlyExisitingUser(msg.sender) 
+    checkTagByPostId(postId, tags) override {
+        posts.editPost(msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -624,6 +627,16 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
 
     modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        _;
+    }
+
+    modifier checkTag(uint32 communityId, uint8[] memory tags) {
+        CommunityLib.checkTag(communities, communityId, tags);
+        _;
+    }
+
+    modifier checkTagByPostId(uint256 postId, uint8[] memory tags) {
+        CommunityLib.checkTagByPostId(communities, posts, postId, tags);
         _;
     }
 }

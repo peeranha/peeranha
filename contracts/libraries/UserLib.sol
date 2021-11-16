@@ -80,6 +80,7 @@ library UserLib {
     bytes32 ipfsHash
   ) internal {
     User storage user = getUserByAddress(self, userAddress);
+    require(user.rating >= 0, "Your rating is too small for upvote reply. You need 0 ratings.");
     user.ipfsDoc.hash = ipfsHash;
 
     emit UserUpdated(userAddress);

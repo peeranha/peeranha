@@ -18,9 +18,11 @@ library SecurityLib {
     downVoteReply,
     upVoteComment,
     downVoteComment,
-    officialReply
+    officialReply,
+    bestReply
   }
   
+  int16 constant MINIMUM_RATING = -300;
   int16 constant POST_QUESTION_ALLOWED = 0;
   int16 constant POST_REPLY_ALLOWED = 0;
   int16 constant POST_OWN_COMMENT_ALLOWED = 35;
@@ -119,6 +121,11 @@ library SecurityLib {
       require(actionCaller != dataUser, "You can not vote for own comment");
       ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for downvote comment. You need 0 ratings";
+
+    } else if (action == Action.bestReply) {
+      require(actionCaller == dataUser, "You can mark the reply as the best, it is not your");
+      ratingAllowen = MINIMUM_RATING;
+      message = "Your rating is too small for mark reply as best. You need -300 ratings";
 
     } else {
       require(false, "Action not allowed");
