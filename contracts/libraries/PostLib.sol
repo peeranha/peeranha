@@ -154,6 +154,11 @@ library PostLib  {
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, user, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(
+            parentReplyId == 0 || 
+            (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
+            "User is forbidden to reply on reply for Expert and Common type of posts"
+        ); // unit tests (reply on reply)
 
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
@@ -183,9 +188,6 @@ library PostLib  {
                 }
             }
         } else {
-          require(postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost, // unit tests (reply on reply)
-            "User is forbidden to reply on reply for Expert and Common type of posts");
-
           getReplyContainerSafe(postContainer, parentReplyId);
           replyContainer.info.parentReplyId = parentReplyId;  
         }
