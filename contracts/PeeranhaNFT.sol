@@ -2,21 +2,25 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "./libraries/NFTLib.sol";
+import "./libraries/AchievementLib.sol";
 import "./interfaces/IPeeranha.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";   //132k gas
 
-contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
+contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
   NFTLib.AchievementsContainerNFT achievementsContainerNFT;
   IPeeranha peeranha;
+  uint32 constant POOL_NFT = 1000000;   // 2 value
 
   using CountersUpgradeable for CountersUpgradeable.Counter;
   CountersUpgradeable.Counter private _tokenIds;
 
   function initialize(string memory name, string memory symbol) public initializer {
     __NFT_init(name, symbol);
+    __Ownable_init();
   }
 
   function initPeeranhaContract(address peeranhaContractAddress) public initializer {
@@ -34,19 +38,20 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function setTokenURI(
+  function createNewAchievement(
     uint64 achievementId,
     uint64 maxCount,
     string memory achievementURI,
-    NFTLib.AchievementType achievementType
+    AchievementLib.AchievementsType achievementsType
   ) 
-    external 
+    external
+    onlyOwner()
     override 
   {
-    NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
+    NFTLib.AchievementConfigsNFT storage achievementNFT = achievementsContainerNFT.achievementsConfigsNFT[achievementId];
     achievementNFT.maxCount = maxCount;
     achievementNFT.achievementURI = achievementURI;
-    achievementNFT.achievementType = achievementType;
+    achievementNFT.achievementsType = achievementsType;
     achievementsContainerNFT.achievementsCount++;
   }
 
@@ -58,9 +63,9 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
     external
     override
   {
-    NFTLib.CountAchievementsNFT storage achievementNFT = achievementsContainerNFT.countAchievementsNFT[achievementId];
+    NFTLib.AchievementConfigsNFT storage achievementNFT = achievementsContainerNFT.achievementsConfigsNFT[achievementId];
     achievementNFT.factCount++;
-    uint64 localTokenId = (achievementId - 1) * 1000000 + achievementNFT.factCount;
+    uint64 localTokenId = (achievementId - 1) * POOL_NFT + achievementNFT.factCount;
     require(tokenId == localTokenId, "Error token ID ??");
 
     _safeMint(recipient, tokenId);          // || _mint
@@ -69,7 +74,7 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
     // check uri?
   }
 
-  function getNFT(uint64 achievementId) external view returns (NFTLib.CountAchievementsNFT memory) {
-    return achievementsContainerNFT.countAchievementsNFT[achievementId];
+  function getNFT(uint64 achievementId) external view returns (NFTLib.AchievementConfigsNFT memory) {
+    return achievementsContainerNFT.achievementsConfigsNFT[achievementId];
   }
 }

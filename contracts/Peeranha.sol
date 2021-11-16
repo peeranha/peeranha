@@ -2,19 +2,20 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"; //
 
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
-import "./libraries/NFTLib.sol";
+import "./libraries/AchievementLib.sol";
 // import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
 
 
-contract Peeranha is IPeeranha, Initializable {
+contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
@@ -32,11 +33,12 @@ contract Peeranha is IPeeranha, Initializable {
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
     // ConfigurationLib.Configuration configuration;
-    NFTLib.AchievementsContainer achievementsContainer;
+    AchievementLib.AchievementsContainer achievementsContainer;
 
     function initialize(address peeranhaContractAddress) public initializer {
         __Peeranha_init();
         achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaContractAddress);
+        __Ownable_init();
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
@@ -508,18 +510,27 @@ contract Peeranha is IPeeranha, Initializable {
         posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote, achievementsContainer);
     }
 
-    function setTokenURI(uint64 achievementId, uint64 maxCount, int64 lowerBound, string memory achievementURI, NFTLib.AchievementType achievementType) external {
-        NFTLib.CountAchievement storage achievement = achievementsContainer.countAchievements[achievementId];
+    function createNewAchievement(
+        uint64 achievementId,
+        uint64 maxCount,
+        int64 lowerBound,
+        string memory achievementURI,
+        AchievementLib.AchievementsType achievementsType
+    )   
+        onlyOwner()
+        external
+    {
+        AchievementLib.AchievementConfig storage achievement = achievementsContainer.achievementsConfigs[achievementId];
         achievement.maxCount = maxCount;
         achievement.lowerBound = lowerBound;
-        achievement.achievementType = achievementType;
+        achievement.achievementsType = achievementsType;
         achievementsContainer.achievementsCount++;
 
-        achievementsContainer.peeranhaNFT.setTokenURI(achievementId, maxCount, achievementURI, achievementType);
+        achievementsContainer.peeranhaNFT.createNewAchievement(achievementId, maxCount, achievementURI, achievementsType);
     }
 
-    function getNFT(uint64 achievementId) external view returns (NFTLib.CountAchievement memory) {
-        return achievementsContainer.countAchievements[achievementId];
+    function getNFT(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {
+        return achievementsContainer.achievementsConfigs[achievementId];
     }
 
     /**
@@ -576,7 +587,11 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
-    function addUserRating(address userAddr, int32 rating) external { // delete?
+    ///
+    // TO DO
+    // to remove it in prod
+    ///
+    function addUserRating(address userAddr, int32 rating) external {
         users.updateUserRating(userRewards, userAddr, rating, achievementsContainer);
     }
 

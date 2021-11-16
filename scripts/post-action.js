@@ -50,12 +50,12 @@ async function main() {
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
 }
 
-const AchievementType = { "Rating": 0 }
+const AchievementsType = { "Rating": 0 }
 
 const achievements = [
-  { id: 1, type: AchievementType.Rating, path: "../image/image1.png"},
-  { id: 2, type: AchievementType.Rating, path: "../image/image2.png"},
-  { id: 3, type: AchievementType.Rating, path: "../image/image3.png"},
+  { id: 1, type: AchievementsType.Rating, path: "../image/image1.png"},
+  { id: 2, type: AchievementsType.Rating, path: "../image/image2.png"},
+  { id: 3, type: AchievementsType.Rating, path: "../image/image3.png"},
 ];
 
 async function initAchievement(peeranha) {
@@ -66,7 +66,7 @@ async function initAchievement(peeranha) {
     const saveResult = await getIpfsApi().add(buffer);
     const ipfsImage = await getBytes32FromData(saveResult);
     console.log(ipfsImage);
-		await peeranha.setTokenURI(id, 5, 15, ipfsImage, type);
+		await peeranha.createNewAchievement(id, 5, 15, ipfsImage, type);
   }
 }
 

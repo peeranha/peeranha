@@ -5,7 +5,7 @@ import "./IpfsLib.sol";
 import "./VoteLib.sol";
 import "./UserLib.sol";
 import "./SecurityLib.sol";
-import "./NFTLib.sol";
+import "./AchievementLib.sol";
 
 /// @title PostLib
 /// @notice Provides information about operation with posts
@@ -149,7 +149,7 @@ library PostLib  {
         uint16 parentReplyId,
         bytes32 ipfsHash,
         bool isOfficialReply,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
@@ -314,7 +314,7 @@ library PostLib  {
         RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
@@ -351,7 +351,7 @@ library PostLib  {
         address user,
         uint256 postId,
         uint16 replyId,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         /*
         check author
@@ -379,7 +379,7 @@ library PostLib  {
         PostType postType,
         ReplyContainer storage replyContainer,
         bool isBestReply,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) private {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
@@ -464,7 +464,7 @@ library PostLib  {
         address user,
         uint256 postId,
         uint16 replyId,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -506,7 +506,7 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId,
         bool isUpvote,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
@@ -540,7 +540,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
@@ -571,7 +571,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) public {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         int32 userRating = UserLib.getUserByAddress(users, votedUser).rating;
@@ -650,7 +650,7 @@ library PostLib  {
         bool isUpvote,
         int32 ratingChanged,
         TypeContent typeContent,
-        NFTLib.AchievementsContainer storage achievementsContainer
+        AchievementLib.AchievementsContainer storage achievementsContainer
     ) private {
        UserLib.UserRatingChange[] memory usersRating = new UserLib.UserRatingChange[](2);
 

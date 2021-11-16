@@ -4,7 +4,7 @@ pragma solidity >=0.5.0;
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
-import "./NFTLib.sol";
+import "./AchievementLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -152,7 +152,7 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating, achievementsContainer);
     }
@@ -162,13 +162,13 @@ library UserLib {
   /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
     if (rating == 0) return;
 
     updateRatingBase(self, userRewards, userAddr, rating, achievementsContainer);
   }
 
-  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, NFTLib.AchievementsContainer storage achievementsContainer) internal {
+  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating, AchievementLib.AchievementsContainer storage achievementsContainer) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     User storage user = getUserByAddress(self, userAddr);
     int32 newRating = user.rating += rating;
@@ -211,7 +211,7 @@ library UserLib {
     user.payOutRating += ratingToRewardChange;
 
     if (rating > 0) {
-      NFTLib.updateAchievement(achievementsContainer, userAddr, NFTLib.AchievementType.Rating, int64(newRating));
+      AchievementLib.updateAchievement(achievementsContainer, userAddr, AchievementLib.AchievementsType.Rating, int64(newRating));
     }
   }
 }
