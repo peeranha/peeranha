@@ -138,7 +138,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	xit("Test upVote own expert post", async function () { // Need to be fixed
+	it("Test upVote own expert post", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -148,7 +148,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await peeranha.voteItem(1, 0, 0, 1);
+        await expect(peeranha.voteItem(1, 0, 0, 1)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const post = await peeranha.getPost(1);
@@ -156,7 +156,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	xit("Test upVote own common post", async function () { // Need to be fixed
+	it("Test upVote own common post", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -166,7 +166,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-        await peeranha.voteItem(1, 0, 0, 1);
+        await expect(peeranha.voteItem(1, 0, 0, 1)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const post = await peeranha.getPost(1);
@@ -184,7 +184,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-        await peeranha.voteItem(1, 0, 0, 1);
+        await expect(peeranha.voteItem(1, 0, 0, 1)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const post = await peeranha.getPost(1);
@@ -333,7 +333,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	xit("Test downVote own expert post", async function () { // Need to be fixed
+	it("Test downVote own expert post", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -342,7 +342,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await peeranha.voteItem(1, 0, 0, 0);
+        await expect(peeranha.voteItem(1, 0, 0, 0)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
@@ -350,7 +350,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	xit("Test downVote own common post", async function () { // Need to be fixed
+	it("Test downVote own common post", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -359,7 +359,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-        await peeranha.voteItem(1, 0, 0, 0);
+        await expect(peeranha.voteItem(1, 0, 0, 0)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
@@ -376,7 +376,7 @@ describe("Test vote", function () {
         await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-    	await peeranha.voteItem(1, 0, 0, 0);
+    	await expect(peeranha.voteItem(1, 0, 0, 0)).to.be.revertedWith('You can not vote for own post');
 
 		const user = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 		const post = await peeranha.getPost(1);
@@ -999,7 +999,7 @@ describe("Test vote", function () {
 		await expect(reply.isQuickReply).to.equal(false);
 	});
 
-	xit("Test create first and quick expert reply for own post", async function () {  // Need to be fixed
+	it("Test create first and quick expert reply for own post", async function () {  // Need to be fixed
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -1014,11 +1014,11 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(StartRating);
 
 		const reply = await peeranha.getReply(1, 1);
-		await expect(reply.isFirstReply).to.equal(true);
-		await expect(reply.isQuickReply).to.equal(true);
+		await expect(reply.isFirstReply).to.equal(false);
+		await expect(reply.isQuickReply).to.equal(false);
 	});
 
-	xit("Test create first and quick common reply for own post", async function () { // Need to be fixed
+	it("Test create first and quick common reply for own post", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -1033,8 +1033,8 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(StartRating);
 
 		const reply = await peeranha.getReply(1, 1);
-		await expect(reply.isFirstReply).to.equal(true);
-		await expect(reply.isQuickReply).to.equal(true);
+		await expect(reply.isFirstReply).to.equal(false);
+		await expect(reply.isQuickReply).to.equal(false);
 	});
 
 	/* - */ xit("Test create first and quick tutorial reply for own post", async function () {
@@ -1194,7 +1194,7 @@ describe("Test vote", function () {
 		await expect(statusHistory._hex).to.equal('-0x01');
 	});
 
-	xit("Test upVote own expert reply", async function () { // Need to be fixed
+	it("Test upVote own expert reply", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1205,7 +1205,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 1);
+        await expect(peeranha.voteItem(1, 1, 0, 1)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1213,7 +1213,7 @@ describe("Test vote", function () {
 		await expect(reply.rating).to.equal(0);
 	});
 
-	xit("Test upVote own common reply", async function () { // Need to be fixed
+	it("Test upVote own common reply", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1224,7 +1224,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 1);
+        await expect(peeranha.voteItem(1, 1, 0, 1)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1243,7 +1243,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 1);
+        await expect(peeranha.voteItem(1, 1, 0, 1)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1251,7 +1251,7 @@ describe("Test vote", function () {
 		await expect(reply.rating).to.equal(0);
 	});
 
-	xit("Test downVote own expert reply", async function () { // Need to be fixed
+	it("Test downVote own expert reply", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1262,7 +1262,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 0);
+        await expect(peeranha.voteItem(1, 1, 0, 0)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1270,7 +1270,7 @@ describe("Test vote", function () {
 		await expect(reply.rating).to.equal(0);
 	});
 
-	xit("Test downVote own common reply", async function () { // Need to be fixed
+	it("Test downVote own common reply", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1281,7 +1281,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 0);
+        await expect(peeranha.voteItem(1, 1, 0, 0)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1289,7 +1289,7 @@ describe("Test vote", function () {
 		await expect(reply.rating).to.equal(0);
 		
 		const statusHistory = await peeranha.getStatusHistory(peeranha.deployTransaction.from, 1, 1, 0);
-		await expect(statusHistory._hex).to.equal('-0x01');
+		await expect(statusHistory._hex).to.equal('0x00');
 	});
 
 	/* - */ xit("Test downVote own tutorial reply", async function () {
@@ -1303,7 +1303,7 @@ describe("Test vote", function () {
 
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 		await peeranha.createReply(1, 0, hashContainer[1], false)
-        await peeranha.voteItem(1, 1, 0, 0);
+        await expect(peeranha.voteItem(1, 1, 0, 0)).to.be.revertedWith('You can not vote for own reply');
 
 		const user = await peeranha.getUserByAddress(signers[0].address);
 		const reply = await peeranha.getReply(1, 1);
@@ -1827,7 +1827,7 @@ describe("Test vote", function () {
 		await expect(userRating2.rating).to.equal(StartRating + DownvotedCommonReply + DeleteOwnReply);
 	});
 
-	xit("Test delete first expert reply and post one more by another user", async function () {
+	it("Test delete first expert reply and post one more by another user", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1846,7 +1846,6 @@ describe("Test vote", function () {
 		
 		const firstReply = await peeranha.getReply(1, 1);
 		await expect(firstReply.isFirstReply).to.equal(true);
-
 		await peeranha.connect(signers[1]).deleteReply(1, 1);
 		await peeranha.connect(signers[2]).createReply(1, 0, hashContainer[2], false);
 
@@ -1857,7 +1856,7 @@ describe("Test vote", function () {
 		await expect(userRating2.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 	});
 
-	xit("Test delete first common reply and post one more by another user", async function () {
+	it("Test delete first common reply and post one more by another user", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1953,7 +1952,7 @@ describe("Test vote", function () {
 		await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
 	});
 
-	xit("Test mark own expert reply as best", async function () { // Need to be fixed
+	it("Test mark own expert reply as best", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -1971,7 +1970,7 @@ describe("Test vote", function () {
 		await expect(userRating.rating).to.equal(oldUserRating.rating);
 	});
 
-	xit("Test mark own common reply as best", async function () { // Need to be fixed
+	it("Test mark own common reply as best", async function () { // Need to be fixed
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -2178,7 +2177,20 @@ describe("Test vote", function () {
 	});
 
 
+	// it("Test upVote own comment", async function () {
+	// 	const peeranha = await createContract();
+	// 	const signers = await ethers.getSigners();
+	// 	const hashContainer = getHashContainer();
+    //     const ipfsHashes = getHashesContainer(2);
 
+	// 	await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+	// 	await peeranha.createUser(hashContainer[1]);
+    //     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+	// 	await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+	// 	await peeranha.createComment(1, 0, hashContainer[1]);
+	// 	await expect(peeranha.voteItem(1, 0, 1, 1)).to.be.revertedWith('You can not vote for own comment.');
+	// });
 
 
 	// it("Test upVote expert comment", async function () {

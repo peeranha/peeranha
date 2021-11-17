@@ -58,24 +58,38 @@ describe("Test post", function () {
 			);
 		});
 
+		it("Test create Tutorial post", async function () {		// must be changed after first release
+			const peeranha = await createContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [2])).to.be.revertedWith('At this release you can not publish tutorial.');
+		});
+
 		it("Test create post without tag", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
+	
 			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
 		});
 
-		xit("Test create post with non-existing tag", async function () { //Need to be fixed
+		it("Test create post with non-existing tag", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6])).to.be.revertedWith('');// What message
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [2, 1, 6])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [6, 2])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [0])).to.be.revertedWith('The community does not have tag with 0 id.');
+			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [])).to.be.revertedWith('At least one tag is required.');
 		});
 
 		it("Test create post without ipfs hash", async function () {
@@ -117,11 +131,11 @@ describe("Test post", function () {
 			await peeranha.freezeCommunity(1);
 
 			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1])).to.be.revertedWith('Community is frozen');
-
 			await peeranha.unfreezeCommunity(1);
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		});
+			
 	});
 
 	describe('Create reply', function () {
@@ -163,18 +177,40 @@ describe("Test post", function () {
 			expect(updatedPost.officialReply).to.equal(2);
 		});
 
-		xit("Test create two replies for same post", async function () { // Need to be fixed
+		it("Test double replies in export post", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
+	
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
-
-			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('');
-			expect(await peeranha.getPost(1).replyCount).to.equal(1);
+			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+		});
+	
+		it("Test double replies in common post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+		});
+	
+		xit("Test double replies in tutorial post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
 		});
 
 		it("Test create two official replies for the same post", async function () {
@@ -381,11 +417,10 @@ describe("Test post", function () {
 			const ipfsHashes = getHashesContainer(2);
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranha.createPost(1, hashContainer[1], PostTypeEnum.CommonPost, [1]);
-			await peeranha.editPost(1, 1, hashContainer[2], []);
-			await peeranha.editPost(2, 1, hashContainer[0], [2]);
+			await peeranha.editPost(1, hashContainer[2], []);
+			await peeranha.editPost(2, hashContainer[0], [2]);
 
 			const post = await peeranha.getPost(1);
 			const post2 = await peeranha.getPost(2);
@@ -397,21 +432,19 @@ describe("Test post", function () {
 			expect(post2.tags[0]).to.equal(2);
 		});
 
-		xit("Test edit post with adding non-existing tags", async function () { //need to be fixed
+		it("Test edit post (wrong tag)", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-
+	
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranha.editPost(1, 1, hashContainer[2], [2])).to.be.revertedWith(''); //what message?
-
-			const post = await peeranha.getPost(1);
-			console.log(post);
-			expect(post.author).to.equal(peeranha.deployTransaction.from);
-			expect(post.isDeleted).to.equal(false);
-			expect(post.ipfsDoc.hash).to.equal(hashContainer[2]);
+			
+			await expect(peeranha.editPost(1, hashContainer[2], [6])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.editPost(1, hashContainer[2], [2, 1, 6])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.editPost(1, hashContainer[2], [6, 2])).to.be.revertedWith('Wrong tag id.');
+			await expect(peeranha.editPost(1, hashContainer[2], [0])).to.be.revertedWith('The community does not have tag with 0 id.');
 		});
 
 		it("Test edit post by not registered user", async function () {
@@ -423,7 +456,7 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranha.connect(signers[1]).editPost(1, 1, hashContainer[2], []))
+			await expect(peeranha.connect(signers[1]).editPost(1, hashContainer[2], []))
 			.to.be.revertedWith('Peeranha: must be an existing user');
 		});
 
@@ -437,7 +470,7 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranha.connect(signers[1]).editPost(1, 1, hashContainer[2], []))
+			await expect(peeranha.connect(signers[1]).editPost(1, hashContainer[2], []))
 			.to.be.revertedWith('You can not edit this post. It is not your.');
 		});
 
@@ -449,7 +482,7 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranha.editPost(1, 1, '0x0000000000000000000000000000000000000000000000000000000000000000', []))
+			await expect(peeranha.editPost(1, '0x0000000000000000000000000000000000000000000000000000000000000000', []))
 			.to.be.revertedWith('Invalid ipfsHash.');
 		});
 
@@ -460,7 +493,7 @@ describe("Test post", function () {
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await expect(peeranha.editPost(1, 1, hashContainer[2], [])).to.be.revertedWith('Post does not exist.');
+			await expect(peeranha.editPost(1, hashContainer[2], [])).to.be.revertedWith('Post does not exist.');
 		});
 	});
 
