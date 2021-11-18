@@ -1,7 +1,10 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
+const { changeFieldValue } = require('../../contracts/libraries/readFile/readWrite');
 
 describe("Test users", function() {
+  changeFieldValue();
+
   it("Test user creating", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();

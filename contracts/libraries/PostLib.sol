@@ -11,7 +11,7 @@ import "./SecurityLib.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant deleteTime = 604800;    //7 days       // name??
+    uint256 constant DELETE_TIME = 3;    //7 days       // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -329,7 +329,7 @@ library PostLib  {
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < deleteTime) {      //unit test ?
+        if (time - postContainer.info.postTime < DELETE_TIME) {      //unit test ?
             if (postContainer.info.rating > 0) {
                 UserLib.updateUserRating(users, userRewards, postContainer.info.author,
                                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
@@ -370,7 +370,7 @@ library PostLib  {
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
 
         uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < deleteTime) {  //unit test ?
+        if (time - postContainer.info.postTime < DELETE_TIME) {  //unit test ?
             deductReplyRating(users, userRewards, postContainer.info.postType, replyContainer, replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId);
         }
         if (user == replyContainer.info.author)
