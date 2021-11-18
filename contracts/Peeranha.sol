@@ -212,7 +212,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdmin() {
+    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
 
@@ -224,7 +224,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function unfreezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyAdmin() {
+    function unfreezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyAdminOrCommunityAdmin(communityId) {
         communities.unfreeze(communityId);
     }
 
@@ -238,9 +238,9 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address user, uint32 communityId) external
-    onlyAdminOrCommunityAdmin(communityId)
     onlyExisitingUser(user) 
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId)
+    onlyAdminOrCommunityAdmin(communityId) {
         SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
         SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
@@ -255,9 +255,9 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - Must be an existing user. 
      */
     function giveCommunityModeratorPermission(address user, uint32 communityId) external
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user)
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyCommunityAdmin(communityId) {
         SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
@@ -271,9 +271,9 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
      * - Must be an existing user. 
      */
     function revokeCommunityAdminPermission(address user, uint32 communityId) external
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user)
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyCommunityAdmin(communityId) {
         SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
@@ -289,9 +289,9 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
 
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeCommunityModeratorPermission(address user, uint32 communityId) external 
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user) 
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId)
+    onlyCommunityAdmin(communityId) {
         SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 

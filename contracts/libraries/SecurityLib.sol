@@ -110,7 +110,7 @@ library SecurityLib {
     } else if (action == Action.downVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
       ratingAllowen = DOWNVOTE_POST_ALLOWED;
-      message = "Your rating is too small for downvote post. You need 35 ratings";
+      message = "Your rating is too small for downvote post. You need 100 ratings";
 
     } else if (action == Action.downVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
