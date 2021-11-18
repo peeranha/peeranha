@@ -163,7 +163,7 @@ library PostLib  {
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
           for (uint16 i = 1; i <= countReplies; i++) {
-            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, i);
+            ReplyContainer storage replyContainer = getReplyContainer(postContainer, i);
             require(user != replyContainer.info.author, "Users can not publish 2 replies in export and common posts.");
           }
         }
@@ -344,6 +344,8 @@ library PostLib  {
         
         if (user == postContainer.info.author)
             UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.DeleteOwnPost);
+        else 
+            UserLib.updateUserRating(users, userRewards, postContainer.info.author, VoteLib.ModeratorDeletePost);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(user, postId);
@@ -375,6 +377,8 @@ library PostLib  {
         }
         if (user == replyContainer.info.author)
             UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.DeleteOwnReply);
+        else 
+            UserLib.updateUserRating(users, userRewards, replyContainer.info.author, VoteLib.ModeratorDeleteReply);
 
         replyContainer.info.isDeleted = true;
         postContainer.info.deletedReplyCount++;
@@ -426,6 +430,7 @@ library PostLib  {
         PostCollection storage self,
         SecurityLib.Roles storage roles,
         UserLib.UserCollection storage users,
+        RewardLib.UserRewards storage userRewards,
         address user,
         uint256 postId,
         uint16 parentReplyId,
@@ -435,6 +440,11 @@ library PostLib  {
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         int32 userRating = UserLib.getUserByAddress(users, user).rating;
         SecurityLib.checkRatingAndCommunityModerator(roles, userRating, user, commentContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+
+        if (user == commentContainer.info.author)
+            UserLib.updateUserRating(users, userRewards, commentContainer.info.author, VoteLib.DeleteOwnComment);
+        else 
+            UserLib.updateUserRating(users, userRewards, commentContainer.info.author, VoteLib.ModeratorDeleteComment);
 
         commentContainer.info.isDeleted = true;
         emit CommentDeleted(user, postId, parentReplyId, commentId);
