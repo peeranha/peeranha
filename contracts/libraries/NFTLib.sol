@@ -1,23 +1,24 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
 
-import "../interfaces/IPeeranhaNFT.sol";
-import "./AchievementLib.sol";
+import "./AchievementCommonLib.sol";
 
 
 /// @title NFTLib
 /// @notice
 /// @dev
 library NFTLib {
-  struct AchievementConfigsNFT {
+  uint32 constant POOL_NFT = 1000000;
+
+  struct AchievementNFTsConfigs {
     uint64 factCount;
     uint64 maxCount;
     string achievementURI;
-    AchievementLib.AchievementsType achievementsType;
+    AchievementCommonLib.AchievementsType achievementsType;
   }
 
-  struct AchievementsContainerNFT {
-    mapping(uint64 => AchievementConfigsNFT) achievementsConfigsNFT;
+  struct AchievementNFTsContainer {
+    mapping(uint64 => AchievementNFTsConfigs) achievementsConfigsNFT;
     uint64 achievementsCount;
   }
 }

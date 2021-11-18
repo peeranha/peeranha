@@ -6,6 +6,7 @@ import "./IpfsLib.sol";
 import "./RewardLib.sol";
 import "./SecurityLib.sol";
 import "./AchievementLib.sol";
+import "./AchievementCommonLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -221,7 +222,7 @@ library UserLib {
     user.payOutRating += ratingToRewardChange;
 
     if (rating > 0) {
-      AchievementLib.updateAchievement(userContext.achievementsContainer, userAddr, AchievementLib.AchievementsType.Rating, int64(newRating));
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
     }
   }
 }

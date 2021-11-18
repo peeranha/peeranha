@@ -10,6 +10,7 @@ import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
 import "./libraries/AchievementLib.sol";
+import "./libraries/AchievementCommonLib.sol";
 // import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
@@ -24,6 +25,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
+    using AchievementLib for AchievementLib.AchievementsContainer;
     // using ConfigurationLib for ConfigurationLib.Configuration;
 
     UserLib.UserContext userContext;
@@ -509,23 +511,17 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
         posts.voteForumItem(userContext, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
-    function createNewAchievement(
+    function configureNewAchievement(
         uint64 achievementId,
         uint64 maxCount,
         int64 lowerBound,
         string memory achievementURI,
-        AchievementLib.AchievementsType achievementsType
+        AchievementCommonLib.AchievementsType achievementsType
     )   
         onlyOwner()
         external
     {
-        AchievementLib.AchievementConfig storage achievement = userContext.achievementsContainer.achievementsConfigs[achievementId];
-        achievement.maxCount = maxCount;
-        achievement.lowerBound = lowerBound;
-        achievement.achievementsType = achievementsType;
-        userContext.achievementsContainer.achievementsCount++;
-
-        userContext.achievementsContainer.peeranhaNFT.createNewAchievement(achievementId, maxCount, achievementURI, achievementsType);
+        userContext.achievementsContainer.configureNewAchievement(achievementId, maxCount, lowerBound, achievementURI, achievementsType);
     }
 
     function getNFT(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {

@@ -2,25 +2,30 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "./libraries/NFTLib.sol";
-import "./libraries/AchievementLib.sol";
+import "./libraries/AchievementCommonLib.sol";
 import "./interfaces/IPeeranha.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";   //132k gas
+// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";   //132k gas    /// delete role? new Option 66k
 
-contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
-  NFTLib.AchievementsContainerNFT achievementsContainerNFT;
+contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
+  address public owner;
+
+  NFTLib.AchievementNFTsContainer achievementsNFTContainer;
   IPeeranha peeranha;
-  uint32 constant POOL_NFT = 1000000;   // 2 value
 
   using CountersUpgradeable for CountersUpgradeable.Counter;
   CountersUpgradeable.Counter private _tokenIds;
 
   function initialize(string memory name, string memory symbol) public initializer {
     __NFT_init(name, symbol);
-    __Ownable_init();
+    Ownable_init_unchained();
+  }
+
+  function Ownable_init_unchained() internal initializer {
+    owner = msg.sender;
   }
 
   function initPeeranhaContract(address peeranhaContractAddress) public initializer {
@@ -38,43 +43,46 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function createNewAchievement(
+  function configureNewAchievementNFT(
     uint64 achievementId,
     uint64 maxCount,
     string memory achievementURI,
-    AchievementLib.AchievementsType achievementsType
+    AchievementCommonLib.AchievementsType achievementsType
   ) 
     external
     onlyOwner()
     override 
   {
-    NFTLib.AchievementConfigsNFT storage achievementNFT = achievementsContainerNFT.achievementsConfigsNFT[achievementId];
+    NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsConfigsNFT[achievementId];
     achievementNFT.maxCount = maxCount;
     achievementNFT.achievementURI = achievementURI;
     achievementNFT.achievementsType = achievementsType;
-    achievementsContainerNFT.achievementsCount++;
+    achievementsNFTContainer.achievementsCount++;
   }
 
-  function mintNFT(
-    address recipient,
-    uint64 tokenId,
+  function mint(
+    address user,
     uint64 achievementId
   )
     external
     override
   {
-    NFTLib.AchievementConfigsNFT storage achievementNFT = achievementsContainerNFT.achievementsConfigsNFT[achievementId];
+    NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsConfigsNFT[achievementId];
     achievementNFT.factCount++;
-    uint64 localTokenId = (achievementId - 1) * POOL_NFT + achievementNFT.factCount;
-    require(tokenId == localTokenId, "Error token ID ??");
+    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
 
-    _safeMint(recipient, tokenId);          // || _mint
+    _safeMint(user, tokenId);          // || _mint
     _setTokenURI(tokenId, achievementNFT.achievementURI);
 
     // check uri?
   }
 
-  function getNFT(uint64 achievementId) external view returns (NFTLib.AchievementConfigsNFT memory) {
-    return achievementsContainerNFT.achievementsConfigsNFT[achievementId];
+  function getNFT(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {
+    return achievementsNFTContainer.achievementsConfigsNFT[achievementId];
+  }
+
+  modifier onlyOwner() {
+    require(owner == msg.sender, "Caller is not the owner");
+    _;
   }
 }
