@@ -724,16 +724,20 @@ describe("Test post", function () {
 			.to.be.revertedWith('You can not delete this item');
 		});
 
-		xit("Test delete post with reply", async function () { // Need to be fixed
+		it("Test delete post with reply", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[2]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranha.createReply(1, 0, hashContainer[1], false);
-			await expect(peeranha.deletePost(1)).to.be.revertedWith(''); // what message?
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.deletePost(1);
+
+			expect((await peeranha.getPost(1)).isDeleted).to.be.true;
 		});
 
 		it("Test delete post, without post", async function () {
@@ -792,7 +796,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('You can not delete this item');
 		});
 
-		xit("Test delete accepted reply", async function () { // Need to be fixed
+		it("Test delete accepted reply", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -804,7 +808,7 @@ describe("Test post", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranha.changeStatusBestReply(1, 1);
-			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith(''); // what message?
+			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('You can not delete the best reply.');
 		});
 
 		it("Test delete reply, without post", async function () {

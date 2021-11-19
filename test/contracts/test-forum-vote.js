@@ -138,7 +138,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	it("Test upVote own expert post", async function () { // Need to be fixed
+	it("Test upVote own expert post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -156,7 +156,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	it("Test upVote own common post", async function () { // Need to be fixed
+	it("Test upVote own common post", async function () {
 		const peeranha = await createContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
@@ -333,7 +333,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	it("Test downVote own expert post", async function () { // Need to be fixed
+	it("Test downVote own expert post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -350,7 +350,7 @@ describe("Test vote", function () {
 		await expect(post.rating).to.equal(0);
 	});
 
-	it("Test downVote own common post", async function () { // Need to be fixed
+	it("Test downVote own common post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -826,6 +826,384 @@ describe("Test vote", function () {
 		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
 		await expect(user.rating).to.equal(StartRating);
 		await expect(userAction.rating).to.equal(StartRating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post after choosing best expert reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + AcceptExpertReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating + AcceptExpertPost);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post after choosing best common reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + AcceptCommonReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating + AcceptCommonPost);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	/* - */ xit("Test delete post after choosing best tutorial reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after create expert reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after create common reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	/* - */ xit("Test delete post one period after create tutorial reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after upvote expert reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.voteItem(1, 1, 0, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + UpvotedExpertReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating + UpvotedExpertReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after upvote common reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.voteItem(1, 1, 0, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + UpvotedCommonReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating + UpvotedCommonReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	/* - */ xit("Test delete post one period after upvote tutorial reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.voteItem(1, 1, 0, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(StartRating);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after choosing best expert reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + AcceptExpertReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating + AcceptExpertPost);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating + AcceptExpertReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	it("Test delete post one period after choosing best common reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating + AcceptCommonReply);
+		await expect(userAction.rating).to.equal(userActionRating.rating + AcceptCommonReply);
+
+		await peeranha.deletePost(1);
+
+		const newUserRating = await peeranha.getUserByAddress(signers[1].address);
+		const newUserActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		await expect(newUserRating.rating).to.equal(userRating.rating + AcceptCommonReply);
+		await expect(newUserActionRating.rating).to.equal(StartRating + DeleteOwnReply);
+	});
+
+	/* - */ xit("Test delete post one period after choosing best tutorial reply", async function () {
+		const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+
+		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+		await peeranha.createUser(hashContainer[1]);
+        await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		const userRating = await peeranha.getUserByAddress(signers[1].address);
+		const userActionRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+
+        await peeranha.changeStatusBestReply(1, 1);
+		await wait(deleteTime);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
+		await expect(user.rating).to.equal(userRating.rating);
+		await expect(userAction.rating).to.equal(userActionRating.rating);
 
 		await peeranha.deletePost(1);
 
@@ -2271,7 +2649,8 @@ describe("Test vote", function () {
 	};
 
 	const StartRating = 10;
-	const QuickReplyTime = 3000 // in milliseconds, defines at CommonLib
+	const QuickReplyTime = 3000; // in milliseconds, defines at CommonLib
+	const deleteTime = 3100;
 
 	const DownvoteExpertPost = -1;
     const UpvotedExpertPost = 5;

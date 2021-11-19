@@ -213,7 +213,7 @@ describe("Test users", function() {
     expect(user.followedCommunities[1]).to.equal(2);
   })
 
-  xit("Follow community by non-existed user", async function() { // must be fixed
+  it("Follow community by non-existed user", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
     const hashContainer = getHashContainer();
@@ -309,7 +309,7 @@ describe("Test users", function() {
     await peeranha.unfollowCommunity(1)
   })
 
-  xit("UnFollow community by non-existed user", async function() { // must be fixed
+  it("UnFollow community by non-existed user", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
     const hashContainer = getHashContainer();
