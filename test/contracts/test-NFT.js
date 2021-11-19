@@ -19,7 +19,7 @@ describe("Test NFT", function () {
   		const saveResult = await getIpfsApi().add(buf);
   		const IPFSimage = await getBytes32FromData(saveResult);
 	
-		await peeranha.configureNewAchievement(1, 111, 15, IPFSimage, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(111, 15, IPFSimage, AchievementsType.Rating);
 		
 		const peeranhaAchievement = await peeranha.getNFT(1)
 		await expect(await getInt(peeranhaAchievement.maxCount)).to.equal(111);
@@ -48,7 +48,7 @@ describe("Test NFT", function () {
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(1, 5, 15, IPFSimage, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -78,7 +78,7 @@ describe("Test NFT", function () {
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(1, 5, 15, IPFSimage, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 
@@ -103,7 +103,7 @@ describe("Test NFT", function () {
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(1, 5, 15, IPFSimage, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1);
 
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -129,7 +129,7 @@ describe("Test NFT", function () {
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
-		await peeranha.configureNewAchievement(1, 5, 15, IPFSimage, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.connect(signers[1]).addUserRating(peeranha.deployTransaction.from, 10);
 
