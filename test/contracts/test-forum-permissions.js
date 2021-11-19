@@ -163,7 +163,7 @@ describe("Test permissions", function () {
             await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
             await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 
-			await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1)).to.be.revertedWith('');
+			await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1)).to.be.revertedWith('You can mark the reply as the best, it is not your');
 		});
 
         it("Test choose the best reply for not own post", async function () {
@@ -178,7 +178,7 @@ describe("Test permissions", function () {
             await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
             await peeranha.createReply(1, 0, hashContainer[1], false);
 
-			await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1)).to.be.revertedWith('');
+			await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1)).to.be.revertedWith('You can mark the reply as the best, it is not your');
 		});
     });
 
