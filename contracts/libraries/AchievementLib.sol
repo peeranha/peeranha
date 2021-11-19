@@ -25,7 +25,6 @@ library AchievementLib {
 
   function configureNewAchievement(
     AchievementsContainer storage achievementsContainer,
-    uint64 achievementId,
     uint64 maxCount,
     int64 lowerBound,
     string memory achievementURI,
@@ -41,7 +40,7 @@ library AchievementLib {
     achievementConfig.lowerBound = lowerBound;
     achievementConfig.achievementsType = achievementsType;
 
-    achievementsContainer.peeranhaNFT.configureNewAchievementNFT(achievementId, maxCount, achievementURI, achievementsType);
+    achievementsContainer.peeranhaNFT.configureNewAchievementNFT(achievementsContainer.achievementsCount, maxCount, achievementURI, achievementsType);
   }
 
   function updateUserAchievements(

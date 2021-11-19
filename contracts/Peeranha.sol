@@ -512,7 +512,6 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
     }
 
     function configureNewAchievement(
-        uint64 achievementId,
         uint64 maxCount,
         int64 lowerBound,
         string memory achievementURI,
@@ -521,7 +520,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
         onlyOwner()
         external
     {
-        userContext.achievementsContainer.configureNewAchievement(achievementId, maxCount, lowerBound, achievementURI, achievementsType);
+        userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
     function getNFT(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {
