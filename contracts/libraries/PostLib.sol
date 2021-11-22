@@ -87,7 +87,7 @@ library PostLib  {
         uint256 postCount;
     }
 
-    event PostCreated(address user, uint32 communityId, uint256 postId);
+    event PostCreated(address user, uint32 communityId, uint256 postId); 
     event ReplyCreated(address user, uint256 postId, uint16 parentReplyId, uint16 replyId);
     event CommentCreated(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
     event PostEdited(address user, uint256 postId);

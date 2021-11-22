@@ -2,7 +2,6 @@ pragma solidity ^0.7.3;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"; //
 
 import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
@@ -16,7 +15,7 @@ import "./libraries/AchievementCommonLib.sol";
 import "./interfaces/IPeeranha.sol";
 
 
-contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
+contract Peeranha is IPeeranha, Initializable {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
@@ -36,7 +35,6 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
     function initialize(address peeranhaContractAddress) public initializer {
         __Peeranha_init();
         userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaContractAddress);
-        __Ownable_init();
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
@@ -517,7 +515,7 @@ contract Peeranha is IPeeranha, Initializable, OwnableUpgradeable {
         string memory achievementURI,
         AchievementCommonLib.AchievementsType achievementsType
     )   
-        onlyOwner()
+        onlyAdmin()
         external
     {
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
