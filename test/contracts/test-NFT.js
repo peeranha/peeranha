@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { wait, getInt, getURI } = require('./utils');
+const { wait, getInt } = require('./utils');
 const bs58 = require('bs58');
 
 const AchievementsType = { "Rating":0 }
@@ -8,15 +8,15 @@ const AchievementsType = { "Rating":0 }
 describe("Test NFT", function () {
 	it("Add achievement", async function () {
 		const peeranhaNFT = await createContractNFT();
+		const URIContainer = getURIContainer();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(111, 15, URI, AchievementsType.Rating);
-		
+		await peeranha.configureNewAchievement(111, 15, URIContainer[0], AchievementsType.Rating);
 		const peeranhaAchievement = await peeranha.getNFT(1)
+
 		await expect(await getInt(peeranhaAchievement.maxCount)).to.equal(111);
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(0);
 		await expect(await getInt(peeranhaAchievement.lowerBound)).to.equal(15);
@@ -25,21 +25,21 @@ describe("Test NFT", function () {
 		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
 		await expect(await getInt(peeranhaAchievementNFT.maxCount)).to.equal(111);
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(0);
-		await expect(peeranhaAchievementNFT.achievementURI).to.equal(URI);
+		await expect(peeranhaAchievementNFT.achievementURI).to.equal(URIContainer[0]);
 		await expect(peeranhaAchievementNFT.achievementsType).to.equal(0);
 	});
 
 	it("Test give 1st NFT", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -58,14 +58,14 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT (try double)", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
@@ -80,14 +80,14 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT low rating", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1);
 
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -100,6 +100,7 @@ describe("Test NFT", function () {
 	it("Test give NFT 2 users", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
 		const signers = await ethers.getSigners();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
@@ -108,8 +109,7 @@ describe("Test NFT", function () {
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(signers[1].address, 10);
@@ -133,6 +133,7 @@ describe("Test NFT", function () {
 	it("Test transfer token", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
 		const signers = await ethers.getSigners();
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
@@ -141,8 +142,7 @@ describe("Test NFT", function () {
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
-		const URI = await getURI("../image/image1.png");
-		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 
 		const tokensCountFirstUser = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
@@ -190,6 +190,14 @@ describe("Test NFT", function () {
 			"0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
 			"0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
 			"0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+		];
+	};
+
+	const getURIContainer = () => {
+		return [
+			"0xe15b8d21c4b0507d289a6323d71f1c010b11300894755b2de46e8a149c52c999",
+			"0x65ba7459c0e361157727c42aa6a3a7e0e398105c2de00cc85b10cd2960aac4ee",
+			"0x4a38adfa5bc07d6d7f276275b0c04f628d7bf76e38f93cacf9bb76f263446413",
 		];
 	};
 });
