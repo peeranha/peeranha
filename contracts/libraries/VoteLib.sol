@@ -3,6 +3,7 @@ pragma abicoder v2;
 
 import "./PostLib.sol";
 
+
 /// @title VoteLib
 /// @notice Provides information about operation with posts                     //
 /// @dev posts information is stored in the mapping on the main contract        ///
@@ -10,51 +11,52 @@ library VoteLib  {
     enum ResourceAction { Downvote, Upvoted, Downvoted, AcceptReply, AcceptedReply, FirstReply, QuickReply }
 
     //expert post
-    int8 constant DownvoteExpertPost = -1;
-    int8 constant UpvotedExpertPost = 5;
-    int8 constant DownvotedExpertPost = -2;
-    int8 constant AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
+    int32 constant DownvoteExpertPost = -1;
+    int32 constant UpvotedExpertPost = 5;
+    int32 constant DownvotedExpertPost = -2;
+    int32 constant AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
 
     //common post 
-    int8 constant DownvoteCommonPost = -1;
-    int8 constant UpvotedCommonPost = 1;
-    int8 constant DownvotedCommonPost = -1;
-    int8 constant AcceptCommonPost = 1;
+    int32 constant DownvoteCommonPost = -1;
+    int32 constant UpvotedCommonPost = 1;
+    int32 constant DownvotedCommonPost = -1;
+    int32 constant AcceptCommonPost = 1;
 
     //tutorial 
-    int8 constant DownvoteTutorial = -1;
-    int8 constant UpvotedTutorial = 1;
-    int8 constant DownvotedTutorial = -1 ;
+    int32 constant DownvoteTutorial = -1;
+    int32 constant UpvotedTutorial = 1;
+    int32 constant DownvotedTutorial = -1 ;
 
-    int8 constant DeleteOwnPost = -1;
-    int8 constant ModeratorDeletePost = -2;
+    int32 constant DeleteOwnPost = -1;
+    int32 constant ModeratorDeletePost = -2;
 
 /////////////////////////////////////////////////////////////////////////////
 
     //expert reply
-    int8 constant DownvoteExpertReply = -1;
-    int8 constant UpvotedExpertReply = 10;
-    int8 constant DownvotedExpertReply = -2;
-    int8 constant AcceptExpertReply = 15;
-    int8 constant AcceptedExpertReply = 2;
-    int8 constant FirstExpertReply = 5;
-    int8 constant QuickExpertReply = 5;
+    int32 constant DownvoteExpertReply = -1;
+    int32 constant UpvotedExpertReply = 10;
+    int32 constant DownvotedExpertReply = -2;
+    int32 constant AcceptExpertReply = 15;
+    int32 constant AcceptedExpertReply = 2;
+    int32 constant FirstExpertReply = 5;
+    int32 constant QuickExpertReply = 5;
 
     //common reply 
-    int8 constant DownvoteCommonReply = -1;
-    int8 constant UpvotedCommonReply = 2;
-    int8 constant DownvotedCommonReply = -1;
-    int8 constant AcceptCommonReply = 3;
-    int8 constant AcceptedCommonReply = 1;
-    int8 constant FirstCommonReply = 1;
-    int8 constant QuickCommonReply = 1;
+    int32 constant DownvoteCommonReply = -1;
+    int32 constant UpvotedCommonReply = 2;
+    int32 constant DownvotedCommonReply = -1;
+    int32 constant AcceptCommonReply = 3;
+    int32 constant AcceptedCommonReply = 1;
+    int32 constant FirstCommonReply = 1;
+    int32 constant QuickCommonReply = 1;
     
-    int8 constant DeleteOwnReply = -1;
-    int8 constant ModeratorDeleteReply = -2;            // to do
+    int32 constant DeleteOwnReply = -1;
+    int32 constant ModeratorDeleteReply = -2;            // to do
 
 /////////////////////////////////////////////////////////////////////////////////
 
-    int8 constant ModeratorDeleteComment = -1;
+    int32 constant DeleteOwnComment = -1;
+    int32 constant ModeratorDeleteComment = -1;
 
     /// @notice Get value Rating for post action
     /// @param postType Type post: expertPost, commonPost, tutorial
@@ -62,9 +64,9 @@ library VoteLib  {
     function getUserRatingChangeForPostAction(
         PostLib.PostType postType,
         ResourceAction resourceAction
-    ) internal pure returns (int8) {
+    ) internal pure returns (int32) {
  
-        if (PostLib.PostType.ExpertPost == postType) {          //switch, gas?
+        if (PostLib.PostType.ExpertPost == postType) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertPost;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertPost;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertPost;
@@ -90,9 +92,9 @@ library VoteLib  {
     function getUserRatingChangeForReplyAction(
         PostLib.PostType postType,
         ResourceAction resourceAction
-    ) internal pure returns (int8) {
+    ) internal pure returns (int32) {
  
-        if (PostLib.PostType.ExpertPost == postType) {          //switch, gas?
+        if (PostLib.PostType.ExpertPost == postType) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteExpertReply;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedExpertReply;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedExpertReply;
@@ -122,7 +124,7 @@ library VoteLib  {
         PostLib.PostType postType,
         ResourceAction resourceAction,
         PostLib.TypeContent typeContent
-    ) internal pure returns (int8) {
+    ) internal pure returns (int32) {
         if (PostLib.TypeContent.Post == typeContent) {
             return getUserRatingChangeForPostAction(postType, resourceAction);
         } else if (PostLib.TypeContent.Reply == typeContent) {
@@ -134,6 +136,10 @@ library VoteLib  {
     /// @notice Get vote history
     /// @param user user who voted for content
     /// @param historyVote history vote all users
+    // return value:
+    // downVote = -1
+    // nothing = 0
+    // upVote = 1
     function getHistoryVote(
         address user,
         mapping(address => int256) storage historyVote
@@ -141,38 +147,49 @@ library VoteLib  {
         return historyVote[user];
     }
 
+    /// @notice .
+    /// @param actionAddress user who voted for content
+    /// @param historyVotes history vote all users
+    /// @param isUpvote Upvote or downvote
+    /// @param votedUsers the list users who voted
+    // fromUpVoteToDownVote = -2
+    // downVote = -1
+    // upVote = 1
+    // fromDownVoteToUpVote = 2
     function getForumItemRatingChange(
         address actionAddress,
         mapping(address => int256) storage historyVotes,
         bool isUpvote,
-        address[] storage votedUsers                              /// for comment
-    ) internal returns (int8) {
+        address[] storage votedUsers
+    ) internal returns (int32) {
         int history = getHistoryVote(actionAddress, historyVotes);
-        int8 ratingChange;
+        int32 ratingChange;
         
         if (isUpvote) {
             if (history == -1) {
                 historyVotes[actionAddress] = 1;
-                ratingChange += 2;
+                ratingChange = 2;
             } else if (history == 0) {
                 historyVotes[actionAddress] = 1;
-                ratingChange++;
+                ratingChange = 1;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = 0;
-                ratingChange--;
+                //clear votedUsers
+                ratingChange = -1;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
-                ratingChange++;
+                //clear votedUsers
+                ratingChange = 1;
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
-                ratingChange--;
+                ratingChange = -1;
                 votedUsers.push(actionAddress);
             } else if (history == 1) {
                 historyVotes[actionAddress] = -1;
-                ratingChange -= 2;
+                ratingChange = -2;
             }
         }
         return ratingChange;
