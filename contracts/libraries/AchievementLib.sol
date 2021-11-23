@@ -35,7 +35,6 @@ library AchievementLib {
     require(maxCount > 0, "Max count of achievements must be more than 0");
 
     AchievementLib.AchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[++achievementsContainer.achievementsCount];
-    require(achievementConfig.maxCount == 0, "This achievement id already exist");
     achievementConfig.maxCount = maxCount;
     achievementConfig.lowerBound = lowerBound;
     achievementConfig.achievementsType = achievementsType;
