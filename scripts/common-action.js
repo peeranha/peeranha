@@ -17,7 +17,9 @@ const NFT = {
 const AchievementsType = { "Rating": 0 }
 
 const achievements = [
-  { type: AchievementsType.Rating, path: "../image/image1.png"},
-  { type: AchievementsType.Rating, path: "../image/image2.png"},
-  { type: AchievementsType.Rating, path: "../image/image3.png"},
+  { maxCount: 20, lowerBound: 15, type: AchievementsType.Rating, path: "../image/image1.png"},
+  { maxCount: 10, lowerBound: 40, type: AchievementsType.Rating, path: "../image/image2.png"},
+  { maxCount: 5, lowerBound: 100, type: AchievementsType.Rating, path: "../image/image3.png"},
 ];
+
+module.exports = { achievements, NFT, testAccount };

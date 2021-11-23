@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, PEERANHA_ADDRESS } = require('../env.json');
+const { IPFS_API_URL, PEERANHA_ADDRESS, TOKEN_ADDRESS, POSTLIB_ADDRESS } = require('../env.json');
 const { testAccount, NFT, achievements } = require('./common-action');
 
 
@@ -26,7 +26,11 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
-  const Peeranha = await ethers.getContractFactory("Peeranha");
+  const Peeranha = await ethers.getContractFactory("Peeranha", {
+		libraries: {
+			PostLib: POSTLIB_ADDRESS,
+		}
+	});
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");
 
@@ -36,17 +40,17 @@ async function main() {
 }
 
 async function initAchievement(peeranha) {
-  for (const { id, type, path } of achievements) {
-    console.loglog("Init achievement:" + id);
+  for (const { maxCount, lowerBound, type, path } of achievements) {
+    console.log("Init achievement. Lower bound: " + lowerBound  + ", max count: " + maxCount);
     const buffer = Buffer.from(path);
     console.log(buffer);
 
     const saveResult = await getIpfsApi().add(buffer);
     const ipfsImage = await getBytes32FromData(saveResult);
-    NFT.image = ipfsImage;
-    console.log(ipfsImage);
+    let nft = NFT;
+    nft.image = ipfsImage;
 
-		await peeranha.configureNewAchievement(5, 15, await getBytes32FromData(NFT), type);
+    await peeranha.configureNewAchievement(maxCount, lowerBound, await getBytes32FromData(nft), type);
   }
 }
 
