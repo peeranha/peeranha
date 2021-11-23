@@ -1,10 +1,8 @@
 const { expect } = require("chai");
-const { wait, getBalance, getInt } = require('./utils');
-const { create } = require('ipfs-http-client');
+const { wait, getInt, getURI } = require('./utils');
 const bs58 = require('bs58');
 
 const AchievementsType = { "Rating":0 }
-const IPFS_API_URL = "https://api.thegraph.com/ipfs/api/v0"
 
 
 describe("Test NFT", function () {
@@ -14,12 +12,9 @@ describe("Test NFT", function () {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
-		
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-	
-		await peeranha.configureNewAchievement(111, 15, IPFSimage, AchievementsType.Rating);
+
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(111, 15, URI, AchievementsType.Rating);
 		
 		const peeranhaAchievement = await peeranha.getNFT(1)
 		await expect(await getInt(peeranhaAchievement.maxCount)).to.equal(111);
@@ -30,25 +25,21 @@ describe("Test NFT", function () {
 		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
 		await expect(await getInt(peeranhaAchievementNFT.maxCount)).to.equal(111);
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(0);
-		await expect(peeranhaAchievementNFT.achievementURI).to.equal(IPFSimage);
+		await expect(peeranhaAchievementNFT.achievementURI).to.equal(URI);
 		await expect(peeranhaAchievementNFT.achievementsType).to.equal(0);
 	});
 
 	it("Test give 1st NFT", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
-
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -67,18 +58,15 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT (try double)", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
-
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 
@@ -92,18 +80,14 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT low rating", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
-
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
 		await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1);
 
 		const peeranhaAchievement = await peeranha.getNFT(1)
@@ -117,11 +101,6 @@ describe("Test NFT", function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
-
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
@@ -129,7 +108,9 @@ describe("Test NFT", function () {
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
-		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
+
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(signers[1].address, 10);
 
@@ -149,16 +130,10 @@ describe("Test NFT", function () {
 		await expect(await getInt(tokenIdSecondUser)).to.equal(2);
 	});
 
-
 	it("Test transfer token", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
-
-		const buf = Buffer.from("../image/image1.png");
-  		const saveResult = await getIpfsApi().add(buf);
-  		const IPFSimage = await getBytes32FromData(saveResult);
-
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
@@ -166,7 +141,8 @@ describe("Test NFT", function () {
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
-		await peeranha.configureNewAchievement(5, 15, IPFSimage, AchievementsType.Rating);
+		const URI = await getURI("../image/image1.png");
+		await peeranha.configureNewAchievement(5, 15, URI, AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 
 		const tokensCountFirstUser = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
@@ -201,14 +177,6 @@ describe("Test NFT", function () {
 		return peeranha;
 	};
 
-	const createContractToken = async function (peeranhaAddress) {
-		const Token = await ethers.getContractFactory("PeeranhaToken");
-		const token = await Token.deploy();
-		await token.deployed();
-        await token.initialize("token", "ecs", peeranhaAddress);
-		return token;
-	};
-
 	const createContractNFT = async function () {
 		const NFT = await ethers.getContractFactory("PeeranhaNFT");
 		const nft = await NFT.deploy();
@@ -224,23 +192,4 @@ describe("Test NFT", function () {
 			"0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
 		];
 	};
-
-	function getIpfsApi() {
-		return create(IPFS_API_URL);
-	}
-
-	async function getBytes32FromData(data) {
-		const ipfsHash = await saveText(JSON.stringify(data));
-		return getBytes32FromIpfsHash(ipfsHash)
-	}
-
-	async function saveText(text) {
-		const buf = Buffer.from(text, 'utf8');
-		const saveResult = await getIpfsApi().add(buf);
-		return saveResult.cid.toString();
-	}
-
-	function getBytes32FromIpfsHash(ipfsListing) {
-		return "0x"+bs58.decode(ipfsListing).slice(2).toString('hex')
-	  }
 });
