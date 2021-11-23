@@ -57,6 +57,8 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsConfigsNFT[++achievementsNFTContainer.achievementsCount];
     require(achievementId == achievementsNFTContainer.achievementsCount, "Wrong achievement Id");
+    require(maxCount > 0, "Max count of achievements must be more than 0");
+    require(maxCount < NFTLib.POOL_NFT, "Max count of achievements must be less than 1 000 000");
 
     achievementNFT.maxCount = maxCount;
     achievementNFT.achievementURI = achievementURI;
