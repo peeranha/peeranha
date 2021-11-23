@@ -14,4 +14,5 @@ async function getInt(value) {
 	return await parseInt(value._hex, 16);
 }
 
+
 module.exports = { wait, getBalance, getInt };
