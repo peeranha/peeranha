@@ -18,7 +18,7 @@ library NFTLib {
   }
 
   struct AchievementNFTsContainer {
-    mapping(uint64 => AchievementNFTsConfigs) achievementsConfigsNFT;
+    mapping(uint64 => AchievementNFTsConfigs) achievementsNFTConfigs;
     uint64 achievementsCount;
   }
 }

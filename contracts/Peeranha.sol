@@ -32,9 +32,9 @@ contract Peeranha is IPeeranha, Initializable {
     PostLib.PostCollection posts;
     // ConfigurationLib.Configuration configuration;
 
-    function initialize(address peeranhaContractAddress) public initializer {
+    function initialize(address peeranhaNFTContractAddress) public initializer {
         __Peeranha_init();
-        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaContractAddress);
+        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaNFTContractAddress);
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
@@ -521,7 +521,7 @@ contract Peeranha is IPeeranha, Initializable {
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
-    function getNFT(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {
+    function getAchievementConfig(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {
         return userContext.achievementsContainer.achievementsConfigs[achievementId];
     }
 

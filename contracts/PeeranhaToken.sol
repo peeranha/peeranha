@@ -13,9 +13,9 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
   IPeeranha peeranha;
 
-  function initialize(string memory name, string memory symbol, address peeranhaContractAddress) public initializer {
+  function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
     __Token_init(name, symbol, TOTAL_SUPPLY);
-    peeranha = IPeeranha(peeranhaContractAddress);
+    peeranha = IPeeranha(peeranhaNFTContractAddress);
   }
 
   function __Token_init(string memory name, string memory symbol, uint256 cap) internal initializer {
