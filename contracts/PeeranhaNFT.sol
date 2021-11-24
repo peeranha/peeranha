@@ -8,7 +8,6 @@ import "./interfaces/IPeeranhaNFT.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";   //132k gas    /// delete role? new Option 66k
 
 contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
   address public owner;

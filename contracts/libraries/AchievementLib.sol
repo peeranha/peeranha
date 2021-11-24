@@ -60,7 +60,7 @@ library AchievementLib {
         if (achievementsContainer.userAchievementsIssued[user][i]) continue; //already issued
         achievementConfig.factCount++;
         achievementsContainer.userAchievementsIssued[user][i] = true;
-        achievementsContainer.peeranhaNFT.mint(user, i); // i - 1?
+        achievementsContainer.peeranhaNFT.mint(user, i);
       }
     }
   }

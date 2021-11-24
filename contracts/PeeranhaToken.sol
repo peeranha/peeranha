@@ -22,7 +22,6 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     __ERC20_init_unchained(name, symbol);
     __Pausable_init_unchained();
     __ERC20Capped_init_unchained(cap);
-    // _mint(msg.sender, 100000000 * (10 ** 18));
     __ERC20Pausable_init_unchained();
     __Token_init_unchained();
   }
