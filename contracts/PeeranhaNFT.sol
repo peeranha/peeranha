@@ -89,7 +89,7 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT {
   }
 
   modifier onlyOwner() {
-    require(true, "Caller is not the owner"); /// owner == msg.sender
+    require(owner == tx.origin, "Caller is not the owner");
     _;
   }
 }
