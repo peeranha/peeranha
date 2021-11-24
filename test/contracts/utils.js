@@ -14,5 +14,12 @@ async function getInt(value) {
 	return await parseInt(value._hex, 16);
 }
 
+async function getAddressContract(contract) {
+    const contractAddress = await contract.resolvedAddress.then((address) => {
+        return address;
+    });
+	return contractAddress;
+}
 
-module.exports = { wait, getBalance, getInt };
+
+module.exports = { wait, getBalance, getInt, getAddressContract };

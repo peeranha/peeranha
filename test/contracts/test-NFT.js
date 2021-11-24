@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { wait, getInt } = require('./utils');
+const { wait, getInt, getAddressContract } = require('./utils');
 const bs58 = require('bs58');
 
 const AchievementsType = { "Rating":0 }
@@ -9,20 +9,20 @@ describe("Test NFT", function () {
 	it("Add achievement", async function () {
 		const peeranhaNFT = await createContractNFT();
 		const URIContainer = getURIContainer();
-		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
-			return value;
-		});
+		const peeranhaNFTContractAddress = await getAddressContract(peeranhaNFT);
 		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await getAddressContract(peeranha);
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
 
 		await peeranha.configureNewAchievement(111, 15, URIContainer[0], AchievementsType.Rating);
-		const peeranhaAchievement = await peeranha.getNFT(1)
+		const peeranhaAchievement = await peeranha.getAchievementConfig(1)
 
 		await expect(await getInt(peeranhaAchievement.maxCount)).to.equal(111);
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(0);
 		await expect(await getInt(peeranhaAchievement.lowerBound)).to.equal(15);
 		await expect(peeranhaAchievement.achievementsType).to.equal(0);
 
-		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
+		const peeranhaAchievementNFT = await peeranhaNFT.getAchievementsNFTConfig(1)
 		await expect(await getInt(peeranhaAchievementNFT.maxCount)).to.equal(111);
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(0);
 		await expect(peeranhaAchievementNFT.achievementURI).to.equal(URIContainer[0]);
@@ -108,15 +108,20 @@ describe("Test NFT", function () {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		
-		const peeranhaAchievement = await peeranha.getNFT(1)
+		const peeranhaAchievement = await peeranha.getAchievementConfig(1)
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(1);
 
-		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
+		const peeranhaAchievementNFT = await peeranhaNFT.getAchievementsNFTConfig(1)
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(1);
 
 		const tokensCount = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
@@ -135,6 +140,11 @@ describe("Test NFT", function () {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
@@ -166,10 +176,10 @@ describe("Test NFT", function () {
 		await peeranha.addUserRating(peeranha.deployTransaction.from, -1);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1);
 
-		const peeranhaAchievement = await peeranha.getNFT(1)
+		const peeranhaAchievement = await peeranha.getAchievementConfig(1)
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(1);
 	
-		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
+		const peeranhaAchievementNFT = await peeranhaNFT.getAchievementsNFTConfig(1)
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(1);
 	});
 
@@ -181,15 +191,20 @@ describe("Test NFT", function () {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
 		await peeranha.createUser(hashContainer[1]);
 
 		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1);
 
-		const peeranhaAchievement = await peeranha.getNFT(1)
+		const peeranhaAchievement = await peeranha.getAchievementConfig(1)
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(0);
 	
-		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
+		const peeranhaAchievementNFT = await peeranhaNFT.getAchievementsNFTConfig(1)
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(0);
 	});
 
@@ -201,7 +216,11 @@ describe("Test NFT", function () {
 		const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
 			return value;
 		});
-		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranha = await createContract(peeranhaNFTContractAddress);const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
@@ -210,9 +229,9 @@ describe("Test NFT", function () {
 		await peeranha.addUserRating(peeranha.deployTransaction.from, 10);
 		await peeranha.addUserRating(signers[1].address, 10);
 
-		const peeranhaAchievement = await peeranha.getNFT(1)
+		const peeranhaAchievement = await peeranha.getAchievementConfig(1)
 		await expect(await getInt(peeranhaAchievement.factCount)).to.equal(2);
-		const peeranhaAchievementNFT = await peeranhaNFT.getNFT(1)
+		const peeranhaAchievementNFT = await peeranhaNFT.getAchievementsNFTConfig(1)
 		await expect(await getInt(peeranhaAchievementNFT.factCount)).to.equal(2);
 
 		const tokensCountFirstUser = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
@@ -273,6 +292,11 @@ describe("Test NFT", function () {
 			return value;
 		});
 		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+			return value;
+		});
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 
@@ -318,6 +342,19 @@ describe("Test NFT", function () {
         await nft.initialize("nft", "ecs");
 		return nft;
 	};
+
+	const initContracts = async function () {
+		const peeranhaNFT = await createContractNFT();
+		const URIContainer = getURIContainer();
+		const peeranhaNFTContractAddress = await getAddressContract(peeranhaNFT);
+		const peeranha = await createContract(peeranhaNFTContractAddress);
+		const peeranhaContractAddress = await getAddressContract(peeranha);
+		await peeranhaNFT.transferOwnership(peeranhaContractAddress);
+
+		return { "peeranhaNFT": peeranhaNFT,
+				 "peeranha": peeranha				  
+		}
+	}
 
 	const getHashContainer = () => {
 		return [
