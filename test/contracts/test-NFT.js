@@ -25,6 +25,24 @@ describe("Test NFT", function () {
 		await expect(peeranhaAchievementNFT.achievementsType).to.equal(0);
 	});
 
+	it("Add achievement/ Boundary test", async function () {
+		const { peeranha, peeranhaNFT } = await initContracts();
+		const URIContainer = getURIContainer();
+
+		await peeranha.configureNewAchievement(1, 15, URIContainer[0], AchievementsType.Rating);
+		await peeranha.configureNewAchievement(999999, 100, URIContainer[1], AchievementsType.Rating);
+		const peeranhaAchievement1 = await peeranha.getAchievementConfig(1);
+		const peeranhaAchievement2 = await peeranha.getAchievementConfig(2);
+
+		await expect(await getInt(peeranhaAchievement1.maxCount)).to.equal(1);
+		await expect(await getInt(peeranhaAchievement2.maxCount)).to.equal(999999);
+
+		const peeranhaAchievementNFT1 = await peeranhaNFT.getAchievementsNFTConfig(1);
+		const peeranhaAchievementNFT2 = await peeranhaNFT.getAchievementsNFTConfig(2);
+		await expect(await getInt(peeranhaAchievementNFT1.maxCount)).to.equal(1);
+		await expect(await getInt(peeranhaAchievementNFT2.maxCount)).to.equal(999999);
+	});
+
 	it("Add achievement with 0 token pool", async function () {
 		const { peeranha } = await initContracts();
 		const URIContainer = getURIContainer();
@@ -50,7 +68,7 @@ describe("Test NFT", function () {
 		.to.be.revertedWith('Peeranha: must have admin role');
 	});
 
-	it("New anmin add achievement", async function () {
+	it("New admin add achievement", async function () {
 		const { peeranha, peeranhaNFT } = await initContracts();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
@@ -80,7 +98,7 @@ describe("Test NFT", function () {
 		.to.be.revertedWith('Peeranha: must have admin role');
 	});
 
-	it("Call NFT action from onother comtract", async function () {
+	it("Call NFT action from another contract", async function () {
 		const { peeranha, peeranhaNFT } = await initContracts();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
@@ -240,6 +258,37 @@ describe("Test NFT", function () {
 
 		const tokensCountThirdUser = await peeranhaNFT.balanceOf(signers[2].address);
 		await expect(await getInt(tokensCountThirdUser)).to.equal(0);
+	});
+
+	it("Test give NFTs for 2 achievements", async function () {
+		const { peeranha, peeranhaNFT } = await initContracts();
+		const hashContainer = getHashContainer();
+		const URIContainer = getURIContainer();
+
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
+		await peeranha.configureNewAchievement(5, 20, URIContainer[1], AchievementsType.Rating);
+		await peeranha.addUserRating(peeranha.deployTransaction.from, 5);
+
+		const tokensCount1 = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
+		await expect(await getInt(tokensCount1)).to.equal(1);
+		const peeranhaAchievement1 = await peeranha.getAchievementConfig(2)
+		await expect(await getInt(peeranhaAchievement1.factCount)).to.equal(0);
+		const peeranhaAchievementNFT1 = await peeranhaNFT.getAchievementsNFTConfig(2)
+		await expect(await getInt(peeranhaAchievementNFT1.factCount)).to.equal(0);
+
+		await peeranha.addUserRating(peeranha.deployTransaction.from, 5);
+
+		const tokensCountAfter = await peeranhaNFT.balanceOf(peeranha.deployTransaction.from);
+		await expect(await getInt(tokensCountAfter)).to.equal(2);
+		const peeranhaAchievement2 = await peeranha.getAchievementConfig(2)
+		await expect(await getInt(peeranhaAchievement2.factCount)).to.equal(1);
+		const peeranhaAchievementNFT2 = await peeranhaNFT.getAchievementsNFTConfig(2)
+		await expect(await getInt(peeranhaAchievementNFT2.factCount)).to.equal(1);
+
+		const tokenId2 = await peeranhaNFT.tokenOfOwnerByIndex(peeranha.deployTransaction.from, 1);
+		await expect(await getInt(tokenId2)).to.equal(1000001);
 	});
 
 	it("Test transfer token", async function () {
