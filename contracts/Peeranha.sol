@@ -82,7 +82,7 @@ contract Peeranha is IPeeranha, Initializable {
      *
      * - Must be an community.  
      */
-    function followCommunity(uint32 communityId) external override 
+    function followCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override 
     onlyExistingAndNotFrozenCommunity(communityId) {
         users.followCommunity(msg.sender, communityId);
     }
@@ -94,7 +94,7 @@ contract Peeranha is IPeeranha, Initializable {
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(uint32 communityId) external override {
+    function unfollowCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override {
         users.unfollowCommunity(msg.sender, communityId);
     }
 
@@ -209,7 +209,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdmin() {
+    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
 
@@ -221,7 +221,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function unfreezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyAdmin() {
+    function unfreezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyAdminOrCommunityAdmin(communityId) {
         communities.unfreeze(communityId);
     }
 
@@ -235,9 +235,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address user, uint32 communityId) external
-    onlyAdminOrCommunityAdmin(communityId)
     onlyExisitingUser(user) 
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId)
+    onlyAdminOrCommunityAdmin(communityId) {
         SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
         SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
@@ -252,9 +252,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user. 
      */
     function giveCommunityModeratorPermission(address user, uint32 communityId) external
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user)
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyCommunityAdmin(communityId) {
         SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
@@ -268,9 +268,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user. 
      */
     function revokeCommunityAdminPermission(address user, uint32 communityId) external
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user)
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyCommunityAdmin(communityId) {
         SecurityLib.revokeRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
@@ -286,9 +286,9 @@ contract Peeranha is IPeeranha, Initializable {
 
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeCommunityModeratorPermission(address user, uint32 communityId) external 
-    onlyCommunityAdmin(communityId)
     onlyExisitingUser(user) 
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId)
+    onlyCommunityAdmin(communityId) {
         SecurityLib.revokeRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
@@ -370,8 +370,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be tags.
     */
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
-    onlyExisitingUser(msg.sender) 
-    onlyExistingAndNotFrozenCommunity(communityId) override {
+    onlyExisitingUser(msg.sender)
+    onlyExistingAndNotFrozenCommunity(communityId)
+    checkTag(communityId, tags) override {
         posts.createPost(roles, users, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
@@ -385,8 +386,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a community.
      * - must be tags
     */
-    function editPost(uint256 postId, uint32 communityId, bytes32 ipfsHash, uint8[] memory tags) external onlyExisitingUser(msg.sender) override {
-        posts.editPost(msg.sender, postId, communityId, ipfsHash, tags);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
+    onlyExisitingUser(msg.sender) 
+    checkTagByPostId(postId, tags) override {
+        posts.editPost(msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -467,7 +470,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a comment.
     */
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external onlyExisitingUser(msg.sender) override {
-        posts.deleteComment(roles, users, msg.sender, postId, parentReplyId, commentId);
+        posts.deleteComment(roles, users, userRewards, msg.sender, postId, parentReplyId, commentId);
     }
 
     /**
@@ -491,7 +494,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a role ?
     */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(users, userRewards, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(roles, users, userRewards, msg.sender, postId, replyId);
     }
 
     /**
@@ -596,6 +599,16 @@ contract Peeranha is IPeeranha, Initializable {
 
     modifier onlyExistingAndNotFrozenCommunity(uint32 communityId) {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        _;
+    }
+
+    modifier checkTag(uint32 communityId, uint8[] memory tags) {
+        CommunityLib.checkTag(communities, communityId, tags);
+        _;
+    }
+
+    modifier checkTagByPostId(uint256 postId, uint8[] memory tags) {
+        CommunityLib.checkTagByPostId(communities, posts, postId, tags);
         _;
     }
 }
