@@ -2,6 +2,7 @@
 pragma solidity >=0.5.0;
 
 import "./UserLib.sol";
+import "./CommonLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -20,7 +21,8 @@ library SecurityLib {
     upVoteComment,
     downVoteComment,
     officialReply,
-    bestReply
+    bestReply,
+    updateProfile
   }
   
   int16 constant MINIMUM_RATING = -300;
@@ -36,6 +38,7 @@ library SecurityLib {
   int16 constant UPVOTE_COMMENT_ALLOWED = 0;
   int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
 
+  int16 constant UPDATE_PROFILE_ALLOWED = 0;
 
 
   uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;    //
@@ -48,11 +51,11 @@ library SecurityLib {
   uint8 constant ENERGY_POST_QUESTION = 10;     //
   uint8 constant ENERGY_POST_ANSWER = 6;    //
   uint8 constant ENERGY_POST_COMMENT = 4;   //
-  uint8 constant ENERGY_MODIFY_ITEM = 2;    //
+  uint8 constant ENERGY_MODIFY_ITEM = 2;    // unit test energy
   uint8 constant ENERGY_DELETE_ITEM = 2;    //
 
-  uint8 constant ENERGY_MARK_ANSWER_AS_CORRECT = 1;
-  uint8 constant ENERGY_UPDATE_PROFILE = 1;
+  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;   // unit test energy
+  uint8 constant ENERGY_UPDATE_PROFILE = 1;           // unit test energy
   uint8 constant ENERGY_CREATE_TAG = 75;
   uint8 constant ENERGY_CREATE_COMMUNITY = 125;
   uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
@@ -169,6 +172,12 @@ library SecurityLib {
       require(actionCaller == dataUser, "You can mark the reply as the best, it is not your");
       ratingAllowen = MINIMUM_RATING;
       message = "Your rating is too small for mark reply as best. You need -300 ratings";
+      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+
+    } else if (action == Action.updateProfile) {
+      ratingAllowen = UPDATE_PROFILE_ALLOWED;
+      message = "Your rating is too small for edit profile. You need 0 ratings";
+      energy = ENERGY_UPDATE_PROFILE;
 
     } else {
       require(false, "Action not allowed");

@@ -4,6 +4,7 @@ pragma solidity >=0.5.0;
 import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
+import "./SecurityLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -69,11 +70,19 @@ library UserLib {
   /// @param ipfsHash IPFS hash of document with user information
   function update(
     UserCollection storage self,
+    SecurityLib.Roles storage roles,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
     User storage user = getUserByAddress(self, userAddress);
-    require(user.rating >= 0, "Your rating is too small for upvote reply. You need 0 ratings.");
+    SecurityLib.checkRatingAndEnergy(   //moderator can edit
+      roles,
+      user,
+      userAddress,
+      userAddress,
+      0,
+      SecurityLib.Action.updateProfile
+    );
     user.ipfsDoc.hash = ipfsHash;
 
     emit UserUpdated(userAddress);

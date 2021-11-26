@@ -283,7 +283,7 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // moderator
-        SecurityLib.checkRatingAndEnergy(       //unit test energy
+        SecurityLib.checkRatingAndEnergy(
             roles,
             UserLib.getUserByAddress(users, userAddr),
             userAddr,
@@ -321,7 +321,7 @@ library PostLib  {
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
-        SecurityLib.checkRatingAndEnergy(       //unit test energy
+        SecurityLib.checkRatingAndEnergy(
             roles,
             UserLib.getUserByAddress(users, userAddr),
             userAddr,
@@ -359,7 +359,7 @@ library PostLib  {
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
-        SecurityLib.checkRatingAndEnergy(       //unit test energy
+        SecurityLib.checkRatingAndEnergy(
             roles,
             UserLib.getUserByAddress(users, userAddr),
             userAddr,

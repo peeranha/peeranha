@@ -72,7 +72,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
-        users.update(msg.sender, ipfsHash);
+        users.update(roles, msg.sender, ipfsHash);
     }
 
     /**
