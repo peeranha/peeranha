@@ -175,7 +175,7 @@ library CommunityLib {
     /// @notice Freeze the community
     /// @param self The mapping containing all communities
     /// @param communityId Address of the community to freeze
-    function freeze(CommunityCollection storage self, uint32 communityId) 
+    function freeze(CommunityCollection storage self, uint32 communityId)
     internal {
         self.communities[communityId].info.isFrozen = true;
 
