@@ -11,6 +11,7 @@ library SecurityLib {
     publicationPost,
     publicationReply,
     publicationComment,
+    editItem,
     deleteItem,
     upVotePost,
     downVotePost,
@@ -47,9 +48,7 @@ library SecurityLib {
   uint8 constant ENERGY_POST_QUESTION = 10;     //
   uint8 constant ENERGY_POST_ANSWER = 6;    //
   uint8 constant ENERGY_POST_COMMENT = 4;   //
-  uint8 constant ENERGY_MODIFY_QUESTION = 2;
-  uint8 constant ENERGY_MODIFY_ANSWER = 2;
-  uint8 constant ENERGY_MODIFY_COMMENT = 1;
+  uint8 constant ENERGY_MODIFY_ITEM = 2;    //
   uint8 constant ENERGY_DELETE_ITEM = 2;    //
 
   uint8 constant ENERGY_MARK_ANSWER_AS_CORRECT = 1;
@@ -86,7 +85,6 @@ library SecurityLib {
     return bytes32(role + communityId);
   }
 
- /// edit item ?
   function checkRatingAndEnergy(
   Roles storage role,
   UserLib.User storage user,
@@ -118,6 +116,12 @@ library SecurityLib {
         message = "Your rating is too small for publication comment. You need 35 ratings";
       }
       energy = ENERGY_POST_COMMENT;
+
+    } else if (action == Action.editItem) {
+      require(actionCaller == dataUser, "You can not edit this item");
+      ratingAllowen = MINIMUM_RATING;
+      message = "Your rating is too small for edit item. You need -300 ratings";
+      energy = ENERGY_MODIFY_ITEM;
 
     } else if (action == Action.deleteItem) {
       require(actionCaller == dataUser, "You can not delete this item");

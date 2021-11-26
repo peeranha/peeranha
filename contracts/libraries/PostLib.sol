@@ -115,7 +115,14 @@ library PostLib  {
         PostType postType,
         uint8[] memory tags
     ) public {
-        SecurityLib.checkRatingAndEnergy(roles, UserLib.getUserByAddress(users, userAddr), userAddr, userAddr, communityId, SecurityLib.Action.publicationPost);
+        SecurityLib.checkRatingAndEnergy(
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            userAddr,
+            communityId,
+            SecurityLib.Action.publicationPost
+        );
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
         require(postType != PostType.Tutorial, "At this release you can not publish tutorial.");
@@ -153,7 +160,14 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
-        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, userAddr, postContainer.info.communityId, SecurityLib.Action.publicationReply);    // postContainer.info.author
+        SecurityLib.checkRatingAndEnergy(
+            roles,
+            user,
+            userAddr,
+            postContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.publicationReply
+        );
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(
             parentReplyId == 0 || 
@@ -220,18 +234,28 @@ library PostLib  {
         UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
-        Comment storage comment;
-        uint8 commentId;
+        Comment storage comment;    ///
+        uint8 commentId;            // struct ?
+        address author;             ///
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
             comment = postContainer.comments[commentId].info;
-            SecurityLib.checkRatingAndEnergy(roles, user, userAddr, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
+            author = postContainer.info.author;
         } else {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
             comment = replyContainer.comments[commentId].info;
-            SecurityLib.checkRatingAndEnergy(roles, user, userAddr, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.publicationComment);
+            author = replyContainer.info.author;
         }
+        SecurityLib.checkRatingAndEnergy(
+            roles,
+            user,
+            userAddr,
+            author,
+            postContainer.info.communityId, 
+            SecurityLib.Action.publicationComment
+        );
+
 
         comment.author = userAddr;
         comment.ipfsDoc.hash = ipfsHash;
@@ -242,11 +266,15 @@ library PostLib  {
 
     /// @notice Edit post
     /// @param self The mapping containing all posts
+    /// @param roles Permissions user
+    /// @param users The mapping containing all users
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param ipfsHash IPFS hash of document with post information
     function editPost(                                                  //LAST MODIFIED?
         PostCollection storage self,
+        SecurityLib.Roles storage roles,
+        UserLib.UserCollection storage users,
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
@@ -254,7 +282,15 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");
+        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // moderator
+        SecurityLib.checkRatingAndEnergy(       //unit test energy
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            postContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.editItem
+        );
 
         if(!IpfsLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
@@ -266,12 +302,16 @@ library PostLib  {
 
     /// @notice Edit reply
     /// @param self The mapping containing all posts
+    /// @param roles Permissions user
+    /// @param users The mapping containing all users
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param replyId The reply which will be change
     /// @param ipfsHash IPFS hash of document with reply information
     function editReply(                                                         //LAST MODIFIED?
         PostCollection storage self,
+        SecurityLib.Roles storage roles,
+        UserLib.UserCollection storage users,
         address userAddr,
         uint256 postId,
         uint16 replyId,
@@ -281,6 +321,14 @@ library PostLib  {
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
+        SecurityLib.checkRatingAndEnergy(       //unit test energy
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            replyContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.editItem
+        );
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
@@ -290,13 +338,17 @@ library PostLib  {
 
     /// @notice Edit comment
     /// @param self The mapping containing all posts
+    /// @param roles Permissions user
+    /// @param users The mapping containing all users
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
-    /// @param parentReplyId The reply where the reply will be edit                                    ///////
+    /// @param parentReplyId The reply where the reply will be edit
     /// @param commentId The comment which will be change
     /// @param ipfsHash IPFS hash of document with comment information
     function editComment(                                           //LAST MODIFIED?
         PostCollection storage self,
+        SecurityLib.Roles storage roles,
+        UserLib.UserCollection storage users,
         address userAddr,
         uint256 postId,
         uint16 parentReplyId,
@@ -307,6 +359,14 @@ library PostLib  {
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
+        SecurityLib.checkRatingAndEnergy(       //unit test energy
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            commentContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.editItem
+        );
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;

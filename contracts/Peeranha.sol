@@ -389,7 +389,7 @@ contract Peeranha is IPeeranha, Initializable {
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     onlyExisitingUser(msg.sender) 
     checkTagByPostId(postId, tags) override {
-        posts.editPost(msg.sender, postId, ipfsHash, tags);
+        posts.editPost(roles, users, msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -424,7 +424,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override { 
-        posts.editReply(msg.sender, postId, replyId, ipfsHash);
+        posts.editReply(roles, users, msg.sender, postId, replyId, ipfsHash);
     }
 
     /**
@@ -459,7 +459,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override {
-        posts.editComment(msg.sender, postId, parentReplyId, commentId, ipfsHash);
+        posts.editComment(roles, users, msg.sender, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
