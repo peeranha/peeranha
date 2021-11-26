@@ -177,7 +177,7 @@ describe("Test post", function () {
 			expect(updatedPost.officialReply).to.equal(2);
 		});
 
-		it("Test double replies in export post", async function () {
+		it("Test double replies in expert post", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -211,6 +211,42 @@ describe("Test post", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
+		});
+
+		it("Test create reply on reply in expert post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.createReply(1, 1, hashContainer[1], false)).to.be.revertedWith('User is forbidden to reply on reply for Expert and Common type of posts');
+		});
+	
+		it("Test create reply on reply in common post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.createReply(1, 1, hashContainer[1], false)).to.be.revertedWith('User is forbidden to reply on reply for Expert and Common type of posts');
+		});
+	
+		xit("Test create reply on reply in tutorial post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 1, hashContainer[1], false);
 		});
 
 		it("Test create two official replies for the same post", async function () {
