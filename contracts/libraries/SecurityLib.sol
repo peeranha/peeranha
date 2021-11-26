@@ -89,12 +89,15 @@ library SecurityLib {
   }
 
   function checkRatingAndEnergy(
-  Roles storage role,
-  UserLib.User storage user,
-  address actionCaller,
-  address dataUser,
-  uint32 communityId,
-  Action action) internal {
+    Roles storage role,
+    UserLib.User storage user,
+    address actionCaller,
+    address dataUser,
+    uint32 communityId,
+    Action action
+  )
+    internal
+  {
     if (hasModeratorRole(role, actionCaller, communityId)) return;
     
     int16 ratingAllowen;
@@ -204,7 +207,6 @@ library SecurityLib {
     user.energy = userEnergy - energy;
     user.lastUpdatePeriod = currentPeriod;
   }
-
 
   function hasModeratorRole(
     Roles storage self,

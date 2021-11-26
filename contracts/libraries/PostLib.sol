@@ -256,7 +256,6 @@ library PostLib  {
             SecurityLib.Action.publicationComment
         );
 
-
         comment.author = userAddr;
         comment.ipfsDoc.hash = ipfsHash;
         comment.postTime = CommonLib.getTimestamp();
@@ -388,8 +387,14 @@ library PostLib  {
         uint256 postId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
-        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, postContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        SecurityLib.checkRatingAndEnergy(
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            postContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.deleteItem
+        );
 
         uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < deleteTime) {      //unit test ?
@@ -432,8 +437,14 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.bestReply != replyId, "You can not delete the best reply."); // unit test
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        UserLib.User storage user = UserLib.getUserByAddress(users, userAddr);
-        SecurityLib.checkRatingAndEnergy(roles, user, userAddr, replyContainer.info.author, postContainer.info.communityId, SecurityLib.Action.deleteItem);
+        SecurityLib.checkRatingAndEnergy(
+            roles,
+            UserLib.getUserByAddress(users, userAddr),
+            userAddr,
+            replyContainer.info.author,
+            postContainer.info.communityId,
+            SecurityLib.Action.deleteItem
+        );
 
         uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < deleteTime) {  //unit test ?
@@ -716,7 +727,6 @@ library PostLib  {
                 UserLib.updateUserRating(users, userRewards, user, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
             }
         }
-
     }
 
     // @notice Vote for comment

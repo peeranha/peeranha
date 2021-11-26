@@ -71,7 +71,7 @@ describe("Test users", function() {
 		await peeranha.addUserRating(peeranha.deployTransaction.from, -11);
     const user = await peeranha.getUserByIndex(0);
     await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
-    await expect(peeranha.updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for upvote reply. You need 0 ratings.');
+    await expect(peeranha.updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for edit profile. You need 0 ratings');  // moderator edit
   })
 
   it("Test user getter", async function() {
