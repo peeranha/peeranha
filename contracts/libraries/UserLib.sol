@@ -11,7 +11,7 @@ import "./SecurityLib.sol";
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
   int32 constant START_USER_RATING = 10;
-  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 3; // 259200 - 3 Days
+  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 8; // 259200 - 3 Days
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;

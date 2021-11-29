@@ -566,6 +566,13 @@ contract Peeranha is IPeeranha, Initializable {
         users.updateUserRating(userRewards, userAddr, rating);
     }
 
+    ///
+    // delete
+    ///
+    function setEnergy(address userAddr, uint16 energy) external {
+        users.getUserByAddress(userAddr).energy = energy;
+    }
+
     modifier onlyExisitingUser(address user) {
         require(UserLib.isExists(users, user),
         "Peeranha: must be an existing user");

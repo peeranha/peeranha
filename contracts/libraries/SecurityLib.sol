@@ -41,28 +41,28 @@ library SecurityLib {
   int16 constant UPDATE_PROFILE_ALLOWED = 0;
 
 
-  uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;    //
-  uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;      //
-  uint8 constant ENERGY_DOWNVOTE_COMMENT = 2;   //
-  uint8 constant ENERGY_UPVOTE_QUESTION = 1;    //
-  uint8 constant ENERGY_UPVOTE_ANSWER = 1;      //
-  uint8 constant ENERGY_UPVOTE_COMMENT = 1;     //
+  uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;
+  uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;
+  uint8 constant ENERGY_DOWNVOTE_COMMENT = 2;
+  uint8 constant ENERGY_UPVOTE_QUESTION = 1;
+  uint8 constant ENERGY_UPVOTE_ANSWER = 1;
+  uint8 constant ENERGY_UPVOTE_COMMENT = 1;
   uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;
-  uint8 constant ENERGY_POST_QUESTION = 10;     //
-  uint8 constant ENERGY_POST_ANSWER = 6;    //
-  uint8 constant ENERGY_POST_COMMENT = 4;   //
-  uint8 constant ENERGY_MODIFY_ITEM = 2;    // unit test energy
-  uint8 constant ENERGY_DELETE_ITEM = 2;    //
+  uint8 constant ENERGY_POST_QUESTION = 10;
+  uint8 constant ENERGY_POST_ANSWER = 6;
+  uint8 constant ENERGY_POST_COMMENT = 4;
+  uint8 constant ENERGY_MODIFY_ITEM = 2;
+  uint8 constant ENERGY_DELETE_ITEM = 2;
 
-  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;   // unit test energy
-  uint8 constant ENERGY_UPDATE_PROFILE = 1;           // unit test energy
-  uint8 constant ENERGY_CREATE_TAG = 75;
-  uint8 constant ENERGY_CREATE_COMMUNITY = 125;
-  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
-  uint8 constant ENERGY_REPORT_PROFILE = 5;
-  uint8 constant ENERGY_REPORT_QUESTION = 3;
-  uint8 constant ENERGY_REPORT_ANSWER = 2;
-  uint8 constant ENERGY_REPORT_COMMENT = 1;
+  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;  // unit test energy
+  uint8 constant ENERGY_UPDATE_PROFILE = 1;
+  uint8 constant ENERGY_CREATE_TAG = 75;            //
+  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     //
+  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;       //
+  uint8 constant ENERGY_REPORT_PROFILE = 5;         //
+  uint8 constant ENERGY_REPORT_QUESTION = 3;        //
+  uint8 constant ENERGY_REPORT_ANSWER = 2;          //
+  uint8 constant ENERGY_REPORT_COMMENT = 1;         //
 
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
   using AddressUpgradeable for address;

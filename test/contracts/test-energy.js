@@ -6,9 +6,7 @@ const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
 
 describe("Test energy", function () {
     const StartEnergy = 300;
-
-	// const user = await peeranha.getUserByAddress(signers[1].address);
-		// const user2 = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+	const PeriodTime = 8000
 
 
 	const energyDownVotePost = 5;
@@ -21,9 +19,8 @@ describe("Test energy", function () {
   	const energyPublicationPost = 10;
   	const energyPublicationReply = 6;
   	const energyPublicationComment = 4;   //
-  	const ENERGY_MODIFY_QUESTION = 2;
-  	const ENERGY_MODIFY_ANSWER = 2;
-  	const ENERGY_MODIFY_COMMENT = 1;
+  	const energyUpdateProfile = 1;   	//
+  	const energyEditItem = 2;			//
   	const energyDeleteItem = 2;
 
 	const energyArray = [
@@ -48,10 +45,9 @@ describe("Test energy", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.addUserRating(signers[1].address, rating);
-			await wait(3000);
+			await wait(PeriodTime);
 
 			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-
 			
 			const user = await peeranha.getUserByAddress(signers[1].address);
 
@@ -69,12 +65,12 @@ describe("Test energy", function () {
 		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 		await peeranha.addUserRating(signers[1].address, -20);		// -10 rating = 0 energy? will check 0 energy
-		await wait(3000);
+		await wait(PeriodTime);
 
 		await expect(peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1])).to.be.revertedWith('Your rating is too small for publication post. You need 0 ratings');
 	});
 
-	it("Test energy publication post", async function () {
+	it("Test energy. publication post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -89,10 +85,10 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost);		
 	});
 
-	it("Test energy publication reply", async function () {
+	it("Test energy. publication reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
-     const ipfsHashes = getHashesContainer(2);
+     	const ipfsHashes = getHashesContainer(2);
 		const signers = await ethers.getSigners();
 		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 		await peeranha.createUser(hashContainer[1]);
@@ -106,7 +102,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply);		
 	});
 
-	it("Test energy publication comment", async function () {
+	it("Test energy. publication comment", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -124,8 +120,110 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationComment);		
 	});
 
+	it("Test energy. Edit post", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-	it("Test energy upvote post", async function () {
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).editPost(1, hashContainer[2], []);
+		const user = await peeranha.getUserByAddress(signers[1].address);
+
+		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost - energyEditItem);		
+	});
+
+	it("Test energy. Edit post (energy not enough)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.setEnergy(signers[1].address, 1);
+
+		await expect(peeranha.connect(signers[1]).editPost(1, hashContainer[2], []))
+			.to.be.revertedWith('Not enought energy!');
+	});
+
+	it("Test energy. Edit reply", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+     	const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		await peeranha.connect(signers[1]).editReply(1, 1, hashContainer[2])
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyEditItem);		
+	});
+
+	it("Test energy. Edit reply (energy not enough)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+		
+		await peeranha.setEnergy(signers[1].address, 1);
+		await expect(peeranha.connect(signers[1]).editReply(1, 1, hashContainer[2]))
+			.to.be.revertedWith('Not enought energy!');
+	});
+
+	it("Test energy. Edit comment", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.addUserRating(signers[1].address, 30);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+		await peeranha.connect(signers[1]).createComment(1, 0, hashContainer[1]);
+		await peeranha.connect(signers[1]).editComment(1, 0, 1, hashContainer[2]);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyPublicationComment - energyEditItem);		
+	});
+
+	it("Test energy. Edit comment (energy not enough)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		await peeranha.addUserRating(signers[1].address, 30);
+		await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createComment(1, 0, hashContainer[1]);
+		
+		await peeranha.setEnergy(signers[1].address, 1);
+		await expect(peeranha.connect(signers[1]).editComment(1, 0, 1, hashContainer[2]))
+			.to.be.revertedWith('Not enought energy!');
+	});
+
+	it("Test energy. upvote post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -143,7 +241,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyUpvotePost);		
 	});
 
-	it("Test energy down vote post", async function () {
+	it("Test energy. down vote post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -151,20 +249,19 @@ describe("Test energy", function () {
 		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.addUserRating(signers[1].address, 100);
-		await wait(3000);
 
 		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 		await peeranha.connect(signers[1]).voteItem(1, 0, 0, 0);
-		const user = await peeranha.getUserByAddress(signers[1].address);
 
-		await expect(user.energy).to.equal(600 - energyDownVotePost);						//////////////// 600		
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyDownVotePost);		
 	});
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// it("Test energy upvote reply", async function () {
+	// it("Test energy. upvote reply", async function () {
 	// 	const peeranha = await createContract();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);
@@ -183,7 +280,7 @@ describe("Test energy", function () {
 	// 	await expect(user.energy).to.equal(StartEnergy - energyUpvoteReply);		
 	// });
 
-	// it("Test energy down vote reply", async function () {
+	// it("Test energy. down vote reply", async function () {
 	// 	const peeranha = await createContract();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);
@@ -191,7 +288,7 @@ describe("Test energy", function () {
 	// 	await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 	// 	await peeranha.createUser(hashContainer[1]);
 	// 	await peeranha.addUserRating(signers[1].address, 100);
-	// 	await wait(3000);
+	// 	await wait(PeriodTime);
 
 	// 	await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 	// 	await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
@@ -212,7 +309,7 @@ describe("Test energy", function () {
 	// vote comment ////
 	//
 
-	it("Test energy delete post", async function () {
+	it("Test energy. delete post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -228,7 +325,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyPublicationPost + energyDeleteItem));		
 	});
 
-	it("Test energy delete reply", async function () {
+	it("Test energy. delete reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -246,7 +343,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyPublicationReply + energyDeleteItem));		
 	});
 
-	it("Test energy delete comment", async function () {
+	it("Test energy. delete comment", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -254,7 +351,6 @@ describe("Test energy", function () {
 		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 		await peeranha.createUser(hashContainer[1]);
 		await peeranha.addUserRating(signers[1].address, 35);
-		await wait(3000);
 
 		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
@@ -263,6 +359,28 @@ describe("Test energy", function () {
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
 		await expect(user.energy).to.equal(StartEnergy - (energyPublicationComment + energyDeleteItem));		
+	});
+
+	it("Test energy. edit profile", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).updateUser(hashContainer[0]);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyUpdateProfile);		
+	});
+
+	it("Test energy. edit profile, negative rating", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+
+		await peeranha.setEnergy(signers[1].address, 1);
+		await expect(peeranha.connect(signers[1]).updateUser(hashContainer[0]))
+			.to.be.revertedWith('Not enought energy!');		
 	});
 
 	const createContract = async function () {

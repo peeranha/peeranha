@@ -281,7 +281,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // moderator
+        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");
         SecurityLib.checkRatingAndEnergy(
             roles,
             UserLib.getUserByAddress(users, userAddr),
