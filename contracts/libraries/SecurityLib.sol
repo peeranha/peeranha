@@ -54,7 +54,7 @@ library SecurityLib {
   uint8 constant ENERGY_MODIFY_ITEM = 2;
   uint8 constant ENERGY_DELETE_ITEM = 2;
 
-  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;  // unit test energy
+  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;
   uint8 constant ENERGY_UPDATE_PROFILE = 1;
   uint8 constant ENERGY_CREATE_TAG = 75;            //
   uint8 constant ENERGY_CREATE_COMMUNITY = 125;     //

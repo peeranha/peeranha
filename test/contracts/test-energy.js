@@ -10,18 +10,19 @@ describe("Test energy", function () {
 
 
 	const energyDownVotePost = 5;
-  	const energyDownVoteReply = 3;      //
-  	const ENERGY_DOWNVOTE_COMMENT = 2;   //
+  	const energyDownVoteReply = 3;
+  	const ENERGY_DOWNVOTE_COMMENT = 2;
   	const energyUpvotePost = 1;
   	const energyUpvoteReply = 1;
-  	const ENERGY_UPVOTE_COMMENT = 1;     //
-  	const ENERGY_FORUM_VOTE_CHANGE = 1;	//
+  	const ENERGY_UPVOTE_COMMENT = 1;
+  	const ENERGY_FORUM_VOTE_CHANGE = 1;
   	const energyPublicationPost = 10;
   	const energyPublicationReply = 6;
-  	const energyPublicationComment = 4;   //
-  	const energyUpdateProfile = 1;   	//
-  	const energyEditItem = 2;			//
+  	const energyPublicationComment = 4;
+  	const energyUpdateProfile = 1;
+  	const energyEditItem = 2;
   	const energyDeleteItem = 2;
+  	const energyBestReply = 1;
 
 	const energyArray = [
 		{rating: 20, energy: 300, status: "Basic"},
@@ -48,7 +49,7 @@ describe("Test energy", function () {
 			await wait(PeriodTime);
 
 			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			
+
 			const user = await peeranha.getUserByAddress(signers[1].address);
 
 			await expect(user.energy).to.equal(energy - energyPublicationPost);		
@@ -369,7 +370,7 @@ describe("Test energy", function () {
 		await peeranha.connect(signers[1]).updateUser(hashContainer[0]);
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
-		await expect(user.energy).to.equal(StartEnergy - energyUpdateProfile);		
+		await expect(user.energy).to.equal(StartEnergy - energyUpdateProfile);
 	});
 
 	it("Test energy. edit profile, negative rating", async function () {
@@ -380,8 +381,82 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).updateUser(hashContainer[0]))
-			.to.be.revertedWith('Not enought energy!');		
+			.to.be.revertedWith('Not enought energy!');
 	});
+
+	it("Test energy. MarkBestReply", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+		await peeranha.connect(signers[1]).changeStatusBestReply(1, 1);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyBestReply);
+	});
+
+	it("Test energy. MarkBestReply and unmark", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+		await peeranha.connect(signers[1]).changeStatusBestReply(1, 1);
+		await peeranha.connect(signers[1]).changeStatusBestReply(1, 1);
+
+		const user = await peeranha.getUserByAddress(signers[1].address);
+		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyBestReply * 2);
+	});
+
+	it("Test energy. MarkBestReply (energy not enough)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+		await peeranha.setEnergy(signers[1].address, energyBestReply - 1);
+		await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1))
+			.to.be.revertedWith('Not enought energy!');
+	});
+
+	it("Test energy. MarkBestReply and unmark (energy not enough)", async function () {
+		const peeranha = await createContract();
+		const hashContainer = getHashContainer();
+        const ipfsHashes = getHashesContainer(2);
+		const signers = await ethers.getSigners();
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranha.createUser(hashContainer[1]);
+
+		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+		await peeranha.connect(signers[1]).changeStatusBestReply(1, 1);
+
+		await peeranha.setEnergy(signers[1].address, energyBestReply - 1);
+		await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1))
+			.to.be.revertedWith('Not enought energy!');
+	});
+
 
 	const createContract = async function () {
 		const PostLib = await ethers.getContractFactory("PostLib")

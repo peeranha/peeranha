@@ -607,7 +607,7 @@ library PostLib  {
             userAddr,
             replyOwner,
             postContainer.info.communityId,
-            SecurityLib.Action.bestReply);    // unit test
+            SecurityLib.Action.bestReply);    // unit test (forum)
 
         emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
     }
