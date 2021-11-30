@@ -391,7 +391,7 @@ describe("Test energy", function () {
 		const signers = await ethers.getSigners();
 		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 
-		await peeranha.setEnergy(signers[1].address, 1);
+		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).updateUser(hashContainer[0]))
 			.to.be.revertedWith('Not enought energy!');
 	});
