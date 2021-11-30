@@ -56,7 +56,7 @@ describe("Test energy", function () {
 		});
 	}
 
-	it("Test action with negetive rating", async function () {
+	it("Test action with negetive rating", async function () {	// need?
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -71,7 +71,7 @@ describe("Test energy", function () {
 		await expect(peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1])).to.be.revertedWith('Your rating is too small for publication post. You need 0 ratings');
 	});
 
-	it("Test energy. publication post", async function () {
+	it("Test energy. Publication post", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -86,7 +86,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost);		
 	});
 
-	it("Test energy. publication reply", async function () {
+	it("Test energy. Publication reply", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
      	const ipfsHashes = getHashesContainer(2);
@@ -103,7 +103,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply);		
 	});
 
-	it("Test energy. publication comment", async function () {
+	it("Test energy. Publication comment", async function () {
 		const peeranha = await createContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -120,6 +120,10 @@ describe("Test energy", function () {
 
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationComment);		
 	});
+
+	///
+	// to do publication (energy not enough) -> setEnergy()
+	///  
 
 	it("Test energy. Edit post", async function () {
 		const peeranha = await createContract();
@@ -260,6 +264,10 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyDownVotePost);		
 	});
 
+	///
+	// to do vote post (energy not enough) -> setEnergy()
+	/// 
+
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// it("Test energy. upvote reply", async function () {
@@ -307,8 +315,12 @@ describe("Test energy", function () {
 
 	
 	//
-	// vote comment ////
+	// to do vote comment
 	//
+
+	///
+	// to do follow / unfollow
+	///
 
 	it("Test energy. delete post", async function () {
 		const peeranha = await createContract();

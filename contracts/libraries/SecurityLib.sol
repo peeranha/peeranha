@@ -22,7 +22,8 @@ library SecurityLib {
     downVoteComment,
     officialReply,
     bestReply,
-    updateProfile
+    updateProfile,
+    followCommunity
   }
   
   int16 constant MINIMUM_RATING = -300;
@@ -56,9 +57,9 @@ library SecurityLib {
 
   uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;
   uint8 constant ENERGY_UPDATE_PROFILE = 1;
-  uint8 constant ENERGY_CREATE_TAG = 75;            //
-  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     //
-  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;       //
+  uint8 constant ENERGY_CREATE_TAG = 75;            // only Admin
+  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     // only admin
+  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
   uint8 constant ENERGY_REPORT_PROFILE = 5;         //
   uint8 constant ENERGY_REPORT_QUESTION = 3;        //
   uint8 constant ENERGY_REPORT_ANSWER = 2;          //
@@ -181,6 +182,11 @@ library SecurityLib {
       ratingAllowen = UPDATE_PROFILE_ALLOWED;
       message = "Your rating is too small for edit profile. You need 0 ratings";
       energy = ENERGY_UPDATE_PROFILE;
+
+    } else if (action == Action.followCommunity) {
+      ratingAllowen = MINIMUM_RATING;
+      message = "Your rating is too small for edit profile. You need -300 ratings";
+      energy = ENERGY_FOLLOW_COMMUNITY;
 
     } else {
       require(false, "Action not allowed");

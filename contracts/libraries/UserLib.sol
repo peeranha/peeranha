@@ -66,6 +66,7 @@ library UserLib {
 
   /// @notice Update new user info record
   /// @param self The mapping containing all users
+  /// @param roles Permissions user
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
@@ -75,7 +76,7 @@ library UserLib {
     bytes32 ipfsHash
   ) internal {
     User storage user = getUserByAddress(self, userAddress);
-    SecurityLib.checkRatingAndEnergy(   //moderator can edit
+    SecurityLib.checkRatingAndEnergy(
       roles,
       user,
       userAddress,
@@ -90,14 +91,25 @@ library UserLib {
 
   /// @notice User follows community
   /// @param self The mapping containing all users
+  /// @param roles Permissions user
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function followCommunity(
     UserCollection storage self,
+    SecurityLib.Roles storage roles,
     address userAddress,
     uint32 communityId
   ) internal {
     User storage user = self.users[userAddress];
+    SecurityLib.checkRatingAndEnergy(
+      roles,
+      user,
+      userAddress,
+      userAddress,
+      0,
+      SecurityLib.Action.followCommunity
+    );
+
     bool isAdded;
     for (uint i; i < user.followedCommunities.length; i++) {
       require(user.followedCommunities[i] != communityId, "You already follow the community");
@@ -115,14 +127,24 @@ library UserLib {
 
   /// @notice User usfollows community
   /// @param self The mapping containing all users
+  /// @param roles Permissions user
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
     UserCollection storage self,
+    SecurityLib.Roles storage roles,
     address userAddress,
     uint32 communityId
   ) internal {
     User storage user = self.users[userAddress];
+    SecurityLib.checkRatingAndEnergy(
+      roles,
+      user,
+      userAddress,
+      userAddress,
+      0,
+      SecurityLib.Action.followCommunity
+    );
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
