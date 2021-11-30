@@ -17,10 +17,22 @@ describe("Test users", function() {
 
     await Promise.all(hashContainer.map(async (hash, index) => {
       const user = await peeranha.getUserByIndex(index);
-      await expect(user.rating).to.equal(StartUserRating);
-      await expect(user.payOutRating).to.equal(StartUserRating);
-      return await expect(user.ipfsDoc.hash).to.equal(hash);
+      expect(user.rating).to.equal(StartUserRating);
+      expect(user.payOutRating).to.equal(StartUserRating);
+      return expect(user.ipfsDoc.hash).to.equal(hash);
     }))
+  });
+
+  it("Test user creating double profile", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+
+    await peeranha.createUser(hashContainer[0]);
+
+    expect(await peeranha.getUsersCount()).to.equal(1);
+
+    await expect(peeranha.createUser(hashContainer[1]))
+    .to.be.revertedWith('User exists');
   });
 
   it("Test user editing", async function() {
@@ -29,46 +41,70 @@ describe("Test users", function() {
     
     await peeranha.createUser(hashContainer[0]);
     const user = await peeranha.getUserByIndex(0);
-    await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
+    expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
     await peeranha.updateUser(hashContainer[1]);
     const changedUser = await peeranha.getUserByIndex(0);
-    await expect(changedUser.ipfsDoc.hash).to.equal(hashContainer[1]);
+    expect(changedUser.ipfsDoc.hash).to.equal(hashContainer[1]);
 
     expect(await peeranha.getUsersCount()).to.equal(1);
   })
 
-  // it("Test user getter", async function() {
-  //   const peeranha = await createContract();
-  //   const signers = await ethers.getSigners();
-  //   const hashContainer = getHashContainer();
+  it("Test user editing/ non-existent user", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
+      
+    await expect(peeranha.updateUser(hashContainer[0]))
+    .to.be.revertedWith('User does not exist');
+    expect(await peeranha.getUsersCount()).to.equal(0);
+
+    await peeranha.createUser(hashContainer[0]);
+    const user = await peeranha.getUserByIndex(0);
+    expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
+    expect(await peeranha.getUsersCount()).to.equal(1);
+  })
+
+  it("Test user editing, negative rating", async function() {
+    const peeranha = await createContract();
+    const hashContainer = getHashContainer();
     
-  //   await Promise.all(hashContainer.map(
-  //     async (hash, index) => {
-  //       return await peeranha.connect(signers[index]).createUser(hash)
-  //     }
-  //   ))
+    await peeranha.createUser(hashContainer[0]);
+		await peeranha.addUserRating(peeranha.deployTransaction.from, -11);
+    const user = await peeranha.getUserByIndex(0);
+    await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
+    await expect(peeranha.updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for upvote reply. You need 0 ratings.');
+  })
+
+  it("Test user getter", async function() {
+    const peeranha = await createContract();
+    const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
     
-  //   const usersByIndex = await Promise.all(hashContainer.map(async (hash, index) => {
-  //     const user = await peeranha.getUserByIndex(index);
-  //     const userToCompare = user.map((entry, index) => {
-  //       return index !== 3 && index != 7 ? entry : 0;
-  //     })
-  //     return userToCompare;
-  //   }));
+    await Promise.all(hashContainer.map(
+      async (hash, index) => {
+        return await peeranha.connect(signers[index]).createUser(hash);
+      }
+    ))
+    
+    const user1 = await peeranha.getUserByIndex(0);
+    expect(user1).to.have.to.have.ownPropertyDescriptor('ipfsDoc');
+    expect(user1.ipfsDoc.hash).to.equal(hashContainer[0]);
+    expect(user1).to.have.ownPropertyDescriptor('rating');
+    expect(user1).to.have.ownPropertyDescriptor('payOutRating');
+    expect(user1).to.have.ownPropertyDescriptor('creationTime');
+    expect(user1).to.have.ownPropertyDescriptor('roles');
+    expect(user1).to.have.ownPropertyDescriptor('followedCommunities');
+    expect(user1).to.have.ownPropertyDescriptor('rewardPeriods');
 
-  
-
-  //   const usersByAddress = await Promise.all(signers.slice(0, 3).map(async (addr) => {
-  //     const user = await peeranha.getUserByAddress(addr.address)
-  //     const userToCompare = user.map((entry, index) => {
-  //       return index !== 3 && index != 7 ? entry : 0;
-  //     })
-  //     return userToCompare;
-  //   }))
-
-  //   expect(JSON.stringify(usersByAddress)).to.equal(JSON.stringify(getUsers(hashContainer)))
-  //   expect(JSON.stringify(usersByIndex)).to.equal(JSON.stringify(getUsers(hashContainer)))
-  // })
+    const user2 = await peeranha.getUserByAddress(signers[1].address);
+    expect(user2).to.have.ownPropertyDescriptor('ipfsDoc');
+    expect(user2.ipfsDoc.hash).to.equal(hashContainer[1]);
+    expect(user2).to.have.ownPropertyDescriptor('rating');
+    expect(user2).to.have.ownPropertyDescriptor('payOutRating');
+    expect(user2).to.have.ownPropertyDescriptor('creationTime');
+    expect(user2).to.have.ownPropertyDescriptor('roles');
+    expect(user2).to.have.ownPropertyDescriptor('followedCommunities');
+    expect(user2).to.have.ownPropertyDescriptor('rewardPeriods');
+  })
 
   it("Follow community", async function() {
     const peeranha = await createContract();
@@ -81,6 +117,17 @@ describe("Test users", function() {
     
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
+  })
+
+  it("Follow community not exist user", async function() {
+    const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
   })
 
   it("Double follow community", async function() {
@@ -166,6 +213,20 @@ describe("Test users", function() {
     expect(user.followedCommunities[1]).to.equal(2);
   })
 
+  xit("Follow community by non-existed user", async function() { // must be fixed
+    const peeranha = await createContract();
+    const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await peeranha.followCommunity(1);
+    
+    await expect(peeranha.connect(signers[1]).followCommunity(1))
+    .to.be.revertedWith('Peeranha: must be an existing user');
+  })
+
   it("UnFollow community", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
@@ -180,6 +241,19 @@ describe("Test users", function() {
 
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(0);
+  })
+
+  it("UnFollow community", async function() {
+    const peeranha = await createContract();
+		const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
   })
 
   it("UnFollow diferent community", async function() {
@@ -233,6 +307,22 @@ describe("Test users", function() {
     await peeranha.freezeCommunity(1);
     
     await peeranha.unfollowCommunity(1)
+  })
+
+  xit("UnFollow community by non-existed user", async function() { // must be fixed
+    const peeranha = await createContract();
+    const signers = await ethers.getSigners();
+    const hashContainer = getHashContainer();
+    const ipfsHashes = getHashesContainer(2);
+    await peeranha.createUser(hashContainer[0]);
+    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+    await peeranha.followCommunity(1);
+    
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(1))
+    .to.be.revertedWith('Peeranha: must be an existing user');
+
+    await peeranha.unfollowCommunity(1);
   })
 
   const createContract = async function(){
