@@ -197,7 +197,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityModerator(communityId) {
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -209,7 +212,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityAdmin(communityId) {
+    function freezeCommunity(uint32 communityId) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdminOrCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
 
@@ -308,6 +314,22 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     /**
+     * @dev Edit tag info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing commuity. 
+     * - Must be an existing tag.  
+     * - Sender must be community moderator.
+     */
+    function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingTag(tagId, communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
+        communities.updateTag(tagId, communityId, ipfsHash);
+    }
+
+    /**
      * @dev Get communities count.
      */
     function getCommunitiesCount() external view returns (uint32 count) {
@@ -356,7 +378,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.
      * - Must be a tag.
      */
-    function getTag(uint32 communityId, uint8 tagId) external view returns (CommunityLib.Tag memory) {
+    function getTag(uint32 communityId, uint8 tagId) external view
+    onlyExistingTag(tagId, communityId) 
+    returns (CommunityLib.Tag memory) {
         return communities.getTag(communityId, tagId);
     }
 
@@ -372,7 +396,7 @@ contract Peeranha is IPeeranha, Initializable {
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
     onlyExisitingUser(msg.sender)
     onlyExistingAndNotFrozenCommunity(communityId)
-    checkTag(communityId, tags) override {
+    checkTags(communityId, tags) override {
         posts.createPost(roles, users, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
@@ -388,7 +412,7 @@ contract Peeranha is IPeeranha, Initializable {
     */
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     onlyExisitingUser(msg.sender) 
-    checkTagByPostId(postId, tags) override {
+    checkTagsByPostId(postId, tags) override {
         posts.editPost(msg.sender, postId, ipfsHash, tags);
     }
 
@@ -601,14 +625,19 @@ contract Peeranha is IPeeranha, Initializable {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
         _;
     }
-
-    modifier checkTag(uint32 communityId, uint8[] memory tags) {
-        CommunityLib.checkTag(communities, communityId, tags);
+    
+    modifier onlyExistingTag(uint8 tagId, uint32 communityId) {
+        CommunityLib.onlyExistingTag(communities, tagId, communityId);
+        _;
+    }
+    
+    modifier checkTags(uint32 communityId, uint8[] memory tags) {
+        CommunityLib.checkTags(communities, communityId, tags);
         _;
     }
 
-    modifier checkTagByPostId(uint256 postId, uint8[] memory tags) {
-        CommunityLib.checkTagByPostId(communities, posts, postId, tags);
+    modifier checkTagsByPostId(uint256 postId, uint8[] memory tags) {
+        CommunityLib.checkTagsByPostId(communities, posts, postId, tags);
         _;
     }
 }
