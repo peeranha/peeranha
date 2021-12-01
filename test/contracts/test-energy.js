@@ -107,7 +107,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Publication reply", async function () {
@@ -140,7 +140,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Publication comment", async function () {
@@ -178,7 +178,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).createComment(1, 0, hashContainer[1]))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Publication comment to reply (energy not enough)", async function () {
@@ -196,7 +196,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).createComment(1, 1, hashContainer[1]))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Edit post", async function () {
@@ -321,7 +321,7 @@ describe("Test energy", function () {
 		
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).editComment(1, 1, 1, hashContainer[2]))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. upvote post", async function () {
@@ -356,7 +356,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. down vote post", async function () {
@@ -391,7 +391,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	xit("Test energy. Cancel upvote post", async function () {
@@ -428,7 +428,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Cancel down vote post", async function () {
@@ -465,7 +465,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 0, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	it("Test energy. upvote reply", async function () {
@@ -502,7 +502,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. down vote reply", async function () {
@@ -539,7 +539,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	xit("Test energy. Cancel upvote reply", async function () {
@@ -579,7 +579,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Cancel down vote reply", async function () {
@@ -618,7 +618,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 0, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	it("Test energy. upvote comment", async function () {
@@ -660,9 +660,9 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 1, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 1, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. down vote comment", async function () {
@@ -704,9 +704,9 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 1, 0))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 1, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	xit("Test energy. Cancel upvote comment", async function () {
@@ -753,9 +753,9 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 1, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 1, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Cancel down vote comment", async function () {
@@ -802,9 +802,9 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).voteItem(1, 0, 1, 0))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 		await expect(peeranha.connect(signers[1]).voteItem(1, 1, 1, 0))
-		.to.be.revertedWith('Not enought energy!');	
+		.to.be.revertedWith('Not enough energy!');	
 	});
 
 	it("Test energy. delete post", async function () {
@@ -836,7 +836,7 @@ describe("Test energy", function () {
 		
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).deletePost(1))
-		.to.be.revertedWith('Not enought energy!');		
+		.to.be.revertedWith('Not enough energy!');		
 	});
 
 	it("Test energy. delete reply", async function () {
@@ -871,7 +871,7 @@ describe("Test energy", function () {
 		
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).deleteReply(1, 1))
-		.to.be.revertedWith('Not enought energy!');		
+		.to.be.revertedWith('Not enough energy!');		
 	});
 
 	it("Test energy. delete comment", async function () {
@@ -910,7 +910,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).deleteComment(1, 0, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. delete comment for reply (energy not enough)", async function () {
@@ -929,7 +929,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).deleteComment(1, 1, 1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. edit profile", async function () {
@@ -1055,7 +1055,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, energyFollowCommunity - 1);
 		await expect(peeranha.connect(signers[1]).followCommunity(1))
-		.to.be.revertedWith('Not enought energy!');
+		.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Unfollow community", async function () {
@@ -1072,25 +1072,25 @@ describe("Test energy", function () {
 		await peeranha.connect(signers[1]).unfollowCommunity(1);
 
 		const user = await peeranha.getUserByAddress(signers[1].address);
-		await expect(user.energy).to.equal(StartEnergy - energyFollowCommunity * 2);
+		await expect(user.energy).to.equal(StartEnergy - energyFollowCommunity);
 	});
 
-	it("Test energy. Unfollow community (energy not enough)", async function () {
-		const peeranha = await createContract();
-		const hashContainer = getHashContainer();
-        const ipfsHashes = getHashesContainer(2);
-		const signers = await ethers.getSigners();
-		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
-		await peeranha.createUser(hashContainer[1]);
+	// it("Test energy. Unfollow community (energy not enough)", async function () {	// dont need?
+	// 	const peeranha = await createContract();
+	// 	const hashContainer = getHashContainer();
+    //     const ipfsHashes = getHashesContainer(2);
+	// 	const signers = await ethers.getSigners();
+	// 	await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+	// 	await peeranha.createUser(hashContainer[1]);
 
-		await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	// 	await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-		await peeranha.connect(signers[1]).followCommunity(1);
+	// 	await peeranha.connect(signers[1]).followCommunity(1);
 
-		await peeranha.setEnergy(signers[1].address, energyFollowCommunity - 1);
-		await expect(peeranha.connect(signers[1]).unfollowCommunity(1))
-		.to.be.revertedWith('Not enought energy!');
-	});
+	// 	await peeranha.setEnergy(signers[1].address, energyFollowCommunity - 1);
+	// 	await expect(peeranha.connect(signers[1]).unfollowCommunity(1))
+	// 	.to.be.revertedWith('Not enough energy!');
+	// });
 
 	it("Test energy. Actions by administrator", async function () {
 		const peeranha = await createContract();
