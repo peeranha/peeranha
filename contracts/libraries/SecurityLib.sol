@@ -209,7 +209,7 @@ library SecurityLib {
       userEnergy = UserLib.getStatusEnergy(user.rating); 
     }
 
-    require(userEnergy >= energy, "Not enought energy!");
+    require(userEnergy >= energy, "Not enough energy!");
     user.energy = userEnergy - energy;
     user.lastUpdatePeriod = currentPeriod;
   }
