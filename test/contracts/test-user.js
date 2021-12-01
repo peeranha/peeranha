@@ -66,12 +66,13 @@ describe("Test users", function() {
   it("Test user editing, negative rating", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
+		const signers = await ethers.getSigners();
     
-    await peeranha.createUser(hashContainer[0]);
-		await peeranha.addUserRating(peeranha.deployTransaction.from, -11);
+    await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[1]).addUserRating(signers[1].address, -11);
     const user = await peeranha.getUserByIndex(0);
     await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
-    await expect(peeranha.updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for upvote reply. You need 0 ratings.');
+    await expect(peeranha.connect(signers[1]).updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for edit profile. You need 0 ratings');
   })
 
   it("Test user getter", async function() {

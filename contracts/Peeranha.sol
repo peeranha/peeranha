@@ -72,7 +72,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
-        users.update(msg.sender, ipfsHash);
+        users.update(roles, msg.sender, ipfsHash);
     }
 
     /**
@@ -84,7 +84,7 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function followCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override 
     onlyExistingAndNotFrozenCommunity(communityId) {
-        users.followCommunity(msg.sender, communityId);
+        users.followCommunity(roles, msg.sender, communityId);
     }
 
     /**
@@ -413,7 +413,7 @@ contract Peeranha is IPeeranha, Initializable {
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     onlyExisitingUser(msg.sender) 
     checkTagsByPostId(postId, tags) override {
-        posts.editPost(msg.sender, postId, ipfsHash, tags);
+        posts.editPost(roles, users, msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -448,7 +448,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override { 
-        posts.editReply(msg.sender, postId, replyId, ipfsHash);
+        posts.editReply(roles, users, msg.sender, postId, replyId, ipfsHash);
     }
 
     /**
@@ -483,7 +483,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override {
-        posts.editComment(msg.sender, postId, parentReplyId, commentId, ipfsHash);
+        posts.editComment(roles, users, msg.sender, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
@@ -588,6 +588,13 @@ contract Peeranha is IPeeranha, Initializable {
 
     function addUserRating(address userAddr, int32 rating) external { // delete?
         users.updateUserRating(userRewards, userAddr, rating);
+    }
+
+    ///
+    // delete
+    ///
+    function setEnergy(address userAddr, uint16 energy) external {
+        users.getUserByAddress(userAddr).energy = energy;
     }
 
     modifier onlyExisitingUser(address user) {
