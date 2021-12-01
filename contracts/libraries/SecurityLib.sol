@@ -48,7 +48,7 @@ library SecurityLib {
   uint8 constant ENERGY_UPVOTE_QUESTION = 1;
   uint8 constant ENERGY_UPVOTE_ANSWER = 1;
   uint8 constant ENERGY_UPVOTE_COMMENT = 1;
-  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;
+  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
   uint8 constant ENERGY_POST_QUESTION = 10;
   uint8 constant ENERGY_POST_ANSWER = 6;
   uint8 constant ENERGY_POST_COMMENT = 4;
@@ -209,7 +209,7 @@ library SecurityLib {
       userEnergy = UserLib.getStatusEnergy(user.rating); 
     }
 
-    require(userEnergy >= energy, "Not enought energy!");
+    require(userEnergy >= energy, "Not enough energy!");
     user.energy = userEnergy - energy;
     user.lastUpdatePeriod = currentPeriod;
   }

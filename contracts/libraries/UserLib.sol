@@ -127,24 +127,14 @@ library UserLib {
 
   /// @notice User usfollows community
   /// @param self The mapping containing all users
-  /// @param roles Permissions user
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
     UserCollection storage self,
-    SecurityLib.Roles storage roles,
     address userAddress,
     uint32 communityId
   ) internal {
     User storage user = self.users[userAddress];
-    SecurityLib.checkRatingAndEnergy(
-      roles,
-      user,
-      userAddress,
-      userAddress,
-      0,
-      SecurityLib.Action.followCommunity
-    );
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {

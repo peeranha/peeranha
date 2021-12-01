@@ -228,7 +228,7 @@ describe("Test energy", function () {
 		await peeranha.setEnergy(signers[1].address, 1);
 
 		await expect(peeranha.connect(signers[1]).editPost(1, hashContainer[2], []))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Edit reply", async function () {
@@ -262,7 +262,7 @@ describe("Test energy", function () {
 		
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).editReply(1, 1, hashContainer[2]))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Edit comment", async function () {
@@ -302,7 +302,7 @@ describe("Test energy", function () {
 		
 		await peeranha.setEnergy(signers[1].address, 1);
 		await expect(peeranha.connect(signers[1]).editComment(1, 0, 1, hashContainer[2]))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Edit comment for reply (energy not enough)", async function () {
@@ -951,7 +951,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, 0);
 		await expect(peeranha.connect(signers[1]).updateUser(hashContainer[0]))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. MarkBestReply", async function () {
@@ -1005,7 +1005,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, energyBestReply - 1);
 		await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. MarkBestReply and unmark (energy not enough)", async function () {
@@ -1024,7 +1024,7 @@ describe("Test energy", function () {
 
 		await peeranha.setEnergy(signers[1].address, energyBestReply - 1);
 		await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1))
-			.to.be.revertedWith('Not enought energy!');
+			.to.be.revertedWith('Not enough energy!');
 	});
 
 	it("Test energy. Follow community", async function () {

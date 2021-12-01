@@ -95,7 +95,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be follow the community.  
      */
     function unfollowCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override {
-        users.unfollowCommunity(roles, msg.sender, communityId);
+        users.unfollowCommunity(msg.sender, communityId);
     }
 
     /**
