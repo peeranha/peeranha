@@ -668,7 +668,7 @@ library PostLib  {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             roles, 
-            UserLib.getUserByAddress(users, votedUser), 
+            UserLib.getUserByAddress(users, votedUser),
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
@@ -699,7 +699,7 @@ library PostLib  {
         UserLib.User storage user = UserLib.getUserByAddress(users, replyContainer.info.author);
         SecurityLib.checkRatingAndEnergy(
             roles, 
-            user, 
+            UserLib.getUserByAddress(users, votedUser),
             votedUser, 
             replyContainer.info.author, 
             communityId, 
@@ -746,7 +746,7 @@ library PostLib  {
         int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             roles, 
-            UserLib.getUserByAddress(users, votedUser), 
+            UserLib.getUserByAddress(users, votedUser),
             votedUser, 
             commentContainer.info.author, 
             communityId, 
