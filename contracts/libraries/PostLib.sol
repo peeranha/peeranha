@@ -699,7 +699,7 @@ library PostLib  {
         UserLib.User storage user = UserLib.getUserByAddress(users, replyContainer.info.author);
         SecurityLib.checkRatingAndEnergy(
             roles, 
-            user, 
+            UserLib.getUserByAddress(users, votedUser), 
             votedUser, 
             replyContainer.info.author, 
             communityId, 
