@@ -177,7 +177,7 @@ describe("Test post", function () {
 			expect(updatedPost.officialReply).to.equal(2);
 		});
 
-		it("Test double replies in export post", async function () {
+		it("Test double replies in expert post", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -211,6 +211,42 @@ describe("Test post", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
+		});
+
+		it("Test create reply on reply in expert post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.createReply(1, 1, hashContainer[1], false)).to.be.revertedWith('User is forbidden to reply on reply for Expert and Common type of posts');
+		});
+	
+		it("Test create reply on reply in common post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranha.createReply(1, 1, hashContainer[1], false)).to.be.revertedWith('User is forbidden to reply on reply for Expert and Common type of posts');
+		});
+	
+		xit("Test create reply on reply in tutorial post", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+	
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 1, hashContainer[1], false);
 		});
 
 		it("Test create two official replies for the same post", async function () {
@@ -341,9 +377,11 @@ describe("Test post", function () {
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
 			await peeranha.deletePost(1);
 
 			await expect(peeranha.createComment(1, 0, hashContainer[1])).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranha.createComment(1, 1, hashContainer[1])).to.be.revertedWith('Post has been deleted.');
 		});
 
 		it("Test create comment, reply has been deleted", async function () {
@@ -495,6 +533,18 @@ describe("Test post", function () {
 
 			await expect(peeranha.editPost(1, hashContainer[2], [])).to.be.revertedWith('Post does not exist.');
 		});
+
+		it("Test edit post, post hes been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.editPost(1, hashContainer[2], [])).to.be.revertedWith('Post has been deleted.');
+		});
 	});
 
 	describe('Edit reply', function () {
@@ -580,6 +630,34 @@ describe("Test post", function () {
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranha.editReply(1, 1, hashContainer[2])).to.be.revertedWith('Reply does not exist.');
+		});
+
+		it("Test edit reply, post has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.editReply(1, 1, hashContainer[2])).to.be.revertedWith('Post has been deleted.');
+		});
+
+		it("Test edit reply, reply has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.deleteReply(1, 1);
+
+			await expect(peeranha.editReply(1, 1, hashContainer[2])).to.be.revertedWith('Reply has been deleted.');
 		});
 	});
 
@@ -677,6 +755,56 @@ describe("Test post", function () {
 			await peeranha.createReply(1, 0, hashContainer[1], false);
 			await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Comment does not exist.');
 		});
+
+		it("Test edit comment, post has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[0], false);
+			await peeranha.createComment(1, 0, hashContainer[1]);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.editComment(1, 0, 1, hashContainer[2])).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Post has been deleted.');
+		});
+
+		it("Test edit comment, reply has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[0], false);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deleteReply(1, 1);
+
+			await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Reply has been deleted.');		
+		});
+
+		it("Test edit comment, comment has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[0], false);
+			await peeranha.createComment(1, 0, hashContainer[1]);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deleteComment(1, 0, 1);
+			await peeranha.deleteComment(1, 1, 1);
+
+			await expect(peeranha.editComment(1, 0, 1, hashContainer[2])).to.be.revertedWith('Comment has been deleted.');
+			await expect(peeranha.editComment(1, 1, 1, hashContainer[2])).to.be.revertedWith('Comment has been deleted.');
+		});
 	});
 
 	describe('Delete post', function () {
@@ -724,16 +852,20 @@ describe("Test post", function () {
 			.to.be.revertedWith('You can not delete this item');
 		});
 
-		xit("Test delete post with reply", async function () { // Need to be fixed
+		it("Test delete post with reply", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[2]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranha.createReply(1, 0, hashContainer[1], false);
-			await expect(peeranha.deletePost(1)).to.be.revertedWith(''); // what message?
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.deletePost(1);
+
+			expect((await peeranha.getPost(1)).isDeleted).to.be.true;
 		});
 
 		it("Test delete post, without post", async function () {
@@ -741,6 +873,18 @@ describe("Test post", function () {
 			const hashContainer = getHashContainer();
 			await peeranha.createUser(hashContainer[1]);
 			await expect(peeranha.deletePost(1)).to.be.revertedWith('Post does not exist.');
+		});
+
+		it("Test delete post, post has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.deletePost(1)).to.be.revertedWith('Post has been deleted.');
 		});
 	});
 
@@ -792,7 +936,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('You can not delete this item');
 		});
 
-		xit("Test delete accepted reply", async function () { // Need to be fixed
+		it("Test delete accepted reply", async function () {
 			const peeranha = await createContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -804,7 +948,7 @@ describe("Test post", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranha.changeStatusBestReply(1, 1);
-			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith(''); // what message?
+			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('You can not delete the best reply.');
 		});
 
 		it("Test delete reply, without post", async function () {
@@ -823,6 +967,34 @@ describe("Test post", function () {
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('Reply does not exist.');
+		});
+
+		it("Test delete reply, post has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('Post has been deleted.');
+		});
+
+		it("Test delete reply, reply has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.deleteReply(1, 1);
+
+			await expect(peeranha.deleteReply(1, 1)).to.be.revertedWith('Reply has been deleted.');
 		});
 	});
 
@@ -912,6 +1084,56 @@ describe("Test post", function () {
 
 			await peeranha.createReply(1, 0, hashContainer[1], false);
 			await expect(peeranha.deleteComment(1, 1, 1)).to.be.revertedWith('Comment does not exist.');
+		});
+
+		it("Test delete comment, post has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createComment(1, 0, hashContainer[1]);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deletePost(1);
+
+			await expect(peeranha.deleteComment(1, 0, 1)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranha.deleteComment(1, 1, 1)).to.be.revertedWith('Post has been deleted.');
+		});
+
+		it("Test delete comment, reply has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deleteReply(1, 1);
+
+			await expect(peeranha.deleteComment(1, 1, 1)).to.be.revertedWith('Reply has been deleted.');
+		});
+
+		it("Test delete comment, comment has been deleted", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.createComment(1, 0, hashContainer[1]);
+			await peeranha.createComment(1, 1, hashContainer[1]);
+			await peeranha.deleteComment(1, 0, 1);
+			await peeranha.deleteComment(1, 1, 1);
+
+			await expect(peeranha.deleteComment(1, 0, 1)).to.be.revertedWith('Comment has been deleted.');
+			await expect(peeranha.deleteComment(1, 1, 1)).to.be.revertedWith('Comment has been deleted.');
 		});
 	});
 
