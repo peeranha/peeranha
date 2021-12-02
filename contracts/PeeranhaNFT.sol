@@ -3,7 +3,6 @@ pragma abicoder v2;
 
 import "./libraries/NFTLib.sol";
 import "./libraries/AchievementCommonLib.sol";
-import "./interfaces/IPeeranha.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -17,15 +16,10 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
 
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
-  IPeeranha peeranha;
 
   function initialize(string memory name, string memory symbol) public initializer {
     __NFT_init(name, symbol);
     __Ownable_init_unchained();
-  }
-
-  function initPeeranhaContract(address peeranhaNFTContractAddress) public initializer {
-    peeranha = IPeeranha(peeranhaNFTContractAddress);
   }
 
   function __NFT_init(string memory name, string memory symbol) internal initializer {
