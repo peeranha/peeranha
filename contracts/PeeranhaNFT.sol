@@ -9,12 +9,12 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 ///
+//   Init contract owner
 // owner init by peranhaNFTAddress
 // peeranhaNFT.transferOwnership(peeranhaAddress)
 ///
 
 contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
-
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
   function initialize(string memory name, string memory symbol) public initializer {
