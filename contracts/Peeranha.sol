@@ -62,7 +62,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be a new user.
      */
     function createUser(bytes32 ipfsHash) external override {
-        userContext.users.create(msg.sender, ipfsHash);
+        UserLib.create(userContext.users, msg.sender, ipfsHash);
     }
 
     /**
@@ -73,7 +73,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
-        userContext.users.update(msg.sender, ipfsHash);
+        UserLib.update(userContext, msg.sender, ipfsHash);
     }
 
     /**
@@ -85,7 +85,7 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function followCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override 
     onlyExistingAndNotFrozenCommunity(communityId) {
-        userContext.users.followCommunity(msg.sender, communityId);
+        UserLib.followCommunity(userContext, msg.sender, communityId);
     }
 
     /**
@@ -96,7 +96,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be follow the community.  
      */
     function unfollowCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override {
-        userContext.users.unfollowCommunity(msg.sender, communityId);
+        UserLib.unfollowCommunity(userContext.users, msg.sender, communityId);
     }
 
     /**
@@ -198,7 +198,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityModerator(communityId) {
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -210,7 +213,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) onlyExistingAndNotFrozenCommunity(communityId) onlyAdminOrCommunityAdmin(communityId) {
+    function freezeCommunity(uint32 communityId) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingAndNotFrozenCommunity(communityId) 
+    onlyAdminOrCommunityAdmin(communityId) {
         communities.freeze(communityId);
     }
 
@@ -309,6 +315,22 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     /**
+     * @dev Edit tag info.
+     *
+     * Requirements:
+     *
+     * - Must be an existing commuity. 
+     * - Must be an existing tag.  
+     * - Sender must be community moderator.
+     */
+    function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external 
+    onlyExisitingUser(msg.sender) 
+    onlyExistingTag(tagId, communityId) 
+    onlyAdminOrCommunityModerator(communityId) {
+        communities.updateTag(tagId, communityId, ipfsHash);
+    }
+
+    /**
      * @dev Get communities count.
      */
     function getCommunitiesCount() external view returns (uint32 count) {
@@ -357,7 +379,9 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing community.
      * - Must be a tag.
      */
-    function getTag(uint32 communityId, uint8 tagId) external view returns (CommunityLib.Tag memory) {
+    function getTag(uint32 communityId, uint8 tagId) external view
+    onlyExistingTag(tagId, communityId) 
+    returns (CommunityLib.Tag memory) {
         return communities.getTag(communityId, tagId);
     }
 
@@ -373,7 +397,7 @@ contract Peeranha is IPeeranha, Initializable {
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
     onlyExisitingUser(msg.sender) 
     onlyExistingAndNotFrozenCommunity(communityId)
-    checkTag(communityId, tags) override {
+    checkTags(communityId, tags) override {
         posts.createPost(userContext, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
@@ -389,8 +413,8 @@ contract Peeranha is IPeeranha, Initializable {
     */
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     onlyExisitingUser(msg.sender) 
-    checkTagByPostId(postId, tags) override {
-        posts.editPost(msg.sender, postId, ipfsHash, tags);
+    checkTagsByPostId(postId, tags) override {
+        posts.editPost(userContext, msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -425,7 +449,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override { 
-        posts.editReply(msg.sender, postId, replyId, ipfsHash);
+        posts.editReply(userContext, msg.sender, postId, replyId, ipfsHash);
     }
 
     /**
@@ -460,7 +484,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override {
-        posts.editComment(msg.sender, postId, parentReplyId, commentId, ipfsHash);
+        posts.editComment(userContext, msg.sender, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
@@ -587,6 +611,13 @@ contract Peeranha is IPeeranha, Initializable {
         UserLib.updateUserRating(userContext, userAddr, rating);
     }
 
+    ///
+    // delete
+    ///
+    function setEnergy(address userAddr, uint16 energy) external {
+        userContext.users.getUserByAddress(userAddr).energy = energy;
+    }
+
     modifier onlyExisitingUser(address user) {
         require(UserLib.isExists(userContext.users, user),
         "Peeranha: must be an existing user");
@@ -622,14 +653,19 @@ contract Peeranha is IPeeranha, Initializable {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
         _;
     }
-
-    modifier checkTag(uint32 communityId, uint8[] memory tags) {
-        CommunityLib.checkTag(communities, communityId, tags);
+    
+    modifier onlyExistingTag(uint8 tagId, uint32 communityId) {
+        CommunityLib.onlyExistingTag(communities, tagId, communityId);
+        _;
+    }
+    
+    modifier checkTags(uint32 communityId, uint8[] memory tags) {
+        CommunityLib.checkTags(communities, communityId, tags);
         _;
     }
 
-    modifier checkTagByPostId(uint256 postId, uint8[] memory tags) {
-        CommunityLib.checkTagByPostId(communities, posts, postId, tags);
+    modifier checkTagsByPostId(uint256 postId, uint8[] memory tags) {
+        CommunityLib.checkTagsByPostId(communities, posts, postId, tags);
         _;
     }
 }

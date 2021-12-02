@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
+import "./UserLib.sol";
+import "./CommonLib.sol";
+
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
@@ -11,6 +14,7 @@ library SecurityLib {
     publicationPost,
     publicationReply,
     publicationComment,
+    editItem,
     deleteItem,
     upVotePost,
     downVotePost,
@@ -19,7 +23,9 @@ library SecurityLib {
     upVoteComment,
     downVoteComment,
     officialReply,
-    bestReply
+    bestReply,
+    updateProfile,
+    followCommunity
   }
   
   int16 constant MINIMUM_RATING = -300;
@@ -34,6 +40,32 @@ library SecurityLib {
   int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
   int16 constant UPVOTE_COMMENT_ALLOWED = 0;
   int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
+
+  int16 constant UPDATE_PROFILE_ALLOWED = 0;
+
+
+  uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;
+  uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;
+  uint8 constant ENERGY_DOWNVOTE_COMMENT = 2;
+  uint8 constant ENERGY_UPVOTE_QUESTION = 1;
+  uint8 constant ENERGY_UPVOTE_ANSWER = 1;
+  uint8 constant ENERGY_UPVOTE_COMMENT = 1;
+  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
+  uint8 constant ENERGY_POST_QUESTION = 10;
+  uint8 constant ENERGY_POST_ANSWER = 6;
+  uint8 constant ENERGY_POST_COMMENT = 4;
+  uint8 constant ENERGY_MODIFY_ITEM = 2;
+  uint8 constant ENERGY_DELETE_ITEM = 2;
+
+  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;
+  uint8 constant ENERGY_UPDATE_PROFILE = 1;
+  uint8 constant ENERGY_CREATE_TAG = 75;            // only Admin
+  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     // only admin
+  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
+  uint8 constant ENERGY_REPORT_PROFILE = 5;         //
+  uint8 constant ENERGY_REPORT_QUESTION = 3;        //
+  uint8 constant ENERGY_REPORT_ANSWER = 2;          //
+  uint8 constant ENERGY_REPORT_COMMENT = 1;         //
 
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
   using AddressUpgradeable for address;
@@ -59,25 +91,30 @@ library SecurityLib {
     return bytes32(role + communityId);
   }
 
-  function checkRatingAndCommunityModerator(
-  Roles storage self,
-  int32 userRating,
-  address actionCaller,
-  address dataUser,
-  uint32 communityId,
-  Action action) internal {
-    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender) ||  //msg.sender?
-      hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender))) return;
+  function checkRatingAndEnergy(
+    Roles storage role,
+    UserLib.User storage user,
+    address actionCaller,
+    address dataUser,
+    uint32 communityId,
+    Action action
+  )
+    internal
+  {
+    if (hasModeratorRole(role, actionCaller, communityId)) return;
     
     int16 ratingAllowen;
     string memory message;
+    uint8 energy;
     if (action == Action.publicationPost) {
       ratingAllowen = POST_QUESTION_ALLOWED;
       message = "Your rating is too small for publication post. You need 0 ratings";
+      energy = ENERGY_POST_QUESTION;
 
     } else if (action == Action.publicationReply) {
       ratingAllowen = POST_REPLY_ALLOWED;
       message = "Your rating is too small for publication reply. You need 0 ratings";
+      energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.publicationComment) {
       if (actionCaller == dataUser) {
@@ -87,51 +124,110 @@ library SecurityLib {
         ratingAllowen = POST_COMMENT_ALLOWED;
         message = "Your rating is too small for publication comment. You need 35 ratings";
       }
+      energy = ENERGY_POST_COMMENT;
+
+    } else if (action == Action.editItem) {
+      require(actionCaller == dataUser, "You can not edit this item");
+      ratingAllowen = MINIMUM_RATING;
+      message = "Your rating is too small for edit item. You need -300 ratings";
+      energy = ENERGY_MODIFY_ITEM;
 
     } else if (action == Action.deleteItem) {
       require(actionCaller == dataUser, "You can not delete this item");
-      return;
+      ratingAllowen = 0;
+      message = "Your rating is too small for delete own item. You need 0 ratings"; // delete own item?
+      energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
       ratingAllowen = UPVOTE_POST_ALLOWED;
       message = "Your rating is too small for upvote post. You need 35 ratings";
+      energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
       ratingAllowen = UPVOTE_REPLY_ALLOWED;
       message = "Your rating is too small for upvote reply. You need 35 ratings";
+      energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.upVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
       ratingAllowen = UPVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for upvote comment. You need 0 ratings";
+      energy = ENERGY_UPVOTE_COMMENT;
 
     } else if (action == Action.downVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
       ratingAllowen = DOWNVOTE_POST_ALLOWED;
       message = "Your rating is too small for downvote post. You need 100 ratings";
+      energy = ENERGY_DOWNVOTE_QUESTION;
 
     } else if (action == Action.downVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
       ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
       message = "Your rating is too small for downvote reply. You need 100 ratings";
+      energy = ENERGY_DOWNVOTE_ANSWER;
 
     } else if (action == Action.downVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
       ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for downvote comment. You need 0 ratings";
+      energy = ENERGY_DOWNVOTE_COMMENT;
 
     } else if (action == Action.bestReply) {
       require(actionCaller == dataUser, "You can mark the reply as the best, it is not your");
       ratingAllowen = MINIMUM_RATING;
       message = "Your rating is too small for mark reply as best. You need -300 ratings";
+      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+
+    } else if (action == Action.updateProfile) {
+      ratingAllowen = UPDATE_PROFILE_ALLOWED;
+      message = "Your rating is too small for edit profile. You need 0 ratings";
+      energy = ENERGY_UPDATE_PROFILE;
+
+    } else if (action == Action.followCommunity) {
+      ratingAllowen = MINIMUM_RATING;
+      message = "Your rating is too small for edit profile. You need -300 ratings";
+      energy = ENERGY_FOLLOW_COMMUNITY;
 
     } else {
       require(false, "Action not allowed");
     }
 
-    require(userRating >= ratingAllowen, message);
+    require(user.rating >= ratingAllowen, message);
+    reduceEnergy(user, energy);
+  }
+
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
+    int32 rating = user.rating;
+    uint256 currentTime = CommonLib.getTimestamp();
+    uint32 currentPeriod = uint32((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
+    uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
+
+    uint16 userEnergy;
+    if (periodsHavePassed == 0) {
+      userEnergy = user.energy;
+    } else {
+      userEnergy = UserLib.getStatusEnergy(user.rating); 
+    }
+
+    require(userEnergy >= energy, "Not enough energy!");
+    user.energy = userEnergy - energy;
+    user.lastUpdatePeriod = currentPeriod;
+  }
+
+  function hasModeratorRole(
+    Roles storage self,
+    address user,
+    uint32 communityId
+  ) 
+    internal 
+    returns (bool) 
+  {
+    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
+      hasRole(self, DEFAULT_ADMIN_ROLE, user))) return true;
+    
+    return false;
   }
 
   /**

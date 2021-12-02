@@ -66,12 +66,13 @@ describe("Test users", function() {
   it("Test user editing, negative rating", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
+		const signers = await ethers.getSigners();
     
-    await peeranha.createUser(hashContainer[0]);
-		await peeranha.addUserRating(peeranha.deployTransaction.from, -11);
+    await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranha.connect(signers[1]).addUserRating(signers[1].address, -11);
     const user = await peeranha.getUserByIndex(0);
     await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
-    await expect(peeranha.updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for upvote reply. You need 0 ratings.');
+    await expect(peeranha.connect(signers[1]).updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for edit profile. You need 0 ratings');
   })
 
   it("Test user getter", async function() {
@@ -213,7 +214,7 @@ describe("Test users", function() {
     expect(user.followedCommunities[1]).to.equal(2);
   })
 
-  xit("Follow community by non-existed user", async function() { // must be fixed
+  it("Follow community by non-existed user", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
     const hashContainer = getHashContainer();
@@ -309,7 +310,7 @@ describe("Test users", function() {
     await peeranha.unfollowCommunity(1)
   })
 
-  xit("UnFollow community by non-existed user", async function() { // must be fixed
+  it("UnFollow community by non-existed user", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
     const hashContainer = getHashContainer();

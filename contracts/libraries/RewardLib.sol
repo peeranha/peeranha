@@ -5,7 +5,6 @@ import "./CommonLib.sol";
 import "./UserLib.sol";
 
 
-
 /// @title RewardLib
 /// @notice
 /// @dev

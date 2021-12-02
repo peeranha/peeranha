@@ -13,11 +13,14 @@ import "./AchievementCommonLib.sol";
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
   int32 constant START_USER_RATING = 10;
+  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 14; // 259200 - 3 Days
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     int32 rating;
     int32 payOutRating;
+    uint16 energy;
+    uint32 lastUpdatePeriod;
     uint256 creationTime;
     bytes32[] roles;
     uint32[] followedCommunities;
@@ -65,6 +68,7 @@ library UserLib {
     user.creationTime = CommonLib.getTimestamp();
     user.rating = START_USER_RATING;
     user.payOutRating = START_USER_RATING;
+    user.energy = getStatusEnergy(START_USER_RATING);
 
     self.userList.push(userAddress);
 
@@ -72,31 +76,47 @@ library UserLib {
   }
 
   /// @notice Update new user info record
-  /// @param self The mapping containing all users
+  /// @param userContext All information about users
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    UserCollection storage self,
+    UserLib.UserContext storage userContext,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    User storage user = getUserByAddress(self, userAddress);
-    require(user.rating >= 0, "Your rating is too small for upvote reply. You need 0 ratings.");
+    User storage user = getUserByAddress(userContext.users, userAddress);
+    SecurityLib.checkRatingAndEnergy(
+      userContext.roles,
+      user,
+      userAddress,
+      userAddress,
+      0,
+      SecurityLib.Action.updateProfile
+    );
     user.ipfsDoc.hash = ipfsHash;
 
     emit UserUpdated(userAddress);
   }
 
   /// @notice User follows community
-  /// @param self The mapping containing all users
+  /// @param userContext All information about users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function followCommunity(
-    UserCollection storage self,
+    UserLib.UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = self.users[userAddress];
+    User storage user = getUserByAddress(userContext.users, userAddress);
+    SecurityLib.checkRatingAndEnergy(
+      userContext.roles,
+      user,
+      userAddress,
+      userAddress,
+      0,
+      SecurityLib.Action.followCommunity
+    );
+
     bool isAdded;
     for (uint i; i < user.followedCommunities.length; i++) {
       require(user.followedCommunities[i] != communityId, "You already follow the community");
@@ -173,15 +193,22 @@ library UserLib {
   /// @notice Add rating to user
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
+  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
+    if (rating == 0) return;
+
+    updateRatingBase(userContext, user, userAddr, rating);
+  }
+
   function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
     if (rating == 0) return;
 
-    updateRatingBase(userContext, userAddr, rating);
+    User storage user = getUserByAddress(userContext.users, userAddr);
+    updateRatingBase(userContext, user, userAddr, rating);
   }
 
-  function updateRatingBase(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    User storage user = getUserByAddress(userContext.users, userAddr);
+    // User storage user = getUserByAddress(userContext.users, userAddr);
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
@@ -224,5 +251,27 @@ library UserLib {
     if (rating > 0) {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
     }
+  }
+
+  function getStatusEnergy(int32 rating) internal returns (uint16) {
+    uint16 maxEnergy;
+    if (rating < 0) {
+      maxEnergy = 0;
+    } else if (rating < 100) {
+      maxEnergy = 300;
+    } else if (rating < 500) {
+      maxEnergy = 600;
+    } else if (rating < 1000) {
+      maxEnergy = 900;
+    } else if (rating < 2500) {
+      maxEnergy = 1200;
+    } else if (rating < 5000) {
+      maxEnergy = 1500;
+    } else if (rating < 10000) {
+      maxEnergy = 1800;
+    } else {
+      maxEnergy = 2100;
+    }
+    return maxEnergy;
   }
 }
