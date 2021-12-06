@@ -8,6 +8,8 @@ import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
 import "./libraries/SecurityLib.sol";
+import "./libraries/AchievementLib.sol";
+import "./libraries/AchievementCommonLib.sol";
 // import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranha.sol";
@@ -22,18 +24,17 @@ contract Peeranha is IPeeranha, Initializable {
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
+    using AchievementLib for AchievementLib.AchievementsContainer;
     // using ConfigurationLib for ConfigurationLib.Configuration;
 
-    UserLib.UserCollection users;
-    RewardLib.UserRewards userRewards;
+    UserLib.UserContext userContext;
     CommunityLib.CommunityCollection communities;
     PostLib.PostCollection posts;
-    SecurityLib.Roles roles;
-    SecurityLib.UserRoles userRoles;
     // ConfigurationLib.Configuration configuration;
 
-    function initialize() public initializer {
+    function initialize(address peeranhaNFTContractAddress) public initializer {
         __Peeranha_init();
+        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaNFTContractAddress);
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
@@ -45,11 +46,11 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function __Peeranha_init_unchained() internal initializer {
-        SecurityLib.setupRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
+        SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(int32) {
-        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriodRating(userRewards, user, rewardPeriod);
+        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriodRating(userContext.userRewards, user, rewardPeriod);
         return userPeriod.ratingToReward;
     }
     
@@ -61,7 +62,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be a new user.
      */
     function createUser(bytes32 ipfsHash) external override {
-        users.create(msg.sender, ipfsHash);
+        UserLib.create(userContext.users, msg.sender, ipfsHash);
     }
 
     /**
@@ -72,7 +73,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) external override {
-        users.update(roles, msg.sender, ipfsHash);
+        UserLib.update(userContext, msg.sender, ipfsHash);
     }
 
     /**
@@ -84,7 +85,7 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function followCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override 
     onlyExistingAndNotFrozenCommunity(communityId) {
-        users.followCommunity(roles, msg.sender, communityId);
+        UserLib.followCommunity(userContext, msg.sender, communityId);
     }
 
     /**
@@ -95,14 +96,14 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be follow the community.  
      */
     function unfollowCommunity(uint32 communityId) external onlyExisitingUser(msg.sender) override {
-        users.unfollowCommunity(msg.sender, communityId);
+        UserLib.unfollowCommunity(userContext.users, msg.sender, communityId);
     }
 
     /**
      * @dev Get users count.
      */
     function getUsersCount() external view returns (uint256 count) {
-        return users.getUsersCount();
+        return userContext.users.getUsersCount();
     }
 
     /**
@@ -113,7 +114,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.
      */
     function getUserByIndex(uint256 index) external view returns (UserLib.User memory) {
-        return users.getUserByIndex(index);
+        return userContext.users.getUserByIndex(index);
     }
 
     /**
@@ -124,14 +125,14 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.
      */
     function getUserByAddress(address addr) external view returns (UserLib.User memory) {
-        return users.getUserByAddress(addr);
+        return userContext.users.getUserByAddress(addr);
     }
 
     /**
      * @dev Check user existence.
      */
     function isUserExists(address addr) external view returns (bool) {
-        return users.isExists(addr);
+        return userContext.users.isExists(addr);
     }
 
     /**
@@ -142,7 +143,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.
      */
     function getUserPermissions(address addr) external view returns (bytes32[] memory) {
-        return SecurityLib.getPermissions(userRoles, addr);
+        return SecurityLib.getPermissions(userContext.userRoles, addr);
     }
 
 
@@ -157,7 +158,7 @@ contract Peeranha is IPeeranha, Initializable {
     function giveAdminPermission(address user) external
     onlyAdmin()
     onlyExisitingUser(user) {
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, user);
+        SecurityLib.grantRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
     }
 
     /**
@@ -173,7 +174,7 @@ contract Peeranha is IPeeranha, Initializable {
     function revokeAdminPermission(address user) external 
     onlyAdmin()
     onlyExisitingUser(user) {
-        SecurityLib.revokeRole(roles, userRoles, SecurityLib.DEFAULT_ADMIN_ROLE, user);
+        SecurityLib.revokeRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
     }
 
     /**
@@ -185,8 +186,8 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external onlyExisitingUser(msg.sender) onlyAdmin() {
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
+        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
+        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
     }
 
     /**
@@ -244,8 +245,8 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExisitingUser(user) 
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyAdminOrCommunityAdmin(communityId) {
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
+        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -261,7 +262,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExisitingUser(user)
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
-        SecurityLib.grantRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -277,7 +278,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExisitingUser(user)
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
-        SecurityLib.revokeRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
+        SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
     /**
@@ -295,7 +296,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExisitingUser(user) 
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyCommunityAdmin(communityId) {
-        SecurityLib.revokeRole(roles, userRoles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -394,10 +395,10 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be tags.
     */
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
-    onlyExisitingUser(msg.sender)
+    onlyExisitingUser(msg.sender) 
     onlyExistingAndNotFrozenCommunity(communityId)
     checkTags(communityId, tags) override {
-        posts.createPost(roles, users, msg.sender, communityId, ipfsHash, postType, tags);
+        posts.createPost(userContext, msg.sender, communityId, ipfsHash, postType, tags);
     }
 
     /**
@@ -413,7 +414,7 @@ contract Peeranha is IPeeranha, Initializable {
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     onlyExisitingUser(msg.sender) 
     checkTagsByPostId(postId, tags) override {
-        posts.editPost(roles, users, msg.sender, postId, ipfsHash, tags);
+        posts.editPost(userContext, msg.sender, postId, ipfsHash, tags);
     }
 
     /**
@@ -424,7 +425,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post.
     */
     function deletePost(uint256 postId) external onlyExisitingUser(msg.sender) override {
-        posts.deletePost(roles, users, userRewards, msg.sender, postId);
+        posts.deletePost(userContext, msg.sender, postId);
     }
 
     /**
@@ -436,7 +437,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external onlyExisitingUser(msg.sender) override {
-        posts.createReply(roles, users, userRewards, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
+        posts.createReply(userContext, msg.sender, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -448,7 +449,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override { 
-        posts.editReply(roles, users, msg.sender, postId, replyId, ipfsHash);
+        posts.editReply(userContext, msg.sender, postId, replyId, ipfsHash);
     }
 
     /**
@@ -459,7 +460,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reply.
     */
     function deleteReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override { 
-        posts.deleteReply(roles, users, userRewards, msg.sender, postId, replyId);
+        posts.deleteReply(userContext, msg.sender, postId, replyId);
     }
 
     /**
@@ -471,7 +472,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post or a reply.
     */
     function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender)override {
-        posts.createComment(roles, users, msg.sender, postId, parentReplyId, ipfsHash);
+        posts.createComment(userContext, msg.sender, postId, parentReplyId, ipfsHash);
     }
 
     /**
@@ -483,7 +484,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external onlyExisitingUser(msg.sender) override {
-        posts.editComment(roles, users, msg.sender, postId, parentReplyId, commentId, ipfsHash);
+        posts.editComment(userContext, msg.sender, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
@@ -494,7 +495,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a comment.
     */
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external onlyExisitingUser(msg.sender) override {
-        posts.deleteComment(roles, users, userRewards, msg.sender, postId, parentReplyId, commentId);
+        posts.deleteComment(userContext, msg.sender, postId, parentReplyId, commentId);
     }
 
     /**
@@ -506,7 +507,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - the user must have right for change status oficial answer.
     */ 
     function changeStatusOfficialReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {            
-        posts.changeStatusOfficialReply(roles, msg.sender, postId, replyId);
+        posts.changeStatusOfficialReply(userContext.roles, msg.sender, postId, replyId);
     }
 
     /**
@@ -518,7 +519,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a role ?
     */ 
     function changeStatusBestReply(uint256 postId, uint16 replyId) external onlyExisitingUser(msg.sender) override {
-        posts.changeStatusBestReply(roles, users, userRewards, msg.sender, postId, replyId);
+        posts.changeStatusBestReply(userContext, msg.sender, postId, replyId);
     }
 
     /**
@@ -529,7 +530,23 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post/reply/comment.
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external onlyExisitingUser(msg.sender) override {  
-        posts.voteForumItem(roles, users, userRewards, msg.sender, postId, replyId, commentId, isUpvote);
+        posts.voteForumItem(userContext, msg.sender, postId, replyId, commentId, isUpvote);
+    }
+
+    function configureNewAchievement(
+        uint64 maxCount,
+        int64 lowerBound,
+        string memory achievementURI,
+        AchievementCommonLib.AchievementsType achievementsType
+    )   
+        onlyAdmin()
+        external
+    {
+        userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
+    }
+
+    function getAchievementConfig(uint64 achievementId) external view returns (AchievementLib.AchievementConfig memory) {
+        return userContext.achievementsContainer.achievementsConfigs[achievementId];
     }
 
     /**
@@ -575,7 +592,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a period less then now.
     */
     function getUserRewardPeriod(address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
-        return RewardLib.getUserPeriodRating(userRewards, user, period);
+        return RewardLib.getUserPeriodRating(userContext.userRewards, user, period);
     }
 
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
@@ -586,45 +603,49 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
-    function addUserRating(address userAddr, int32 rating) external { // delete?
-        users.updateUserRating(userRewards, userAddr, rating);
+    ///
+    // TO DO
+    // to remove it in prod
+    ///
+    function addUserRating(address userAddr, int32 rating) external {
+        UserLib.updateUserRating(userContext, userAddr, rating);
     }
 
     ///
     // delete
     ///
     function setEnergy(address userAddr, uint16 energy) external {
-        users.getUserByAddress(userAddr).energy = energy;
+        userContext.users.getUserByAddress(userAddr).energy = energy;
     }
 
     modifier onlyExisitingUser(address user) {
-        require(UserLib.isExists(users, user),
+        require(UserLib.isExists(userContext.users, user),
         "Peeranha: must be an existing user");
         _;
     }
 
     modifier onlyCommunityModerator(uint32 communityId) {
-        SecurityLib.onlyCommunityModerator(roles, communityId);
+        SecurityLib.onlyCommunityModerator(userContext.roles, communityId);
         _;
     }
 
     modifier onlyCommunityAdmin(uint32 communityId) {
-        SecurityLib.onlyCommunityAdmin(roles, communityId);
+        SecurityLib.onlyCommunityAdmin(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdminOrCommunityAdmin(uint32 communityId) {
-        SecurityLib.onlyAdminOrCommunityAdmin(roles, communityId);
+        SecurityLib.onlyAdminOrCommunityAdmin(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdminOrCommunityModerator(uint32 communityId) {
-        SecurityLib.onlyAdminOrCommunityModerator(roles, communityId);
+        SecurityLib.onlyAdminOrCommunityModerator(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdmin() {
-        SecurityLib.onlyAdmin(roles);
+        SecurityLib.onlyAdmin(userContext.roles);
         _;
     }
 

@@ -7,7 +7,19 @@ async function wait(ms) {
 
 async function getBalance(contract, user) {
     const balance = await contract.balanceOf(user);
-	return await parseInt(balance._hex, 16);
+	return await getInt(balance);
 }
 
-module.exports = { wait, getBalance };
+async function getInt(value) {
+	return await parseInt(value._hex, 16);
+}
+
+async function getAddressContract(contract) {
+    const contractAddress = await contract.resolvedAddress.then((address) => {
+        return address;
+    });
+	return contractAddress;
+}
+
+
+module.exports = { wait, getBalance, getInt, getAddressContract };

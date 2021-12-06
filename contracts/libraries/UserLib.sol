@@ -5,6 +5,8 @@ import "./CommonLib.sol";
 import "./IpfsLib.sol";
 import "./RewardLib.sol";
 import "./SecurityLib.sol";
+import "./AchievementLib.sol";
+import "./AchievementCommonLib.sol";
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -23,6 +25,15 @@ library UserLib {
     bytes32[] roles;
     uint32[] followedCommunities;
     uint16[] rewardPeriods;
+  }
+
+  /// users The mapping containing all users
+  struct UserContext {
+    UserLib.UserCollection users;
+    RewardLib.UserRewards userRewards;
+    SecurityLib.Roles roles;
+    SecurityLib.UserRoles userRoles;
+    AchievementLib.AchievementsContainer achievementsContainer;
   }
   
   struct UserCollection {
@@ -65,19 +76,17 @@ library UserLib {
   }
 
   /// @notice Update new user info record
-  /// @param self The mapping containing all users
-  /// @param roles Permissions user
+  /// @param userContext All information about users
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    UserCollection storage self,
-    SecurityLib.Roles storage roles,
+    UserLib.UserContext storage userContext,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    User storage user = getUserByAddress(self, userAddress);
+    User storage user = getUserByAddress(userContext.users, userAddress);
     SecurityLib.checkRatingAndEnergy(
-      roles,
+      userContext.roles,
       user,
       userAddress,
       userAddress,
@@ -90,19 +99,17 @@ library UserLib {
   }
 
   /// @notice User follows community
-  /// @param self The mapping containing all users
-  /// @param roles Permissions user
+  /// @param userContext All information about users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function followCommunity(
-    UserCollection storage self,
-    SecurityLib.Roles storage roles,
+    UserLib.UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = self.users[userAddress];
+    User storage user = getUserByAddress(userContext.users, userAddress);
     SecurityLib.checkRatingAndEnergy(
-      roles,
+      userContext.roles,
       user,
       userAddress,
       userAddress,
@@ -177,40 +184,35 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(self, userRewards, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating);
     }
   }
 
   /// @notice Add rating to user
-  /// @param self The mapping containing all users
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, address userAddr, int32 rating) internal {  // name action?
+  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
     if (rating == 0) return;
 
-    User storage user = getUserByAddress(self, userAddr);
-    updateRatingBase(self, userRewards, user, userAddr, rating);
+    updateRatingBase(userContext, user, userAddr, rating);
   }
 
-  /// @notice Add rating to user
-  /// @param self The mapping containing all users
-  /// @param userAddr user's rating will be change
-  /// @param rating value for add to user's rating
-  function updateUserRating(UserCollection storage self, RewardLib.UserRewards storage userRewards, User storage user, address userAddr, int32 rating) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
     if (rating == 0) return;
 
-    updateRatingBase(self, userRewards, user, userAddr, rating);
+    User storage user = getUserByAddress(userContext.users, userAddr);
+    updateRatingBase(userContext, user, userAddr, rating);
   }
 
-  function updateRatingBase(UserCollection storage self, RewardLib.UserRewards storage userRewards, User storage user, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    // User storage user = getUserByAddress(self, userAddr);
+    // User storage user = getUserByAddress(userContext.users, userAddr);
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
-    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userRewards, userAddr, currentPeriod);
+    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, currentPeriod);
     bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
     if (isFirstTransactionOnThisWeek) {
       user.rewardPeriods.push(currentPeriod);
@@ -222,7 +224,7 @@ library UserLib {
     // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
     if (pastPeriodsCount > 0) {
       uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
-      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userRewards, userAddr, previousWeekNumber);
+      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, previousWeekNumber);
 
 
       int32 paidOutRating = user.payOutRating - ratingToReward;
@@ -245,6 +247,10 @@ library UserLib {
     currentWeekRating.ratingToReward += ratingToRewardChange;
     user.rating = newRating;
     user.payOutRating += ratingToRewardChange;
+
+    if (rating > 0) {
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
+    }
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {
