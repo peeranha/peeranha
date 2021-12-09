@@ -4,7 +4,8 @@ pragma abicoder v2;
 import './IPeeranhaForum.sol';
 import './IPeeranhaUser.sol';
 import './IPeeranhaPost.sol';
+import './IPeeranhaPostPublic.sol';
 
-interface IPeeranha is IPeeranhaForum, IPeeranhaUser, IPeeranhaPost {
+interface IPeeranha is IPeeranhaForum, IPeeranhaUser, IPeeranhaPost, IPeeranhaPostPublic {
   function getRatingToReward(address user, uint16 rewardPeriod) external view returns(int32);
 }

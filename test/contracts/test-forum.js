@@ -1138,17 +1138,26 @@ describe("Test post", function () {
 	});
 
 	const createContract = async function () {
-		const PostLib = await ethers.getContractFactory("PostLib")
-		const postLib = await PostLib.deploy();
-		const Peeranha = await ethers.getContractFactory("Peeranha", {
-		libraries: {
-				PostLib: postLib.address,
-		}
-		});
-		const peeranha = await Peeranha.deploy();
-		await peeranha.deployed();
+        const UserLibPublic = await ethers.getContractFactory("UserLibPublic");
+        const CommunityLibPublic = await ethers.getContractFactory("CommunityLibPublic");
+        const SecurityLibPublic = await ethers.getContractFactory("SecurityLibPublic");
+        const PostLibPublic = await ethers.getContractFactory("PostLibPublic");
+        const userLibPublic = await UserLibPublic.deploy();
+        const communityLibPublic = await CommunityLibPublic.deploy();
+        const securityLibPublic = await SecurityLibPublic.deploy();
+        const postLibPublic = await PostLibPublic.deploy();
+        const Peeranha = await ethers.getContractFactory("Peeranha", {
+        libraries: {
+            UserLibPublic: userLibPublic.address,
+            CommunityLibPublic: communityLibPublic.address,
+            SecurityLibPublic: securityLibPublic.address,
+            PostLibPublic: postLibPublic.address,
+        }
+        });
+        const peeranha = await Peeranha.deploy();
+        await peeranha.deployed();
         await peeranha.__Peeranha_init();
-		return peeranha;
+        return peeranha;
 	};
 
 	////

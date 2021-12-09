@@ -32,7 +32,7 @@ library AchievementLib {
   ) 
     internal 
   {
-    require(maxCount > 0, "Max count of achievements must be more than 0");
+    require(maxCount > 0, "A1");
 
     AchievementLib.AchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[++achievementsContainer.achievementsCount];
     achievementConfig.maxCount = maxCount;

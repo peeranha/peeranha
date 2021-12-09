@@ -82,8 +82,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "PostType or voteResource is not found");
-        return 0;
+        require(false, "V1");
     }
 
     /// @notice Get value Rating for rating action
@@ -116,8 +115,7 @@ library VoteLib  {
             return 0;
         }
         
-        require(false, "PostType or voteResource is not found");
-        return 0;
+        require(false, "V1");
     }
 
     function getUserRatingChange(
@@ -162,7 +160,7 @@ library VoteLib  {
         bool isUpvote,
         address[] storage votedUsers
     ) internal returns (int32) {
-        int history = getHistoryVote(actionAddress, historyVotes);
+        int256 history = getHistoryVote(actionAddress, historyVotes);
         int32 ratingChange;
         
         if (isUpvote) {
@@ -173,7 +171,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = 1;
                 ratingChange = 1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = -1;
@@ -187,7 +185,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -2;
             }

@@ -17,14 +17,15 @@ library UserLib {
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
+    bytes32[] roles;
+    uint32[] followedCommunities;
+    uint16[] rewardPeriods;
+    uint256 creationTime;
+
     int32 rating;
     int32 payOutRating;
     uint16 energy;
     uint32 lastUpdatePeriod;
-    uint256 creationTime;
-    bytes32[] roles;
-    uint32[] followedCommunities;
-    uint16[] rewardPeriods;
   }
 
   /// users The mapping containing all users
@@ -46,114 +47,6 @@ library UserLib {
     int32 rating;
   }
 
-  event UserCreated(address userAddress);
-  event UserUpdated(address userAddress);
-  event FollowedCommunity(address userAddress, uint32 communityId);
-  event UnfollowedCommunity(address userAddress, uint32 communityId);
-
-
-  /// @notice Create new user info record
-  /// @param self The mapping containing all users
-  /// @param userAddress Address of the user to create 
-  /// @param ipfsHash IPFS hash of document with user information
-  function create(
-    UserCollection storage self,
-    address userAddress,
-    bytes32 ipfsHash
-  ) internal {
-    require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "User exists");
-
-    User storage user = self.users[userAddress];
-    user.ipfsDoc.hash = ipfsHash;
-    user.creationTime = CommonLib.getTimestamp();
-    user.rating = START_USER_RATING;
-    user.payOutRating = START_USER_RATING;
-    user.energy = getStatusEnergy(START_USER_RATING);
-
-    self.userList.push(userAddress);
-
-    emit UserCreated(userAddress);
-  }
-
-  /// @notice Update new user info record
-  /// @param userContext All information about users
-  /// @param userAddress Address of the user to update
-  /// @param ipfsHash IPFS hash of document with user information
-  function update(
-    UserLib.UserContext storage userContext,
-    address userAddress,
-    bytes32 ipfsHash
-  ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-    SecurityLib.checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      userAddress,
-      userAddress,
-      0,
-      SecurityLib.Action.updateProfile
-    );
-    user.ipfsDoc.hash = ipfsHash;
-
-    emit UserUpdated(userAddress);
-  }
-
-  /// @notice User follows community
-  /// @param userContext All information about users
-  /// @param userAddress Address of the user to update
-  /// @param communityId User follows om this community
-  function followCommunity(
-    UserLib.UserContext storage userContext,
-    address userAddress,
-    uint32 communityId
-  ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-    SecurityLib.checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      userAddress,
-      userAddress,
-      0,
-      SecurityLib.Action.followCommunity
-    );
-
-    bool isAdded;
-    for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "You already follow the community");
-
-      if (user.followedCommunities[i] == 0 && !isAdded) {
-        user.followedCommunities[i] = communityId;
-        isAdded = true;
-      }
-    }
-    if (!isAdded)
-      user.followedCommunities.push(communityId);
-
-    emit FollowedCommunity(userAddress, communityId);
-  }
-
-  /// @notice User usfollows community
-  /// @param self The mapping containing all users
-  /// @param userAddress Address of the user to update
-  /// @param communityId User follows om this community
-  function unfollowCommunity(
-    UserCollection storage self,
-    address userAddress,
-    uint32 communityId
-  ) internal {
-    User storage user = self.users[userAddress];
-
-    for (uint i; i < user.followedCommunities.length; i++) {
-      if (user.followedCommunities[i] == communityId) {
-        delete user.followedCommunities[i]; //method rewrite to 0
-        
-        emit UnfollowedCommunity(userAddress, communityId);
-        return;
-      }
-    }
-    require(false, "You are not following the community");
-  }
-
   /// @notice Get the number of users
   /// @param self The mapping containing all users
   function getUsersCount(UserCollection storage self) internal view returns (uint256 count) {
@@ -173,7 +66,7 @@ library UserLib {
   /// @param addr Address of the user to get
   function getUserByAddress(UserCollection storage self, address addr) internal view returns (User storage) {
     User storage user = self.users[addr];
-    require(user.ipfsDoc.hash != bytes32(0x0), "User does not exist");
+    require(user.ipfsDoc.hash != bytes32(0x0), "U1");
     return user;
   }
 
@@ -208,7 +101,6 @@ library UserLib {
 
   function updateRatingBase(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
-    // User storage user = getUserByAddress(userContext.users, userAddr);
     int32 newRating = user.rating += rating;
     uint256 pastPeriodsCount = user.rewardPeriods.length;
     
@@ -253,25 +145,23 @@ library UserLib {
     }
   }
 
-  function getStatusEnergy(int32 rating) internal returns (uint16) {
-    uint16 maxEnergy;
+  function getStatusEnergy(int32 rating) internal pure returns (uint16) {
     if (rating < 0) {
-      maxEnergy = 0;
+      return 0;
     } else if (rating < 100) {
-      maxEnergy = 300;
+      return 300;
     } else if (rating < 500) {
-      maxEnergy = 600;
+      return 600;
     } else if (rating < 1000) {
-      maxEnergy = 900;
+      return 900;
     } else if (rating < 2500) {
-      maxEnergy = 1200;
+      return 1200;
     } else if (rating < 5000) {
-      maxEnergy = 1500;
+      return 1500;
     } else if (rating < 10000) {
-      maxEnergy = 1800;
+      return 1800;
     } else {
-      maxEnergy = 2100;
+      return 2100;
     }
-    return maxEnergy;
   }
 }

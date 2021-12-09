@@ -7,8 +7,6 @@ import "./CommonLib.sol";
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
-import "./UserLib.sol";
-
 library SecurityLib {
   enum Action {
     publicationPost,
@@ -34,23 +32,23 @@ library SecurityLib {
   int16 constant POST_OWN_COMMENT_ALLOWED = 35;
   int16 constant POST_COMMENT_ALLOWED = 35;
 
-  int16 constant UPVOTE_POST_ALLOWED = 35;
-  int16 constant DOWNVOTE_POST_ALLOWED = 100;
-  int16 constant UPVOTE_REPLY_ALLOWED = 35;
-  int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
+  int16 constant UPVOTE_POST_REPLY_ALLOWED = 35;
+  int16 constant DOWNVOTE_POST_REPLY_ALLOWED = 100;
+  // int16 constant UPVOTE_REPLY_ALLOWED = 35;
+  // int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
   int16 constant UPVOTE_COMMENT_ALLOWED = 0;
   int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
 
   int16 constant UPDATE_PROFILE_ALLOWED = 0;
 
 
-  uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;
-  uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;
+  uint8 constant ENERGY_DOWNVOTE_QUESTION_REPLY = 5;
+  // uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;
   uint8 constant ENERGY_DOWNVOTE_COMMENT = 2;
-  uint8 constant ENERGY_UPVOTE_QUESTION = 1;
+  uint8 constant ENERGY_UPVOTE_QUESTION_REPLY = 1;
   uint8 constant ENERGY_UPVOTE_ANSWER = 1;
   uint8 constant ENERGY_UPVOTE_COMMENT = 1;
-  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
+  // uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
   uint8 constant ENERGY_POST_QUESTION = 10;
   uint8 constant ENERGY_POST_ANSWER = 6;
   uint8 constant ENERGY_POST_COMMENT = 4;
@@ -59,13 +57,13 @@ library SecurityLib {
 
   uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;
   uint8 constant ENERGY_UPDATE_PROFILE = 1;
-  uint8 constant ENERGY_CREATE_TAG = 75;            // only Admin
-  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     // only admin
+  // uint8 constant ENERGY_CREATE_TAG = 75;            // only Admin
+  // uint8 constant ENERGY_CREATE_COMMUNITY = 125;     // only admin
   uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
-  uint8 constant ENERGY_REPORT_PROFILE = 5;         //
-  uint8 constant ENERGY_REPORT_QUESTION = 3;        //
-  uint8 constant ENERGY_REPORT_ANSWER = 2;          //
-  uint8 constant ENERGY_REPORT_COMMENT = 1;         //
+  // uint8 constant ENERGY_REPORT_PROFILE = 5;         //
+  // uint8 constant ENERGY_REPORT_QUESTION = 3;        //
+  // uint8 constant ENERGY_REPORT_ANSWER = 2;          //
+  // uint8 constant ENERGY_REPORT_COMMENT = 1;         //
 
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
   using AddressUpgradeable for address;
@@ -104,102 +102,77 @@ library SecurityLib {
     if (hasModeratorRole(role, actionCaller, communityId)) return;
     
     int16 ratingAllowen;
-    string memory message;
     uint8 energy;
+    bool checkAuthor = true;
     if (action == Action.publicationPost) {
       ratingAllowen = POST_QUESTION_ALLOWED;
-      message = "Your rating is too small for publication post. You need 0 ratings";
       energy = ENERGY_POST_QUESTION;
 
     } else if (action == Action.publicationReply) {
       ratingAllowen = POST_REPLY_ALLOWED;
-      message = "Your rating is too small for publication reply. You need 0 ratings";
       energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.publicationComment) {
       if (actionCaller == dataUser) {
         ratingAllowen = POST_OWN_COMMENT_ALLOWED;
-        message = "Your rating is too small for publication own comment. You need 35 ratings";
       } else {
         ratingAllowen = POST_COMMENT_ALLOWED;
-        message = "Your rating is too small for publication comment. You need 35 ratings";
       }
       energy = ENERGY_POST_COMMENT;
 
     } else if (action == Action.editItem) {
-      require(actionCaller == dataUser, "You can not edit this item");
+      checkAuthor = actionCaller == dataUser;
       ratingAllowen = MINIMUM_RATING;
-      message = "Your rating is too small for edit item. You need -300 ratings";
       energy = ENERGY_MODIFY_ITEM;
 
     } else if (action == Action.deleteItem) {
-      require(actionCaller == dataUser, "You can not delete this item");
+      checkAuthor = actionCaller == dataUser;
       ratingAllowen = 0;
-      message = "Your rating is too small for delete own item. You need 0 ratings"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.upVotePost) {
-      require(actionCaller != dataUser, "You can not vote for own post");
-      ratingAllowen = UPVOTE_POST_ALLOWED;
-      message = "Your rating is too small for upvote post. You need 35 ratings";
-      energy = ENERGY_UPVOTE_QUESTION;
-
-    } else if (action == Action.upVoteReply) {
-      require(actionCaller != dataUser, "You can not vote for own reply");
-      ratingAllowen = UPVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small for upvote reply. You need 35 ratings";
-      energy = ENERGY_UPVOTE_ANSWER;
+      checkAuthor = actionCaller != dataUser;
+      ratingAllowen = UPVOTE_POST_REPLY_ALLOWED;
+      energy = ENERGY_UPVOTE_QUESTION_REPLY;
 
     } else if (action == Action.upVoteComment) {
-      require(actionCaller != dataUser, "You can not vote for own comment");
+      checkAuthor = actionCaller != dataUser;
       ratingAllowen = UPVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small for upvote comment. You need 0 ratings";
       energy = ENERGY_UPVOTE_COMMENT;
 
     } else if (action == Action.downVotePost) {
-      require(actionCaller != dataUser, "You can not vote for own post");
-      ratingAllowen = DOWNVOTE_POST_ALLOWED;
-      message = "Your rating is too small for downvote post. You need 100 ratings";
-      energy = ENERGY_DOWNVOTE_QUESTION;
-
-    } else if (action == Action.downVoteReply) {
-      require(actionCaller != dataUser, "You can not vote for own reply");
-      ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small for downvote reply. You need 100 ratings";
-      energy = ENERGY_DOWNVOTE_ANSWER;
+      checkAuthor = actionCaller != dataUser;
+      ratingAllowen = DOWNVOTE_POST_REPLY_ALLOWED;
+      energy = ENERGY_DOWNVOTE_QUESTION_REPLY;
 
     } else if (action == Action.downVoteComment) {
-      require(actionCaller != dataUser, "You can not vote for own comment");
+      checkAuthor = actionCaller != dataUser;
       ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small for downvote comment. You need 0 ratings";
       energy = ENERGY_DOWNVOTE_COMMENT;
 
     } else if (action == Action.bestReply) {
-      require(actionCaller == dataUser, "You can mark the reply as the best, it is not your");
+      checkAuthor = actionCaller == dataUser;
       ratingAllowen = MINIMUM_RATING;
-      message = "Your rating is too small for mark reply as best. You need -300 ratings";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
     } else if (action == Action.updateProfile) {
       ratingAllowen = UPDATE_PROFILE_ALLOWED;
-      message = "Your rating is too small for edit profile. You need 0 ratings";
       energy = ENERGY_UPDATE_PROFILE;
 
     } else if (action == Action.followCommunity) {
       ratingAllowen = MINIMUM_RATING;
-      message = "Your rating is too small for edit profile. You need -300 ratings";
       energy = ENERGY_FOLLOW_COMMUNITY;
 
     } else {
-      require(false, "Action not allowed");
+      require(false, "S6");
     }
 
-    require(user.rating >= ratingAllowen, message);
+    require(checkAuthor, "S7");
+    require(user.rating >= ratingAllowen);
     reduceEnergy(user, energy);
   }
 
   function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
-    int32 rating = user.rating;
     uint256 currentTime = CommonLib.getTimestamp();
     uint32 currentPeriod = uint32((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
@@ -211,7 +184,7 @@ library SecurityLib {
       userEnergy = UserLib.getStatusEnergy(user.rating); 
     }
 
-    require(userEnergy >= energy, "Not enough energy!");
+    require(userEnergy >= energy, "A3");
     user.energy = userEnergy - energy;
     user.lastUpdatePeriod = currentPeriod;
   }
@@ -229,33 +202,6 @@ library SecurityLib {
     
     return false;
   }
-
-  /**
-    * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
-    *
-    * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
-    * {RoleAdminChanged} not being emitted signaling this.
-    *
-    * _Available since v3.1._
-    */
-  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
-  /**
-    * @dev Emitted when `account` is granted `role`.
-    *
-    * `sender` is the account that originated the contract call, an admin role
-    * bearer except when using {setupRole}.
-    */
-  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
-
-  /**
-    * @dev Emitted when `account` is revoked `role`.
-    *
-    * `sender` is the account that originated the contract call:
-    *   - if using `revokeRole`, it is the admin role bearer
-    *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
-    */
-  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
   /**
     * @dev Returns `true` if `account` has been granted `role`.
@@ -365,62 +311,36 @@ library SecurityLib {
     * system imposed by {AccessControl}.
     * ====
     */
-  function setupRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-      grantRole(userContext, role, account);
-  }
-
-  function revokeRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.remove(account)) {
-      emit RoleRevoked(role, account, msg.sender);
-
-      uint256 length = userContext.userRoles.userRoles[account].length;
-      for(uint32 i = 0; i < length; i++) {
-        if(userContext.userRoles.userRoles[account][i] == role) {
-          if (i < length - 1) {
-            userContext.userRoles.userRoles[account][i] = userContext.userRoles.userRoles[account][length - 1];
-            userContext.userRoles.userRoles[account].pop();
-          } else userContext.userRoles.userRoles[account].pop();
-        }
-      }
-    }
-  }
 
   function getPermissions(UserRoles storage self, address account) internal view returns (bytes32[] memory) {
     return self.userRoles[account];
   }
 
-  function grantRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.add(account)) {
-      userContext.userRoles.userRoles[account].push(role);   
-      emit RoleGranted(role, account, msg.sender);
-    }
-  }
-
   function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
     require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have community moderator role");
+        "S1");
   }
 
-    function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
+  function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
     require((hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have community admin role");
+        "S2");
   }
 
   function onlyAdminOrCommunityAdmin(Roles storage self, uint32 communityId) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) || 
         (hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community admin role");
+        "S3");
   }
 
   function onlyAdminOrCommunityModerator(Roles storage self, uint32 communityId) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) ||
         (hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community moderator role");
+        "S4");
   }
 
   function onlyAdmin(Roles storage self) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender), 
-        "Peeranha: must have admin role");
+        "S5");
   }
 
   // uint256[49] private __gap;
