@@ -17,15 +17,14 @@ library UserLib {
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
-    bytes32[] roles;
-    uint32[] followedCommunities;
-    uint16[] rewardPeriods;
     uint256 creationTime;
-
     int32 rating;
     int32 payOutRating;
     uint16 energy;
     uint32 lastUpdatePeriod;
+    uint32[] followedCommunities;
+    uint16[] rewardPeriods;
+    bytes32[] roles;
   }
 
   /// users The mapping containing all users

@@ -161,7 +161,7 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function giveAdminPermission(address user) external
     onlyAdmin() {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.grantRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
     }
 
@@ -177,7 +177,7 @@ contract Peeranha is IPeeranha, Initializable {
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address user) external 
     onlyAdmin() {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.revokeRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
     }
 
@@ -250,7 +250,7 @@ contract Peeranha is IPeeranha, Initializable {
     function giveCommunityAdminPermission(address user, uint32 communityId) external
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyAdminOrCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
         SecurityLibPublic.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
@@ -267,7 +267,7 @@ contract Peeranha is IPeeranha, Initializable {
     function giveCommunityModeratorPermission(address user, uint32 communityId) external
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
@@ -283,7 +283,7 @@ contract Peeranha is IPeeranha, Initializable {
     function revokeCommunityAdminPermission(address user, uint32 communityId) external
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
@@ -301,7 +301,7 @@ contract Peeranha is IPeeranha, Initializable {
     function revokeCommunityModeratorPermission(address user, uint32 communityId) external 
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        onlyExisitingUser(user);
         SecurityLibPublic.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 

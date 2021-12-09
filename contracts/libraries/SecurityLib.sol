@@ -11,6 +11,7 @@ library SecurityLib {
   enum Action {
     publicationPost,
     publicationReply,
+    publicationOfficialReply,
     publicationComment,
     editItem,
     deleteItem,
@@ -111,6 +112,9 @@ library SecurityLib {
     } else if (action == Action.publicationReply) {
       ratingAllowen = POST_REPLY_ALLOWED;
       energy = ENERGY_POST_ANSWER;
+
+    } else if (action == Action.publicationOfficialReply) {
+      require(false, "P5");
 
     } else if (action == Action.publicationComment) {
       if (actionCaller == dataUser) {

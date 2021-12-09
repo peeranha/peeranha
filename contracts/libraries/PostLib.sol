@@ -55,9 +55,7 @@ library PostLib {
     }
 
     struct Post {
-        uint8[] tags;
         IpfsLib.IpfsHash ipfsDoc;
-        PostType postType;
         address author;
         int32 rating;
         uint32 postTime;
@@ -70,6 +68,9 @@ library PostLib {
         uint16 replyCount;
         uint16 deletedReplyCount;
         bool isDeleted;
+
+        uint8[] tags;
+        PostType postType;
     }
 
     struct PostContainer {
@@ -154,7 +155,7 @@ library PostLib {
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.publicationReply
+            isOfficialReply ? SecurityLib.Action.publicationOfficialReply : SecurityLib.Action.publicationReply
         );
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "H1");
         require(
@@ -175,14 +176,12 @@ library PostLib {
 
         PostLib.ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
-        // if (parentReplyId == 0) {
-        //     if (isOfficialReply) {
-        //         require((SecurityLib.hasRole(userContext.roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
-        //             "P5");
-        //         postContainer.info.officialReply = postContainer.info.replyCount;
-        //     }
+        if (parentReplyId == 0) {
+            if (isOfficialReply) {
+                postContainer.info.officialReply = postContainer.info.replyCount;
+            }
 
-        //     if (postContainer.info.postType != PostLib.PostType.Tutorial && postContainer.info.author != userAddr) {
+        //     if (postContainer.info.postType != PostLib.PostType.Tutorial && postContainer.info.author != userAddr) {     // only one updateUserRating
         //         if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
         //             replyContainer.info.isFirstReply = true;
         //             UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
@@ -192,14 +191,14 @@ library PostLib {
         //             UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
         //         }
         //     }
-        // } else {
-        //   PostLib.getReplyContainerSafe(postContainer, parentReplyId);
-        //   replyContainer.info.parentReplyId = parentReplyId;  
-        // }
+        } else {
+          PostLib.getReplyContainerSafe(postContainer, parentReplyId);
+          replyContainer.info.parentReplyId = parentReplyId;  
+        }
 
-        // replyContainer.info.author = userAddr;
-        // replyContainer.info.ipfsDoc.hash = ipfsHash;
-        // replyContainer.info.postTime = timestamp;
+        replyContainer.info.author = userAddr;
+        replyContainer.info.ipfsDoc.hash = ipfsHash;
+        replyContainer.info.postTime = timestamp;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
