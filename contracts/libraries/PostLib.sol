@@ -166,6 +166,12 @@ library PostLib  {
             postContainer.info.communityId,
             SecurityLib.Action.publicationReply
         );
+        /*  
+            Check gas one more 
+            isOfficialReply ? SecurityLib.Action.publicationOfficialReply : SecurityLib.Action.publicationReply
+            remove: require((SecurityLib.hasRole(userContex ...
+            20k in gas contract, +20 gas in common reply (-20 in official reply), but Avg gas -20 ?
+         */
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(
             parentReplyId == 0 || 
@@ -175,7 +181,7 @@ library PostLib  {
 
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
-          for (uint16 i = 1; i <= countReplies; i++) {
+          for (uint16 i = 1; i <= countReplies; i++) {              ////
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, i);
             require(userAddr != replyContainer.info.author, "Users can not publish 2 replies in export and common posts.");
           }
@@ -193,7 +199,7 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
                 if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
+                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));   ///
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;

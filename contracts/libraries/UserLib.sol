@@ -22,9 +22,9 @@ library UserLib {
     uint16 energy;
     uint32 lastUpdatePeriod;
     uint256 creationTime;
-    bytes32[] roles;
     uint32[] followedCommunities;
     uint16[] rewardPeriods;
+    bytes32[] roles;
   }
 
   /// users The mapping containing all users
@@ -254,24 +254,22 @@ library UserLib {
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {
-    uint16 maxEnergy;
     if (rating < 0) {
-      maxEnergy = 0;
+      return 0;
     } else if (rating < 100) {
-      maxEnergy = 300;
+      return 300;
     } else if (rating < 500) {
-      maxEnergy = 600;
+      return 600;
     } else if (rating < 1000) {
-      maxEnergy = 900;
+      return 900;
     } else if (rating < 2500) {
-      maxEnergy = 1200;
+      return 1200;
     } else if (rating < 5000) {
-      maxEnergy = 1500;
+      return 1500;
     } else if (rating < 10000) {
-      maxEnergy = 1800;
+      return 1800;
     } else {
-      maxEnergy = 2100;
+      return 2100;
     }
-    return maxEnergy;
   }
 }
