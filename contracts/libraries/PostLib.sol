@@ -866,7 +866,7 @@ library PostLib  {
         if (parentReplyId == 0) {
             commentContainer = postContainer.comments[commentId];  
         } else {
-            ReplyContainer storage reply = getReplyContainer(postContainer, parentReplyId);
+            ReplyContainer storage reply = getReplyContainerSafe(postContainer, parentReplyId);
             commentContainer = reply.comments[commentId];
         }
         require(!IpfsLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment does not exist.");
