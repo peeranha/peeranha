@@ -17,11 +17,11 @@ library UserLib {
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
+    uint256 creationTime;
     int32 rating;
     int32 payOutRating;
     uint16 energy;
     uint32 lastUpdatePeriod;
-    uint256 creationTime;
     uint32[] followedCommunities;
     uint16[] rewardPeriods;
     bytes32[] roles;

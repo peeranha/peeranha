@@ -7,8 +7,6 @@ import "./CommonLib.sol";
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
-import "./UserLib.sol";
-
 library SecurityLib {
   enum Action {
     publicationPost,

@@ -56,8 +56,6 @@ library PostLib  {
     }
 
     struct Post {
-        uint8[] tags;
-        IpfsLib.IpfsHash ipfsDoc;
         PostType postType;
         address author;
         int32 rating;
@@ -71,6 +69,9 @@ library PostLib  {
         uint16 replyCount;
         uint16 deletedReplyCount;
         bool isDeleted;
+
+        uint8[] tags;
+        IpfsLib.IpfsHash ipfsDoc;
     }
 
     struct PostContainer {
@@ -181,8 +182,10 @@ library PostLib  {
 
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
-          for (uint16 i = 1; i <= countReplies; i++) {              ////
-            ReplyContainer storage replyContainer = getReplyContainer(postContainer, i);
+
+          PostLib.ReplyContainer storage replyContainer;
+          for (uint16 i = 1; i <= countReplies; i++) {
+            replyContainer = getReplyContainer(postContainer, i);
             require(userAddr != replyContainer.info.author, "Users can not publish 2 replies in export and common posts.");
           }
         }
@@ -199,7 +202,7 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
                 if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));   ///
+                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;
