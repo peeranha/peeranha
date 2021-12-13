@@ -133,15 +133,15 @@ library UserLib {
   }
 
   /// @notice User usfollows community
-  /// @param self The mapping containing all users
+  /// @param users The mapping containing all users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
-    UserCollection storage self,
+    UserCollection storage users,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = self.users[userAddress];
+    User storage user = getUserByAddress(users, userAddress);
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
