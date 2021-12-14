@@ -128,7 +128,7 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('User does not exist');
   })
 
   it("Double follow community", async function() {
@@ -225,7 +225,7 @@ describe("Test users", function() {
     await peeranha.followCommunity(1);
     
     await expect(peeranha.connect(signers[1]).followCommunity(1))
-    .to.be.revertedWith('Peeranha: must be an existing user');
+    .to.be.revertedWith('User does not exist');
   })
 
   it("UnFollow community", async function() {
@@ -253,8 +253,8 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 
-    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
-    await expect(peeranha.connect(signers[1]).unfollowCommunity(1)).to.be.revertedWith('Peeranha: must be an existing user');
+    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('User does not exist');
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(1)).to.be.revertedWith('User does not exist');
   })
 
   it("UnFollow diferent community", async function() {
@@ -321,7 +321,7 @@ describe("Test users", function() {
     await peeranha.followCommunity(1);
     
     await expect(peeranha.connect(signers[1]).unfollowCommunity(1))
-    .to.be.revertedWith('Peeranha: must be an existing user');
+    .to.be.revertedWith('User does not exist');
 
     await peeranha.unfollowCommunity(1);
   })

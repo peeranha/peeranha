@@ -403,7 +403,7 @@ library PostLib  {
                                                 TypeContent.Post) * postContainer.info.rating);
         }
         if (postContainer.info.bestReply != 0) {
-            UserLib.updateUserRating(userContext, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+            UserLib.updateUserRating(userContext, postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
         }
 
         uint256 time = CommonLib.getTimestamp();
