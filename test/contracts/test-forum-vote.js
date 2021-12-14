@@ -882,7 +882,7 @@ describe("Test vote", function () {
 			const user = await peeranha.getUserByAddress(signers[1].address);
 			const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
 			await expect(user.rating).to.equal(userRating.rating + AcceptExpertReply);
-			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptExpertPost);
+			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptedExpertReply);
 
 			await peeranha.deletePost(1);
 
@@ -913,7 +913,7 @@ describe("Test vote", function () {
 			const user = await peeranha.getUserByAddress(signers[1].address);
 			const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
 			await expect(user.rating).to.equal(userRating.rating + AcceptCommonReply);
-			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptCommonPost);
+			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptedCommonReply);
 
 			await peeranha.deletePost(1);
 
@@ -1168,7 +1168,7 @@ describe("Test vote", function () {
 			const user = await peeranha.getUserByAddress(signers[1].address);
 			const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
 			await expect(user.rating).to.equal(userRating.rating + AcceptExpertReply);
-			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptExpertPost);
+			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptedExpertReply);
 
 			await peeranha.deletePost(1);
 
@@ -1200,7 +1200,7 @@ describe("Test vote", function () {
 			const user = await peeranha.getUserByAddress(signers[1].address);
 			const userAction = await peeranha.getUserByAddress(peeranha.deployTransaction.from);		
 			await expect(user.rating).to.equal(userRating.rating + AcceptCommonReply);
-			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptCommonReply);
+			await expect(userAction.rating).to.equal(userActionRating.rating + AcceptedCommonReply);
 
 			await peeranha.deletePost(1);
 
@@ -1281,8 +1281,7 @@ describe("Test vote", function () {
 
 	describe("Test create first reply", function () {
 
-		// to perform this test, change the QUICK_REPLY_TIME to 3 seconds at the CommonLib.sol
-		xit("Test create first expert reply", async function () {
+		it("Test create first expert reply", async function () {
 			const peeranha = await createContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -1304,8 +1303,7 @@ describe("Test vote", function () {
 			await expect(reply.isQuickReply).to.equal(false);
 		});
 
-		// to perform this test, change the QUICK_REPLY_TIME to 3 seconds at the CommonLib.sol
-		xit("Test create first common reply", async function () {
+		it("Test create first common reply", async function () {
 			const peeranha = await createContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -2258,7 +2256,7 @@ describe("Test vote", function () {
 
 	describe("Test delete 2 upVoted reply, one first and two quick", function () {
 
-		it("Test delete 2 upVoted expert reply, one first and two quick ", async function () {
+		it("Test delete 2 upVoted expert reply, one first and two quick", async function () {
 			const peeranha = await createContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -2485,7 +2483,7 @@ describe("Test vote", function () {
 			await expect(userRating2.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 		});
 
-		xit("Test delete first expert reply and post one more by same user", async function () {
+		it("Test delete first expert reply and post one more by same user", async function () {
 			const peeranha = await createContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -2493,7 +2491,6 @@ describe("Test vote", function () {
 
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
@@ -2510,11 +2507,11 @@ describe("Test vote", function () {
 			const secondReply = await peeranha.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
 
-			const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-			await expect(userRating2.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
+			const userRating2 = await peeranha.getUserByAddress(signers[1].address);
+			await expect(userRating2.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply + DeleteOwnReply);
 		});
 
-		xit("Test delete first common reply and post one more by same user", async function () {
+		it("Test delete first common reply and post one more by same user", async function () {
 			const peeranha = await createContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -2522,7 +2519,6 @@ describe("Test vote", function () {
 
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
@@ -2540,8 +2536,8 @@ describe("Test vote", function () {
 			const secondReply = await peeranha.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
 
-			const userRating2 = await peeranha.getUserByAddress(signers[2].address);
-			await expect(userRating2.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+			const userRating2 = await peeranha.getUserByAddress(signers[1].address);
+			await expect(userRating2.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply + DeleteOwnReply);
 		});
 	});
 
@@ -2566,7 +2562,7 @@ describe("Test vote", function () {
 			const user1Rating = await peeranha.getUserByAddress(signers[1].address);
 			const user2Rating = await peeranha.getUserByAddress(signers[0].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptExpertReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptExpertPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
 		});
 
 		it("Test mark common reply as best", async function () {
@@ -2588,7 +2584,7 @@ describe("Test vote", function () {
 			const user1Rating = await peeranha.getUserByAddress(signers[1].address);
 			const user2Rating = await peeranha.getUserByAddress(signers[0].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 		});
 
 		/* - */ xit("Test mark tutorial reply as best", async function () {
@@ -2610,7 +2606,7 @@ describe("Test vote", function () {
 			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
 			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 		});
 	});
 
@@ -2760,7 +2756,7 @@ describe("Test vote", function () {
 			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
 			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptExpertReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptExpertPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
 			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
 
 			await peeranha.changeStatusBestReply(1, 1);
@@ -2769,7 +2765,7 @@ describe("Test vote", function () {
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
 			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
-			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptExpertPost);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
 			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptExpertReply);
 		});
 
@@ -2797,7 +2793,7 @@ describe("Test vote", function () {
 			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
 			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
 
 			await peeranha.changeStatusBestReply(1, 1);
@@ -2806,7 +2802,7 @@ describe("Test vote", function () {
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
 			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
-			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptCommonReply);
 		});
 
@@ -2834,7 +2830,7 @@ describe("Test vote", function () {
 			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
 			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
-			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
 
 			await peeranha.changeStatusBestReply(1, 2);
@@ -2842,8 +2838,8 @@ describe("Test vote", function () {
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
 			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
-			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptCommonPost);
-			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptCommonPost);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
+			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptedCommonReply);
 		});
 	});
 
@@ -3066,18 +3062,18 @@ describe("Test vote", function () {
 
 	const StartRating = 10;
 	const QuickReplyTime = 7000; // in milliseconds, defines at CommonLib
-	const deleteTime = 7000;
+	const deleteTime = 10000;
 
 	const DownvoteExpertPost = -1;
     const UpvotedExpertPost = 5;
     const DownvotedExpertPost = -2;
-    const AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
+    // const AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
 
     //common post 
     const DownvoteCommonPost = -1;
     const UpvotedCommonPost = 1;
     const DownvotedCommonPost = -1;
-    const AcceptCommonPost = 1;
+    // const AcceptCommonPost = 1;
 
     //tutorial 
     const DownvoteTutorial = -1;    //autorAction
@@ -3093,6 +3089,7 @@ describe("Test vote", function () {
     const UpvotedExpertReply = 10;
     const DownvotedExpertReply = -2;
     const AcceptExpertReply = 15;
+	const AcceptedExpertReply = 2;
     const FirstExpertReply = 5;
     const QuickExpertReply = 5;
 
@@ -3101,6 +3098,7 @@ describe("Test vote", function () {
     const UpvotedCommonReply = 2;
     const DownvotedCommonReply = -1;
     const AcceptCommonReply = 3;
+    const AcceptedCommonReply = 1;
     const FirstCommonReply = 1;
     const QuickCommonReply = 1;
     

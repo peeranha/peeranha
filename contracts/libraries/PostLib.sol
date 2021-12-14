@@ -12,7 +12,7 @@ import "./AchievementLib.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days       // name??
+    uint256 constant DELETE_TIME = 10;    //7 days  (604800)     // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -186,7 +186,8 @@ library PostLib  {
           PostLib.ReplyContainer storage replyContainer;
           for (uint16 i = 1; i <= countReplies; i++) {
             replyContainer = getReplyContainer(postContainer, i);
-            require(userAddr != replyContainer.info.author, "Users can not publish 2 replies in export and common posts.");
+            require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
+                "Users can not publish 2 replies in export and common posts.");
           }
         }
 
@@ -395,15 +396,18 @@ library PostLib  {
             SecurityLib.Action.deleteItem
         );
 
+        if (postContainer.info.rating > 0) {
+            UserLib.updateUserRating(userContext, postContainer.info.author,
+                -VoteLib.getUserRatingChange(   postContainer.info.postType, 
+                                                VoteLib.ResourceAction.Upvoted,
+                                                TypeContent.Post) * postContainer.info.rating);
+        }
+        if (postContainer.info.bestReply != 0) {
+            UserLib.updateUserRating(userContext, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+        }
+
         uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < DELETE_TIME) {      //unit test ?
-            if (postContainer.info.rating > 0) {
-                            UserLib.updateUserRating(userContext, postContainer.info.author,
-                                -VoteLib.getUserRatingChange(   postContainer.info.postType, 
-                                                                VoteLib.ResourceAction.Upvoted,
-                                                                TypeContent.Post) * postContainer.info.rating);
-            }
-    
+        if (time - postContainer.info.postTime < DELETE_TIME) {    
             for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
                 deductReplyRating(userContext, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
             }
@@ -479,18 +483,15 @@ library PostLib  {
         if (replyContainer.info.rating >= 0) {
             changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction( postType,
                                                                             VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating;
-            
-            // best reply
 
             if (replyContainer.info.isFirstReply) {
-                changeReplyAuthorRating -= -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
+                changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
             if (replyContainer.info.isQuickReply) {
-                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
+                changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
             if (isBestReply && postType != PostType.Tutorial) {
-                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
-                UserLib.updateUserRating(userContext, msg.sender, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply));
+                changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
         }
 
@@ -551,7 +552,7 @@ library PostLib  {
         uint256 postId,
         uint16 replyId
     ) public {
-        // check permistion
+        // check permistion + energy?
         PostContainer storage postContainer = getPostContainer(self, postId);
         require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
                     "Must have community moderator role");
@@ -579,8 +580,10 @@ library PostLib  {
         uint16 replyId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
+        require(postContainer.info.author == userAddr, "Only owner by post can change statust best reply.");
+        
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        address replyOwner = replyContainer.info.author;        // mb rewrite
+        // address replyOwner = replyContainer.info.author;        // mb rewrite    // for what?
 
         if (postContainer.info.bestReply == replyId) {
             if (replyContainer.info.author != userAddr) {       // unit test
@@ -596,7 +599,7 @@ library PostLib  {
                     UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
                     UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
                 }
-                replyOwner = oldBestReplyContainer.info.author;
+                // replyOwner = oldBestReplyContainer.info.author;
             }
 
             if (replyContainer.info.author != userAddr) {   // unit test
@@ -610,7 +613,7 @@ library PostLib  {
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             userAddr,
-            replyOwner,
+            userAddr,
             postContainer.info.communityId,
             SecurityLib.Action.bestReply
         );    // unit test (forum)

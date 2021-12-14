@@ -173,7 +173,6 @@ library SecurityLib {
       energy = ENERGY_DOWNVOTE_COMMENT;
 
     } else if (action == Action.bestReply) {
-      require(actionCaller == dataUser, "You can mark the reply as the best, it is not your");
       ratingAllowen = MINIMUM_RATING;
       message = "Your rating is too small for mark reply as best. You need -300 ratings";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
