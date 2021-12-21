@@ -16,6 +16,7 @@ library SecurityLib {
     publicationComment,
     editItem,
     deleteItem,
+    changePostType,
     upVotePost,
     downVotePost,
     upVoteReply,
@@ -137,6 +138,9 @@ library SecurityLib {
       ratingAllowen = 0;
       message = "Your rating is too small for delete own item. You need 0 ratings"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
+
+    } else if (action == Action.changePostType) {
+      require(false, "Only moderator can change post");
 
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
