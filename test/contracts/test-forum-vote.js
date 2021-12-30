@@ -2971,6 +2971,1043 @@ describe("Test vote", function () {
 		});
 	});
 
+	describe('Change post type', function () {
+		it("Test upVote post expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonPost);
+
+			const post = await peeranha.getPost(1);
+			await expect(post.postType).to.equal(PostTypeEnum.CommonPost);
+		});
+
+		xit("Test upVote post expert -> tutorial", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedExpertPost);
+
+			await peeranha.changePostType(1, PostTypeEnum.Tutorial);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedTutorial);
+		});
+
+		it("Test upVote post common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedCommonPost);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost);
+
+			const post = await peeranha.getPost(1);
+			await expect(post.postType).to.equal(PostTypeEnum.ExpertPost);
+		});
+
+		xit("Test upVote post tutorial -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedTutorial);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost);
+		});
+
+		it("Test 2 upVote 2 downVote post expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
+		});
+
+		it("Test 2 upVote 2 downVote post common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
+		});
+
+		it("Test 4 zero vote post expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test zero vote post common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test upVote reply expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedExpertReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonReply);
+		});
+
+		it("Test upVote reply common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedCommonReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertReply);
+		});
+
+		it("Test downVote reply expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 0);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + DownvotedExpertReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DownvotedCommonReply);
+		});
+
+		it("Test downVote reply common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 0);
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + DownvotedCommonReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DownvotedExpertReply);
+		});
+
+		it("Test 2 upVote 2 downVote reply expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+		});
+
+		it("Test 2 upVote 2 downVote reply common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+		});
+
+		it("Test 4 zero vote reply expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test zero vote reply common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const user = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user.rating).to.equal(StartRating);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test first/best reply expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const user = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(user.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(newRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+		});
+
+		it("Test first/best reply common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const user = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(user.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			const newRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(newRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+		});
+
+		// xit("Test best reply expert -> common", async function () {		//// merge develop
+		// 	const peeranha = await createContract();
+		// 	const signers = await ethers.getSigners();
+		// 	const hashContainer = getHashContainer();
+		// 	const ipfsHashes = getHashesContainer(2);
+
+		// 	await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		// 	await peeranha.createUser(hashContainer[1]);
+		// 	await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		// 	await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		// 	await peeranha.createReply(1, 0, hashContainer[1], false);
+		// 	await peeranha.changeStatusBestReply(1, 1);
+			
+		// 	const userPost = await peeranha.getUserByAddress(signers[1].address);
+		// 	const userReply = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		// 	await expect(userReply.rating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
+		// 	await expect(userPost.rating).to.equal(StartRating + AcceptExpertPost);
+
+		// 	// await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+		// 	// const newRating = await peeranha.getUserByAddress(signers[1].address);
+		// 	// await expect(newRating.rating).to.equal(StartRating);
+		// });
+		// best reply
+
+
+		it("Change the same type post (expert)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await expect(peeranha.changePostType(1, PostTypeEnum.ExpertPost))
+			.to.be.revertedWith('This post type is already set.');
+		});
+
+		it("Change the same type post (common)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await expect(peeranha.changePostType(1, PostTypeEnum.CommonPost))
+			.to.be.revertedWith('This post type is already set.');
+		});
+	});
+
+	describe('Actions after change post type', function () {
+		it("Test upVote post after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+	
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonPost);
+
+			const post = await peeranha.getPost(1);
+			await expect(post.postType).to.equal(PostTypeEnum.CommonPost);
+		});
+
+		xit("Test upVote post after expert -> tutorial", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.Tutorial);
+			await peeranha.voteItem(1, 0, 0, 1);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedTutorial);
+		});
+
+		it("Test upVote post after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost);
+
+			const post = await peeranha.getPost(1);
+			await expect(post.postType).to.equal(PostTypeEnum.ExpertPost);
+		});
+
+		xit("Test upVote post after tutorial -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost);
+		});
+
+		it("Test 2 upVote 2 downVote post after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
+		});
+
+		it("Test 2 upVote 2 downVote post after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
+		});
+
+		it("Test cancel vote post after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test cancel vote post after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 0, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 0, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test upVote reply after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 1, 0, 1);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonReply);
+		});
+
+		it("Test upVote reply after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 1, 0, 1);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertReply);
+		});
+
+		it("Test downVote reply after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 1, 0, 0);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DownvotedCommonReply);
+		});
+
+		it("Test downVote reply after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 1, 0, 0);
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DownvotedExpertReply);
+		});
+
+		it("Test 2 upVote 2 downVote reply after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+		});
+
+		it("Test 2 upVote 2 downVote reply after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+		});
+
+		it("Test cancel vote reply after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test cancel vote reply after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[0]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[2]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[3]).voteItem(1, 1, 0, 0);
+			await peeranha.connect(signers[4]).voteItem(1, 1, 0, 0);
+
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating);
+		});
+
+		it("Test first/best reply after expert -> common", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const newRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(newRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+		});
+
+		it("Test first/best reply after common -> expert", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const newRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+			await expect(newRating.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
+		});
+
+		// xit("Test best reply expert -> common", async function () {		//// merge develop
+		// 	const peeranha = await createContract();
+		// 	const signers = await ethers.getSigners();
+		// 	const hashContainer = getHashContainer();
+		// 	const ipfsHashes = getHashesContainer(2);
+
+		// 	await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+		// 	await peeranha.createUser(hashContainer[1]);
+		// 	await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+		// 	await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		// 	await peeranha.createReply(1, 0, hashContainer[1], false);
+		// 	await peeranha.changeStatusBestReply(1, 1);
+			
+		// 	const userPost = await peeranha.getUserByAddress(signers[1].address);
+		// 	const userReply = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
+		// 	await expect(userReply.rating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
+		// 	await expect(userPost.rating).to.equal(StartRating + AcceptExpertPost);
+
+		// 	// await peeranha.changePostType(1, PostTypeEnum.ExpertPost);
+		// 	// const newRating = await peeranha.getUserByAddress(signers[1].address);
+		// 	// await expect(newRating.rating).to.equal(StartRating);
+		// });
+		// best reply
+
+		it("Test delete post after change post type", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.connect(signers[1]).deletePost(1);
+			
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DeleteOwnPost);
+		});
+		
+		it("Test delete reply after change post type", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.changePostType(1, PostTypeEnum.CommonPost);
+			await peeranha.connect(signers[1]).deleteReply(1, 1);
+			
+			const newRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(newRating.rating).to.equal(StartRating + DeleteOwnReply);
+		});
+	});
+
 	// it("Test upVote own comment", async function () {
 	// 	const peeranha = await createContract();
 	// 	const signers = await ethers.getSigners();
