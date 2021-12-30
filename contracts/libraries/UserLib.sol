@@ -17,14 +17,14 @@ library UserLib {
 
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
+    uint256 creationTime;
     int32 rating;
     int32 payOutRating;
     uint16 energy;
     uint32 lastUpdatePeriod;
-    uint256 creationTime;
-    bytes32[] roles;
     uint32[] followedCommunities;
     uint16[] rewardPeriods;
+    bytes32[] roles;
   }
 
   /// users The mapping containing all users
@@ -133,15 +133,15 @@ library UserLib {
   }
 
   /// @notice User usfollows community
-  /// @param self The mapping containing all users
+  /// @param users The mapping containing all users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
-    UserCollection storage self,
+    UserCollection storage users,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = self.users[userAddress];
+    User storage user = getUserByAddress(users, userAddress);
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
@@ -254,24 +254,22 @@ library UserLib {
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {
-    uint16 maxEnergy;
     if (rating < 0) {
-      maxEnergy = 0;
+      return 0;
     } else if (rating < 100) {
-      maxEnergy = 300;
+      return 300;
     } else if (rating < 500) {
-      maxEnergy = 600;
+      return 600;
     } else if (rating < 1000) {
-      maxEnergy = 900;
+      return 900;
     } else if (rating < 2500) {
-      maxEnergy = 1200;
+      return 1200;
     } else if (rating < 5000) {
-      maxEnergy = 1500;
+      return 1500;
     } else if (rating < 10000) {
-      maxEnergy = 1800;
+      return 1800;
     } else {
-      maxEnergy = 2100;
+      return 2100;
     }
-    return maxEnergy;
   }
 }

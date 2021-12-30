@@ -1,6 +1,8 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
-const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
+const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
+const { wait } = require('./utils');
+
 
 describe("Test post", function () {
 
@@ -154,6 +156,31 @@ describe("Test post", function () {
 			expect(reply.author).to.equal(peeranha.deployTransaction.from);
 			expect(reply.isDeleted).to.equal(false);
 			expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test create 4 replies (test gas)", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranha.connect(signers[2]).createUser(hashContainer[1]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[1]);
+			await peeranha.connect(signers[4]).createUser(hashContainer[1]);
+			await peeranha.connect(signers[5]).createUser(hashContainer[1]);
+
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			// await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await wait(5000)
+			await peeranha.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[3]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[4]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[5]).createReply(1, 0, hashContainer[1], false);
 		});
 
 		it("Test create official reply", async function () {

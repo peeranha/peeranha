@@ -130,14 +130,13 @@ library VoteLib  {
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedCommonPost;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonPost;
 
-        } else if (PostLib.PostType.Tutorial == postType) {
+        } else if (PostLib.PostType.Tutorial == postType) { // else -> check gas !
             if (ResourceAction.Downvote == resourceAction) return DownvoteTutorial;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedTutorial;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
         require(false, "PostType or voteResource is not found");
-        return 0;
     }
 
     /// @notice Get value Rating for rating action
@@ -171,7 +170,6 @@ library VoteLib  {
         }
         
         require(false, "PostType or voteResource is not found");
-        return 0;
     }
 
     function getUserRatingChange(
@@ -227,7 +225,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = 1;
                 ratingChange = 1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = -1;
@@ -241,7 +239,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -2;
             }
