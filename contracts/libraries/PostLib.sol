@@ -187,7 +187,7 @@ library PostLib  {
           for (uint16 i = 1; i <= countReplies; i++) {
             replyContainer = getReplyContainer(postContainer, i);
             require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
-                "Users can not publish 2 replies in export and common posts.");
+                "Users can not publish 2 replies for expert and common posts.");
           }
         }
 
@@ -583,7 +583,6 @@ library PostLib  {
         require(postContainer.info.author == userAddr, "Only owner by post can change statust best reply.");
         
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        // address replyOwner = replyContainer.info.author;        // mb rewrite    // for what?
 
         if (postContainer.info.bestReply == replyId) {
             if (replyContainer.info.author != userAddr) {       // unit test
@@ -599,7 +598,6 @@ library PostLib  {
                     UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
                     UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
                 }
-                // replyOwner = oldBestReplyContainer.info.author;
             }
 
             if (replyContainer.info.author != userAddr) {   // unit test

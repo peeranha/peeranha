@@ -14,13 +14,11 @@ library VoteLib  {
     int32 constant DownvoteExpertPost = -1;
     int32 constant UpvotedExpertPost = 5;
     int32 constant DownvotedExpertPost = -2;
-    // int32 constant AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
 
     //common post 
     int32 constant DownvoteCommonPost = -1;
     int32 constant UpvotedCommonPost = 1;
     int32 constant DownvotedCommonPost = -1;
-    // int32 constant AcceptCommonPost = 1;
 
     //tutorial 
     int32 constant DownvoteTutorial = -1;
