@@ -180,6 +180,39 @@ describe("Test permissions", function () {
 
 			await expect(peeranha.connect(signers[1]).changeStatusBestReply(1, 1)).to.be.revertedWith('Only owner by post can change statust best reply');
 		});
+
+        it("Test change post type by not registered user", async function () {
+            const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await expect(peeranha.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
+            .to.be.revertedWith("revert Peeranha: must be an existing user");
+        })
+
+        it("Test change post type by common user", async function () {
+            const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await expect(peeranha.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
+            .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        })
     });
 
     describe("General admin", function () {

@@ -16,4 +16,5 @@ interface IPeeranhaPost {
     function changeStatusOfficialReply(uint256 postId, uint16 replyId) external;
     function changeStatusBestReply(uint256 postId, uint16 replyId) external;
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external;
+    function changePostType(uint256 postId, PostLib.PostType postType) external;
 }

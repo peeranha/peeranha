@@ -100,6 +100,7 @@ library PostLib  {
     event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
     event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
     event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
+    event ChangePostType(address user, uint256 postId, PostType newPostType);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -810,7 +811,85 @@ library PostLib  {
                 usersRating[1].rating *= -1;  
             }
         }
-        UserLib.updateUsersRating(userContext, usersRating); 
+        UserLib.updateUsersRating(userContext, usersRating);
+    }
+
+    function changePostType(
+        PostCollection storage self,
+        UserLib.UserContext storage userContext,
+        address userAddr,
+        uint256 postId,
+        PostType newPostType
+    ) public {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
+        SecurityLib.checkRatingAndEnergy(
+            userContext.roles,
+            user,
+            userAddr,
+            userAddr,
+            postContainer.info.communityId,
+            SecurityLib.Action.changePostType
+        );
+        require(newPostType != postContainer.info.postType, "This post type is already set.");
+        
+        VoteLib.StructRating memory oldTypeRating = getTypesRating(postContainer.info.postType);
+        VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
+
+        uint8 positive;
+        uint8 negative;
+        for (uint32 i; i < postContainer.votedUsers.length; i++) {
+            if(postContainer.historyVotes[postContainer.votedUsers[i]] == 1) positive++;
+            else if(postContainer.historyVotes[postContainer.votedUsers[i]] == -1) negative++;
+        }
+        int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
+                                (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
+        UserLib.updateUserRating(userContext, postContainer.info.author, changeUserRating);
+
+        for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
+            ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            positive = 0;
+            negative = 0;
+            for (uint32 i; i < replyContainer.votedUsers.length; i++) {
+                if(replyContainer.historyVotes[replyContainer.votedUsers[i]] == 1) positive++;
+                else if (replyContainer.historyVotes[replyContainer.votedUsers[i]] == -1) negative++;
+            }
+
+            changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                                    (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+            if (replyContainer.info.isFirstReply) {
+                changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+            }
+            if (replyContainer.info.isQuickReply) {
+                changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+            }
+
+            UserLib.updateUserRating(userContext, replyContainer.info.author, changeUserRating);
+        }
+
+        if (postContainer.info.bestReply != 0) {
+            UserLib.updateUserRating(userContext, postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply);
+            UserLib.updateUserRating(
+                userContext,
+                getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
+                newTypeRating.acceptReply - oldTypeRating.acceptReply
+            );
+        }
+
+        postContainer.info.postType = newPostType;
+        emit ChangePostType(userAddr, postId, newPostType);
+    }
+
+    function getTypesRating(        //name?
+        PostType postType
+    ) public view returns (VoteLib.StructRating memory) {
+        if (postType == PostType.ExpertPost)
+            return VoteLib.getExpertRating();
+        else if (postType == PostType.CommonPost)
+            return VoteLib.getCommonRating();
+        
+        require(false, "At this release you can not publish tutorial.");
+        return VoteLib.getTutorialRating();
     }
 
     /// @notice Return post

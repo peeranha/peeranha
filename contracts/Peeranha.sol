@@ -545,6 +545,10 @@ contract Peeranha is IPeeranha, Initializable {
         posts.voteForumItem(userContext, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
+    function changePostType(uint256 postId, PostLib.PostType postType) external onlyExisitingUser(msg.sender) override {  
+        posts.changePostType(userContext, msg.sender, postId, postType);
+    }
+
     function configureNewAchievement(
         uint64 maxCount,
         int64 lowerBound,
