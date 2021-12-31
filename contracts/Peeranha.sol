@@ -540,12 +540,13 @@ contract Peeranha is IPeeranha, Initializable {
      *
      * - must be a post/reply/comment.
     */ 
-    function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override { 
+    function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
         onlyExisitingUser(msg.sender);
         posts.voteForumItem(userContext, msg.sender, postId, replyId, commentId, isUpvote);
     }
 
-    function changePostType(uint256 postId, PostLib.PostType postType) external onlyExisitingUser(msg.sender) override {  
+    function changePostType(uint256 postId, PostLib.PostType postType) external override {
+        onlyExisitingUser(msg.sender);
         posts.changePostType(userContext, msg.sender, postId, postType);
     }
 
