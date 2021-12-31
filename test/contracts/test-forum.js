@@ -213,7 +213,7 @@ describe("Test post", function () {
 	
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
-			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies for expert and common posts.');
 		});
 	
 		it("Test double replies in common post", async function () {
@@ -225,7 +225,7 @@ describe("Test post", function () {
 	
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
 			await peeranha.createReply(1, 0, hashContainer[1], false);
-			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies in export and common posts.');
+			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies for expert and common posts.');
 		});
 	
 		xit("Test double replies in tutorial post", async function () {
