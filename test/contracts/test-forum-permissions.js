@@ -682,7 +682,7 @@ describe("Test permissions", function () {
             await expect(userRating2.rating).to.equal(StartRating + DownvotedCommonReply + ModeratorDeleteReply);
         });
 
-        xit("Test delete expert reply as best", async function () { // delete best reply?
+        it("Test delete expert reply as best", async function () { // delete best reply?
             const peeranha = await createContract();
             const signers = await ethers.getSigners();
             const hashContainer = getHashContainer();
@@ -711,7 +711,7 @@ describe("Test permissions", function () {
             await expect(newReplierRating.rating).to.equal(StartRating + ModeratorDeleteReply);
         });
     
-        xit("Test delete common reply as best", async function () { // delete best reply?
+        it("Test delete common reply as best", async function () { // delete best reply?
             const peeranha = await createContract();
             const signers = await ethers.getSigners();
             const hashContainer = getHashContainer();
@@ -1292,7 +1292,7 @@ describe("Test permissions", function () {
             await expect(userRating2.rating).to.equal(StartRating + DownvotedCommonReply + ModeratorDeleteReply);
         });
 
-        xit("Test delete expert reply as best", async function () {  // delete best reply
+        it("Test delete expert reply as best", async function () {  // delete best reply
             const peeranha = await createContract();
             const signers = await ethers.getSigners();
             const hashContainer = getHashContainer();
@@ -1322,7 +1322,7 @@ describe("Test permissions", function () {
             await expect(newReplierRating.rating).to.equal(StartRating + ModeratorDeleteReply);
         });
     
-        xit("Test delete common reply as best", async function () {      // delete best reply?
+        it("Test delete common reply as best", async function () {      // delete best reply?
             const peeranha = await createContract();
             const signers = await ethers.getSigners();
             const hashContainer = getHashContainer();
