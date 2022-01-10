@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require('path');
 
 const Stage = {"prod":0, "test":1, "unitTest":2}
 
@@ -36,7 +37,7 @@ async function changeFieldValue(stage) {
     }
 
     for (let i = 0; i < statusField.length; i++) {
-        let fileContent = await fs.readFileSync(statusField[i].path, "utf8");
+        let fileContent = await fs.readFileSync(path.resolve(__dirname, statusField[i].path), "utf8");
 
         let pos = fileContent.indexOf(statusField[i].field);
         if (pos == -1) {
@@ -49,13 +50,15 @@ async function changeFieldValue(stage) {
         let newString = fileContent.slice(pos, endPos);
         fileContent = fileContent.replace(newString, statusField[i].field + ' = ' + statusField[i].value);
 
-        await fs.writeFileSync(statusField[i].path, fileContent)
+        await fs.writeFileSync(path.resolve(__dirname, statusField[i].path), fileContent)
     }   
 }
-  
-changeFieldValue(Stage.unitTest)
-    .then(() => process.exit(0))
-    .catch(error => {
-      console.error(error);
-      process.exit(1);
-    });
+
+module.exports = { changeFieldValue };
+
+// changeFieldValue(stage)
+//     .then(() => process.exit(0))
+//     .catch(error => {
+//       console.error(error);
+//       process.exit(1);
+//     });
