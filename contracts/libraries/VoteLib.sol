@@ -10,21 +10,73 @@ import "./PostLib.sol";
 library VoteLib  {
     enum ResourceAction { Downvote, Upvoted, Downvoted, AcceptReply, AcceptedReply, FirstReply, QuickReply }
 
+    struct StructRating {
+        int32 upvotedPost;
+        int32 downvotedPost;
+
+        int32 upvotedReply;
+        int32 downvotedReply;
+        int32 firstReply;
+        int32 quickReply;
+        int32 acceptReply;
+        int32 acceptedReply;
+    }
+
+    function getExpertRating() internal pure returns (StructRating memory) {
+        return StructRating({
+           upvotedPost: UpvotedExpertPost,
+           downvotedPost: DownvotedExpertPost,
+
+           upvotedReply: UpvotedExpertReply,
+           downvotedReply: DownvotedExpertReply,
+           firstReply: FirstExpertReply,
+           quickReply: QuickExpertReply,
+           acceptReply: AcceptExpertReply,
+           acceptedReply: AcceptedExpertReply
+        });
+    }
+
+    function getCommonRating() internal pure returns (StructRating memory) {
+        return StructRating({
+           upvotedPost: UpvotedCommonPost,
+           downvotedPost: DownvotedCommonPost,
+
+           upvotedReply: UpvotedCommonReply,
+           downvotedReply: DownvotedCommonReply,
+           firstReply: FirstCommonReply,
+           quickReply: QuickCommonReply,
+           acceptReply: AcceptCommonReply,
+           acceptedReply: AcceptedCommonReply
+        });
+    }
+
+    function getTutorialRating() internal pure returns (StructRating memory) {
+        return StructRating({
+           upvotedPost: UpvotedTutorial,
+           downvotedPost: DownvotedTutorial,
+
+           upvotedReply: 0,
+           downvotedReply: 0,
+           firstReply: 0,
+           quickReply: 0,
+           acceptReply: 0,
+           acceptedReply: 0
+        });
+    }
+
     //expert post
     int32 constant DownvoteExpertPost = -1;
     int32 constant UpvotedExpertPost = 5;
-    int32 constant DownvotedExpertPost = -2;
-    int32 constant AcceptExpertPost = 2;         //Accept answer as correct for Expert Question
+    int32 constant DownvotedExpertPost = -2;        // -1
 
     //common post 
     int32 constant DownvoteCommonPost = -1;
     int32 constant UpvotedCommonPost = 1;
     int32 constant DownvotedCommonPost = -1;
-    int32 constant AcceptCommonPost = 1;
 
     //tutorial 
     int32 constant DownvoteTutorial = -1;
-    int32 constant UpvotedTutorial = 1;
+    int32 constant UpvotedTutorial = 1;             // 10? !
     int32 constant DownvotedTutorial = -1 ;
 
     int32 constant DeleteOwnPost = -1;
@@ -55,6 +107,7 @@ library VoteLib  {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+    int32 constant DeleteOwnComment = -1;
     int32 constant ModeratorDeleteComment = -1;
 
     /// @notice Get value Rating for post action
@@ -75,14 +128,13 @@ library VoteLib  {
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedCommonPost;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonPost;
 
-        } else if (PostLib.PostType.Tutorial == postType) {
+        } else if (PostLib.PostType.Tutorial == postType) { // else -> check gas !
             if (ResourceAction.Downvote == resourceAction) return DownvoteTutorial;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedTutorial;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
         require(false, "PostType or voteResource is not found");
-        return 0;
     }
 
     /// @notice Get value Rating for rating action
@@ -116,7 +168,6 @@ library VoteLib  {
         }
         
         require(false, "PostType or voteResource is not found");
-        return 0;
     }
 
     function getUserRatingChange(
@@ -172,7 +223,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = 1;
                 ratingChange = 1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = -1;
@@ -186,7 +237,7 @@ library VoteLib  {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -1;
                 votedUsers.push(actionAddress);
-            } else if (history == 1) {
+            } else {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -2;
             }
