@@ -85,13 +85,14 @@ describe("Test vote", function () {
 
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.addUserRating(signers[1].address, 30);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranha.voteItem(1, 0, 0, 1);
-			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[1]).voteItem(1, 0, 0, 1);
 
-			const user = await peeranha.getUserByAddress(signers[1].address);
+			const user = await peeranha.getUserByAddress(signers[0].address);
 			const post = await peeranha.getPost(1);
 			await expect(user.rating).to.equal(StartRating);
 			await expect(post.rating).to.equal(0);
@@ -108,13 +109,14 @@ describe("Test vote", function () {
 
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.addUserRating(signers[1].address, 30);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranha.voteItem(1, 0, 0, 1);
-			await peeranha.voteItem(1, 0, 0, 1);
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).voteItem(1, 0, 0, 1);
+			await peeranha.connect(signers[1]).voteItem(1, 0, 0, 1);
 
-			const user = await peeranha.getUserByAddress(signers[1].address);
+			const user = await peeranha.getUserByAddress(signers[0].address);
 			const post = await peeranha.getPost(1);
 			await expect(user.rating).to.equal(StartRating);
 			await expect(post.rating).to.equal(0);
@@ -1628,14 +1630,15 @@ describe("Test vote", function () {
 
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.addUserRating(signers[1].address, 30);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false)
-			await peeranha.voteItem(1, 1, 0, 1);
-			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false)
+			await peeranha.connect(signers[1]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[1]).voteItem(1, 1, 0, 1);
 
-			const user = await peeranha.getUserByAddress(signers[1].address);
+			const user = await peeranha.getUserByAddress(signers[0].address);
 			const reply = await peeranha.getReply(1, 1);
 			await expect(user.rating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 			await expect(reply.rating).to.equal(0);
@@ -1652,14 +1655,15 @@ describe("Test vote", function () {
 
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 			await peeranha.createUser(hashContainer[1]);
+			await peeranha.addUserRating(signers[1].address, 30);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false)
-			await peeranha.voteItem(1, 1, 0, 1);
-			await peeranha.voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false)
+			await peeranha.connect(signers[1]).voteItem(1, 1, 0, 1);
+			await peeranha.connect(signers[1]).voteItem(1, 1, 0, 1);
 
-			const user = await peeranha.getUserByAddress(signers[1].address);
+			const user = await peeranha.getUserByAddress(signers[0].address);
 			const reply = await peeranha.getReply(1, 1);
 			await expect(user.rating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			await expect(reply.rating).to.equal(0);
