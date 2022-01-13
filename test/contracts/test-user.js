@@ -2,7 +2,6 @@ const { expect } = require("chai");
 const crypto = require("crypto");
 
 describe("Test users", function() {
-
   it("Test user creating", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
