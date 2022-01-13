@@ -620,20 +620,13 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
-    ///
-    // TO DO
-    // to remove it in prod
-    ///
-    function addUserRating(address userAddr, int32 rating) external {
+    /*function addUserRating(address userAddr, int32 rating) external {
         UserLib.updateUserRating(userContext, userAddr, rating);
-    }
+    }*/
 
-    ///
-    // delete
-    ///
-    function setEnergy(address userAddr, uint16 energy) external {
+    /*function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }
+    }*/
 
     function onlyExisitingUser(address user) private {
         require(UserLib.isExists(userContext.users, user),

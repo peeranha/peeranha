@@ -1,10 +1,7 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
-const { changeFieldValue } = require('../../contracts/libraries/readFile/readWrite');
-const { Stage } = require('./utils');
 
 describe("Test users", function() {
-  changeFieldValue(Stage.unitTest);
 
   it("Test user creating", async function() {
     const peeranha = await createContract();

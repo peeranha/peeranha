@@ -1,7 +1,5 @@
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-const Stage = {"prod":0, "test":1, "unitTest":2}
-
 async function wait(ms) {
     console.log("delay:" + ms)
     await delay(ms);
@@ -24,4 +22,4 @@ async function getAddressContract(contract) {
 }
 
 
-module.exports = { Stage, wait, getBalance, getInt, getAddressContract };
+module.exports = { wait, getBalance, getInt, getAddressContract };
