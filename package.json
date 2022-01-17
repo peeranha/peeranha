@@ -10,8 +10,8 @@
     "compile": "node scripts/change-value.js 0 & npx hardhat compile",
     "deploy-goerli": "node scripts/change-value.js 0 & npx hardhat run --network goerli scripts/deploy.js",
     "upgrade-goerli": "node scripts/change-value.js 0 & npx hardhat run --network goerli scripts/upgrade.js",
-    "post-action-goerli": "node scripts/change-value.js 0 & npx hardhat run --network goerli scripts/post-action.js",
-    "query-data-goerli": "node scripts/change-value.js 0 & npx hardhat run --network goerli scripts/query-data.js"
+    "post-action-goerli": "npx hardhat run --network goerli scripts/post-action.js",
+    "query-data-goerli": "npx hardhat run --network goerli scripts/query-data.js"
   },
   "keywords": [],
   "author": "",
