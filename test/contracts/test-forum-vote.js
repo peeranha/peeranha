@@ -2269,6 +2269,7 @@ describe("Test vote", function () {
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
 			await peeranha.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranha.connect(signers[3]).createUser(hashContainer[0]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
@@ -2280,11 +2281,18 @@ describe("Test vote", function () {
 
 			await peeranha.connect(signers[1]).deleteReply(1, 1);
 			await peeranha.connect(signers[2]).deleteReply(1, 2);
-			
+
+			await wait(QuickReplyTime);
+			await peeranha.connect(signers[3]).createReply(1, 0, hashContainer[2], false);
+			await peeranha.voteItem(1, 3, 0, 1);
+			await peeranha.connect(signers[3]).deleteReply(1, 3);
+
 			const userRating = await peeranha.getUserByAddress(signers[1].address);
 			const userRating2 = await peeranha.getUserByAddress(signers[2].address);
+			const userRating3 = await peeranha.getUserByAddress(signers[3].address);
 			await expect(userRating.rating).to.equal(StartRating + DeleteOwnReply);
 			await expect(userRating2.rating).to.equal(StartRating + DeleteOwnReply);
+			await expect(userRating3.rating).to.equal(StartRating + DeleteOwnReply);
 		});
 
 		it("Test delete 2 upVoted common reply, one first and two quick ", async function () {
@@ -2649,7 +2657,7 @@ describe("Test vote", function () {
 			await peeranha.deleteReply(1, 1);
 
 			const newUserRating = await peeranha.getUserByAddress(signers[1].address);
-			await expect(newUserRating.rating).to.equal(userRating.rating - UpvotedExpertReply + DeleteOwnReply - (FirstExpertReply + QuickExpertReply));
+			await expect(newUserRating.rating).to.equal(userRating.rating + DeleteOwnReply - (FirstExpertReply + QuickExpertReply));
 		});
 
 		it("Test delete reply one period after upvote common reply", async function () {
@@ -2676,7 +2684,7 @@ describe("Test vote", function () {
 			await peeranha.deleteReply(1, 1);
 
 			const newUserRating = await peeranha.getUserByAddress(signers[1].address);
-			await expect(newUserRating.rating).to.equal(userRating.rating - UpvotedCommonReply + DeleteOwnReply - (FirstCommonReply + QuickCommonReply));
+			await expect(newUserRating.rating).to.equal(userRating.rating + DeleteOwnReply - (FirstCommonReply + QuickCommonReply));
 		});
 
 		/* - */ xit("Test delete reply one period after upvote tutorial reply", async function () {
