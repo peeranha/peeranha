@@ -2730,6 +2730,66 @@ describe("Test vote", function () {
 		});
 	});
 
+	describe("Test unmark own reply as best", function () {
+
+		it("Test unmark own expert reply as best", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const oldUserRating = await peeranha.getUserByAddress(signers[0].address);
+			await peeranha.changeStatusBestReply(1, 1);
+			await peeranha.changeStatusBestReply(1, 1);
+			const userRating = await peeranha.getUserByAddress(signers[0].address);
+			await expect(userRating.rating).to.equal(oldUserRating.rating);
+		});
+
+		it("Test unmark own common reply as best", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const oldUserRating = await peeranha.getUserByAddress(signers[0].address);
+			await peeranha.changeStatusBestReply(1, 1);
+			await peeranha.changeStatusBestReply(1, 1);
+			const userRating = await peeranha.getUserByAddress(signers[0].address);
+			await expect(userRating.rating).to.equal(oldUserRating.rating);
+		});
+
+		/* - */ xit("Test unmark own tutorial reply as best", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			
+			const oldUserRating = await peeranha.getUserByAddress(signers[0].address);
+			await peeranha.changeStatusBestReply(1, 1);
+			await peeranha.changeStatusBestReply(1, 1);
+			const userRating = await peeranha.getUserByAddress(signers[0].address);
+			await expect(userRating.rating).to.equal(oldUserRating.rating);
+		});
+	});
+
 	describe("Test choose another reply as best", function () {
 
 		it("Test choose another expert reply as best", async function () {
@@ -2759,7 +2819,6 @@ describe("Test vote", function () {
 			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
 			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
 
-			await peeranha.changeStatusBestReply(1, 1);
 			await peeranha.changeStatusBestReply(1, 2);
 			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
@@ -2796,7 +2855,6 @@ describe("Test vote", function () {
 			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
 
-			await peeranha.changeStatusBestReply(1, 1);
 			await peeranha.changeStatusBestReply(1, 2);
 			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
@@ -2838,6 +2896,192 @@ describe("Test vote", function () {
 			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
 			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
+			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptedCommonReply);
+		});
+	});
+
+	describe("Test choose another reply as best (new reply is own)", function () {
+
+		it("Test choose another expert reply as best (new reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 0, hashContainer[2], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser2Rating = await peeranha.getUserByAddress(signers[1].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptExpertReply);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating);
+		});
+
+		it("Test choose another common reply as best (new reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 0, hashContainer[2], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser2Rating = await peeranha.getUserByAddress(signers[1].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating);
+		});
+
+		/* - */ xit("Test choose another tutorial reply as best (new reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranha.createReply(1, 0, hashContainer[2], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser2Rating = await peeranha.getUserByAddress(signers[1].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user2Rating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2Rating.rating).to.equal(oldUser2Rating.rating + AcceptCommonReply);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user2EndRating = await peeranha.getUserByAddress(signers[1].address);
+			await expect(user2EndRating.rating).to.equal(oldUser2Rating.rating);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating);
+		});
+	});
+
+	describe("Test choose another reply as best (old reply is own)", function () {
+
+		it("Test choose another expert reply as best (old reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[2]).createUser(hashContainer[2]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[2]).createReply(1, 0, hashContainer[2], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser3Rating = await peeranha.getUserByAddress(signers[2].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating);
+			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedExpertReply);
+			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptExpertReply);
+		});
+
+		it("Test choose another common reply as best (old reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[2]).createUser(hashContainer[2]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[2]).createReply(1, 0, hashContainer[2], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser3Rating = await peeranha.getUserByAddress(signers[2].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating);
+			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
+			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
+			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptCommonReply);
+		});
+
+		/* - */ xit("Test choose another tutorial reply as best (old reply is own)", async function () {
+			const peeranha = await createContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.connect(signers[2]).createUser(hashContainer[2]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranha.createReply(1, 0, hashContainer[1], false);
+			await peeranha.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
+			
+			const oldUser1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const oldUser3Rating = await peeranha.getUserByAddress(signers[2].address);
+
+			await peeranha.changeStatusBestReply(1, 1);
+			const user1Rating = await peeranha.getUserByAddress(signers[0].address);
+			const user3Rating = await peeranha.getUserByAddress(signers[2].address);
+			await expect(user1Rating.rating).to.equal(oldUser1Rating.rating);
+			await expect(user3Rating.rating).to.equal(oldUser3Rating.rating);
+
+			await peeranha.changeStatusBestReply(1, 2);
+			const user1EndRating = await peeranha.getUserByAddress(signers[0].address);
+			const user3EndRating = await peeranha.getUserByAddress(signers[2].address);
 			await expect(user1EndRating.rating).to.equal(oldUser1Rating.rating + AcceptedCommonReply);
 			await expect(user3EndRating.rating).to.equal(oldUser3Rating.rating + AcceptedCommonReply);
 		});
