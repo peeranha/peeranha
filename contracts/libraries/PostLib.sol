@@ -127,8 +127,6 @@ library PostLib  {
         );
         require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
-        require(postType != PostType.Tutorial, "At this release you can not publish tutorial.");
-
 
         PostContainer storage post = self.posts[++self.postCount];
         post.info.ipfsDoc.hash = ipfsHash;
@@ -159,6 +157,8 @@ library PostLib  {
         bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
+        require(postContainer.info.postType != PostType.Tutorial, "You can not publish replies in tutorial.");
+
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
