@@ -2,7 +2,9 @@ const { expect } = require("chai");
 const { wait } = require('./utils');
 const crypto = require("crypto");
 
-
+///
+// rewrite to common user do action
+///
 describe("Test vote", function () {
 	const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
 

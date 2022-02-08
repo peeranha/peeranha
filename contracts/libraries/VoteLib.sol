@@ -202,9 +202,10 @@ library VoteLib  {
     /// @param historyVotes history vote all users
     /// @param isUpvote Upvote or downvote
     /// @param votedUsers the list users who voted
+    // return value:
     // fromUpVoteToDownVote = -2
-    // downVote = -1
-    // upVote = 1
+    // cancel downVote = 1  && upVote = 1       !!!!
+    // cancel upVote = -1   && downVote = -1    !!!!
     // fromDownVoteToUpVote = 2
     function getForumItemRatingChange(
         address actionAddress,

@@ -680,7 +680,12 @@ library PostLib  {
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVotePost : SecurityLib.Action.downVotePost
+            ratingChange == 2 ?
+                SecurityLib.Action.upVotePost :
+                (ratingChange == -2 ?
+                    SecurityLib.Action.downVotePost :
+                    SecurityLib.Action.cancelVote
+                )
         );
 
         vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
@@ -708,7 +713,12 @@ library PostLib  {
             votedUser, 
             replyContainer.info.author, 
             communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVoteReply : SecurityLib.Action.downVoteReply
+            ratingChange == 2 ?
+                SecurityLib.Action.upVoteReply :
+                (ratingChange == -2 ?
+                    SecurityLib.Action.downVoteReply :
+                    SecurityLib.Action.cancelVote
+                )
         );
 
         if (postType == PostType.Tutorial) return;
@@ -755,7 +765,14 @@ library PostLib  {
             votedUser, 
             commentContainer.info.author, 
             communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVoteComment : SecurityLib.Action.downVoteComment
+            ratingChange == 2 ? 
+                SecurityLib.Action.upVoteComment :
+                (ratingChange == -2 ?
+                    SecurityLib.Action.downVoteComment :
+                    SecurityLib.Action.cancelVote
+                )
+            // ratingChange > 0 ? SecurityLib.Action.upVoteComment : SecurityLib.Action.downVoteComment
+
         );
         
         commentContainer.info.rating += ratingChange;
