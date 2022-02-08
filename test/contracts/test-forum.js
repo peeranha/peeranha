@@ -60,14 +60,29 @@ describe("Test post", function () {
 			);
 		});
 
-		it("Test create Tutorial post", async function () {		// must be changed after first release
+		it("Test create Tutorial post", async function () {
 			const peeranha = await createContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranha.createUser(hashContainer[1]);
 			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-	
-			await expect(peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [2])).to.be.revertedWith('At this release you can not publish tutorial.');
+
+			await Promise.all(
+				hashContainer.map(async (hash, index) => {
+					return await peeranha
+						.createPost(1, hash, PostTypeEnum.Tutorial, [1]);
+				})
+			);
+
+			await Promise.all(
+				hashContainer.map(async (hash, index) => {
+					const post = await peeranha.getPost(index + 1);
+					//await expect(post.author).to.equal(peeranha.deployTransaction.from);		// ???
+					expect(post.isDeleted).to.equal(false);
+					expect(post.postType).to.equal(PostTypeEnum.Tutorial);
+					return expect(post.ipfsDoc.hash).to.equal(hash);
+				})
+			);
 		});
 
 		it("Test create post without tag", async function () {
@@ -156,6 +171,17 @@ describe("Test post", function () {
 			expect(reply.author).to.equal(peeranha.deployTransaction.from);
 			expect(reply.isDeleted).to.equal(false);
 			expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test create reply in tutorial", async function () {
+			const peeranha = await createContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranha.createUser(hashContainer[1]);
+			await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await expect(peeranha.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial.');
 		});
 
 		it("Test create 4 replies (test gas)", async function () {
