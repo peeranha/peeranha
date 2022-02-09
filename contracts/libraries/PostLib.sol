@@ -673,20 +673,30 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
-            ratingChange == 2 ?
-                SecurityLib.Action.upVotePost :
-                (ratingChange == -2 ?
-                    SecurityLib.Action.downVotePost :
-                    SecurityLib.Action.cancelVote
+            isCancel ?
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVotePost :
+                    SecurityLib.Action.downVotePost
                 )
-        );
+            ///
+            // only 1 'if' for upvote
+            //
+            //  ratingChange == 2
+            //      SecurityLib.Action.upVotePost :
+            //      (ratingChange == -2 ?
+            //          SecurityLib.Action.downVotePost :
+            //          SecurityLib.Action.cancelVote
+            //      )
+            ///
+        );  
 
         vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
         postContainer.info.rating += ratingChange;
@@ -706,18 +716,18 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             votedUser, 
             replyContainer.info.author, 
             communityId, 
-            ratingChange == 2 ?
-                SecurityLib.Action.upVoteReply :
-                (ratingChange == -2 ?
-                    SecurityLib.Action.downVoteReply :
-                    SecurityLib.Action.cancelVote
+            isCancel ?
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVoteReply :
+                    SecurityLib.Action.downVoteReply
                 )
         );
 
@@ -758,21 +768,19 @@ library PostLib  {
         address votedUser,
         bool isUpvote
     ) private {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             votedUser, 
             commentContainer.info.author, 
             communityId, 
-            ratingChange == 2 ? 
-                SecurityLib.Action.upVoteComment :
-                (ratingChange == -2 ?
-                    SecurityLib.Action.downVoteComment :
-                    SecurityLib.Action.cancelVote
+            isCancel ? 
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVoteComment :
+                    SecurityLib.Action.downVoteComment
                 )
-            // ratingChange > 0 ? SecurityLib.Action.upVoteComment : SecurityLib.Action.downVoteComment
-
         );
         
         commentContainer.info.rating += ratingChange;

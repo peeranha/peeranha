@@ -141,7 +141,7 @@ library SecurityLib {
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.changePostType) {
-      require(false, "Only moderator can change post");
+      require(false, "Only moderator can change type of post");
 
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");

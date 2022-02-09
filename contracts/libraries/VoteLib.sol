@@ -212,9 +212,10 @@ library VoteLib  {
         mapping(address => int256) storage historyVotes,
         bool isUpvote,
         address[] storage votedUsers
-    ) internal returns (int32) {
+    ) internal returns (int32, bool) {
         int history = getHistoryVote(actionAddress, historyVotes);
         int32 ratingChange;
+        bool isCancel;
         
         if (isUpvote) {
             if (history == -1) {
@@ -228,12 +229,14 @@ library VoteLib  {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = -1;
+                isCancel = true;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = 1;
+                isCancel = true;
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -1;
@@ -243,6 +246,6 @@ library VoteLib  {
                 ratingChange = -2;
             }
         }
-        return ratingChange;
+        return (ratingChange, isCancel);
     }
 }
