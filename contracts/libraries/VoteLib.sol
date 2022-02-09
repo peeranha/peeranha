@@ -95,7 +95,7 @@ library VoteLib  {
 
     //common reply 
     int32 constant DownvoteCommonReply = -1;
-    int32 constant UpvotedCommonReply = 2;
+    int32 constant UpvotedCommonReply = 1;
     int32 constant DownvotedCommonReply = -1;
     int32 constant AcceptCommonReply = 3;
     int32 constant AcceptedCommonReply = 1;

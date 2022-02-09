@@ -4297,7 +4297,7 @@ describe("Test vote", function () {
 
     //common reply 
     const DownvoteCommonReply = -1;
-    const UpvotedCommonReply = 2;
+    const UpvotedCommonReply = 1;
     const DownvotedCommonReply = -1;
     const AcceptCommonReply = 3;
     const AcceptedCommonReply = 1;
