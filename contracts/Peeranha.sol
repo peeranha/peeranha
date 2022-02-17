@@ -17,6 +17,7 @@ import "./interfaces/IPeeranha.sol";
 
 contract Peeranha is IPeeranha, Initializable {
     using UserLib for UserLib.UserCollection;
+    using UserLib for UserLib.UserRatingCollection;
     using UserLib for UserLib.User;
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
@@ -49,10 +50,9 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(int32) {
-        RewardLib.PeriodRating storage userPeriod = RewardLib.getUserPeriodRating(userContext.userRewards, user, rewardPeriod);
-        return userPeriod.ratingToReward;
-    }
+    // function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(RewardLib.UserRewards storage) {            // why 2 functions getUserRewardPeriod
+    //     return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod];
+    // }
     
     /**
      * @dev Signup for user account.
@@ -126,6 +126,10 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function getUserByAddress(address addr) external view returns (UserLib.User memory) {
         return userContext.users.getUserByAddress(addr);
+    }
+
+    function getUserRating(address addr, uint32 communityId) external view returns (int32) {
+        return userContext.userRatingCollection.getUserRating(addr, communityId);
     }
 
     /**
@@ -608,8 +612,8 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reward in this period.
      * - must be a period less then now.
     */
-    function getUserRewardPeriod(address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
-        return RewardLib.getUserPeriodRating(userContext.userRewards, user, period);
+    function getUserRewardPeriod(uint32 communityId, address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
+        return RewardLib.getUserPeriodRating(userContext.userRatingCollection.communityRatingForUser[user].userRewards[period], communityId);
     }
 
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
@@ -624,8 +628,8 @@ contract Peeranha is IPeeranha, Initializable {
     // TO DO
     // to remove it in prod
     ///
-    function addUserRating(address userAddr, int32 rating) external {
-        UserLib.updateUserRating(userContext, userAddr, rating);
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
+        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
     ///

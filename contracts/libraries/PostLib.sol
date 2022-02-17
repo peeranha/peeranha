@@ -120,6 +120,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, communityId),
             userAddr,
             userAddr,
             communityId,
@@ -163,6 +164,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             user,
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
@@ -204,11 +206,11 @@ library PostLib  {
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
                 if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
                     replyContainer.info.isFirstReply = true;
-                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply));
+                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
                 if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
                     replyContainer.info.isQuickReply = true;
-                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply));
+                    UserLib.updateUserRating(userContext, user, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
                 }
             }
         } else {
@@ -258,6 +260,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             user,
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             author,
             postContainer.info.communityId, 
@@ -291,6 +294,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
@@ -327,6 +331,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
@@ -363,6 +368,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
@@ -387,10 +393,11 @@ library PostLib  {
         uint256 postId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        int32 userRating = UserLib.getUserByAddress(userContext.users, userAddr).rating;
+        int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
@@ -401,23 +408,23 @@ library PostLib  {
             UserLib.updateUserRating(userContext, postContainer.info.author,
                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                 VoteLib.ResourceAction.Upvoted,
-                                                TypeContent.Post) * postContainer.info.rating);
+                                                TypeContent.Post) * postContainer.info.rating, postContainer.info.communityId);
         }
         if (postContainer.info.bestReply != 0) {
-            UserLib.updateUserRating(userContext, postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+            UserLib.updateUserRating(userContext, postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
         }
 
         uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < DELETE_TIME) {    
             for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
-                deductReplyRating(userContext, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i);
+                deductReplyRating(userContext, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
             }
         }
         
         if (userAddr == postContainer.info.author)
-            UserLib.updateUserRating(userContext, postContainer.info.author, VoteLib.DeleteOwnPost);
+            UserLib.updateUserRating(userContext, postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
         else 
-            UserLib.updateUserRating(userContext, postContainer.info.author, VoteLib.ModeratorDeletePost);
+            UserLib.updateUserRating(userContext, postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(userAddr, postId);
@@ -442,6 +449,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
@@ -454,13 +462,14 @@ library PostLib  {
                 userContext,
                 postContainer.info.postType,
                 replyContainer,
-                replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId
+                replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId,
+                postContainer.info.communityId
             );
         }
         if (userAddr == replyContainer.info.author)
-            UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.DeleteOwnReply);
+            UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
         else 
-            UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.ModeratorDeleteReply);
+            UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
 
         replyContainer.info.isDeleted = true;
         postContainer.info.deletedReplyCount++;
@@ -475,7 +484,8 @@ library PostLib  {
         UserLib.UserContext storage userContext,
         PostType postType,
         ReplyContainer storage replyContainer,
-        bool isBestReply
+        bool isBestReply,
+        uint32 communityId
     ) private {
         if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
@@ -500,7 +510,8 @@ library PostLib  {
             UserLib.updateUserRating(
                 userContext, 
                 replyContainer.info.author, 
-                changeReplyAuthorRating
+                changeReplyAuthorRating,
+                communityId
             );
         }
     }
@@ -525,6 +536,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
@@ -532,9 +544,9 @@ library PostLib  {
         );
 
         if (userAddr == commentContainer.info.author)
-            UserLib.updateUserRating(userContext, commentContainer.info.author, VoteLib.DeleteOwnComment);
+            UserLib.updateUserRating(userContext, commentContainer.info.author, VoteLib.DeleteOwnComment, postContainer.info.communityId);
         else 
-            UserLib.updateUserRating(userContext, commentContainer.info.author, VoteLib.ModeratorDeleteComment);
+            UserLib.updateUserRating(userContext, commentContainer.info.author, VoteLib.ModeratorDeleteComment, postContainer.info.communityId);
 
         commentContainer.info.isDeleted = true;
         emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
@@ -587,8 +599,8 @@ library PostLib  {
 
         if (postContainer.info.bestReply == replyId) {
             if (replyContainer.info.author != userAddr) {       // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
+                UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
             }
             postContainer.info.bestReply = 0;
         } else {
@@ -596,14 +608,14 @@ library PostLib  {
                 ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
 
                 if (oldBestReplyContainer.info.author != userAddr) {    // unit test
-                    UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                    UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+                    UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
+                    UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
                 }
             }
 
             if (replyContainer.info.author != userAddr) {   // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                UserLib.updateUserRating(userContext, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
+                UserLib.updateUserRating(userContext, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
             }
             postContainer.info.bestReply = replyId;
         }
@@ -611,6 +623,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             userAddr,
             postContainer.info.communityId,
@@ -677,13 +690,14 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
+            UserLib.getUserRating(userContext.userRatingCollection, votedUser, postContainer.info.communityId),
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
             ratingChange > 0 ? SecurityLib.Action.upVotePost : SecurityLib.Action.downVotePost
         );
 
-        vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
+        vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post, postContainer.info.communityId);
         postContainer.info.rating += ratingChange;
     }
  
@@ -705,6 +719,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
+            UserLib.getUserRating(userContext.userRatingCollection, votedUser, communityId),
             votedUser, 
             replyContainer.info.author, 
             communityId, 
@@ -713,7 +728,7 @@ library PostLib  {
 
         if (postType == PostType.Tutorial) return;
 
-        vote(userContext, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply);
+        vote(userContext, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply, communityId);
         int32 oldRating = replyContainer.info.rating;
         replyContainer.info.rating += ratingChange;
         int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
@@ -721,17 +736,17 @@ library PostLib  {
         if (replyContainer.info.isFirstReply) {
             int32 changeRating;
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
             }
         }
 
         if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {
-                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
             } else if (oldRating >= 0 && newRating < 0) {
-                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply));
+                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
             }
         }
     }
@@ -752,6 +767,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
+            UserLib.getUserRating(userContext.userRatingCollection, votedUser, communityId),
             votedUser, 
             commentContainer.info.author, 
             communityId, 
@@ -776,7 +792,8 @@ library PostLib  {
         PostType postType,
         bool isUpvote,
         int32 ratingChanged,
-        TypeContent typeContent
+        TypeContent typeContent,
+        uint32 communityId
     ) private {
        UserLib.UserRatingChange[] memory usersRating = new UserLib.UserRatingChange[](2);
 
@@ -811,7 +828,7 @@ library PostLib  {
                 usersRating[1].rating *= -1;  
             }
         }
-        UserLib.updateUsersRating(userContext, usersRating);
+        UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
     function changePostType(
@@ -826,6 +843,7 @@ library PostLib  {
         SecurityLib.checkRatingAndEnergy(
             userContext.roles,
             user,
+            UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             userAddr,
             postContainer.info.communityId,
@@ -844,7 +862,7 @@ library PostLib  {
         }
         int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
-        UserLib.updateUserRating(userContext, postContainer.info.author, changeUserRating);
+        UserLib.updateUserRating(userContext, postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
@@ -864,15 +882,16 @@ library PostLib  {
                 changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
             }
 
-            UserLib.updateUserRating(userContext, replyContainer.info.author, changeUserRating);
+            UserLib.updateUserRating(userContext, replyContainer.info.author, changeUserRating, postContainer.info.communityId);
         }
 
         if (postContainer.info.bestReply != 0) {
-            UserLib.updateUserRating(userContext, postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply);
+            UserLib.updateUserRating(userContext, postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply, postContainer.info.communityId);
             UserLib.updateUserRating(
                 userContext,
                 getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
-                newTypeRating.acceptReply - oldTypeRating.acceptReply
+                newTypeRating.acceptReply - oldTypeRating.acceptReply,
+                postContainer.info.communityId
             );
         }
 

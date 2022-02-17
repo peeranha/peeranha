@@ -18,19 +18,33 @@ library UserLib {
   struct User {
     IpfsLib.IpfsHash ipfsDoc;
     uint256 creationTime;
-    int32 rating;
-    int32 payOutRating;
     uint16 energy;
     uint32 lastUpdatePeriod;
     uint32[] followedCommunities;
-    uint16[] rewardPeriods;
     bytes32[] roles;
   }
+
+  struct UserRatingCollection {
+    mapping(address => CommunityRatingForUser) communityRatingForUser;
+  }
+
+  struct CommunityRatingForUser {
+    mapping(uint32 => UserRating) userRating;   //uint32 - community id
+    uint16[] rewardPeriods; // периоды когда было изменение рейтинга
+    mapping(uint16 => RewardLib.UserRewards) userRewards; // period
+  }
+
+  struct UserRating {
+    int32 rating;
+    int32 payOutRating;
+    bool isActive;
+  }
+
 
   /// users The mapping containing all users
   struct UserContext {
     UserLib.UserCollection users;
-    RewardLib.UserRewards userRewards;
+    UserLib.UserRatingCollection userRatingCollection;
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
@@ -66,8 +80,6 @@ library UserLib {
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
     user.creationTime = CommonLib.getTimestamp();
-    user.rating = START_USER_RATING;
-    user.payOutRating = START_USER_RATING;
     user.energy = getStatusEnergy(START_USER_RATING);
 
     self.userList.push(userAddress);
@@ -88,6 +100,7 @@ library UserLib {
     SecurityLib.checkRatingAndEnergy(
       userContext.roles,
       user,
+      0,
       userAddress,
       userAddress,
       0,
@@ -111,6 +124,7 @@ library UserLib {
     SecurityLib.checkRatingAndEnergy(
       userContext.roles,
       user,
+      getUserRating(userContext.userRatingCollection, userAddress, communityId),
       userAddress,
       userAddress,
       0,
@@ -177,6 +191,11 @@ library UserLib {
     return user;
   }
 
+  function getUserRating(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (int32) {
+    int32 rating = self.communityRatingForUser[addr].userRating[communityId].rating;
+    return rating;
+  }
+
   /// @notice Check user existence
   /// @param self The mapping containing all users
   /// @param addr Address of the user to check
@@ -184,59 +203,76 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating);
+      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
   /// @notice Add rating to user
   /// @param userAddr user's rating will be change
   /// @param rating value for add to user's rating
-  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating, uint32 communityId) internal {
     if (rating == 0) return;
 
-    updateRatingBase(userContext, user, userAddr, rating);
+    updateRatingBase(userContext, user, userAddr, rating, communityId);
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
     if (rating == 0) return;
 
     User storage user = getUserByAddress(userContext.users, userAddr);
-    updateRatingBase(userContext, user, userAddr, rating);
+    updateRatingBase(userContext, user, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating) internal {
+  function updateRatingBase(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating, uint32 communityId) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     // User storage user = getUserByAddress(userContext.users, userAddr);
-    int32 newRating = user.rating += rating;
-    uint256 pastPeriodsCount = user.rewardPeriods.length;
     
-    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, currentPeriod);
-    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || user.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
-    if (isFirstTransactionOnThisWeek) {
-      user.rewardPeriods.push(currentPeriod);
+    CommunityRatingForUser storage communityUser = userContext.userRatingCollection.communityRatingForUser[userAddr];
+    // UserRating storage userRating = communityUser.userRating[communityId]  // !! заменить ниже
+    if (!communityUser.userRating[communityId].isActive) {
+      communityUser.userRating[communityId].rating = START_USER_RATING;
+      communityUser.userRating[communityId].payOutRating = START_USER_RATING;
+      communityUser.userRating[communityId].isActive = true;
     }
-    
+
+    int32 newRating = communityUser.userRating[communityId].rating += rating;
+    uint256 pastPeriodsCount = communityUser.rewardPeriods.length;
+
+    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(communityUser.userRewards[currentPeriod], communityId);
+    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
+    if (isFirstTransactionOnThisWeek) {
+      communityUser.rewardPeriods.push(currentPeriod);
+
+      bool isCommunity;  // name
+      for (uint32 i = 0; i < communityUser.userRewards[currentPeriod].activeInCommunity.length; i++) {
+        if (communityUser.userRewards[currentPeriod].activeInCommunity[i] == communityId) {
+          isCommunity = true;
+          break;
+        }
+      }
+      if (!isCommunity) 
+        communityUser.userRewards[currentPeriod].activeInCommunity.push(communityId);
+    }
+
     int32 ratingToReward = currentWeekRating.ratingToReward;
     int32 ratingToRewardChange = 0;
-  
-    // Reward for current week is based on rating earned for the previous week. Current week will be rewarded next week.
+
     if (pastPeriodsCount > 0) {
-      uint16 previousWeekNumber = user.rewardPeriods[pastPeriodsCount - 1]; // period now
-      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(userContext.userRewards, userAddr, previousWeekNumber);
+      uint16 previousWeekNumber = communityUser.rewardPeriods[pastPeriodsCount - 1]; // period now
+      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(communityUser.userRewards[previousWeekNumber], communityId);
 
-
-      int32 paidOutRating = user.payOutRating - ratingToReward;
+      int32 paidOutRating = communityUser.userRating[communityId].payOutRating - ratingToReward;
       
-      // If current week rating is smaller then past week reward then use it as base for the past week reward.
+        // If current week rating is smaller then past week reward then use it as base for the past week reward.
       int32 baseRewardRating =
         CommonLib.minInt32(previousWeekRating.rating, newRating);
       
       ratingToRewardChange =
         (baseRewardRating - paidOutRating) -
         ratingToReward;  // equal user_week_rating_after_change -
-                          // pay_out_rating;
+                         // pay_out_rating;
       
       // If current preiod rating drops to negative reward then rating to award for current period should be 0
       if (ratingToRewardChange + ratingToReward < 0)
@@ -245,8 +281,8 @@ library UserLib {
 
     currentWeekRating.rating = newRating;
     currentWeekRating.ratingToReward += ratingToRewardChange;
-    user.rating = newRating;
-    user.payOutRating += ratingToRewardChange;
+    communityUser.userRating[communityId].rating = newRating;
+    communityUser.userRating[communityId].payOutRating += ratingToRewardChange;
 
     if (rating > 0) {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));

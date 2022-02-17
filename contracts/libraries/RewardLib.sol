@@ -16,30 +16,20 @@ library RewardLib {
   struct PeriodRating {
     int32 rating;
     int32 ratingToReward;
-  }
-
-  struct StatusRewardContainer {
-    mapping(address => mapping(uint16 => StatusReward)) statusReward;
-  }
-
-  struct StatusReward {
     bool isPaid;
   }
 
   struct UserRewards {
-    mapping(address => mapping(uint16 => PeriodRating)) userRewards;
+    uint32[] activeInCommunity;
+    mapping(uint32 => PeriodRating) periodRating;  //communityID
+  }
+  
+  function getUserPeriodRating(RewardLib.UserRewards storage userRewards, uint32 communityId) internal view returns (RewardLib.PeriodRating storage) {
+    return userRewards.periodRating[communityId];
   }
 
-  /// @notice Get information about the user's reward
-  /// @param userRewards The mapping containing all user's rewards
-  /// @param user The use who has rewards
-  /// @param period The period which we get reward
-  function getUserPeriodRating(RewardLib.UserRewards storage userRewards, address user, uint16 period) internal view returns (RewardLib.PeriodRating storage) {
-    return userRewards.userRewards[user][period];
-  }
-
-  function getRewardStatus(StatusRewardContainer storage statusReward, address user, uint16 period) internal view returns (StatusReward storage) {
-    return statusReward.statusReward[user][period];
+  function getRewardStatus(RewardLib.UserRewards storage userRewards, uint32 communityId) internal view returns (bool) {
+    return userRewards.periodRating[communityId].isPaid;
   }
 
   /// @notice Get tokens' coefficient to 1 rating
