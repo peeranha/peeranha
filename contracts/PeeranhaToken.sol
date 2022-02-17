@@ -41,15 +41,17 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
    * - must be a period less then now.
   */
   function claimReward(uint16 period) external {
-    // RewardLib.StatusReward storage rewardStatus = RewardLib.getRewardStatus(statusRewards, msg.sender, period);
-    // require(!rewardStatus.isPaid, "You already picked up this reward.");
-    // rewardStatus.isPaid = true;
+    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
+    address user = msg.sender;
+    uint32[] memory activeInCommunity = peeranha.getActiveInCommunity(user, period);
 
-    // RewardLib.UserRewards storage userRewards = peeranha.getRatingToReward(msg.sender, period);
-    // require(ratingToReward > 0, "No reward for you in this period");
-    // require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
-    // uint256 tokenReward = uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
+    int32 ratingToReward;
+    uint256 tokenReward;
+    for (uint32 i = 0; i < activeInCommunity.length; i++) {
+      ratingToReward = peeranha.getRatingToReward(user, period, activeInCommunity[i]);
+      tokenReward += uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
+    }
     
-    // _mint(msg.sender, tokenReward);
+    _mint(user, tokenReward);
   }
 }

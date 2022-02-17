@@ -50,9 +50,23 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    // function getRatingToReward(address user, uint16 rewardPeriod) external view override returns(RewardLib.UserRewards storage) {            // why 2 functions getUserRewardPeriod
-    //     return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod];
-    // }
+    function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {            // why 2 functions getUserRewardPeriod
+        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].periodRating[communityId].ratingToReward;
+    }
+
+    function getActiveInCommunity(address user, uint16 rewardPeriod) external override returns(uint32[] memory) {
+        require(
+            !userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid,
+            "You already picked up this reward."
+        );
+        require(
+            userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].activeInCommunity.length > 0,
+            "No reward for you in this period"
+        );
+
+        userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid = true;
+        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].activeInCommunity;
+    }
     
     /**
      * @dev Signup for user account.

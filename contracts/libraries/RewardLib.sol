@@ -16,11 +16,11 @@ library RewardLib {
   struct PeriodRating {
     int32 rating;
     int32 ratingToReward;
-    bool isPaid;
   }
 
   struct UserRewards {
     uint32[] activeInCommunity;
+    bool isPaid;
     mapping(uint32 => PeriodRating) periodRating;  //communityID
   }
   
@@ -28,9 +28,9 @@ library RewardLib {
     return userRewards.periodRating[communityId];
   }
 
-  function getRewardStatus(RewardLib.UserRewards storage userRewards, uint32 communityId) internal view returns (bool) {
-    return userRewards.periodRating[communityId].isPaid;
-  }
+  // function getRewardStatus(RewardLib.UserRewards storage userRewards) internal view returns (bool) {
+  //   return userRewards.isPaid;
+  // }
 
   /// @notice Get tokens' coefficient to 1 rating
   function getRewardCoefficient() internal view returns (uint256) {
