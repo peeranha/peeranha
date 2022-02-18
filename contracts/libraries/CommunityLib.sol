@@ -233,7 +233,7 @@ library CommunityLib {
     function checkTags(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal {
         Community storage community = self.communities[communityId].info;
 
-        for (uint32 i = 0; i < tags.length; i++) {
+        for (uint32 i; i < tags.length; i++) {
             require(community.tagsCount >= tags[i], "Wrong tag id.");
             require(tags[i] != 0, "The community does not have tag with 0 id.");
         }

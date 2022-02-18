@@ -1,4 +1,5 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 import "./libraries/RewardLib.sol";
 import "./interfaces/IPeeranha.sol";
 
@@ -47,7 +48,7 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
 
     int32 ratingToReward;
     uint256 tokenReward;
-    for (uint32 i = 0; i < activeInCommunity.length; i++) {
+    for (uint32 i; i < activeInCommunity.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, activeInCommunity[i]);
       tokenReward += uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
     }

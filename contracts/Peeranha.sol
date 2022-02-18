@@ -50,10 +50,6 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {            // why 2 functions getUserRewardPeriod
-        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].periodRating[communityId].ratingToReward;
-    }
-
     function getActiveInCommunity(address user, uint16 rewardPeriod) external override returns(uint32[] memory) {
         require(
             !userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid,
@@ -617,25 +613,16 @@ contract Peeranha is IPeeranha, Initializable {
         return posts.getComment(postId, parentReplyId, commentId);
     }
 
-    /**
-     * @dev Get a comment by index.
-     *
-     * Requirements:
-     *
-     * - must be a user.
-     * - must be a reward in this period.
-     * - must be a period less then now.
-    */
-    function getUserRewardPeriod(uint32 communityId, address user, uint16 period) external view returns (RewardLib.PeriodRating memory) {
-        return RewardLib.getUserPeriodRating(userContext.userRatingCollection.communityRatingForUser[user].userRewards[period], communityId);
+    function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {
+        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].periodRating[communityId].ratingToReward;
     }
 
+    ///
+    // TO DO (front?)
+    // to remove it in prod
+    ///
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
-    }
-
-    function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) external view returns (address[] memory) {
-        return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
     ///

@@ -4269,7 +4269,7 @@ describe("Test vote", function () {
 		await peeranha.addUserRating(signer.address, rating, 1);
 	};
 
-	const StartRating = 0;
+	const StartRating = 10;
 	const QuickReplyTime = 7000; // in milliseconds, defines at CommonLib
 	const deleteTime = 10000;
 

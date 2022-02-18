@@ -28,10 +28,6 @@ library RewardLib {
     return userRewards.periodRating[communityId];
   }
 
-  // function getRewardStatus(RewardLib.UserRewards storage userRewards) internal view returns (bool) {
-  //   return userRewards.isPaid;
-  // }
-
   /// @notice Get tokens' coefficient to 1 rating
   function getRewardCoefficient() internal view returns (uint256) {
     return COEFFICIENT_TOKEN;
