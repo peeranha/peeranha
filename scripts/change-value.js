@@ -13,8 +13,8 @@ const prod = [
 
 const test = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
-	{ field: 'constant DELETE_TIME', value: 259200, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 3 days
-	{ field: 'constant PERIOD_LENGTH', value: 259200, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 3 days
+	{ field: 'constant DELETE_TIME', value: 7200, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
+	{ field: 'constant PERIOD_LENGTH', value: 7200, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
 	{ field: 'function addUserRating', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 	{ field: 'function setEnergy', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 ];
