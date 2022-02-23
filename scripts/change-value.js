@@ -3,13 +3,7 @@ const path = require('path');
 
 const Stage = {"prod":0, "test":1, "unitTest":2}
 
-const prod = [
-	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
-	{ field: 'constant DELETE_TIME', value: 604800, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
-	{ field: 'constant PERIOD_LENGTH', value: 604800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
-	{ field: 'function addUserRating', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
-	{ field: 'function setEnergy', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
-];
+const prod = [];
 
 const test = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
