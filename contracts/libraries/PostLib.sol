@@ -586,25 +586,16 @@ library PostLib  {
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
 
         if (postContainer.info.bestReply == replyId) {
-            if (replyContainer.info.author != userAddr) {       // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
-            }
+            updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, replyContainer.info.author, false);
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
-                ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
+                ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, postContainer.info.bestReply);
 
-                if (oldBestReplyContainer.info.author != userAddr) {    // unit test
-                    UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                    UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
-                }
+                updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, oldBestReplyContainer.info.author, false);
             }
 
-            if (replyContainer.info.author != userAddr) {   // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply));
-                UserLib.updateUserRating(userContext, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply));
-            }
+            updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, replyContainer.info.author, true);
             postContainer.info.bestReply = replyId;
         }
 
@@ -618,6 +609,32 @@ library PostLib  {
         );    // unit test (forum)
 
         emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
+    }
+
+    function updateRatingForBestReply (
+        UserLib.UserContext storage userContext,
+        PostLib.PostType postType,
+        address authorPost,
+        address authorReply,
+        bool isMark
+    ) public {
+        if (authorPost != authorReply) {
+            UserLib.updateUserRating(
+                userContext,
+                authorPost, 
+                isMark ?
+                    VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply) :
+                    -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply)
+            );
+
+            UserLib.updateUserRating(
+                userContext,
+                authorReply,
+                isMark ?
+                    VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply) :
+                    -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply)
+            );
+        }
     }
 
     /// @notice Vote for post, reply or comment
