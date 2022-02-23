@@ -686,16 +686,6 @@ library PostLib  {
                     SecurityLib.Action.upVotePost :
                     SecurityLib.Action.downVotePost
                 )
-            ///
-            // only 1 'if' for upvote
-            //
-            //  ratingChange == 2
-            //      SecurityLib.Action.upVotePost :
-            //      (ratingChange == -2 ?
-            //          SecurityLib.Action.downVotePost :
-            //          SecurityLib.Action.cancelVote
-            //      )
-            ///
         );  
 
         vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post);
