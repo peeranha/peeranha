@@ -1,6 +1,7 @@
 pragma solidity ^0.7.3;
 pragma abicoder v2;
 import "./libraries/RewardLib.sol";
+import "./libraries/CommonLib.sol";
 import "./interfaces/IPeeranha.sol";
 
 
@@ -9,7 +10,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
-  uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
+  uint256 public constant FRACTION = (10 ** 18);
+  uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
+  uint256 public constant REWARD_WEEK = 1000000 * FRACTION;
+
+  // mapping(uint16 => RewardLib.UserRewards) userRewards; // period
+  mapping(uint16 => uint256) shiftRewards;
+
   IPeeranha peeranha;
 
   function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
@@ -46,13 +53,47 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     address user = msg.sender;
     uint32[] memory activeInCommunity = peeranha.getActiveInCommunity(user, period);
 
+    RewardLib.WeekReward memory weekReward = peeranha.getWeekRewardContainer(period);
+    // uint256 rewardWeek = reduceRewards(REWARD_WEEK, period);
+    uint256 rewardWeek = REWARD_WEEK;
+    if (weekReward.usersActiveInPeriod <= 1000) {
+      uint256 userRewardWeek = weekReward.usersActiveInPeriod * 1000 * FRACTION;
+
+      rewardWeek = CommonLib.minUint256(userRewardWeek, rewardWeek);
+    }
+    uint256 shiftReward = shiftRewards[period];
+    if (shiftReward == 0) {
+      if (uint256(weekReward.rating) * RewardLib.getRewardCoefficient() * FRACTION > rewardWeek) {
+        shiftReward = (uint256(weekReward.rating) * RewardLib.getRewardCoefficient() * FRACTION * 100) / rewardWeek;
+      } else {
+        shiftReward = FRACTION;
+      }
+      shiftRewards[period] = shiftReward;
+    }
+
     int32 ratingToReward;
     uint256 tokenReward;
     for (uint32 i; i < activeInCommunity.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, activeInCommunity[i]);
-      tokenReward += uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
+      if (ratingToReward == 0) continue;
+      tokenReward += uint256(ratingToReward) * RewardLib.getRewardCoefficient() * shiftReward;
     }
+    require(tokenReward != 0, "No reward for you in this period");
     
     _mint(user, tokenReward);
+  }
+
+  function reduceRewards(uint256 rewardWeek, uint16 period) private returns(uint256) {
+    uint16 countReduce = period / 52;
+
+    if (countReduce > 0) {
+      rewardWeek *= (93 * countReduce) / 100;
+    }
+
+    return rewardWeek;
+  }
+
+  function getShiftRewards(uint16 period) external view  returns(uint256) {
+    return shiftRewards[period];
   }
 }

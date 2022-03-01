@@ -23,7 +23,16 @@ library RewardLib {
     bool isPaid;
     mapping(uint32 => PeriodRating) periodRating;  //communityID
   }
-  
+
+  struct WeekRewardContainer {
+    mapping(uint16 => WeekReward) weekReward; // period
+  }
+
+  struct WeekReward {
+    int64 rating;
+    uint16 usersActiveInPeriod;
+  }
+
   function getUserPeriodRating(RewardLib.UserRewards storage userRewards, uint32 communityId) internal view returns (RewardLib.PeriodRating storage) {
     return userRewards.periodRating[communityId];
   }

@@ -31,4 +31,8 @@ library CommonLib {
   function minInt32(int32 a, int32 b) internal pure returns (int32) {
     return a < b ? a : b;
   }
+
+  function minUint256(uint256 a, uint256 b) internal pure returns (uint256) {
+    return a < b ? a : b;
+  }
 }

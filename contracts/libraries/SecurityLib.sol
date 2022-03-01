@@ -203,7 +203,7 @@ library SecurityLib {
   function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
     int32 rating = userRating;
     uint256 currentTime = CommonLib.getTimestamp();
-    uint32 currentPeriod = uint32((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
+    uint16 currentPeriod = uint16((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
     uint16 userEnergy;
