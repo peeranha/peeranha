@@ -50,18 +50,13 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getActiveInCommunity(address user, uint16 rewardPeriod) external override returns(uint32[] memory) {
+    function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
         require(
-            !userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid,
-            "You already picked up this reward."
-        );
-        require(
-            userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].activeInCommunity.length > 0,
+            userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities.length > 0,
             "No reward for you in this period"
         );
 
-        userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid = true;
-        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].activeInCommunity;
+        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
     
     /**
@@ -614,7 +609,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {
-        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].periodRating[communityId].ratingToReward;
+        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId].ratingToReward;
     }
 
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {

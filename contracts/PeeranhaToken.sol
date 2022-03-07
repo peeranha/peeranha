@@ -1,6 +1,7 @@
 pragma solidity ^0.7.3;
 pragma abicoder v2;
 import "./libraries/RewardLib.sol";
+import "./libraries/TokenLib.sol";
 import "./interfaces/IPeeranha.sol";
 
 
@@ -10,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.s
 
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
+  TokenLib.StatusRewardContainer statusRewardContainer;
   IPeeranha peeranha;
 
   function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
@@ -44,13 +46,20 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   function claimReward(uint16 period) external {
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
     address user = msg.sender;
-    uint32[] memory activeInCommunity = peeranha.getActiveInCommunity(user, period);
+
+    require(
+      statusRewardContainer.statusReward[user][period].isPaid,
+      "You already picked up this reward."
+    );
+
+    statusRewardContainer.statusReward[user][period].isPaid = true;
+    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
 
     int32 ratingToReward;
     uint256 tokenReward;
-    for (uint32 i; i < activeInCommunity.length; i++) {
-      ratingToReward = peeranha.getRatingToReward(user, period, activeInCommunity[i]);
-      tokenReward += uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
+    for (uint32 i; i < rewardCommunities.length; i++) {
+      ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
+      tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient(); // * 10^18
     }
     
     _mint(user, tokenReward);
