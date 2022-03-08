@@ -95,7 +95,7 @@ library VoteLib  {
 
     //common reply 
     int32 constant DownvoteCommonReply = -1;
-    int32 constant UpvotedCommonReply = 2;
+    int32 constant UpvotedCommonReply = 1;
     int32 constant DownvotedCommonReply = -1;
     int32 constant AcceptCommonReply = 3;
     int32 constant AcceptedCommonReply = 1;
@@ -202,18 +202,20 @@ library VoteLib  {
     /// @param historyVotes history vote all users
     /// @param isUpvote Upvote or downvote
     /// @param votedUsers the list users who voted
+    // return value:
     // fromUpVoteToDownVote = -2
-    // downVote = -1
-    // upVote = 1
+    // cancel downVote = 1  && upVote = 1       !!!!
+    // cancel upVote = -1   && downVote = -1    !!!!
     // fromDownVoteToUpVote = 2
     function getForumItemRatingChange(
         address actionAddress,
         mapping(address => int256) storage historyVotes,
         bool isUpvote,
         address[] storage votedUsers
-    ) internal returns (int32) {
+    ) internal returns (int32, bool) {
         int history = getHistoryVote(actionAddress, historyVotes);
         int32 ratingChange;
+        bool isCancel;
         
         if (isUpvote) {
             if (history == -1) {
@@ -227,12 +229,14 @@ library VoteLib  {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = -1;
+                isCancel = true;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
                 //clear votedUsers
                 ratingChange = 1;
+                isCancel = true;
             } else if (history == 0) {
                 historyVotes[actionAddress] = -1;
                 ratingChange = -1;
@@ -242,6 +246,6 @@ library VoteLib  {
                 ratingChange = -2;
             }
         }
-        return ratingChange;
+        return (ratingChange, isCancel);
     }
 }

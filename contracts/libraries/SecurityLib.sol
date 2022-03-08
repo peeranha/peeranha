@@ -21,6 +21,7 @@ library SecurityLib {
     downVoteReply,
     upVoteComment,
     downVoteComment,
+    cancelVote,
     officialReply,
     bestReply,
     updateProfile,
@@ -39,6 +40,8 @@ library SecurityLib {
   int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
   int16 constant UPVOTE_COMMENT_ALLOWED = 0;
   int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
+  int16 constant CANCEL_VOTE = 0;
+
 
   int16 constant UPDATE_PROFILE_ALLOWED = 0;
 
@@ -49,7 +52,7 @@ library SecurityLib {
   uint8 constant ENERGY_UPVOTE_QUESTION = 1;
   uint8 constant ENERGY_UPVOTE_ANSWER = 1;
   uint8 constant ENERGY_UPVOTE_COMMENT = 1;
-  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
+  uint8 constant ENERGY_FORUM_VOTE_CANCEL = 1;
   uint8 constant ENERGY_POST_QUESTION = 10;
   uint8 constant ENERGY_POST_ANSWER = 6;
   uint8 constant ENERGY_POST_COMMENT = 4;
@@ -103,92 +106,97 @@ library SecurityLib {
   {
     if (hasModeratorRole(role, actionCaller, communityId)) return;
     
-    int16 ratingAllowen;
+    int16 ratingAllowed;
     string memory message;
     uint8 energy;
     if (action == Action.publicationPost) {
-      ratingAllowen = POST_QUESTION_ALLOWED;
+      ratingAllowed = POST_QUESTION_ALLOWED;
       message = "Your rating is too small for publication post. You need 0 ratings";
       energy = ENERGY_POST_QUESTION;
 
     } else if (action == Action.publicationReply) {
-      ratingAllowen = POST_REPLY_ALLOWED;
+      ratingAllowed = POST_REPLY_ALLOWED;
       message = "Your rating is too small for publication reply. You need 0 ratings";
       energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.publicationComment) {
       if (actionCaller == dataUser) {
-        ratingAllowen = POST_OWN_COMMENT_ALLOWED;
+        ratingAllowed = POST_OWN_COMMENT_ALLOWED;
         message = "Your rating is too small for publication own comment. You need 35 ratings";
       } else {
-        ratingAllowen = POST_COMMENT_ALLOWED;
+        ratingAllowed = POST_COMMENT_ALLOWED;
         message = "Your rating is too small for publication comment. You need 35 ratings";
       }
       energy = ENERGY_POST_COMMENT;
 
     } else if (action == Action.editItem) {
       require(actionCaller == dataUser, "You can not edit this item");
-      ratingAllowen = MINIMUM_RATING;
+      ratingAllowed = MINIMUM_RATING;
       message = "Your rating is too small for edit item. You need -300 ratings";
       energy = ENERGY_MODIFY_ITEM;
 
     } else if (action == Action.deleteItem) {
       require(actionCaller == dataUser, "You can not delete this item");
-      ratingAllowen = 0;
+      ratingAllowed = 0;
       message = "Your rating is too small for delete own item. You need 0 ratings"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.changePostType) {
-      require(false, "Only moderator can change post");
+      require(false, "Only moderator can change type of post");
 
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
-      ratingAllowen = UPVOTE_POST_ALLOWED;
+      ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "Your rating is too small for upvote post. You need 35 ratings";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
-      ratingAllowen = UPVOTE_REPLY_ALLOWED;
+      ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "Your rating is too small for upvote reply. You need 35 ratings";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.upVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
-      ratingAllowen = UPVOTE_COMMENT_ALLOWED;
+      ratingAllowed = UPVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for upvote comment. You need 0 ratings";
       energy = ENERGY_UPVOTE_COMMENT;
 
     } else if (action == Action.downVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
-      ratingAllowen = DOWNVOTE_POST_ALLOWED;
+      ratingAllowed = DOWNVOTE_POST_ALLOWED;
       message = "Your rating is too small for downvote post. You need 100 ratings";
       energy = ENERGY_DOWNVOTE_QUESTION;
 
     } else if (action == Action.downVoteReply) {
       require(actionCaller != dataUser, "You can not vote for own reply");
-      ratingAllowen = DOWNVOTE_REPLY_ALLOWED;
+      ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
       message = "Your rating is too small for downvote reply. You need 100 ratings";
       energy = ENERGY_DOWNVOTE_ANSWER;
 
     } else if (action == Action.downVoteComment) {
       require(actionCaller != dataUser, "You can not vote for own comment");
-      ratingAllowen = DOWNVOTE_COMMENT_ALLOWED;
+      ratingAllowed = DOWNVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for downvote comment. You need 0 ratings";
       energy = ENERGY_DOWNVOTE_COMMENT;
 
+    } else if (action == Action.cancelVote) {
+      ratingAllowed = CANCEL_VOTE;
+      message = "Your rating is too small for cancel vote. You need 0 ratings";
+      energy = ENERGY_FORUM_VOTE_CANCEL;
+
     } else if (action == Action.bestReply) {
-      ratingAllowen = MINIMUM_RATING;
+      ratingAllowed = MINIMUM_RATING;
       message = "Your rating is too small for mark reply as best. You need -300 ratings";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
     } else if (action == Action.updateProfile) {
-      ratingAllowen = UPDATE_PROFILE_ALLOWED;
+      ratingAllowed = UPDATE_PROFILE_ALLOWED;
       message = "Your rating is too small for edit profile. You need 0 ratings";
       energy = ENERGY_UPDATE_PROFILE;
 
     } else if (action == Action.followCommunity) {
-      ratingAllowen = MINIMUM_RATING;
+      ratingAllowed = MINIMUM_RATING;
       message = "Your rating is too small for edit profile. You need -300 ratings";
       energy = ENERGY_FOLLOW_COMMUNITY;
 
@@ -196,7 +204,7 @@ library SecurityLib {
       require(false, "Action not allowed");
     }
 
-    require(userRating >= ratingAllowen, message);
+    require(userRating >= ratingAllowed, message);
     reduceEnergy(user, userRating, energy);
   }
 

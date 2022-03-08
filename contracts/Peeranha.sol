@@ -50,14 +50,13 @@ contract Peeranha is IPeeranha, Initializable {
         SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getActiveInCommunity(address user, uint16 rewardPeriod) external override returns(uint32[] memory) {
+    function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
         require(
-            !userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid,
-            "You already picked up this reward."
+            userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities.length > 0,
+            "No reward for you in this period"
         );
 
-        userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].isPaid = true;
-        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].activeInCommunity;
+        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
     function getWeekRewardContainer(uint16 period) external override returns(RewardLib.WeekReward memory) {
@@ -614,13 +613,17 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {
-        return userContext.userRatingCollection.communityRatingForUser[user].userRewards[rewardPeriod].periodRating[communityId].ratingToReward;
+        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId].ratingToReward;
     }
 
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
     }
 
+    ///
+    // TO DO
+    // to remove it in prod
+    /// ?
     function getAcctiveUserPeriods (address userAddr) external view returns (uint16[] memory) {
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
@@ -628,17 +631,18 @@ contract Peeranha is IPeeranha, Initializable {
     ///
     // TO DO
     // to remove it in prod
-    ///
+    /// ?
+    function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) external view returns (address[] memory) {
+        return PostLib.getVotedUsers(posts, postId, replyId, commentId);
+    }
+
     function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
-    ///
-    // delete
-    ///
-    function setEnergy(address userAddr, uint16 energy) external {
+    /*function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }
+    }*/
 
     function onlyExisitingUser(address user) private {
         require(UserLib.isExists(userContext.users, user),

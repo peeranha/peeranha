@@ -9,19 +9,13 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint32 constant PERIOD_LENGTH = 3;             // 7 day = 1 week //
+  uint32 constant PERIOD_LENGTH = 604800;             // 7 day = 1 week //
   uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
-  uint256 constant COEFFICIENT_TOKEN = 10;
 
   struct PeriodRating {
     int32 rating;
     int32 ratingToReward;
-  }
-
-  struct UserRewards {
-    uint32[] activeInCommunity;
-    bool isPaid;
-    mapping(uint32 => PeriodRating) periodRating;  //communityID
+    bool isActive;
   }
 
   struct WeekRewardContainer {
@@ -33,13 +27,10 @@ library RewardLib {
     uint16 usersActiveInPeriod;
   }
 
-  function getUserPeriodRating(RewardLib.UserRewards storage userRewards, uint32 communityId) internal view returns (RewardLib.PeriodRating storage) {
-    return userRewards.periodRating[communityId];
-  }
 
-  /// @notice Get tokens' coefficient to 1 rating
-  function getRewardCoefficient() internal view returns (uint256) {
-    return COEFFICIENT_TOKEN;
+  struct UserPeriodRewards {
+    uint32[] rewardCommunities;
+    mapping(uint32 => PeriodRating) periodRating;  //communityID
   }
 
 

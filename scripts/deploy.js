@@ -5,14 +5,20 @@ async function main() {
   console.log("Deploying PostLib...");
   const postLib = await PostLib.deploy();
   console.log("PostLib deployed to:", postLib.address);
+
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const peeranhaNFT = await upgrades.deployProxy(PeeranhaNFT, ["PEERNFT", "PEERNFT"]);
+  console.log("Peeranha NFT deployed to:", peeranhaNFT.address);
+  
   const Peeranha = await ethers.getContractFactory("Peeranha", {
     libraries: {
       PostLib: postLib.address,
     }
   });
   console.log("Deploying Peeranha...");
-  const peeranha = await upgrades.deployProxy(Peeranha, [], {unsafeAllowLinkedLibraries: true});
+  const peeranha = await upgrades.deployProxy(Peeranha, [peeranhaNFT.address], {unsafeAllowLinkedLibraries: true});
   console.log("Peeranha deployed to:", peeranha.address);
+  
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
   const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEER", "PEER", peeranha.address]);
   console.log("Peeranha token deployed to:", peeranhaToken.address);

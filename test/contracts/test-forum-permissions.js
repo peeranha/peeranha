@@ -194,7 +194,7 @@ describe("Test permissions", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranha.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("revert Peeranha: must be an existing user");
+            .to.be.revertedWith("Peeranha: must be an existing user");
         })
 
         it("Test change post type by common user", async function () {
@@ -211,7 +211,7 @@ describe("Test permissions", function () {
 			await peeranha.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranha.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+            .to.be.revertedWith("Only moderator can change type of post");
         })
     });
 

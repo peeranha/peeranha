@@ -30,8 +30,8 @@ library UserLib {
 
   struct CommunityRatingForUser {
     mapping(uint32 => UserRating) userRating;   //uint32 - community id
-    uint16[] rewardPeriods; // периоды когда было изменение рейтинга
-    mapping(uint16 => RewardLib.UserRewards) userRewards; // period
+    uint16[] rewardPeriods; // periods when the rating was changed
+    mapping(uint16 => RewardLib.UserPeriodRewards) userPeriodRewards; // period
   }
 
   struct UserRating {
@@ -240,36 +240,30 @@ library UserLib {
     int32 newRating = userRating.rating += rating;
     uint256 pastPeriodsCount = communityUser.rewardPeriods.length;
 
-    RewardLib.PeriodRating storage currentWeekRating = RewardLib.getUserPeriodRating(communityUser.userRewards[currentPeriod], communityId);
-    bool isFirstTransactionOnThisWeek = pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod; 
+    RewardLib.UserPeriodRewards storage userPeriodRewards = communityUser.userPeriodRewards[currentPeriod];
     RewardLib.WeekReward storage weekReward = userContext.weekRewardContainer.weekReward[currentPeriod];
-    if (isFirstTransactionOnThisWeek) {
+    if (pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
       weekReward.usersActiveInPeriod++;
       communityUser.rewardPeriods.push(currentPeriod);
-
-      bool isActiveInCommunity;  // name
-      for (uint32 i = 0; i < communityUser.userRewards[currentPeriod].activeInCommunity.length; i++) {
-        if (communityUser.userRewards[currentPeriod].activeInCommunity[i] == communityId) {
-          isActiveInCommunity = true;
-          break;
-        }
-      }
-      if (!isActiveInCommunity) 
-        communityUser.userRewards[currentPeriod].activeInCommunity.push(communityId);
     }
 
-    int32 ratingToReward = currentWeekRating.ratingToReward;
+    if (userPeriodRewards.periodRating[communityId].isActive) {
+      userPeriodRewards.periodRating[communityId].isActive = true;
+      userPeriodRewards.rewardCommunities.push(communityId);
+    }
+
+    int32 ratingToReward = userPeriodRewards.periodRating[communityId].ratingToReward;
     int32 ratingToRewardChange = 0;
 
     if (pastPeriodsCount > 0) {
       uint16 previousWeekNumber = communityUser.rewardPeriods[pastPeriodsCount - 1]; // period now
-      RewardLib.PeriodRating storage previousWeekRating =  RewardLib.getUserPeriodRating(communityUser.userRewards[previousWeekNumber], communityId);
 
       int32 paidOutRating = userRating.payOutRating - ratingToReward;
       
-        // If current week rating is smaller then past week reward then use it as base for the past week reward.
+      // If current week rating is smaller then past week reward then use it as base for the past week reward.
+      int32 previousWeekRating = communityUser.userPeriodRewards[previousWeekNumber].periodRating[communityId].rating;
       int32 baseRewardRating =
-        CommonLib.minInt32(previousWeekRating.rating, newRating);
+        CommonLib.minInt32(previousWeekRating, newRating);
       
       ratingToRewardChange =
         (baseRewardRating - paidOutRating) -
@@ -281,8 +275,8 @@ library UserLib {
         ratingToRewardChange = -ratingToReward;
     }
 
-    currentWeekRating.rating = newRating;
-    currentWeekRating.ratingToReward += ratingToRewardChange;
+    userPeriodRewards.periodRating[communityId].rating = newRating;
+    userPeriodRewards.periodRating[communityId].ratingToReward += ratingToRewardChange;
     userRating.rating = newRating;
     userRating.payOutRating += ratingToRewardChange;
     weekReward.rating += newRating;
