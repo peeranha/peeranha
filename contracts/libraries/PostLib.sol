@@ -598,25 +598,16 @@ library PostLib  {
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
 
         if (postContainer.info.bestReply == replyId) {
-            if (replyContainer.info.author != userAddr) {       // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
-                UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-            }
+            updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, replyContainer.info.author, false, postContainer.info.communityId);
             postContainer.info.bestReply = 0;
         } else {
             if (postContainer.info.bestReply != 0) {
-                ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, replyId);
+                ReplyContainer storage oldBestReplyContainer = getReplyContainerSafe(postContainer, postContainer.info.bestReply);
 
-                if (oldBestReplyContainer.info.author != userAddr) {    // unit test
-                    UserLib.updateUserRating(userContext, oldBestReplyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
-                    UserLib.updateUserRating(userContext, userAddr, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-                }
+                updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, oldBestReplyContainer.info.author, false, postContainer.info.communityId);
             }
 
-            if (replyContainer.info.author != userAddr) {   // unit test
-                UserLib.updateUserRating(userContext, replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptReply), postContainer.info.communityId);
-                UserLib.updateUserRating(userContext, userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-            }
+            updateRatingForBestReply(userContext, postContainer.info.postType, userAddr, replyContainer.info.author, true, postContainer.info.communityId);
             postContainer.info.bestReply = replyId;
         }
 
@@ -631,6 +622,35 @@ library PostLib  {
         );    // unit test (forum)
 
         emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
+    }
+
+    function updateRatingForBestReply (
+        UserLib.UserContext storage userContext,
+        PostLib.PostType postType,
+        address authorPost,
+        address authorReply,
+        bool isMark,
+        uint32 communityId
+    ) public {
+        if (authorPost != authorReply) {
+            UserLib.updateUserRating(
+                userContext,
+                authorPost, 
+                isMark ?
+                    VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply) :
+                    -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptedReply),
+                communityId
+            );
+
+            UserLib.updateUserRating(
+                userContext,
+                authorReply,
+                isMark ?
+                    VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply) :
+                    -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply),
+                communityId
+            );
+        }
     }
 
     /// @notice Vote for post, reply or comment
@@ -686,7 +706,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
@@ -694,8 +714,13 @@ library PostLib  {
             votedUser, 
             postContainer.info.author, 
             postContainer.info.communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVotePost : SecurityLib.Action.downVotePost
-        );
+            isCancel ?
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVotePost :
+                    SecurityLib.Action.downVotePost
+                )
+        );  
 
         vote(userContext, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post, postContainer.info.communityId);
         postContainer.info.rating += ratingChange;
@@ -715,7 +740,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
@@ -723,7 +748,12 @@ library PostLib  {
             votedUser, 
             replyContainer.info.author, 
             communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVoteReply : SecurityLib.Action.downVoteReply
+            isCancel ?
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVoteReply :
+                    SecurityLib.Action.downVoteReply
+                )
         );
 
         if (postType == PostType.Tutorial) return;
@@ -763,7 +793,7 @@ library PostLib  {
         address votedUser,
         bool isUpvote
     ) private {
-        int32 ratingChange = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
+        (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         SecurityLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
@@ -771,7 +801,12 @@ library PostLib  {
             votedUser, 
             commentContainer.info.author, 
             communityId, 
-            ratingChange > 0 ? SecurityLib.Action.upVoteComment : SecurityLib.Action.downVoteComment
+            isCancel ? 
+                SecurityLib.Action.cancelVote :
+                (ratingChange > 0 ?
+                    SecurityLib.Action.upVoteComment :
+                    SecurityLib.Action.downVoteComment
+                )
         );
         
         commentContainer.info.rating += ratingChange;

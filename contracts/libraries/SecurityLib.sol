@@ -21,6 +21,7 @@ library SecurityLib {
     downVoteReply,
     upVoteComment,
     downVoteComment,
+    cancelVote,
     officialReply,
     bestReply,
     updateProfile,
@@ -39,6 +40,8 @@ library SecurityLib {
   int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
   int16 constant UPVOTE_COMMENT_ALLOWED = 0;
   int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
+  int16 constant CANCEL_VOTE = 0;
+
 
   int16 constant UPDATE_PROFILE_ALLOWED = 0;
 
@@ -49,7 +52,7 @@ library SecurityLib {
   uint8 constant ENERGY_UPVOTE_QUESTION = 1;
   uint8 constant ENERGY_UPVOTE_ANSWER = 1;
   uint8 constant ENERGY_UPVOTE_COMMENT = 1;
-  uint8 constant ENERGY_FORUM_VOTE_CHANGE = 1;    ///
+  uint8 constant ENERGY_FORUM_VOTE_CANCEL = 1;
   uint8 constant ENERGY_POST_QUESTION = 10;
   uint8 constant ENERGY_POST_ANSWER = 6;
   uint8 constant ENERGY_POST_COMMENT = 4;
@@ -139,7 +142,7 @@ library SecurityLib {
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.changePostType) {
-      require(false, "Only moderator can change post");
+      require(false, "Only moderator can change type of post");
 
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "You can not vote for own post");
@@ -176,6 +179,11 @@ library SecurityLib {
       ratingAllowed = DOWNVOTE_COMMENT_ALLOWED;
       message = "Your rating is too small for downvote comment. You need 0 ratings";
       energy = ENERGY_DOWNVOTE_COMMENT;
+
+    } else if (action == Action.cancelVote) {
+      ratingAllowed = CANCEL_VOTE;
+      message = "Your rating is too small for cancel vote. You need 0 ratings";
+      energy = ENERGY_FORUM_VOTE_CANCEL;
 
     } else if (action == Action.bestReply) {
       ratingAllowed = MINIMUM_RATING;
