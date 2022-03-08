@@ -72,8 +72,8 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     }
     uint256 shiftReward = shiftRewards[period];
     if (shiftReward == 0) {
-      if (uint256(weekReward.rating) * RewardLib.getRewardCoefficient() * FRACTION > rewardWeek) {
-        shiftReward = (uint256(weekReward.rating) * RewardLib.getRewardCoefficient() * FRACTION * 100) / rewardWeek;
+      if (uint256(weekReward.rating) * TokenLib.getRewardCoefficient() * FRACTION > rewardWeek) {
+        shiftReward = (uint256(weekReward.rating) * TokenLib.getRewardCoefficient() * FRACTION * 100) / rewardWeek;
       } else {
         shiftReward = FRACTION;
       }
