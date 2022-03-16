@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 /// @notice
 /// @dev
 library CommonLib {
-  uint16 constant QUICK_REPLY_TIME_SECONDS = 900; // 6
+  uint16 constant QUICK_REPLY_TIME_SECONDS = 6; // 6
 
   /// @notice get timestamp in uint32 format
   function getTimestamp() internal view returns (uint32) {

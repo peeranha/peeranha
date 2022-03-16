@@ -640,9 +640,9 @@ contract Peeranha is IPeeranha, Initializable {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
-    /*function setEnergy(address userAddr, uint16 energy) external {
+    function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     function onlyExisitingUser(address user) private {
         require(UserLib.isExists(userContext.users, user),

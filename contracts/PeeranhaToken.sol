@@ -55,7 +55,7 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     address user = msg.sender;
 
     require(
-      statusRewardContainer.statusReward[user][period].isPaid,
+      !statusRewardContainer.statusReward[user][period].isPaid,
       "You already picked up this reward."
     );
 
@@ -85,11 +85,11 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     for (uint32 i; i < rewardCommunities.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
       if (ratingToReward == 0) continue;
-      tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient(); // * 10^18  ///* shiftReward; ??
+      tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient() * FRACTION; // * 10^18  ///* shiftReward; ??
     }
     require(tokenReward != 0, "No reward for you in this period");
     
-    _mint(user, tokenReward);
+    _mint(user, uint256(weekReward.rating));
   }
 
   function reduceRewards(uint256 rewardWeek, uint16 period) private returns(uint256) {

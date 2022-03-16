@@ -14,8 +14,8 @@ const test = [
 ];
 
 const unitTest = [
-	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 3, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
-	{ field: 'constant DELETE_TIME', value: 3, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
+	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 6, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
+	{ field: 'constant DELETE_TIME', value: 10, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'constant PERIOD_LENGTH', value: 3, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'function addUserRating', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 	{ field: 'function setEnergy', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
