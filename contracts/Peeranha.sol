@@ -51,11 +51,6 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
-        require(
-            userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities.length > 0,
-            "No reward for you in this period"
-        );
-
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
