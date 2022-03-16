@@ -62,6 +62,8 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
       tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient(); // * 10^18
     }
     
+    require(tokenReward != 0, "No reward for you in this period");
+    
     _mint(user, tokenReward);
   }
 }

@@ -244,7 +244,7 @@ library UserLib {
       communityUser.rewardPeriods.push(currentPeriod);
     }
 
-    if (userPeriodRewards.periodRating[communityId].isActive) {
+    if (!userPeriodRewards.periodRating[communityId].isActive) {
       userPeriodRewards.periodRating[communityId].isActive = true;
       userPeriodRewards.rewardCommunities.push(communityId);
     }
