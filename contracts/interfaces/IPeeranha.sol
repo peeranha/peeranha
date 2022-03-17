@@ -6,5 +6,6 @@ import './IPeeranhaUser.sol';
 import './IPeeranhaPost.sol';
 
 interface IPeeranha is IPeeranhaForum, IPeeranhaUser, IPeeranhaPost {
-  function getRatingToReward(address user, uint16 rewardPeriod) external view returns(int32);
+  function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);
+  function getUserRewardCommunities(address user, uint16 rewardPeriod) external view returns(uint32[] memory);
 }

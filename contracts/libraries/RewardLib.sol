@@ -11,11 +11,11 @@ import "./UserLib.sol";
 library RewardLib {
   uint32 constant PERIOD_LENGTH = 604800;             // 7 day = 1 week //
   uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
-  uint256 constant COEFFICIENT_TOKEN = 10;
 
   struct PeriodRating {
     int32 rating;
     int32 ratingToReward;
+    bool isActive;
   }
 
   struct StatusRewardContainer {
@@ -26,25 +26,9 @@ library RewardLib {
     bool isPaid;
   }
 
-  struct UserRewards {
-    mapping(address => mapping(uint16 => PeriodRating)) userRewards;
-  }
-
-  /// @notice Get information about the user's reward
-  /// @param userRewards The mapping containing all user's rewards
-  /// @param user The use who has rewards
-  /// @param period The period which we get reward
-  function getUserPeriodRating(RewardLib.UserRewards storage userRewards, address user, uint16 period) internal view returns (RewardLib.PeriodRating storage) {
-    return userRewards.userRewards[user][period];
-  }
-
-  function getRewardStatus(StatusRewardContainer storage statusReward, address user, uint16 period) internal view returns (StatusReward storage) {
-    return statusReward.statusReward[user][period];
-  }
-
-  /// @notice Get tokens' coefficient to 1 rating
-  function getRewardCoefficient() internal view returns (uint256) {
-    return COEFFICIENT_TOKEN;
+  struct UserPeriodRewards {
+    uint32[] rewardCommunities;
+    mapping(uint32 => PeriodRating) periodRating;  //communityID
   }
 
 

@@ -1,5 +1,7 @@
 pragma solidity ^0.7.3;
+pragma abicoder v2;
 import "./libraries/RewardLib.sol";
+import "./libraries/TokenLib.sol";
 import "./interfaces/IPeeranha.sol";
 
 
@@ -8,9 +10,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
 
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
-  RewardLib.StatusRewardContainer statusRewards;
-
   uint256 public constant TOTAL_SUPPLY = 100000000 * (10 ** 18);
+  TokenLib.StatusRewardContainer statusRewardContainer;
   IPeeranha peeranha;
 
   function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
@@ -43,15 +44,26 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
    * - must be a period less then now.
   */
   function claimReward(uint16 period) external {
-    RewardLib.StatusReward storage rewardStatus = RewardLib.getRewardStatus(statusRewards, msg.sender, period);
-    require(!rewardStatus.isPaid, "You already picked up this reward.");
-    rewardStatus.isPaid = true;
-
-    int32 ratingToReward = peeranha.getRatingToReward(msg.sender, period);
-    require(ratingToReward > 0, "No reward for you in this period");
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
-    uint256 tokenReward = uint256(ratingToReward) * RewardLib.getRewardCoefficient(); // * 10^18
+    address user = msg.sender;
+
+    require(
+      statusRewardContainer.statusReward[user][period].isPaid,
+      "You already picked up this reward."
+    );
+
+    statusRewardContainer.statusReward[user][period].isPaid = true;
+    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
+
+    int32 ratingToReward;
+    uint256 tokenReward;
+    for (uint32 i; i < rewardCommunities.length; i++) {
+      ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
+      tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient(); // * 10^18
+    }
     
-    _mint(msg.sender, tokenReward);
+    require(tokenReward != 0, "No reward for you in this period");
+    
+    _mint(user, tokenReward);
   }
 }

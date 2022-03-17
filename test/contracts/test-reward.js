@@ -29,10 +29,10 @@ describe("Test wallet", function () {
 				const newuserRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 				console.log(newuserRating)
 				
-				const userRewardPerid = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
+				const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
 				console.log(userRewardPerid)
 				console.log("**************************");
-				const userRewardPerid2 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
+				const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
 				console.log(userRewardPerid2)
 				
 				expect(userRewardPerid.ratingToReward).to.equal(0);
@@ -58,13 +58,13 @@ describe("Test wallet", function () {
 			console.log(newuserRating)
 			
 
-			const userRewardPerid = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
+			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
 			console.log(userRewardPerid)
 			console.log("**************************");
-			const userRewardPerid2 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
+			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
 			console.log(userRewardPerid2)
 			console.log("-----------------------");
-			const userRewardPerid3 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
+			const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
 			console.log(userRewardPerid3)
 
 			expect(userRewardPerid.ratingToReward).to.equal(0);
@@ -92,13 +92,13 @@ describe("Test wallet", function () {
 			console.log(newuserRating)
 			
 
-			const userRewardPerid = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
+			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
 			console.log(userRewardPerid)
 			console.log("**************************");
-			const userRewardPerid2 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
+			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
 			console.log(userRewardPerid2)
 			console.log("++++++++++++++++++++++++++");
-			const userRewardPerid3 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
+			const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
 			console.log(userRewardPerid3)
 
 			expect(userRewardPerid.ratingToReward).to.equal(0);
@@ -130,7 +130,7 @@ describe("Test wallet", function () {
 			const newuserRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 			console.log(newuserRating);
 			
-			const userRewardPerid2 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
+			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
 
 			expect(userRewardPerid2.ratingToReward).to.equal(5);
 
@@ -159,8 +159,8 @@ describe("Test wallet", function () {
 			const newuserRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 			console.log(newuserRating)
 
-			console.log(await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]));
-			console.log(await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]));
+			console.log(await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]));
+			console.log(await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]));
 
 			await expect(token.claimReward(newuserRating.rewardPeriods[0]))
 			.to.be.revertedWith('No reward for you in this period');
@@ -207,7 +207,7 @@ describe("Test wallet", function () {
 			const newuserRating = await peeranha.getUserByAddress(peeranha.deployTransaction.from);
 			console.log(newuserRating)
 
-			console.log(await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]));
+			console.log(await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]));
 
 			await expect(token.claimReward(newuserRating.rewardPeriods[0] - 1))
 			.to.be.revertedWith('No reward for you in this period');
@@ -236,9 +236,9 @@ describe("Test wallet", function () {
 			console.log(newuserRating)
 			
 
-			const userRewardPerid = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
-			const userRewardPerid2 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
-			const userRewardPerid3 = await peeranha.getUserRewardPeriod(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
+			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[0]);
+			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[1]);
+			const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, newuserRating.rewardPeriods[2]);
 
 			expect(userRewardPerid.ratingToReward).to.equal(0);
 			expect(userRewardPerid2.ratingToReward).to.equal(5);
