@@ -13,10 +13,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.s
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
-  uint256 public constant REWARD_WEEK = 1000000 * FRACTION;
+  uint256 public constant REWARD_WEEK = 1000;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
 
-  // mapping(uint16 => RewardLib.UserRewards) userRewards; // period
-  mapping(uint16 => uint256) shiftRewards;
+  mapping(uint16 => uint256) poolTokens;
 
   TokenLib.StatusRewardContainer statusRewardContainer;
   IPeeranha peeranha;
@@ -60,49 +60,46 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;
-    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
-
     RewardLib.WeekReward memory weekReward = peeranha.getWeekRewardContainer(period);
-    // uint256 rewardWeek = reduceRewards(REWARD_WEEK, period);
-    uint256 rewardWeek = REWARD_WEEK;
-    if (weekReward.usersActiveInPeriod <= 1000) {
-      uint256 userRewardWeek = weekReward.usersActiveInPeriod * 1000 * FRACTION;
 
-      rewardWeek = CommonLib.minUint256(userRewardWeek, rewardWeek);
-    }
-    uint256 shiftReward = shiftRewards[period];
-    if (shiftReward == 0) {
-      if (uint256(weekReward.rating) * TokenLib.getRewardCoefficient() * FRACTION > rewardWeek) {
-        shiftReward = (uint256(weekReward.rating) * TokenLib.getRewardCoefficient() * FRACTION * 100) / rewardWeek;
-      } else {
-        shiftReward = FRACTION;
+    uint256 poolToken = poolTokens[period];
+    if (poolToken == 0) {
+      poolToken = reduceRewards(REWARD_WEEK, period);
+      if (weekReward.usersActiveInPeriod <= ACTIVE_USERS_IN_PERIOD) {
+        uint256 userRewardWeek = weekReward.usersActiveInPeriod * 1000 * FRACTION;
+        poolToken = CommonLib.minUint256(poolToken, userRewardWeek);
       }
-      shiftRewards[period] = shiftReward;
+      poolToken = CommonLib.minUint256(poolToken, uint256(weekReward.rating) * TokenLib.getRewardCoefficient());
+
+      poolTokens[period] = poolToken;
     }
 
     int32 ratingToReward;
     uint256 tokenReward;
+    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
     for (uint32 i; i < rewardCommunities.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
       if (ratingToReward == 0) continue;
-      tokenReward += uint256(ratingToReward) * TokenLib.getRewardCoefficient() * FRACTION; // * 10^18  ///* shiftReward; ??
+      tokenReward += uint256(ratingToReward);
     }
+
     require(tokenReward != 0, "No reward for you in this period");
-    
-    _mint(user, uint256(weekReward.rating));
+    uint256 userReward = (poolToken * tokenReward) / uint256(weekReward.rating); // weekReward.rating - int64 
+
+    _mint(user, userReward * FRACTION);
   }
 
   function reduceRewards(uint256 rewardWeek, uint16 period) private returns(uint256) {
     uint16 countReduce = period / 52;
 
-    if (countReduce > 0) {
-      rewardWeek *= (93 * countReduce) / 100;
+    for (uint16 i = 0; i < countReduce; i++) {
+      rewardWeek = (rewardWeek * 93) / 100;
     }
 
     return rewardWeek;
   }
 
-  function getShiftRewards(uint16 period) external view  returns(uint256) {
-    return shiftRewards[period];
+  function getPoolTokens(uint16 period) external view returns(uint256) {
+    return poolTokens[period];
   }
 }

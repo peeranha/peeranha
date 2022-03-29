@@ -279,7 +279,7 @@ library UserLib {
     userPeriodRewards.periodRating[communityId].ratingToReward += ratingToRewardChange;
     userRating.rating = newRating;
     userRating.payOutRating += ratingToRewardChange;
-    weekReward.rating += newRating;
+    weekReward.rating += ratingToRewardChange;
 
     // if (rating > 0) {
       // AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
