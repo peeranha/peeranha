@@ -45,6 +45,7 @@ library UserLib {
   struct UserContext {
     UserLib.UserCollection users;
     UserLib.UserRatingCollection userRatingCollection;
+    UserLib.UserDelegationCollection userDelegationCollection;
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
@@ -58,6 +59,11 @@ library UserLib {
   struct UserRatingChange {
     address user;
     int32 rating;
+  }
+
+  struct UserDelegationCollection {
+    mapping(address => uint) userDelegations;
+    address delegateUser;
   }
 
   event UserCreated(address userAddress);
@@ -85,6 +91,21 @@ library UserLib {
     self.userList.push(userAddress);
 
     emit UserCreated(userAddress);
+  }
+
+  /// @notice Create new user info record
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to create 
+  /// @param ipfsHash IPFS hash of document with user information
+  function createByDelegate(
+    UserContext storage self,
+    address msgSender,
+    address userAddress,
+    bytes32 ipfsHash
+  ) internal {
+    require(msgSender == self.userDelegationCollection.delegateUser, "Invalid delegate user");
+    self.userDelegationCollection.userDelegations[userAddress] = 1;
+    create(self.users, userAddress, ipfsHash);
   }
 
   /// @notice Update new user info record
@@ -201,6 +222,21 @@ library UserLib {
   /// @param addr Address of the user to check
   function isExists(UserCollection storage self, address addr) internal view returns (bool) {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
+  }
+
+  /// @notice Check user delegated permissions for certain actions
+  /// @param delegations User delegations
+  /// @param delegateUser Delegate user address
+  function setDelegateUser(UserDelegationCollection storage delegations, address delegateUser) internal {
+    delegations.delegateUser = delegateUser;
+  }
+  
+  
+  /// @notice Check user delegated permissions for certain actions
+  /// @param delegateUser Delegate user address
+  /// @param userAddress Address of the user to check
+  function isDelegateUser(UserDelegationCollection storage delegations, address delegateUser, address userAddress) internal view returns (bool) {
+    return delegateUser == delegations.delegateUser && delegations.userDelegations[userAddress] ==1;
   }
 
   function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
