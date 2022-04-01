@@ -20,7 +20,7 @@ module.exports = {
     }
   },
   networks: {
-    goerli: {
+    mumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${infuraApiKey}`,
       accounts: [adminPrivateKey],
       gas: 2100000,
