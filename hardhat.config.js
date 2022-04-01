@@ -21,10 +21,10 @@ module.exports = {
   },
   networks: {
     goerli: {
-      url: `https://goerli.infura.io/v3/${infuraApiKey}`,
+      url: `https://polygon-mumbai.infura.io/v3/${infuraApiKey}`,
       accounts: [adminPrivateKey],
       gas: 2100000,
-      gasPrice: 8000000000
+      gasPrice: 10000000000
     }
   }
 };
