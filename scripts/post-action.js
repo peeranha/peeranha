@@ -78,8 +78,8 @@ async function main() {
 	});
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   console.log("Posting action");
-
-  //  result = await peeranha.createUser(await getBytes32FromData(testAccount));
+  // result = await peeranha.createUser(await getBytes32FromData(testAccount));
+   result = await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
   // console.log(JSON.stringify(result))
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
   // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
@@ -97,7 +97,7 @@ async function main() {
   // await peeranha.createComment(1, 0, await getBytes32FromData(testComment));
   // await peeranha.editComment(1, 0, 1, await getBytes32FromData(testComment));
   // await peeranha.deleteComment(1, 0, 1);
-  await peeranha.voteItem(1, 0, 3, true);
+  // await peeranha.voteItem(1, 0, 3, true);
 }
 
 async function initAchievement(peeranha) {

@@ -31,7 +31,6 @@ library SecurityLib {
   int16 constant MINIMUM_RATING = -300;
   int16 constant POST_QUESTION_ALLOWED = 0;
   int16 constant POST_REPLY_ALLOWED = 0;
-  int16 constant POST_OWN_COMMENT_ALLOWED = 35;
   int16 constant POST_COMMENT_ALLOWED = 35;
 
   int16 constant UPVOTE_POST_ALLOWED = 35;
@@ -120,13 +119,8 @@ library SecurityLib {
       energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.publicationComment) {
-      if (actionCaller == dataUser) {
-        ratingAllowed = POST_OWN_COMMENT_ALLOWED;
-        message = "Your rating is too small for publication own comment. You need 35 ratings";
-      } else {
-        ratingAllowed = POST_COMMENT_ALLOWED;
-        message = "Your rating is too small for publication comment. You need 35 ratings";
-      }
+      ratingAllowed = POST_COMMENT_ALLOWED;
+      message = "Your rating is too small for publication own comment. You need 35 ratings";
       energy = ENERGY_POST_COMMENT;
 
     } else if (action == Action.editItem) {

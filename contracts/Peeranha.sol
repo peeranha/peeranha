@@ -54,7 +54,7 @@ contract Peeranha is IPeeranha, Initializable {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
-    function getWeekRewardContainer(uint16 period) external override returns(RewardLib.WeekReward memory) {
+    function getWeekRewardContainer(uint16 period) external view override returns(RewardLib.WeekReward memory) {
         return userContext.weekRewardContainer.weekReward[period];
     }
 
@@ -615,6 +615,18 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
     }
 
+    function getPeriodInfo() external view returns (uint256 startPeriodTime, uint256 periodLength) {
+        return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
+    }
+
+    function getPeriod() external view returns (uint16) {
+        return RewardLib.getPeriod(CommonLib.getTimestamp());
+    }
+
+    function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
+        return userContext.weekRewardContainer.weekReward[period].activeUsersInPeriod;
+    }
+
     ///
     // TO DO
     // to remove it in prod
@@ -632,7 +644,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        PostLib.addUserRating(userContext, userAddr, rating, communityId);
     }
 
     function setEnergy(address userAddr, uint16 energy) external {

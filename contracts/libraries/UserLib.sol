@@ -243,12 +243,12 @@ library UserLib {
     RewardLib.UserPeriodRewards storage userPeriodRewards = communityUser.userPeriodRewards[currentPeriod];
     RewardLib.WeekReward storage weekReward = userContext.weekRewardContainer.weekReward[currentPeriod];
     if (pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
-      weekReward.usersActiveInPeriod++;
+      weekReward.activeUsersInPeriod.push(userAddr);
       communityUser.rewardPeriods.push(currentPeriod);
     }
 
     if (!userPeriodRewards.periodRating[communityId].isActive) {
-      userPeriodRewards.periodRating[communityId].isActive = true;
+      userPeriodRewards.periodRating[communityId].isActive = true;    // need?
       userPeriodRewards.rewardCommunities.push(communityId);
     }
 
@@ -281,28 +281,28 @@ library UserLib {
     userRating.payOutRating += ratingToRewardChange;
     weekReward.rating += ratingToRewardChange;
 
-    // if (rating > 0) {
-      // AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
-    // }
+    if (rating > 0) {
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
+    }
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {
-    // if (rating < 0) {
-    //   return 0;
-    // } else if (rating < 100) {
-    //   return 300;
-    // } else if (rating < 500) {
-    //   return 600;
-    // } else if (rating < 1000) {
-    //   return 900;
-    // } else if (rating < 2500) {
-    //   return 1200;
-    // } else if (rating < 5000) {
-    //   return 1500;
-    // } else if (rating < 10000) {
-    //   return 1800;
-    // } else {
+    if (rating < 0) {
+      return 0;
+    } else if (rating < 100) {
+      return 300;
+    } else if (rating < 500) {
+      return 600;
+    } else if (rating < 1000) {
+      return 900;
+    } else if (rating < 2500) {
+      return 1200;
+    } else if (rating < 5000) {
+      return 1500;
+    } else if (rating < 10000) {
+      return 1800;
+    } else {
       return 2100;
-    // }
+    }
   }
 }

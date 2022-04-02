@@ -1120,4 +1120,13 @@ library PostLib  {
 
         return votedUsers;
     }
+
+    function addUserRating(
+        UserLib.UserContext storage userContext,
+        address userAddr,
+        int32 rating,
+        uint32 communityId
+    ) public {
+        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+    }
 }
