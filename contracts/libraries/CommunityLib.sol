@@ -29,16 +29,6 @@ library CommunityLib {
         uint32 communityCount;
     }
 
-    // modifier onlyExistingAndNotFrozen(CommunityCollection storage self, uint32 id){
-    //     require(
-    //         self.communities[id].info.ipfsDoc.hash != bytes32(0x0),
-    //         "Community does not exist"
-    //     );
-    //     require(!self.communities[id].info.isFrozen,
-    //         "Community is frozen"
-    //     );
-    //     _;
-    // }
 
     event CommunityCreated(address user, uint32 id);
     event CommunityUpdated(address user, uint32 id);
