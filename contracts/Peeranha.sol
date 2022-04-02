@@ -726,7 +726,8 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     modifier checkTagsByPostId(uint256 postId, uint8[] memory tags) {
-        CommunityLib.checkTagsByPostId(communities, posts, postId, tags);
+        PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
+        CommunityLib.checkTagsByPostId(communities, postContainer.info.communityId, postId, tags);
         _;
     }
 }

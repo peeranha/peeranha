@@ -110,92 +110,92 @@ library SecurityLib {
     uint8 energy;
     if (action == Action.publicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
-      message = "Your rating is too small for publication post. You need 0 ratings";
+      message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
 
     } else if (action == Action.publicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
-      message = "Your rating is too small for publication reply. You need 0 ratings";
+      message = "low_rating_reply";
       energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.publicationComment) {
       ratingAllowed = POST_COMMENT_ALLOWED;
-      message = "Your rating is too small for publication own comment. You need 35 ratings";
+      message = "low_rating_own_post_comment";
       energy = ENERGY_POST_COMMENT;
 
     } else if (action == Action.editItem) {
-      require(actionCaller == dataUser, "You can not edit this item");
+      require(actionCaller == dataUser, "not_allowed_edit");
       ratingAllowed = MINIMUM_RATING;
-      message = "Your rating is too small for edit item. You need -300 ratings";
+      message = "low_rating_edit";
       energy = ENERGY_MODIFY_ITEM;
 
     } else if (action == Action.deleteItem) {
-      require(actionCaller == dataUser, "You can not delete this item");
+      require(actionCaller == dataUser, "not_allowed_delete");
       ratingAllowed = 0;
-      message = "Your rating is too small for delete own item. You need 0 ratings"; // delete own item?
+      message = "low_rating_delete_own"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.changePostType) {
-      require(false, "Only moderator can change type of post");
+      require(false, "not_allowed_change_type");
 
     } else if (action == Action.upVotePost) {
-      require(actionCaller != dataUser, "You can not vote for own post");
+      require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "Your rating is too small for upvote post. You need 35 ratings";
+      message = "low rating to upvote (35 min)";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
-      require(actionCaller != dataUser, "You can not vote for own reply");
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small for upvote reply. You need 35 ratings";
+      message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.upVoteComment) {
-      require(actionCaller != dataUser, "You can not vote for own comment");
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
       ratingAllowed = UPVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small for upvote comment. You need 0 ratings";
+      message = "low_rating_upvote_comment";
       energy = ENERGY_UPVOTE_COMMENT;
 
     } else if (action == Action.downVotePost) {
-      require(actionCaller != dataUser, "You can not vote for own post");
+      require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = DOWNVOTE_POST_ALLOWED;
-      message = "Your rating is too small for downvote post. You need 100 ratings";
+      message = "low_rating_downvote_post";
       energy = ENERGY_DOWNVOTE_QUESTION;
 
     } else if (action == Action.downVoteReply) {
-      require(actionCaller != dataUser, "You can not vote for own reply");
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
-      message = "Your rating is too small for downvote reply. You need 100 ratings";
+      message = "low_rating_downvote_reply";
       energy = ENERGY_DOWNVOTE_ANSWER;
 
     } else if (action == Action.downVoteComment) {
-      require(actionCaller != dataUser, "You can not vote for own comment");
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
       ratingAllowed = DOWNVOTE_COMMENT_ALLOWED;
-      message = "Your rating is too small for downvote comment. You need 0 ratings";
+      message = "low_rating_downvote_comment";
       energy = ENERGY_DOWNVOTE_COMMENT;
 
     } else if (action == Action.cancelVote) {
       ratingAllowed = CANCEL_VOTE;
-      message = "Your rating is too small for cancel vote. You need 0 ratings";
+      message = "low_rating_cancel_vote";
       energy = ENERGY_FORUM_VOTE_CANCEL;
 
     } else if (action == Action.bestReply) {
       ratingAllowed = MINIMUM_RATING;
-      message = "Your rating is too small for mark reply as best. You need -300 ratings";
+      message = "low_rating_mark_best";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
     } else if (action == Action.updateProfile) {
       ratingAllowed = UPDATE_PROFILE_ALLOWED;
-      message = "Your rating is too small for edit profile. You need 0 ratings";
+      message = "low_rating_edit_profile";
       energy = ENERGY_UPDATE_PROFILE;
 
     } else if (action == Action.followCommunity) {
       ratingAllowed = MINIMUM_RATING;
-      message = "Your rating is too small for edit profile. You need -300 ratings";
+      message = "low_rating_follow_comm";
       energy = ENERGY_FOLLOW_COMMUNITY;
 
     } else {
-      require(false, "Action not allowed");
+      require(false, "not_allowed_action");
     }
 
     require(userRating >= ratingAllowed, message);
@@ -402,29 +402,29 @@ library SecurityLib {
 
   function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
     require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have community moderator role");
+        "not_allowed_not_moderator");
   }
 
     function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
     require((hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have community admin role");
+        "not_allowed_not_comm_admin");
   }
 
   function onlyAdminOrCommunityAdmin(Roles storage self, uint32 communityId) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) || 
         (hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community admin role");
+        "not_allowed_admin_or_comm_admin");
   }
 
   function onlyAdminOrCommunityModerator(Roles storage self, uint32 communityId) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) ||
         (hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "Peeranha: must have admin or community moderator role");
+        "not_allowed_admin_or_comm_admin");
   }
 
   function onlyAdmin(Roles storage self) internal {
     require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender), 
-        "Peeranha: must have admin role");
+        "not_allowed_not_admin");
   }
 
   // uint256[49] private __gap;

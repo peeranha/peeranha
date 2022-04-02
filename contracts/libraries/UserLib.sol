@@ -82,7 +82,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "User exists");
+    require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
@@ -104,7 +104,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    require(msgSender == self.userDelegationCollection.delegateUser, "Invalid delegate user");
+    require(msgSender == self.userDelegationCollection.delegateUser, "invld_user");
     self.userDelegationCollection.userDelegations[userAddress] = 1;
     create(self.users, userAddress, ipfsHash);
   }
@@ -155,7 +155,7 @@ library UserLib {
 
     bool isAdded;
     for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "You already follow the community");
+      require(user.followedCommunities[i] != communityId, "already_followed");
 
       if (user.followedCommunities[i] == 0 && !isAdded) {
         user.followedCommunities[i] = communityId;
@@ -187,7 +187,7 @@ library UserLib {
         return;
       }
     }
-    require(false, "You are not following the community");
+    require(false, "comm_not_followed");
   }
 
   /// @notice Get the number of users
@@ -209,7 +209,7 @@ library UserLib {
   /// @param addr Address of the user to get
   function getUserByAddress(UserCollection storage self, address addr) internal view returns (User storage) {
     User storage user = self.users[addr];
-    require(user.ipfsDoc.hash != bytes32(0x0), "User does not exist");
+    require(user.ipfsDoc.hash != bytes32(0x0), "user_not_found");
     return user;
   }
 

@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
 require("hardhat-gas-reporter");
+require('hardhat-contract-sizer');
 
 const { infuraApiKey, adminPrivateKey } = require('./env.json');
 

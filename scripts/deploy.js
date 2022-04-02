@@ -6,6 +6,11 @@ async function main() {
   const postLib = await PostLib.deploy();
   console.log("PostLib deployed to:", postLib.address);
 
+  const CommunityLib = await ethers.getContractFactory("CommunityLib");
+  console.log("Deploying CommunityLib...");
+  const communityLib = await CommunityLib.deploy();
+  console.log("CommunityLib deployed to:", communityLib.address);
+
   const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   const peeranhaNFT = await upgrades.deployProxy(PeeranhaNFT, ["PEERNFT", "PEERNFT"]);
   console.log("Peeranha NFT deployed to:", peeranhaNFT.address);
@@ -13,6 +18,7 @@ async function main() {
   const Peeranha = await ethers.getContractFactory("Peeranha", {
     libraries: {
       PostLib: postLib.address,
+      CommunityLib: communityLib.address,
     }
   });
   console.log("Deploying Peeranha...");

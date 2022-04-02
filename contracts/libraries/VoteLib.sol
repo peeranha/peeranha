@@ -134,7 +134,7 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "PostType or voteResource is not found");
+        require(false, "invalid_post_type");
     }
 
     /// @notice Get value Rating for rating action
@@ -167,7 +167,7 @@ library VoteLib  {
             return 0;
         }
         
-        require(false, "PostType or voteResource is not found");
+        require(false, "invalid_resource_type");
     }
 
     function getUserRatingChange(
