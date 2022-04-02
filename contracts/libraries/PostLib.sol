@@ -1,10 +1,8 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
 
-import "./IpfsLib.sol";
 import "./VoteLib.sol";
 import "./UserLib.sol";
-import "./SecurityLib.sol";
 import "./AchievementLib.sol";
 
 /// @title PostLib
@@ -18,7 +16,7 @@ library PostLib  {
     enum TypeContent { Post, Reply, Comment }
 
     struct Comment {
-        IpfsLib.IpfsHash ipfsDoc;
+        CommonLib.IpfsHash ipfsDoc;
         address author;
         int32 rating;
         uint32 postTime;
@@ -34,7 +32,7 @@ library PostLib  {
     }
 
     struct Reply {
-        IpfsLib.IpfsHash ipfsDoc;
+        CommonLib.IpfsHash ipfsDoc;
         address author;
         int32 rating;
         uint32 postTime;
@@ -71,7 +69,7 @@ library PostLib  {
         bool isDeleted;
 
         uint8[] tags;
-        IpfsLib.IpfsHash ipfsDoc;
+        CommonLib.IpfsHash ipfsDoc;
     }
 
     struct PostContainer {
@@ -117,16 +115,16 @@ library PostLib  {
         PostType postType,
         uint8[] memory tags
     ) public {
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, communityId),
             userAddr,
             userAddr,
             communityId,
-            SecurityLib.Action.publicationPost
+            UserLib.Action.publicationPost
         );
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(tags.length > 0, "At least one tag is required.");
 
         PostContainer storage post = self.posts[++self.postCount];
@@ -161,22 +159,22 @@ library PostLib  {
         require(postContainer.info.postType != PostType.Tutorial, "You can not publish replies in tutorial.");
 
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             user,
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.publicationReply
+            UserLib.Action.publicationReply
         );
         /*  
             Check gas one more 
-            isOfficialReply ? SecurityLib.Action.publicationOfficialReply : SecurityLib.Action.publicationReply
-            remove: require((SecurityLib.hasRole(userContex ...
+            isOfficialReply ? UserLib.Action.publicationOfficialReply : UserLib.Action.publicationReply
+            remove: require((UserLib.hasRole(userContex ...
             20k in gas contract, +20 gas in common reply (-20 in official reply), but Avg gas -20 ?
          */
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(
             parentReplyId == 0 || 
             (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
@@ -198,7 +196,7 @@ library PostLib  {
         uint32 timestamp = CommonLib.getTimestamp();
         if (parentReplyId == 0) {
             if (isOfficialReply) {
-                require((SecurityLib.hasRole(userContext.roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
+                require((UserLib.hasRole(userContext.roles, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
                     "Must have community moderator role");
                 postContainer.info.officialReply = postContainer.info.replyCount;
             }
@@ -242,7 +240,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
         Comment storage comment;    ///
         uint8 commentId;            // struct ?
@@ -257,14 +255,14 @@ library PostLib  {
             comment = replyContainer.comments[commentId].info;
             author = replyContainer.info.author;
         }
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             user,
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             author,
             postContainer.info.communityId, 
-            SecurityLib.Action.publicationComment
+            UserLib.Action.publicationComment
         );
 
         comment.author = userAddr;
@@ -289,19 +287,19 @@ library PostLib  {
         uint8[] memory tags
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.editItem
+            UserLib.Action.editItem
         );
 
-        if(!IpfsLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
+        if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
         if (tags.length > 0)
             postContainer.info.tags = tags;
@@ -326,16 +324,16 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.editItem
+            UserLib.Action.editItem
         );
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
@@ -363,16 +361,16 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        require(!IpfsLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.editItem
+            UserLib.Action.editItem
         );
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
@@ -394,14 +392,14 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.deleteItem
+            UserLib.Action.deleteItem
         );
 
         if (postContainer.info.rating > 0) {
@@ -446,14 +444,14 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.bestReply != replyId, "You can not delete the best reply."); // unit test
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.deleteItem
+            UserLib.Action.deleteItem
         );
 
         uint256 time = CommonLib.getTimestamp();
@@ -487,7 +485,7 @@ library PostLib  {
         bool isBestReply,
         uint32 communityId
     ) private {
-        if (IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
+        if (CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
             return;
 
         int32 changeReplyAuthorRating;
@@ -533,14 +531,14 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
-            SecurityLib.Action.deleteItem
+            UserLib.Action.deleteItem
         );
 
         if (userAddr == commentContainer.info.author)
@@ -560,14 +558,14 @@ library PostLib  {
     /// @param replyId Reply which will change status
     function changeStatusOfficialReply(
         PostCollection storage self,
-        SecurityLib.Roles storage roles,
+        UserLib.Roles storage roles,
         address userAddr,
         uint256 postId,
         uint16 replyId
     ) public {
         // check permistion + energy?
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require((SecurityLib.hasRole(roles, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
+        require((UserLib.hasRole(roles, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, postContainer.info.communityId), userAddr)), 
                     "Must have community moderator role");
         getReplyContainerSafe(postContainer, replyId);
          
@@ -611,14 +609,14 @@ library PostLib  {
             postContainer.info.bestReply = replyId;
         }
 
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             UserLib.getUserByAddress(userContext.users, userAddr),
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             userAddr,
             postContainer.info.communityId,
-            SecurityLib.Action.bestReply
+            UserLib.Action.bestReply
         );    // unit test (forum)
 
         emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
@@ -707,7 +705,7 @@ library PostLib  {
         bool isUpvote
     ) public {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             UserLib.getUserRating(userContext.userRatingCollection, votedUser, postContainer.info.communityId),
@@ -715,10 +713,10 @@ library PostLib  {
             postContainer.info.author, 
             postContainer.info.communityId, 
             isCancel ?
-                SecurityLib.Action.cancelVote :
+                UserLib.Action.cancelVote :
                 (ratingChange > 0 ?
-                    SecurityLib.Action.upVotePost :
-                    SecurityLib.Action.downVotePost
+                    UserLib.Action.upVotePost :
+                    UserLib.Action.downVotePost
                 )
         );  
 
@@ -741,7 +739,7 @@ library PostLib  {
         bool isUpvote
     ) public {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             UserLib.getUserRating(userContext.userRatingCollection, votedUser, communityId),
@@ -749,10 +747,10 @@ library PostLib  {
             replyContainer.info.author, 
             communityId, 
             isCancel ?
-                SecurityLib.Action.cancelVote :
+                UserLib.Action.cancelVote :
                 (ratingChange > 0 ?
-                    SecurityLib.Action.upVoteReply :
-                    SecurityLib.Action.downVoteReply
+                    UserLib.Action.upVoteReply :
+                    UserLib.Action.downVoteReply
                 )
         );
 
@@ -794,7 +792,7 @@ library PostLib  {
         bool isUpvote
     ) private {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles, 
             UserLib.getUserByAddress(userContext.users, votedUser),
             UserLib.getUserRating(userContext.userRatingCollection, votedUser, communityId),
@@ -802,10 +800,10 @@ library PostLib  {
             commentContainer.info.author, 
             communityId, 
             isCancel ? 
-                SecurityLib.Action.cancelVote :
+                UserLib.Action.cancelVote :
                 (ratingChange > 0 ?
-                    SecurityLib.Action.upVoteComment :
-                    SecurityLib.Action.downVoteComment
+                    UserLib.Action.upVoteComment :
+                    UserLib.Action.downVoteComment
                 )
         );
         
@@ -875,14 +873,14 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        SecurityLib.checkRatingAndEnergy(
+        UserLib.checkRatingAndEnergy(
             userContext.roles,
             user,
             UserLib.getUserRating(userContext.userRatingCollection, userAddr, postContainer.info.communityId),
             userAddr,
             userAddr,
             postContainer.info.communityId,
-            SecurityLib.Action.changePostType
+            UserLib.Action.changePostType
         );
         require(newPostType != postContainer.info.postType, "This post type is already set.");
         
@@ -954,7 +952,7 @@ library PostLib  {
         uint256 postId
     ) public view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
-        require(!IpfsLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
+        require(!CommonLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
         
         return post;
@@ -969,7 +967,7 @@ library PostLib  {
     ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer = postContainer.replies[replyId];
 
-        require(!IpfsLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply does not exist.");
+        require(!CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply does not exist.");
         return replyContainer;
     }
 
@@ -1003,7 +1001,7 @@ library PostLib  {
             ReplyContainer storage reply = getReplyContainerSafe(postContainer, parentReplyId);
             commentContainer = reply.comments[commentId];
         }
-        require(!IpfsLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment does not exist.");
+        require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment does not exist.");
 
         return commentContainer;
     }

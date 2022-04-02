@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
-import "./IpfsLib.sol";
 import "./CommonLib.sol";
 import "./PostLib.sol";
 
@@ -9,14 +8,14 @@ import "./PostLib.sol";
 /// @dev Community information is stored in the mapping on the main contract
 library CommunityLib {
     struct Community {
-        IpfsLib.IpfsHash ipfsDoc;
+        CommonLib.IpfsHash ipfsDoc;
         uint8 tagsCount;
         uint32 timeCreate;
         bool isFrozen;
     }
 
     struct Tag {
-        IpfsLib.IpfsHash ipfsDoc;
+        CommonLib.IpfsHash ipfsDoc;
     }
 
     struct CommunityContainer {

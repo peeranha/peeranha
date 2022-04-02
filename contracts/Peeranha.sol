@@ -7,7 +7,6 @@ import "./libraries/UserLib.sol";
 import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./libraries/RewardLib.sol";
-import "./libraries/SecurityLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
 // import "./libraries/ConfigurationLib.sol";
@@ -48,7 +47,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function __Peeranha_init_unchained() internal initializer {
-        SecurityLib.setupRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, msg.sender);
+        UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
@@ -163,7 +162,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.
      */
     function getUserPermissions(address addr) external view returns (bytes32[] memory) {
-        return SecurityLib.getPermissions(userContext.userRoles, addr);
+        return UserLib.getPermissions(userContext.userRoles, addr);
     }
 
 
@@ -178,7 +177,7 @@ contract Peeranha is IPeeranha, Initializable {
     function giveAdminPermission(address user) external
     onlyAdmin() {
         onlyExisitingUser(user);
-        SecurityLib.grantRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
+        UserLib.grantRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, user);
     }
 
     /**
@@ -194,7 +193,7 @@ contract Peeranha is IPeeranha, Initializable {
     function revokeAdminPermission(address user) external 
     onlyAdmin() {
         onlyExisitingUser(user);
-        SecurityLib.revokeRole(userContext, SecurityLib.DEFAULT_ADMIN_ROLE, user);
+        UserLib.revokeRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, user);
     }
     
     /**
@@ -220,8 +219,8 @@ contract Peeranha is IPeeranha, Initializable {
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external onlyAdmin() {
         onlyExisitingUser(msg.sender);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
-        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
-        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
+        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
+        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
     }
 
     /**
@@ -280,8 +279,8 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyAdminOrCommunityAdmin(communityId) {
         onlyExisitingUser(user);
-        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
-        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), user);
+        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -297,7 +296,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
         onlyExisitingUser(user);
-        SecurityLib.grantRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -313,7 +312,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyCommunityAdmin(communityId) {
         onlyExisitingUser(user);
-        SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_ADMIN_ROLE, communityId), user);
+        UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), user);
     }
 
     /**
@@ -331,7 +330,7 @@ contract Peeranha is IPeeranha, Initializable {
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyCommunityAdmin(communityId) {
         onlyExisitingUser(user);
-        SecurityLib.revokeRole(userContext, SecurityLib.getCommunityRole(SecurityLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
+        UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), user);
     }
 
     /**
@@ -686,27 +685,27 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     modifier onlyCommunityModerator(uint32 communityId) {
-        SecurityLib.onlyCommunityModerator(userContext.roles, communityId);
+        UserLib.onlyCommunityModerator(userContext.roles, communityId);
         _;
     }
 
     modifier onlyCommunityAdmin(uint32 communityId) {
-        SecurityLib.onlyCommunityAdmin(userContext.roles, communityId);
+        UserLib.onlyCommunityAdmin(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdminOrCommunityAdmin(uint32 communityId) {
-        SecurityLib.onlyAdminOrCommunityAdmin(userContext.roles, communityId);
+        UserLib.onlyAdminOrCommunityAdmin(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdminOrCommunityModerator(uint32 communityId) {
-        SecurityLib.onlyAdminOrCommunityModerator(userContext.roles, communityId);
+        UserLib.onlyAdminOrCommunityModerator(userContext.roles, communityId);
         _;
     }
 
     modifier onlyAdmin() {
-        SecurityLib.onlyAdmin(userContext.roles);
+        UserLib.onlyAdmin(userContext.roles);
         _;
     }
 

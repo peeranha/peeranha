@@ -1,10 +1,11 @@
 pragma abicoder v2;
 pragma solidity >=0.5.0;
 
+import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+
 import "./CommonLib.sol";
-import "./IpfsLib.sol";
 import "./RewardLib.sol";
-import "./SecurityLib.sol";
 import "./AchievementLib.sol";
 import "./AchievementCommonLib.sol";
 
@@ -12,11 +13,57 @@ import "./AchievementCommonLib.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
+  using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+  using AddressUpgradeable for address;
+
   int32 constant START_USER_RATING = 10;
   uint256 constant ACCOUNT_STAT_RESET_PERIOD = 14; // 259200 - 3 Days
 
+  int16 constant MINIMUM_RATING = -300;
+  int16 constant POST_QUESTION_ALLOWED = 0;
+  int16 constant POST_REPLY_ALLOWED = 0;
+  int16 constant POST_COMMENT_ALLOWED = 35;
+
+  int16 constant UPVOTE_POST_ALLOWED = 35;
+  int16 constant DOWNVOTE_POST_ALLOWED = 100;
+  int16 constant UPVOTE_REPLY_ALLOWED = 35;
+  int16 constant DOWNVOTE_REPLY_ALLOWED = 100;
+  int16 constant UPVOTE_COMMENT_ALLOWED = 0;
+  int16 constant DOWNVOTE_COMMENT_ALLOWED = 0;
+  int16 constant CANCEL_VOTE = 0;
+
+  int16 constant UPDATE_PROFILE_ALLOWED = 0;
+
+  uint8 constant ENERGY_DOWNVOTE_QUESTION = 5;
+  uint8 constant ENERGY_DOWNVOTE_ANSWER = 3;
+  uint8 constant ENERGY_DOWNVOTE_COMMENT = 2;
+  uint8 constant ENERGY_UPVOTE_QUESTION = 1;
+  uint8 constant ENERGY_UPVOTE_ANSWER = 1;
+  uint8 constant ENERGY_UPVOTE_COMMENT = 1;
+  uint8 constant ENERGY_FORUM_VOTE_CANCEL = 1;
+  uint8 constant ENERGY_POST_QUESTION = 10;
+  uint8 constant ENERGY_POST_ANSWER = 6;
+  uint8 constant ENERGY_POST_COMMENT = 4;
+  uint8 constant ENERGY_MODIFY_ITEM = 2;
+  uint8 constant ENERGY_DELETE_ITEM = 2;
+
+  uint8 constant ENERGY_MARK_REPLY_AS_CORRECT = 1;
+  uint8 constant ENERGY_UPDATE_PROFILE = 1;
+  uint8 constant ENERGY_CREATE_TAG = 75;            // only Admin
+  uint8 constant ENERGY_CREATE_COMMUNITY = 125;     // only admin
+  uint8 constant ENERGY_FOLLOW_COMMUNITY = 1;
+  uint8 constant ENERGY_REPORT_PROFILE = 5;         //
+  uint8 constant ENERGY_REPORT_QUESTION = 3;        //
+  uint8 constant ENERGY_REPORT_ANSWER = 2;          //
+  uint8 constant ENERGY_REPORT_COMMENT = 1;         //
+
+  bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+  uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
+  uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
+
+
   struct User {
-    IpfsLib.IpfsHash ipfsDoc;
+    CommonLib.IpfsHash ipfsDoc;
     uint256 creationTime;
     uint16 energy;
     uint16 lastUpdatePeriod;
@@ -47,8 +94,8 @@ library UserLib {
     UserLib.UserRatingCollection userRatingCollection;
     UserLib.UserDelegationCollection userDelegationCollection;
     RewardLib.WeekRewardContainer weekRewardContainer;
-    SecurityLib.Roles roles;
-    SecurityLib.UserRoles userRoles;
+    UserLib.Roles roles;
+    UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
   }
   
@@ -65,6 +112,39 @@ library UserLib {
   struct UserDelegationCollection {
     mapping(address => uint) userDelegations;
     address delegateUser;
+  }
+
+  enum Action {
+    publicationPost,
+    publicationReply,
+    publicationComment,
+    editItem,
+    deleteItem,
+    changePostType,
+    upVotePost,
+    downVotePost,
+    upVoteReply,
+    downVoteReply,
+    upVoteComment,
+    downVoteComment,
+    cancelVote,
+    officialReply,
+    bestReply,
+    updateProfile,
+    followCommunity
+  }
+
+  struct RoleData {
+    EnumerableSetUpgradeable.AddressSet members;
+    bytes32 adminRole;
+  }
+
+  struct Roles {
+    mapping (bytes32 => RoleData) _roles;
+  }
+
+  struct UserRoles {
+    mapping (address => bytes32[]) userRoles;
   }
 
   event UserCreated(address userAddress);
@@ -119,14 +199,14 @@ library UserLib {
     bytes32 ipfsHash
   ) internal {
     User storage user = getUserByAddress(userContext.users, userAddress);
-    SecurityLib.checkRatingAndEnergy(
+    UserLib.checkRatingAndEnergy(
       userContext.roles,
       user,
       0,
       userAddress,
       userAddress,
       0,
-      SecurityLib.Action.updateProfile
+      UserLib.Action.updateProfile
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -143,14 +223,14 @@ library UserLib {
     uint32 communityId
   ) internal {
     User storage user = getUserByAddress(userContext.users, userAddress);
-    SecurityLib.checkRatingAndEnergy(
+    UserLib.checkRatingAndEnergy(
       userContext.roles,
       user,
       getUserRating(userContext.userRatingCollection, userAddress, communityId),
       userAddress,
       userAddress,
       0,
-      SecurityLib.Action.followCommunity
+      UserLib.Action.followCommunity
     );
 
     bool isAdded;
@@ -320,6 +400,345 @@ library UserLib {
     if (rating > 0) {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));
     }
+  }
+
+  function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
+    return bytes32(role + communityId);
+  }
+
+  function checkRatingAndEnergy(
+    Roles storage role,
+    UserLib.User storage user,
+    int32 userRating,
+    address actionCaller,
+    address dataUser,
+    uint32 communityId,
+    Action action
+  )
+    internal
+  {
+    if (hasModeratorRole(role, actionCaller, communityId)) return;
+    
+    int16 ratingAllowed;
+    string memory message;
+    uint8 energy;
+    if (action == Action.publicationPost) {
+      ratingAllowed = POST_QUESTION_ALLOWED;
+      message = "low_rating_post";
+      energy = ENERGY_POST_QUESTION;
+
+    } else if (action == Action.publicationReply) {
+      ratingAllowed = POST_REPLY_ALLOWED;
+      message = "low_rating_reply";
+      energy = ENERGY_POST_ANSWER;
+
+    } else if (action == Action.publicationComment) {
+      ratingAllowed = POST_COMMENT_ALLOWED;
+      message = "low_rating_own_post_comment";
+      energy = ENERGY_POST_COMMENT;
+
+    } else if (action == Action.editItem) {
+      require(actionCaller == dataUser, "not_allowed_edit");
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_edit";
+      energy = ENERGY_MODIFY_ITEM;
+
+    } else if (action == Action.deleteItem) {
+      require(actionCaller == dataUser, "not_allowed_delete");
+      ratingAllowed = 0;
+      message = "low_rating_delete_own"; // delete own item?
+      energy = ENERGY_DELETE_ITEM;
+
+    } else if (action == Action.changePostType) {
+      require(false, "not_allowed_change_type");
+
+    } else if (action == Action.upVotePost) {
+      require(actionCaller != dataUser, "not_allowed_vote_post");
+      ratingAllowed = UPVOTE_POST_ALLOWED;
+      message = "low rating to upvote (35 min)";
+      energy = ENERGY_UPVOTE_QUESTION;
+
+    } else if (action == Action.upVoteReply) {
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
+      ratingAllowed = UPVOTE_REPLY_ALLOWED;
+      message = "low_rating_upvote_post";
+      energy = ENERGY_UPVOTE_ANSWER;
+
+    } else if (action == Action.upVoteComment) {
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
+      ratingAllowed = UPVOTE_COMMENT_ALLOWED;
+      message = "low_rating_upvote_comment";
+      energy = ENERGY_UPVOTE_COMMENT;
+
+    } else if (action == Action.downVotePost) {
+      require(actionCaller != dataUser, "not_allowed_vote_post");
+      ratingAllowed = DOWNVOTE_POST_ALLOWED;
+      message = "low_rating_downvote_post";
+      energy = ENERGY_DOWNVOTE_QUESTION;
+
+    } else if (action == Action.downVoteReply) {
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
+      ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
+      message = "low_rating_downvote_reply";
+      energy = ENERGY_DOWNVOTE_ANSWER;
+
+    } else if (action == Action.downVoteComment) {
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
+      ratingAllowed = DOWNVOTE_COMMENT_ALLOWED;
+      message = "low_rating_downvote_comment";
+      energy = ENERGY_DOWNVOTE_COMMENT;
+
+    } else if (action == Action.cancelVote) {
+      ratingAllowed = CANCEL_VOTE;
+      message = "low_rating_cancel_vote";
+      energy = ENERGY_FORUM_VOTE_CANCEL;
+
+    } else if (action == Action.bestReply) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_mark_best";
+      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+
+    } else if (action == Action.updateProfile) {
+      ratingAllowed = UPDATE_PROFILE_ALLOWED;
+      message = "low_rating_edit_profile";
+      energy = ENERGY_UPDATE_PROFILE;
+
+    } else if (action == Action.followCommunity) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_follow_comm";
+      energy = ENERGY_FOLLOW_COMMUNITY;
+
+    } else {
+      require(false, "not_allowed_action");
+    }
+
+    require(userRating >= ratingAllowed, message);
+    reduceEnergy(user, userRating, energy);
+  }
+
+  function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
+    int32 rating = userRating;
+    uint256 currentTime = CommonLib.getTimestamp();
+    uint16 currentPeriod = uint16((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
+    uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
+
+    uint16 userEnergy;
+    if (periodsHavePassed == 0) {
+      userEnergy = user.energy;
+    } else {
+      userEnergy = UserLib.getStatusEnergy(userRating); 
+    }
+
+    require(userEnergy >= energy, "Not enough energy!");
+    user.energy = userEnergy - energy;
+    user.lastUpdatePeriod = currentPeriod;
+  }
+
+  function hasModeratorRole(
+    Roles storage self,
+    address user,
+    uint32 communityId
+  ) 
+    internal 
+    returns (bool) 
+  {
+    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
+      hasRole(self, DEFAULT_ADMIN_ROLE, user))) return true;
+    
+    return false;
+  }
+
+  /**
+    * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
+    *
+    * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
+    * {RoleAdminChanged} not being emitted signaling this.
+    *
+    * _Available since v3.1._
+    */
+  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
+
+  /**
+    * @dev Emitted when `account` is granted `role`.
+    *
+    * `sender` is the account that originated the contract call, an admin role
+    * bearer except when using {setupRole}.
+    */
+  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
+
+  /**
+    * @dev Emitted when `account` is revoked `role`.
+    *
+    * `sender` is the account that originated the contract call:
+    *   - if using `revokeRole`, it is the admin role bearer
+    *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
+    */
+  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+
+  /**
+    * @dev Returns `true` if `account` has been granted `role`.
+    */
+  function hasRole(Roles storage self, bytes32 role, address account) internal view returns (bool) {
+      return self._roles[role].members.contains(account);
+  }
+
+  /**
+    * @dev Returns the number of accounts that have `role`. Can be used
+    * together with {getRoleMember} to enumerate all bearers of a role.
+    */
+  function getRoleMemberCount(Roles storage self, bytes32 role) internal view returns (uint256) {
+      return self._roles[role].members.length();
+  }
+
+  /**
+    * @dev Returns one of the accounts that have `role`. `index` must be a
+    * value between 0 and {getRoleMemberCount}, non-inclusive.
+    *
+    * Role bearers are not sorted in any particular way, and their ordering may
+    * change at any point.
+    *
+    * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure
+    * you perform all queries on the same block. See the following
+    * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
+    * for more information.
+    */
+  function getRoleMember(Roles storage self, bytes32 role, uint256 index) internal view returns (address) {
+      return self._roles[role].members.at(index);
+  }
+
+  /**
+    * @dev Returns the admin role that controls `role`. See {grantRole} and
+    * {revokeRole}.
+    *
+    * To change a role's admin, use {_setRoleAdmin}.
+    */
+  function getRoleAdmin(Roles storage self, bytes32 role) internal view returns (bytes32) {
+      return self._roles[role].adminRole;
+  }
+
+  /**
+    * @dev Grants `role` to `account`.
+    *
+    * If `account` had not been already granted `role`, emits a {RoleGranted}
+    * event.
+    *
+    * Requirements:
+    *
+    * - the caller must have ``role``'s admin role.
+    */
+  // function grantRole(bytes32 role, address account) public virtual {
+  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to grant");
+
+  //     _grantRole(role, account);
+  // }
+
+  /**
+    * @dev Revokes `role` from `account`.
+    *
+    * If `account` had been granted `role`, emits a {RoleRevoked} event.
+    *
+    * Requirements:
+    *
+    * - the caller must have ``role``'s admin role.
+    */
+  // function revokeRole(bytes32 role, address account) public virtual {
+  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to revoke");
+
+  //     revokeRole(role, account);
+  // }
+
+  /**
+    * @dev Revokes `role` from the calling account.
+    *
+    * Roles are often managed via {grantRole} and {revokeRole}: this function's
+    * purpose is to provide a mechanism for accounts to lose their privileges
+    * if they are compromised (such as when a trusted device is misplaced).
+    *
+    * If the calling account had been granted `role`, emits a {RoleRevoked}
+    * event.
+    *
+    * Requirements:
+    *
+    * - the caller must be `account`.
+    */
+  // function renounceRole(bytes32 role, address account) public virtual {
+  //     require(account == _msgSender(), "AccessControl: can only renounce roles for self");
+
+  //     revokeRole(role, account);
+  // }
+
+  /**
+    * @dev Grants `role` to `account`.
+    *
+    * If `account` had not been already granted `role`, emits a {RoleGranted}
+    * event. Note that unlike {grantRole}, this function doesn't perform any
+    * checks on the calling account.
+    *
+    * [WARNING]
+    * ====
+    * This function should only be called from the constructor when setting
+    * up the initial roles for the system.
+    *
+    * Using this function in any other way is effectively circumventing the admin
+    * system imposed by {AccessControl}.
+    * ====
+    */
+  function setupRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+      grantRole(userContext, role, account);
+  }
+
+  function revokeRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+    if (userContext.roles._roles[role].members.remove(account)) {
+      emit RoleRevoked(role, account, msg.sender);
+
+      uint256 length = userContext.userRoles.userRoles[account].length;
+      for(uint32 i = 0; i < length; i++) {
+        if(userContext.userRoles.userRoles[account][i] == role) {
+          if (i < length - 1) {
+            userContext.userRoles.userRoles[account][i] = userContext.userRoles.userRoles[account][length - 1];
+            userContext.userRoles.userRoles[account].pop();
+          } else userContext.userRoles.userRoles[account].pop();
+        }
+      }
+    }
+  }
+
+  function getPermissions(UserRoles storage self, address account) internal view returns (bytes32[] memory) {
+    return self.userRoles[account];
+  }
+
+  function grantRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
+    if (userContext.roles._roles[role].members.add(account)) {
+      userContext.userRoles.userRoles[account].push(role);   
+      emit RoleGranted(role, account, msg.sender);
+    }
+  }
+
+  function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
+    require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
+        "not_allowed_not_moderator");
+  }
+
+    function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
+    require((hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
+        "not_allowed_not_comm_admin");
+  }
+
+  function onlyAdminOrCommunityAdmin(Roles storage self, uint32 communityId) internal {
+    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) || 
+        (hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
+        "not_allowed_admin_or_comm_admin");
+  }
+
+  function onlyAdminOrCommunityModerator(Roles storage self, uint32 communityId) internal {
+    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) ||
+        (hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
+        "not_allowed_admin_or_comm_admin");
+  }
+
+  function onlyAdmin(Roles storage self) internal {
+    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender), 
+        "not_allowed_not_admin");
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {
