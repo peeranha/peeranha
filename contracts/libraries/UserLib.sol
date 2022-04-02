@@ -19,7 +19,7 @@ library UserLib {
     IpfsLib.IpfsHash ipfsDoc;
     uint256 creationTime;
     uint16 energy;
-    uint32 lastUpdatePeriod;
+    uint16 lastUpdatePeriod;
     uint32[] followedCommunities;
     bytes32[] roles;
   }
@@ -45,6 +45,7 @@ library UserLib {
   struct UserContext {
     UserLib.UserCollection users;
     UserLib.UserRatingCollection userRatingCollection;
+    RewardLib.WeekRewardContainer weekRewardContainer;
     SecurityLib.Roles roles;
     SecurityLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
@@ -240,12 +241,14 @@ library UserLib {
     uint256 pastPeriodsCount = communityUser.rewardPeriods.length;
 
     RewardLib.UserPeriodRewards storage userPeriodRewards = communityUser.userPeriodRewards[currentPeriod];
+    RewardLib.WeekReward storage weekReward = userContext.weekRewardContainer.weekReward[currentPeriod];
     if (pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
+      weekReward.activeUsersInPeriod.push(userAddr);
       communityUser.rewardPeriods.push(currentPeriod);
     }
 
     if (!userPeriodRewards.periodRating[communityId].isActive) {
-      userPeriodRewards.periodRating[communityId].isActive = true;
+      userPeriodRewards.periodRating[communityId].isActive = true;    // need?
       userPeriodRewards.rewardCommunities.push(communityId);
     }
 
@@ -276,6 +279,7 @@ library UserLib {
     userPeriodRewards.periodRating[communityId].ratingToReward += ratingToRewardChange;
     userRating.rating = newRating;
     userRating.payOutRating += ratingToRewardChange;
+    weekReward.rating += ratingToRewardChange;
 
     if (rating > 0) {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));

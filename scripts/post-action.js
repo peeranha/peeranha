@@ -92,6 +92,10 @@ async function main() {
     }
   });
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
+  // console.log("Posting action");
+  // result = await peeranha.createUser(await getBytes32FromData(testAccount));
+  // result = await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
+  // console.log(JSON.stringify(result))
 
   const initCommunity = {
     description:

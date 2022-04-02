@@ -53,7 +53,11 @@ contract Peeranha is IPeeranha, Initializable {
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
-    
+
+    function getWeekRewardContainer(uint16 period) external view override returns(RewardLib.WeekReward memory) {
+        return userContext.weekRewardContainer.weekReward[period];
+    }
+
     /**
      * @dev Signup for user account.
      *
@@ -611,17 +615,41 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
     }
 
+    function getPeriodInfo() external view returns (uint256 startPeriodTime, uint256 periodLength) {
+        return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
+    }
+
+    function getPeriod() external view returns (uint16) {
+        return RewardLib.getPeriod(CommonLib.getTimestamp());
+    }
+
+    function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
+        return userContext.weekRewardContainer.weekReward[period].activeUsersInPeriod;
+    }
+
+    ///
+    // TO DO
+    // to remove it in prod
+    /// ?
+    function getAcctiveUserPeriods (address userAddr) external view returns (uint16[] memory) {
+        return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
+    }
+
+    ///
+    // TO DO
+    // to remove it in prod
+    /// ?
     function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) external view returns (address[] memory) {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
     function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        PostLib.addUserRating(userContext, userAddr, rating, communityId);
     }
 
-    /*function setEnergy(address userAddr, uint16 energy) external {
+    function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     function onlyExisitingUser(address user) private {
         require(UserLib.isExists(userContext.users, user),

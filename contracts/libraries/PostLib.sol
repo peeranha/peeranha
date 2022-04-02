@@ -12,7 +12,7 @@ import "./AchievementLib.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days  (10)     // name??
+    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -1119,5 +1119,14 @@ library PostLib  {
         }
 
         return votedUsers;
+    }
+
+    function addUserRating(
+        UserLib.UserContext storage userContext,
+        address userAddr,
+        int32 rating,
+        uint32 communityId
+    ) public {
+        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 }
