@@ -11,7 +11,8 @@
     "size-contracts": "npx hardhat size-contracts",
     "deploy-mumbai": "node scripts/change-env-values.js 0 & npx hardhat run --network mumbai scripts/deploy.js",
     "upgrade-mumbai": "node scripts/change-env-values.js 0 & npx hardhat run --network mumbai scripts/upgrade.js",
-    "query-data-mumbai": "npx hardhat run --network mumbai scripts/query-data.js"
+    "query-data-mumbai": "npx hardhat run --network mumbai scripts/query-data.js",
+    "set-delegate-user-mumbai": "npx hardhat run --network mumbai scripts/set-delegate-user.js"
   },
   "keywords": [],
   "author": "",

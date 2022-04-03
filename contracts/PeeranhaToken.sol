@@ -52,9 +52,9 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
    * - must be a reward in this period.
    * - must be a period less then now.
   */
-  function claimReward(uint16 period) external {
+  function claimReward(address user, uint16 period) external {
+    // TODO: check that user is sender or admin
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
-    address user = msg.sender;
 
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
@@ -125,4 +125,6 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   function getPoolTokens(uint16 period) external view returns(uint256) {
     return poolTokens[period];
   }
+
+  // TODO: add actions that allow owner to mint 40% of total token supply
 }
