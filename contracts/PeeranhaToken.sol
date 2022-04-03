@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.s
 contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
-  uint256 public constant REWARD_WEEK = 1000;
+  uint256 public constant REWARD_WEEK = 1000000;
   uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   mapping(uint16 => uint256) poolTokens;
