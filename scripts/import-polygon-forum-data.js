@@ -41,12 +41,14 @@ const getAnswers = async(questions) => {
         topic.post_stream.posts.forEach(({id}) => {
           urls.push(`https://forum.matic.network/posts/${id}.json`)
         });
+        await new Promise(r => setTimeout(r, 10));
     }
 
     const answersList = [];
 
     for (const url of urls) {
         const post = await (await fetch(url)).json();
+        await new Promise(r => setTimeout(r, 10));
 
         const _rating = post.actions_summary[0] === undefined ? 0 : post.actions_summary[0].count;
         const answer = {
