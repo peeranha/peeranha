@@ -1,22 +1,47 @@
 const fs = require("fs");
 const path = require('path');
 
-const Stage = {"prod":0, "test":1, "unitTest":2}
+const Stage = {"prod":0, "staging": 1, "test":2, "unitTest":3}
 
-const prod = [];
+const prod = [
+    { field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
+	{ field: 'constant DELETE_TIME', value: 604800, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
+	{ field: 'constant PERIOD_LENGTH', value: 604800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
+    { field: 'constant START_PERIOD_TIME', value: 1648875600, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+	{ field: 'constant REWARD_WEEK', value: 1000000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'function addUserRating', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
+	{ field: 'function setEnergy', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
+];
+
+const staging = [
+    { field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
+	{ field: 'constant DELETE_TIME', value: 604800, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
+	{ field: 'constant PERIOD_LENGTH', value: 604800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
+    { field: 'constant START_PERIOD_TIME', value: 1648875600, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+	{ field: 'constant REWARD_WEEK', value: 1000000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'function addUserRating', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
+	{ field: 'function setEnergy', value: `/*`, path: `../contracts/Peeranha.sol`, isFunction: true },
+];
 
 const test = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 7200, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
 	{ field: 'constant PERIOD_LENGTH', value: 7200, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
+	{ field: 'constant REWARD_WEEK', value: 1000000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 	{ field: 'function setEnergy', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 ];
 
 const unitTest = [
-	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 3, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
-	{ field: 'constant DELETE_TIME', value: 3, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
+	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 6, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
+	{ field: 'constant DELETE_TIME', value: 10, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'constant PERIOD_LENGTH', value: 3, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+	{ field: 'constant START_PERIOD_TIME', value: Math.floor(Date.now() / 1000), path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+	{ field: 'constant REWARD_WEEK', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 	{ field: 'function setEnergy', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 ];
@@ -27,13 +52,16 @@ async function changeFieldValue() {
     let statusField;
     if (stage == Stage.prod) {
         statusField = prod;
-        console.log("Prod");
+        console.log("Setting environment variables to Prod values");
+    } else if (stage == Stage.staging) {
+        statusField = staging;
+        console.log("Setting environment variables to Staging values");
     } else if (stage == Stage.test) {
         statusField = test;
-        console.log("Test");
+        console.log("Setting environment variables to Test values");
     } else {
         statusField = unitTest;
-        console.log("Unit Test");
+        console.log("Setting environment variables to Unit Testing values");
     }
 
     for (let i = 0; i < statusField.length; i++) {
@@ -41,10 +69,10 @@ async function changeFieldValue() {
 
         let pos = fileContent.indexOf(statusField[i].field);
         if (pos == -1) {
-            console.log(`Field ${statusField[i].field} did not found!`)
+            console.log('\x1b[41m', `Field ${statusField[i].field} was not found!`, '\x1b[0m')
             continue;
         } else {
-            console.log(`Field ${statusField[i].field} founded.`)
+            console.log(`Updated value '${statusField[i].field}'.`)
         }
 
         if (statusField[i].isFunction) {
