@@ -1,13 +1,9 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, PEERANHA_ADDRESS, POSTLIB_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
-const { testAccount, NFT, achievements } = require('./common-action');
+const { IPFS_API_URL, PEERANHA_ADDRESS, POSTLIB_ADDRESS, COMMUNITYLIB_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
+const { achievements, PATH } = require('./common-action');
 var fs = require('fs');
-var PNG = require('png-js');
-var FileReader = require('filereader');
-
-const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
 
 function getIpfsApi() {
   return create(IPFS_API_URL);
@@ -18,11 +14,11 @@ function getIpfsApiTheGraph() {
 }
 
 async function saveTextTheGraph(buf) {
-  const saveResult = await getIpfsApiTheGraph().add(buf);
+  await getIpfsApiTheGraph().add(buf);
 }
 
 async function saveFileTheGraph(buf) {
-  const saveResult = await getIpfsApiTheGraph().add(buf);
+  await getIpfsApiTheGraph().add(buf);
 }
 
 async function saveText(text) {
@@ -38,7 +34,7 @@ function getBytes32FromIpfsHash(ipfsListing) {
 
 async function saveFile(file) {
   const buf = Buffer.from(file);
-  const saveResult2 = await getIpfsApiTheGraph().add(buf);
+  await getIpfsApiTheGraph().add(buf);
   const saveResult = await getIpfsApi().add(buf);
 
   await saveFileTheGraph(buf);
@@ -53,13 +49,15 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
+  console.log("Begin initializing NFTs");
+  console.log(`Images path: ${PATH}`);
   const Peeranha = await ethers.getContractFactory("Peeranha", {
 		libraries: {
 			PostLib: POSTLIB_ADDRESS,
+      CommunityLib: COMMUNITYLIB_ADDRESS,
 		}
 	});
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
-  console.log("Begin initializing achievemnts NFTs");
   await initAchievement(peeranha);
 }
 
