@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, PEERANHA_ADDRESS, POSTLIB_ADDRESS, COMMUNITYLIB_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
+const { IPFS_API_URL, PEERANHA_ADDRESS, POSTLIB_ADDRESS, COMMUNITYLIB_ADDRESS, NFT_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
 const { achievements, PATH } = require('./common-action');
 var fs = require('fs');
 
@@ -51,6 +51,16 @@ async function getBytes32FromData(data) {
 async function main() {
   console.log("Begin initializing NFTs");
   console.log(`Images path: ${PATH}`);
+  
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const peeranhaNft = await PeeranhaNFT.attach(NFT_ADDRESS);
+  const tx = await peeranhaNft.transferOwnership(PEERANHA_ADDRESS);
+  console.log(`Send transaction to set owner for NFT contract - ${tx}.`);
+  
+  console.log(`Waiting for transaction ${tx.hash} to confirm.`)
+  await tx.wait();
+  console.log(`Transaction confirmed.`)
+
   const Peeranha = await ethers.getContractFactory("Peeranha", {
 		libraries: {
 			PostLib: POSTLIB_ADDRESS,
@@ -59,6 +69,8 @@ async function main() {
 	});
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
   await initAchievement(peeranha);
+
+  console.log('DONE!');
 }
 
 async function initAchievement(peeranha) {
@@ -71,7 +83,12 @@ async function initAchievement(peeranha) {
       image: imgHash,
       attributes: attributes,
     };
-    await peeranha.configureNewAchievement(maxCount, lowerBound, await getBytes32FromData(nft), type);
+    const tx = await peeranha.configureNewAchievement(maxCount, lowerBound, await getBytes32FromData(nft), type);
+    console.log(`Sent transaction ${tx.hash} to init NFT ${name}`);
+
+    console.log(`Waiting for confirmation`)
+    await tx.wait();
+    console.log(`Confirmed.`);
   }
 }
 
