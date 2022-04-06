@@ -4,3 +4,4 @@ artifacts
 secrets.json
 .openzeppelin
 env.json
+.idea

@@ -4,6 +4,8 @@
   "COMMUNITYLIB_ADDRESS": "0x2706B270661F372331ae50B5B894CA4977fD2f19",
   "TOKEN_ADDRESS": "0xdB4af34Fb249C8C8be3D3d8548e046d26C964a79",
   "NFT_ADDRESS": "0x1328033BDD948e63dA196218b1Db9B25eD6B732e",
+  "IPFS_API_URL_THE_GRAPH": "https://api.thegraph.com/ipfs/api/v0",
+  "IPFS_API_URL": "https://ipfs.testpeeranha.io:5001",
   "IPFS_API_HOST": "ipfs.testpeeranha.io",
   "IPFS_API_PORT": "5001",
   "IPFS_PROTOCOL": "https",
