@@ -9,8 +9,8 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint32 constant PERIOD_LENGTH = 604800;             // 7 day = 1 week //
-  uint256 constant START_PERIOD_TIME = 1632967903;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant PERIOD_LENGTH = 604800;             // 7 day = 1 week //
+  uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
     int32 rating;
@@ -18,12 +18,14 @@ library RewardLib {
     bool isActive;
   }
 
-  struct StatusRewardContainer {
-    mapping(address => mapping(uint16 => StatusReward)) statusReward;
+  struct WeekRewardContainer {
+    mapping(uint16 => WeekReward) weekReward; // period
   }
 
-  struct StatusReward {
-    bool isPaid;
+  struct WeekReward {
+    int64 rating;
+    // uint16 countActiveUsersInPeriod;
+    address[] activeUsersInPeriod;
   }
 
   struct UserPeriodRewards {

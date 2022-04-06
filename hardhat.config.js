@@ -2,8 +2,9 @@ require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
 require("hardhat-gas-reporter");
+require('hardhat-contract-sizer');
 
-const { infuraApiKey, adminPrivateKey } = require('./env.json');
+const { INFURA_API_KEY, ADMIN_PRIVATE_KEY } = require('./secrets.json');
 
 
 /**
@@ -20,11 +21,11 @@ module.exports = {
     }
   },
   networks: {
-    goerli: {
-      url: `https://goerli.infura.io/v3/${infuraApiKey}`,
-      accounts: [adminPrivateKey],
+    mumbai: {
+      url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
-      gasPrice: 8000000000
+      gasPrice: 10000000000
     }
   }
 };
