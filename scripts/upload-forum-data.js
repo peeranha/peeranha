@@ -5,6 +5,7 @@ const {
   IPFS_API_URL,
   PEERANHA_ADDRESS,
   POSTLIB_ADDRESS,
+  COMMUNITYLIB_ADDRESS,
   IPFS_API_URL_THE_GRAPH,
   infuraApiKey
 } = require("../env.json");
@@ -51,18 +52,19 @@ async function getBytes32FromData(data) {
 async function main() {
   const Peeranha = await ethers.getContractFactory("Peeranha", {
     libraries: {
-      PostLib: POSTLIB_ADDRESS
+      PostLib: POSTLIB_ADDRESS,
+      CommunityLib: COMMUNITYLIB_ADDRESS,
     }
   });
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
 
   const initCommunity = {
     description:
-      "Filecoin is an open-source cloud storage marketplace, protocol, and incentive layer",
+      "Polygon is a decentralised Ethereum scaling platform that enables developers to build scalable user-friendly dApps with low transaction fees without ever sacrificing on security.",
     language: "en",
-    name: "Filecoin",
+    name: "Polygon",
     tags: [],
-    website: "https://filecoin.io"
+    website: "https://polygon.technology/"
   };
 
   const CATEGORIES_FILE_NAME = "scripts/categories.json";
@@ -70,9 +72,8 @@ async function main() {
   const DISCUSSIONS_FILE_NAME = "scripts/discussions.json";
   const ANSWERS_FILE_NAME = "scripts/answers.json";
 
-  const provider = new ethers.providers.InfuraProvider(
-    "maticmum",
-    infuraApiKey
+  const provider = ethers.providers.getDefaultProvider(
+    'https://rpc-mumbai.maticvigil.com'
   );
 
   async function uploadForumData(community) {
@@ -95,9 +96,7 @@ async function main() {
         ...community,
         tags: categories.map(category => ({
           name: category.name,
-          description: category.description
-            ? category.description
-            : "TEXT TO BE FILLED OUT"
+          description: `Questions related to ${category.name}`
         }))
       };
 
@@ -151,13 +150,7 @@ async function main() {
             value: ethers.utils.parseEther(amountInEther)
           };
 
-          return await mainWallet
-            .sendTransaction(tx)
-            .then(txObj => {
-              console.log("txHash", txObj.hash);
-              return txObj;
-            })
-            .catch(err => console.log(err));
+          return await mainWallet.sendTransaction(tx);
         };
 
         const wallets = await ethers.getSigners();
@@ -171,7 +164,7 @@ async function main() {
         console.log("address:", newWallet.address);
         console.log("privateKey:", newWallet.privateKey);
 
-        const txObj = await topUpWallet(mainWallet, "0.01", newWallet.address);
+        const txObj = await runWithRetry(() => topUpWallet(mainWallet, "0.01", newWallet.address));
 
         return [newWallet, txObj];
       };
@@ -183,7 +176,7 @@ async function main() {
             .createUser(await getBytes32FromData(user));
         };
 
-        return await createUser(newWallet, user);
+        return await runWithRetry(() => createUser(newWallet, user));
       };
 
       const users = await readFile(USERS_FILE_NAME);
@@ -255,6 +248,7 @@ async function main() {
         return await peeranha
           .connect(wallet)
           .createPost(
+            wallet.address,
             communityId,
             await getBytes32FromData(post),
             PostTypeEnum.CommonPost,
@@ -299,12 +293,12 @@ async function main() {
         const tagNumber =
           tags.map(tag => tag.id).indexOf(tagIdFromDiscussion) + 1;
 
-        const txObj = await createPost(
+        const txObj = await runWithRetry(() => createPost(
           userWallet,
           newPost,
           tagNumber,
           communityId
-        );
+        ));
 
         postsAndRepliesIds.push({
           postId: newPostId,
@@ -328,27 +322,41 @@ async function main() {
     };
 
     const createReplies = async (walletsAndUsers, postsAndRepliesIds) => {
+      
       const createReply = async (userWallet, postId, reply) => {
+        console.log(`Reply from ${userWallet.address}`);
         return await peeranha
           .connect(userWallet)
-          .createReply(postId, 0, getBytes32FromData(reply), false);
+          .createReply(userWallet.address, postId, 0, getBytes32FromData(reply), false);
       };
 
       for (let i = 0; i < postsAndRepliesIds.length; i++) {
+        // if (i < 165) {
+        //   continue;
+        // }
+
         if (postsAndRepliesIds[i].repliesIds.length !== 0) {
           const answer = answers.find(
             answer => answer.id === postsAndRepliesIds[i].repliesIds[0]
           );
 
+          if(!answer) {
+            continue;
+          }
+
           const walletAndUser = walletsAndUsers.find(
             walletAndUser => walletAndUser.displayName === answer.author.name
           );
 
+          if(!walletAndUser) {
+            continue;
+          }
+
           const userWallet = walletAndUser.wallet;
 
-          await createReply(userWallet, postsAndRepliesIds[i].postId, {
+          await runWithRetry(() => createReply(userWallet, postsAndRepliesIds[i].postId, {
             content: answer.content
-          });
+          }));
 
           console.log(`reply ${i}`);
         }
@@ -358,11 +366,10 @@ async function main() {
     const discussions = await readFile(DISCUSSIONS_FILE_NAME);
 
     const answers = await readFile(ANSWERS_FILE_NAME);
-
+    
     await createCommunity(community);
 
     const newWalletsAndUsers = await createWalletsAndUsers();
-
     writeDataToFile(
       "scripts/wallets.json",
       newWalletsAndUsers.map(walletAndUser => ({
@@ -371,6 +378,13 @@ async function main() {
         userName: walletAndUser.displayName
       }))
     );
+
+    // const wallets = await readFile("scripts/wallets.json");
+
+    // const newWalletsAndUsers = wallets.map(item => ({
+    //   wallet: new ethers.Wallet(item.walletPrivateKey, provider),
+    //   displayName: item.userName
+    // }))
 
     const communityId = await peeranha.getCommunitiesCount();
 
@@ -387,7 +401,21 @@ async function main() {
   }
 
   await uploadForumData(initCommunity);
+}
 
+async function runWithRetry(func) {
+  let iteration = 0;
+  while(iteration < 3) {
+    try
+    {
+      return await func();
+    } catch(err) {
+      console.log(`Retrying after error: ${err}`);
+      await new Promise(r => setTimeout(r, 3000));
+      iteration++;
+    }
+  }
+  throw new Error('Failed after 3 retries');
 }
 
 main()
