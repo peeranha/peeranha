@@ -17,7 +17,8 @@
     "set-delegate-user:test": "cp env-test.json env.json & npx hardhat run --network mumbai scripts/set-delegate-user.js",
     "set-delegate-user:staging": "cp env-staging.json env.json & npx hardhat run --network mumbai scripts/set-delegate-user.js",
     "init-nfts:test": "cp env-test.json env.json & npx hardhat run --network mumbai scripts/init-nfts.js",
-    "init-nfts:staging": "cp env-staging.json env.json & npx hardhat run --network mumbai scripts/init-nfts.js"
+    "init-nfts:staging": "cp env-staging.json env.json & npx hardhat run --network mumbai scripts/init-nfts.js",
+    "upload-forum-data": "npx hardhat run --network mumbai scripts/upload-forum-data.js"
   },
   "keywords": [],
   "author": "",
