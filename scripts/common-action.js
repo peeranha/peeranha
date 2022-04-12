@@ -1,4 +1,6 @@
 const env = require("hardhat");
+const path = require('path');
+const PATH = '../image/';
 
 const testAccount = {
     displayName: "testAccount",
@@ -17,8 +19,6 @@ const NFT = {
 };
 
 const AchievementsType = { "Rating": 0 }
-const path = require('path');
-const PATH = '../image/';
 
 const achievements = (env) => {
   return [
@@ -79,4 +79,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, NFT, testAccount };
+module.exports = { achievements, NFT, testAccount, PATH };
