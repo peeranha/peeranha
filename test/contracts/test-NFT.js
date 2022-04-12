@@ -1,9 +1,13 @@
 const { expect } = require("chai");
-const { wait, getInt, getAddressContract } = require('./utils');
+const { wait, getInt, getAddressContract, createContract } = require('./utils');
 const bs58 = require('bs58');
 
 const AchievementsType = { "Rating":0 }
 
+///
+// to do
+// fix tests
+///
 
 describe("Test NFT", function () {
 	it("Add achievement", async function () {
@@ -320,20 +324,6 @@ describe("Test NFT", function () {
 		await expect(await getInt(tokenIdSecondUser2)).to.equal(1);
 	});
 
-
-	const createContract = async function (peeranhaNFTAddress) {
-		const PostLib = await ethers.getContractFactory("PostLib")
-		const postLib = await PostLib.deploy();
-		const Peeranha = await ethers.getContractFactory("Peeranha", {
-		libraries: {
-				PostLib: postLib.address,
-		}
-		});
-		const peeranha = await Peeranha.deploy();
-		await peeranha.deployed();
-        await peeranha.initialize(peeranhaNFTAddress);
-		return peeranha;
-	};
 
 	const createContractNFT = async function () {
 		const NFT = await ethers.getContractFactory("PeeranhaNFT");

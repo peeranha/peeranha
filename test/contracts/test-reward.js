@@ -1,16 +1,12 @@
 const { expect } = require("chai");
-const { wait, getInt, getBalance } = require('./utils');
+const {
+	wait, getBalance, createContract, createContractToken, getHashContainer, coefficientToken , PeriodTime, fraction, ratingChanges,
+} = require('./utils');
 
-const ratingChanges = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: 4},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: 1},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: 0},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: 0},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: 0},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: 0},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: 0},
-];
-const fraction = (10 ** 18);
+///
+// to do: active users
+// active in 2 community
+///
 
 describe("Test wallet", function () {
 
@@ -25,7 +21,7 @@ describe("Test wallet", function () {
 		
 				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[0], 1);
 				
-				await wait(periodLength);
+				await wait(PeriodTime);
 				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[1], 1);
 		
 				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
@@ -50,15 +46,14 @@ describe("Test wallet", function () {
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, -4, 1);
 			// console.log(userRating.rewardPeriods[0])
-			await wait(periodLength);
+			await wait(PeriodTime);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
 			
-			await wait(periodLength);
+			await wait(PeriodTime);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 			console.log(rewardPeriods)
-			
 
 			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
 			console.log(userRewardPerid)
@@ -82,11 +77,11 @@ describe("Test wallet", function () {
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
 			// console.log(userRating.rewardPeriods[0])
-			await wait(periodLength * 2);
+			await wait(PeriodTime * 2);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
 			
 			
-			await wait(periodLength * 2);
+			await wait(PeriodTime * 2);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 2, 1);
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
@@ -119,10 +114,10 @@ describe("Test wallet", function () {
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 			
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
 
@@ -131,7 +126,7 @@ describe("Test wallet", function () {
 			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await token.claimReward(rewardPeriods[1]);
+			await token.claimReward(rewardPeriods[1]);		// 0 ?
 			const balance = await getBalance(token, peeranha.deployTransaction.from);
 
 			expect(balance).to.equal(5 * coefficientToken * fraction);
@@ -148,7 +143,7 @@ describe("Test wallet", function () {
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
 
@@ -171,7 +166,7 @@ describe("Test wallet", function () {
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
 
-			await wait(periodLength);
+			await wait(PeriodTime);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
@@ -191,7 +186,7 @@ describe("Test wallet", function () {
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
@@ -211,11 +206,11 @@ describe("Test wallet", function () {
 		// 	await peeranha.createUser(hashContainer[1]);
 
 		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-		// 	await wait(periodLength);
+		// 	await wait(PeriodTime);
 
 		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
 			
-		// 	await wait(periodLength);
+		// 	await wait(PeriodTime);
 		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
 
 		// 	const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
@@ -245,37 +240,4 @@ describe("Test wallet", function () {
 		// 	await expect(token.claimReward(rewardPeriods[1])).to.be.revertedWith('You already picked up this reward.');
 		// });
 	});
-
-	const createContract = async function () {
-		const PostLib = await ethers.getContractFactory("PostLib")
-		const postLib = await PostLib.deploy();
-		const Peeranha = await ethers.getContractFactory("Peeranha", {
-		libraries: {
-				PostLib: postLib.address,
-		}
-		});
-		const peeranha = await Peeranha.deploy();
-		await peeranha.deployed();
-        await peeranha.__Peeranha_init();
-		return peeranha;
-	};
-
-	const createContractToken = async function (peeranhaAddress) {
-		const Token = await ethers.getContractFactory("PeeranhaToken");
-		const token = await Token.deploy();
-		await token.deployed();
-        await token.initialize("token", "ecs", peeranhaAddress);
-		return token;
-	};
-
-	const getHashContainer = () => {
-		return [
-			"0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-			"0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-			"0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-		];
-	};
-
-	const coefficientToken = 10;
-	const periodLength = 3000;
 });

@@ -1,7 +1,12 @@
 const { expect } = require("chai");
-const crypto = require("crypto");
+const { createContract, getHashContainer, getHashesContainer, createTags, } = require('./utils');
+
+///
+// deligate
+///
 
 describe("Test users", function() {
+
   it("Test user creating", async function() {
     const peeranha = await createContract();
     const signers = await ethers.getSigners();
@@ -17,8 +22,8 @@ describe("Test users", function() {
 
     await Promise.all(hashContainer.map(async (hash, index) => {
       const user = await peeranha.getUserByIndex(index);
-      expect(user.rating).to.equal(StartUserRating);
-      expect(user.payOutRating).to.equal(StartUserRating);
+      // expect(user.rating).to.equal(StartUserRating);
+      // expect(user.payOutRating).to.equal(StartUserRating);
       return expect(user.ipfsDoc.hash).to.equal(hash);
     }))
   });
@@ -32,7 +37,7 @@ describe("Test users", function() {
     expect(await peeranha.getUsersCount()).to.equal(1);
 
     await expect(peeranha.createUser(hashContainer[1]))
-    .to.be.revertedWith('User exists');
+    .to.be.revertedWith('user_exists');
   });
 
   it("Test user editing", async function() {
@@ -42,7 +47,7 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     const user = await peeranha.getUserByIndex(0);
     expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
-    await peeranha.updateUser(hashContainer[1]);
+    await peeranha.updateUser(peeranha.deployTransaction.from, hashContainer[1]);
     const changedUser = await peeranha.getUserByIndex(0);
     expect(changedUser.ipfsDoc.hash).to.equal(hashContainer[1]);
 
@@ -53,8 +58,8 @@ describe("Test users", function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
       
-    await expect(peeranha.updateUser(hashContainer[0]))
-    .to.be.revertedWith('User does not exist');
+    await expect(peeranha.updateUser(peeranha.deployTransaction.from, hashContainer[0]))
+    .to.be.revertedWith('user_not_found');
     expect(await peeranha.getUsersCount()).to.equal(0);
 
     await peeranha.createUser(hashContainer[0]);
@@ -63,16 +68,16 @@ describe("Test users", function() {
     expect(await peeranha.getUsersCount()).to.equal(1);
   })
 
-  it("Test user editing, negative rating", async function() {
+  xit("Test user editing, negative rating", async function() {
     const peeranha = await createContract();
     const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
     
     await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-		await peeranha.connect(signers[1]).addUserRating(signers[1].address, -11);
+		await peeranha.connect(signers[1]).addUserRating(signers[1].address, -11, 1);
     const user = await peeranha.getUserByIndex(0);
     await expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
-    await expect(peeranha.connect(signers[1]).updateUser(hashContainer[1])).to.be.revertedWith('Your rating is too small for edit profile. You need 0 ratings');
+    await expect(peeranha.connect(signers[1]).updateUser(signers[1].address, hashContainer[1])).to.be.revertedWith('low_rating_edit_profile');
   })
 
   it("Test user getter", async function() {
@@ -89,22 +94,20 @@ describe("Test users", function() {
     const user1 = await peeranha.getUserByIndex(0);
     expect(user1).to.have.to.have.ownPropertyDescriptor('ipfsDoc');
     expect(user1.ipfsDoc.hash).to.equal(hashContainer[0]);
-    expect(user1).to.have.ownPropertyDescriptor('rating');
-    expect(user1).to.have.ownPropertyDescriptor('payOutRating');
     expect(user1).to.have.ownPropertyDescriptor('creationTime');
-    expect(user1).to.have.ownPropertyDescriptor('roles');
+    expect(user1).to.have.ownPropertyDescriptor('energy');
+    expect(user1).to.have.ownPropertyDescriptor('lastUpdatePeriod');
     expect(user1).to.have.ownPropertyDescriptor('followedCommunities');
-    expect(user1).to.have.ownPropertyDescriptor('rewardPeriods');
+    expect(user1).to.have.ownPropertyDescriptor('roles');
 
     const user2 = await peeranha.getUserByAddress(signers[1].address);
     expect(user2).to.have.ownPropertyDescriptor('ipfsDoc');
     expect(user2.ipfsDoc.hash).to.equal(hashContainer[1]);
-    expect(user2).to.have.ownPropertyDescriptor('rating');
-    expect(user2).to.have.ownPropertyDescriptor('payOutRating');
     expect(user2).to.have.ownPropertyDescriptor('creationTime');
-    expect(user2).to.have.ownPropertyDescriptor('roles');
+    expect(user2).to.have.ownPropertyDescriptor('energy');
+    expect(user2).to.have.ownPropertyDescriptor('lastUpdatePeriod');
     expect(user2).to.have.ownPropertyDescriptor('followedCommunities');
-    expect(user2).to.have.ownPropertyDescriptor('rewardPeriods');
+    expect(user2).to.have.ownPropertyDescriptor('roles');
   })
 
   it("Follow community", async function() {
@@ -114,7 +117,7 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
     
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(1);   //  expect(user.followCommunity).to.equal([1]); ?
@@ -128,7 +131,7 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('User does not exist');
+    await expect(peeranha.connect(signers[1]).followCommunity(signers[1].address, 1)).to.be.revertedWith('user_not_found');
   })
 
   it("Double follow community", async function() {
@@ -138,8 +141,8 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await peeranha.followCommunity(1);
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('You already follow the community');
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await expect(peeranha.followCommunity(peeranha.deployTransaction.from, 1)).to.be.revertedWith('already_followed');
   })
 
   it("Follow on not exist community", async function() {
@@ -147,7 +150,7 @@ describe("Test users", function() {
     const hashContainer = getHashContainer();
     await peeranha.createUser(hashContainer[0]);
 
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Community does not exist');
+    await expect(peeranha.followCommunity(peeranha.deployTransaction.from, 1)).to.be.revertedWith('Community does not exist');
 
   })
 
@@ -159,7 +162,7 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.freezeCommunity(1);
     
-    await expect(peeranha.followCommunity(1)).to.be.revertedWith('Community is frozen');
+    await expect(peeranha.followCommunity(peeranha.deployTransaction.from, 1)).to.be.revertedWith('Community is frozen');
   })
 
   it("Follow on deferent communities", async function() {
@@ -170,8 +173,8 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     
-    await peeranha.followCommunity(1);
-    await peeranha.followCommunity(2);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 2);
 
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(1);
@@ -186,10 +189,10 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     
-    await peeranha.followCommunity(1);
-    await peeranha.followCommunity(2);
-    await peeranha.unfollowCommunity(1);
-    await expect(peeranha.followCommunity(2)).to.be.revertedWith('You already follow the community');
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 2);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
+    await expect(peeranha.followCommunity(peeranha.deployTransaction.from, 2)).to.be.revertedWith('already_followed');
   })
 
   it("Follow on two communities -> unfollow from first -> follow on third community", async function() {
@@ -201,14 +204,14 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
     
-    await peeranha.followCommunity(1);
-    await peeranha.followCommunity(2);
-    await peeranha.unfollowCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 2);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
     let user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(0);
     expect(user.followedCommunities[1]).to.equal(2);
 
-    await peeranha.followCommunity(3);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 3);
     user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(3);
     expect(user.followedCommunities[1]).to.equal(2);
@@ -222,10 +225,10 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
     
-    await expect(peeranha.connect(signers[1]).followCommunity(1))
-    .to.be.revertedWith('User does not exist');
+    await expect(peeranha.connect(signers[1]).followCommunity(signers[1].address, 1))
+    .to.be.revertedWith('user_not_found');
   })
 
   it("UnFollow community", async function() {
@@ -237,14 +240,14 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 
-    await peeranha.followCommunity(1);
-    await peeranha.unfollowCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
 
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(0);
   })
 
-  it("UnFollow community", async function() {
+  it("UnFollow community by non-existed user", async function() {
     const peeranha = await createContract();
 		const signers = await ethers.getSigners();
     const hashContainer = getHashContainer();
@@ -253,8 +256,8 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 
-    await expect(peeranha.connect(signers[1]).followCommunity(1)).to.be.revertedWith('User does not exist');
-    await expect(peeranha.connect(signers[1]).unfollowCommunity(1)).to.be.revertedWith('User does not exist');
+    await expect(peeranha.connect(signers[1]).followCommunity(signers[1].address, 1)).to.be.revertedWith('user_not_found');
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(signers[1].address, 1)).to.be.revertedWith('user_not_found');
   })
 
   it("UnFollow diferent community", async function() {
@@ -266,10 +269,10 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 
-    await peeranha.followCommunity(1);
-    await peeranha.followCommunity(2);
-    await peeranha.unfollowCommunity(1);
-    await peeranha.unfollowCommunity(2);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 2);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 2);
 
     const user = await peeranha.getUserByIndex(0);
     expect(user.followedCommunities[0]).to.equal(0);
@@ -284,9 +287,9 @@ describe("Test users", function() {
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
 
-    await peeranha.followCommunity(1);
-    await peeranha.unfollowCommunity(1);
-    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
+    await expect(peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1)).to.be.revertedWith('comm_not_followed');
   })
 
   it("Unfollow on not exist community", async function() {
@@ -294,7 +297,7 @@ describe("Test users", function() {
     const hashContainer = getHashContainer();
     await peeranha.createUser(hashContainer[0]);
 
-    await expect(peeranha.unfollowCommunity(1)).to.be.revertedWith('You are not following the community');
+    await expect(peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1)).to.be.revertedWith('comm_not_followed');
 
   })
 
@@ -304,10 +307,10 @@ describe("Test users", function() {
     const ipfsHashes = getHashesContainer(2);
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
-    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
     await peeranha.freezeCommunity(1);
     
-    await peeranha.unfollowCommunity(1)
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1)
   })
 
   it("UnFollow community by non-existed user", async function() {
@@ -318,53 +321,11 @@ describe("Test users", function() {
     await peeranha.createUser(hashContainer[0]);
     await peeranha.createCommunity(ipfsHashes[0], createTags(5));
 
-    await peeranha.followCommunity(1);
+    await peeranha.followCommunity(peeranha.deployTransaction.from, 1);
     
-    await expect(peeranha.connect(signers[1]).unfollowCommunity(1))
-    .to.be.revertedWith('User does not exist');
+    await expect(peeranha.connect(signers[1]).unfollowCommunity(signers[1].address, 1))
+    .to.be.revertedWith('user_not_found');
 
-    await peeranha.unfollowCommunity(1);
+    await peeranha.unfollowCommunity(peeranha.deployTransaction.from, 1);
   })
-
-  const createContract = async function(){
-    const PostLib = await ethers.getContractFactory("PostLib")
-    const postLib = await PostLib.deploy();
-    const Peeranha = await ethers.getContractFactory("Peeranha", {
-      libraries: {
-        PostLib: postLib.address,
-      }
-    });
-    const peeranha = await Peeranha.deploy();
-    await peeranha.deployed();
-    await peeranha.__Peeranha_init();
-    return peeranha;
-  }
-
-  const getHashContainer = () => {
-    return [
-      "0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-      "0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-      "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-    ];
-  }
-
-  const getUsers = (hashes) => {
-    const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-    const creationTime = 0;
-    const rating = 0;
-    return hashes.map((hash) => {
-      return [hash, ipfsHash2, rating, creationTime, []];
-    })
-  }
-
-  const getHashesContainer = (size) =>
-        Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
-  
-  const createTags = (countOfTags) =>
-  getHashesContainer(countOfTags).map((hash) => {
-    const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-      return {"ipfsDoc": {hash, hash2}}
-  });
-
-  const StartUserRating = 10;
 });

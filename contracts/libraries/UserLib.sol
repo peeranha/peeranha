@@ -317,7 +317,7 @@ library UserLib {
   /// @param delegateUser Delegate user address
   /// @param userAddress Address of the user to check
   function isDelegateUser(UserDelegationCollection storage delegations, address delegateUser, address userAddress) internal view returns (bool) {
-    return delegateUser == delegations.delegateUser && delegations.userDelegations[userAddress] ==1;
+    return delegateUser == delegations.delegateUser && delegations.userDelegations[userAddress] == 1;
   }
 
   function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
@@ -453,19 +453,19 @@ library UserLib {
       require(false, "not_allowed_change_type");
 
     } else if (action == Action.upVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");
+      require(actionCaller != dataUser, "not_allowed_vote_post");   // в функции есть You can not vote for own post
       ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "low rating to upvote (35 min)";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
-      require(actionCaller != dataUser, "not_allowed_vote_reply");
+      require(actionCaller != dataUser, "not_allowed_vote_reply"); // в функции есть You can not vote for own reply
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.upVoteComment) {
-      require(actionCaller != dataUser, "not_allowed_vote_comment");
+      require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
       ratingAllowed = UPVOTE_COMMENT_ALLOWED;
       message = "low_rating_upvote_comment";
       energy = ENERGY_UPVOTE_COMMENT;
@@ -498,9 +498,7 @@ library UserLib {
       message = "low_rating_mark_best";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
-    } else if (action == Action.updateProfile) {
-      ratingAllowed = UPDATE_PROFILE_ALLOWED;
-      message = "low_rating_edit_profile";
+    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
       energy = ENERGY_UPDATE_PROFILE;
 
     } else if (action == Action.followCommunity) {
@@ -526,12 +524,12 @@ library UserLib {
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy(userRating); 
+      userEnergy = UserLib.getStatusEnergy(userRating);
+      user.lastUpdatePeriod = currentPeriod;
     }
 
     require(userEnergy >= energy, "Not enough energy!");
     user.energy = userEnergy - energy;
-    user.lastUpdatePeriod = currentPeriod;
   }
 
   function hasModeratorRole(

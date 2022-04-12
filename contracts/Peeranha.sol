@@ -99,7 +99,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an community.  
      */
     function followCommunity(address userAddress, uint32 communityId) external override 
-    onlyExistingAndNotFrozenCommunity(communityId) {
+    onlyExistingAndNotFrozenCommunity(communityId) {  // isDelegateUserAndExisitingUser(userAddress); check deligate?
         UserLib.followCommunity(userContext, userAddress, communityId);
     }
 
@@ -110,7 +110,7 @@ contract Peeranha is IPeeranha, Initializable {
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(address userAddress, uint32 communityId) external override {
+    function unfollowCommunity(address userAddress, uint32 communityId) external override { // isDelegateUserAndExisitingUser(userAddress); check deligate?
         UserLib.unfollowCommunity(userContext.users, userAddress, communityId);
     }
 
@@ -176,7 +176,7 @@ contract Peeranha is IPeeranha, Initializable {
      */
     function giveAdminPermission(address user) external
     onlyAdmin() {
-        onlyExisitingUser(user);
+        isDelegateUserAndExisitingUser(user);
         UserLib.grantRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, user);
     }
 
@@ -192,7 +192,7 @@ contract Peeranha is IPeeranha, Initializable {
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address user) external 
     onlyAdmin() {
-        onlyExisitingUser(user);
+        isDelegateUserAndExisitingUser(user);
         UserLib.revokeRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, user);
     }
     
@@ -217,7 +217,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be a new community.
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external onlyAdmin() {
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
         UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), msg.sender);
         UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), msg.sender);
@@ -234,7 +234,7 @@ contract Peeranha is IPeeranha, Initializable {
     function updateCommunity(uint32 communityId, bytes32 ipfsHash) external 
     onlyExistingAndNotFrozenCommunity(communityId)
     onlyAdminOrCommunityModerator(communityId) {
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -249,7 +249,7 @@ contract Peeranha is IPeeranha, Initializable {
     function freezeCommunity(uint32 communityId) external 
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyAdminOrCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         communities.freeze(communityId);
     }
 
@@ -262,7 +262,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Sender must be community moderator.
      */
     function unfreezeCommunity(uint32 communityId) external onlyAdminOrCommunityAdmin(communityId) {
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         communities.unfreeze(communityId);
     }
 
@@ -344,7 +344,7 @@ contract Peeranha is IPeeranha, Initializable {
     function createTag(uint32 communityId, bytes32 ipfsHash) external 
     onlyExistingAndNotFrozenCommunity(communityId) 
     onlyAdminOrCommunityModerator(communityId) { // community admin || global moderator
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         communities.createTag(communityId, ipfsHash);
     }
 
@@ -360,7 +360,7 @@ contract Peeranha is IPeeranha, Initializable {
     function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external 
     onlyExistingTag(tagId, communityId) 
     onlyAdminOrCommunityModerator(communityId) {
-        onlyExisitingUser(msg.sender);
+        isDelegateUserAndExisitingUser(msg.sender);
         communities.updateTag(tagId, communityId, ipfsHash);
     }
 
@@ -431,7 +431,7 @@ contract Peeranha is IPeeranha, Initializable {
     function createPost(address userAddress, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
     onlyExistingAndNotFrozenCommunity(communityId)
     checkTags(communityId, tags) override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.createPost(userContext, userAddress, communityId, ipfsHash, postType, tags);
     }
 
@@ -447,7 +447,7 @@ contract Peeranha is IPeeranha, Initializable {
     */
     function editPost(address userAddress, uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external
     checkTagsByPostId(postId, tags) override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.editPost(userContext, userAddress, postId, ipfsHash, tags);
     }
 
@@ -459,7 +459,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post.
     */
     function deletePost(address userAddress, uint256 postId) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.deletePost(userContext, userAddress, postId);
     }
 
@@ -472,7 +472,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.createReply(userContext, userAddress, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
@@ -485,7 +485,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editReply(address userAddress, uint256 postId, uint16 replyId, bytes32 ipfsHash) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.editReply(userContext, userAddress, postId, replyId, ipfsHash);
     }
 
@@ -497,7 +497,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a reply.
     */
     function deleteReply(address userAddress, uint256 postId, uint16 replyId) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.deleteReply(userContext, userAddress, postId, replyId);
     }
 
@@ -510,7 +510,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post or a reply.
     */
     function createComment(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.createComment(userContext, userAddress, postId, parentReplyId, ipfsHash);
     }
 
@@ -523,7 +523,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be new info about reply.
     */
     function editComment(address userAddress, uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.editComment(userContext, userAddress, postId, parentReplyId, commentId, ipfsHash);
     }
 
@@ -535,7 +535,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a comment.
     */
     function deleteComment(address userAddress, uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.deleteComment(userContext, userAddress, postId, parentReplyId, commentId);
     }
 
@@ -548,7 +548,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - the user must have right for change status oficial answer.
     */ 
     function changeStatusOfficialReply(address userAddress, uint256 postId, uint16 replyId) external override {
-        onlyExisitingUser(userAddress);           
+        isDelegateUserAndExisitingUser(userAddress);           
         posts.changeStatusOfficialReply(userContext.roles, userAddress, postId, replyId);
     }
 
@@ -561,7 +561,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a role ?
     */ 
     function changeStatusBestReply(address userAddress, uint256 postId, uint16 replyId) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.changeStatusBestReply(userContext, userAddress, postId, replyId);
     }
 
@@ -573,12 +573,12 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post/reply/comment.
     */ 
     function voteItem(address userAddress, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.voteForumItem(userContext, userAddress, postId, replyId, commentId, isUpvote);
     }
 
     function changePostType(address userAddress, uint256 postId, PostLib.PostType postType) external override {
-        onlyExisitingUser(userAddress);
+        isDelegateUserAndExisitingUser(userAddress);
         posts.changePostType(userContext, userAddress, postId, postType);
     }
 
@@ -675,11 +675,15 @@ contract Peeranha is IPeeranha, Initializable {
         userContext.users.getUserByAddress(userAddr).energy = energy;
     }
 
-    function onlyExisitingUser(address user) private {
+    function isDelegateUserAndExisitingUser(address user) private {
         if (user != msg.sender) {
-            require(UserLib.isDelegateUser(userContext.userDelegationCollection, msg.sender, user), "Not ");
+            require(UserLib.isDelegateUser(userContext.userDelegationCollection, msg.sender, user), "erro_deligate");
         }
 
+        onlyExisitingUser(user);
+    }
+
+    function onlyExisitingUser(address user) private {
         require(UserLib.isExists(userContext.users, user),
         "Peeranha: must be an existing user");
     }

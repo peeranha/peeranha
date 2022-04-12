@@ -1,6 +1,6 @@
 const { expect } = require('chai');
-const crypto = require("crypto");
- 
+const { getHashContainer, getHashesContainer, createTags } = require('./utils');
+
 let Peeranha;
 let peeranha;
  
@@ -35,21 +35,4 @@ describe('Peeranha (proxy)', function () {
     expect(await newPeeranha.getCommunitiesCount()).to.be.equal(1);
     expect((await newPeeranha.getCommunity(1)).ipfsDoc.hash).to.be.equal(ipfsHashes[0]);
   });
-
-  const getHashesContainer = (size) =>
-        Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
-
-  const createTags = (countOfTags) =>
-      getHashesContainer(countOfTags).map((hash) => {
-          const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-          return {"ipfsDoc": {hash, hash2}}
-      });
-    
-  const getHashContainer = () => {
-      return [
-          "0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-          "0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-          "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-      ];
-  };
 });
