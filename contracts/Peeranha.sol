@@ -667,13 +667,13 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
         PostLib.addUserRating(userContext, userAddr, rating, communityId);
-    }*/
+    }
 
-    /*function setEnergy(address userAddr, uint16 energy) external {
+    function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     function isDelegateUserAndExisitingUser(address user) private {
         if (user != msg.sender) {

@@ -8,13 +8,17 @@ import "./interfaces/IPeeranha.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20CappedUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
 
-contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable {
+contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20BurnableUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
-  uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
-  uint256 public constant REWARD_WEEK = 1000000;
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
+  // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
+  uint256 public constant REWARD_WEEK = 100;
+  ///
+  // 100 000  - 100 token * 1000 user
+  // 40 000 000 - компания
+  ///
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
 
   mapping(uint16 => uint256) poolTokens;
 
@@ -24,14 +28,14 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   event GetReward(address user, uint16 period);
 
   function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
-    __Token_init(name, symbol, TOTAL_SUPPLY);
+    __Token_init(name, symbol);
     peeranha = IPeeranha(peeranhaNFTContractAddress);
   }
 
-  function __Token_init(string memory name, string memory symbol, uint256 cap) internal initializer {
+  function __Token_init(string memory name, string memory symbol) internal initializer {
     __ERC20_init_unchained(name, symbol);
     __Pausable_init_unchained();
-    __ERC20Capped_init_unchained(cap);
+    __ERC20Burnable_init_unchained();
     __ERC20Pausable_init_unchained();
     __Token_init_unchained();
   }
@@ -39,7 +43,7 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
   function __Token_init_unchained() internal initializer {
   }
 
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable, ERC20CappedUpgradeable) {
+  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable/*, ERC20CappedUpgradeable*/) {
     super._beforeTokenTransfer(from, to, amount);
   }
 
@@ -65,19 +69,21 @@ contract PeeranhaToken is ERC20Upgradeable, ERC20PausableUpgradeable, ERC20Cappe
     RewardLib.WeekReward memory weekReward = peeranha.getWeekRewardContainer(period);
     
     uint256 poolToken = getPool(weekReward, period);
-    if (poolTokens[period] != poolToken) poolTokens[period] = poolToken;
+    if (poolTokens[period] == 0 && poolToken != poolTokens[period]) {
+      poolTokens[period] = poolToken;
+    }
     uint256 userReward = getUserReward(weekReward, user, period, poolToken);
 
     require(userReward != 0, "No reward for you in this period");
 
     emit GetReward(user, period);
-    _mint(user, userReward * FRACTION);
+    _mint(user, userReward);
   }
 
   function getPool(RewardLib.WeekReward memory weekReward, uint16 period) private view returns(uint256) {
     uint256 poolToken = poolTokens[period];
     if (poolToken == 0) {
-      poolToken = reduceRewards(REWARD_WEEK, period);
+      poolToken = reduceRewards(REWARD_WEEK * FRACTION, period);
       if (weekReward.activeUsersInPeriod.length <= ACTIVE_USERS_IN_PERIOD) {
         uint256 userRewardWeek = weekReward.activeUsersInPeriod.length * 1000 * FRACTION;
         poolToken = CommonLib.minUint256(poolToken, userRewardWeek);

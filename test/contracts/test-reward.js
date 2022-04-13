@@ -113,7 +113,7 @@ describe("Test wallet", function () {
 
 			await peeranha.createUser(hashContainer[1]);
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 100000, 1);
 			await wait(PeriodTime);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
@@ -126,7 +126,7 @@ describe("Test wallet", function () {
 			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await token.claimReward(rewardPeriods[1]);		// 0 ?
+			await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);		// 0 ?
 			const balance = await getBalance(token, peeranha.deployTransaction.from);
 
 			expect(balance).to.equal(5 * coefficientToken * fraction);
@@ -149,7 +149,7 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[0]))
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0]))
 			.to.be.revertedWith('No reward for you in this period');
 			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
 		});
@@ -170,7 +170,7 @@ describe("Test wallet", function () {
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[1]), 'Transaction was not reverted')
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]), 'Transaction was not reverted')
 			.to.be.revertedWith("This period isn't ended yet!");
 			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
 		}).retries(2);
@@ -190,7 +190,7 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[0] - 1))
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0] - 1))
 			.to.be.revertedWith('No reward for you in this period');
 			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
 		});
@@ -227,7 +227,7 @@ describe("Test wallet", function () {
 		// 	console.log(userRewardPerid2);
 		// 	console.log(rewardPeriods[1])
 
-		// 	await token.claimReward(rewardPeriods[1]);
+		// 	await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
 
 		// 	console.log("|||||||||||||||||||||||||||||||")
 		// 	const shiftReward = await token.getShiftRewards(rewardPeriods[0]);
@@ -237,7 +237,7 @@ describe("Test wallet", function () {
 		// 	const balance = await getBalance(token, peeranha.deployTransaction.from);
 		// 	console.log(balance);
 
-		// 	await expect(token.claimReward(rewardPeriods[1])).to.be.revertedWith('You already picked up this reward.');
+		// 	await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1])).to.be.revertedWith('You already picked up this reward.');
 		// });
 	});
 });
