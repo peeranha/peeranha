@@ -12,7 +12,7 @@ async function wait(ms) {
 }
 
 async function getBalance(contract, user) {
-    const balance = await contract.balanceOf(user);
+    const balance = await contract.stakeBalanceOf(user);
 	return await getInt(balance);
 }
 
@@ -50,6 +50,38 @@ const createContractToken = async function (peeranhaAddress) {
     await token.deployed();
     await token.initialize("token", "ecs", peeranhaAddress);
     return token;
+};
+
+const createPeerenhaAndTokenContract = async function () {
+    const PostLib = await ethers.getContractFactory("PostLib")
+    const CommunityLib = await ethers.getContractFactory("CommunityLib")
+    const postLib = await PostLib.deploy();
+    const communityLib = await CommunityLib.deploy();
+    const Peeranha = await ethers.getContractFactory("Peeranha", {
+    libraries: {
+            PostLib: postLib.address,
+            CommunityLib: communityLib.address,
+    }
+    });
+    const peeranha = await Peeranha.deploy();
+    await peeranha.deployed();
+    await peeranha.__Peeranha_init();
+
+    const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+        return value;
+    });
+
+    const Token = await ethers.getContractFactory("PeeranhaToken");
+    const token = await Token.deploy();
+    await token.deployed();
+    await token.initialize("token", "ecs", peeranhaContractAddress);
+
+    const tokenContractAddress = await token.resolvedAddress.then((value) => {
+        return value;
+    });
+    await peeranha.setTokenContract(tokenContractAddress);
+
+    return { peeranha: peeranha, token: token, accountDeployed: peeranha.deployTransaction.from};
 };
 
 const getIdsContainer = (countOfCommunities) =>
@@ -193,7 +225,7 @@ const ModeratorDeleteComment = -1;
 
 module.exports = { 
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers,
-    getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating,
+    getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction,
     ratingChanges, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,

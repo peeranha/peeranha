@@ -8,6 +8,9 @@ import "./CommonLib.sol";
 import "./RewardLib.sol";
 import "./AchievementLib.sol";
 import "./AchievementCommonLib.sol";
+import "./AchievementCommonLib.sol";
+import "../interfaces/IPeeranhaToken.sol";
+
 
 /// @title Users
 /// @notice Provides information about registered user
@@ -97,6 +100,7 @@ library UserLib {
     UserLib.Roles roles;
     UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
+    IPeeranhaToken peeranhaToken;
   }
   
   struct UserCollection {
@@ -395,7 +399,7 @@ library UserLib {
     userPeriodRewards.periodRating[communityId].ratingToReward += ratingToRewardChange;
     userRating.rating = newRating;
     userRating.payOutRating += ratingToRewardChange;
-    weekReward.rating += ratingToRewardChange;
+    weekReward.tokens += userContext.peeranhaToken.getBoost(userAddr, currentPeriod, ratingToRewardChange);
 
     if (rating > 0) {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(newRating));

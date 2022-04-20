@@ -16,6 +16,25 @@ library TokenLib {
     bool isPaid;
   }
 
+  struct BoostContainer {
+    mapping(uint16 => CountBoost) userBoostCount;               // period
+    uint16[] updateBoostInPeriod;
+  }
+
+  struct CountBoost {
+    uint256 allStake;
+    uint64 countStaking;    //name?
+  }
+
+  struct WeekUserBoost {
+    mapping(address => UserBoost) weekUserBoost;
+  }
+
+  struct UserBoost {
+    mapping(uint16 => uint256) stakedTokens;                    // period
+    uint16[] updateUserBoostInPeriod;
+  }
+
   /// @notice Get tokens' coefficient to 1 rating
   function getRewardCoefficient() internal view returns (uint256) {
     return COEFFICIENT_TOKEN;

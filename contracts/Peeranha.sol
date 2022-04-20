@@ -50,6 +50,10 @@ contract Peeranha is IPeeranha, Initializable {
         UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    function setTokenContract(address pperanhaTokenAddress) public onlyAdmin() {
+       userContext.peeranhaToken = IPeeranhaToken(pperanhaTokenAddress); 
+    }
+
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }

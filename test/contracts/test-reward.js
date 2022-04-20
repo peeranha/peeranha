@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const {
-	wait, getBalance, createContract, createContractToken, getHashContainer, coefficientToken , PeriodTime, fraction, ratingChanges,
+	wait, getBalance, createPeerenhaAndTokenContract, getHashContainer, coefficientToken , PeriodTime, fraction, ratingChanges,
 } = require('./utils');
 
 ///
@@ -14,7 +14,7 @@ describe("Test wallet", function () {
 
 		for (const {actions, ratings, result} of ratingChanges) {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period`, async function () {
-				const peeranha = await createContract();
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 		
 				await peeranha.createUser(hashContainer[1]);
@@ -39,7 +39,7 @@ describe("Test wallet", function () {
 		}
 
 		it("Test subtract rating in 1st and add rating in 2nd and 3rd periods", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
@@ -70,7 +70,7 @@ describe("Test wallet", function () {
 		});
 
 		it("Test add rating in 1st and 3rd period", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
@@ -104,16 +104,15 @@ describe("Test wallet", function () {
 	describe('Get reward', function(){
 
 		it("Test get reward", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
 				return value;
 			});
-			const token = await createContractToken(peeranhaContractAddress);
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 100000, 1);
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
@@ -133,11 +132,10 @@ describe("Test wallet", function () {
 		});
 
 		it("Test get reward for 1st period", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
 				return value;
 			});
-			const token = await createContractToken(peeranhaContractAddress);
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
@@ -155,11 +153,10 @@ describe("Test wallet", function () {
 		});
 
 		it("Test get reward for the ongoing period", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
 				return value;
 			});
-			const token = await createContractToken(peeranhaContractAddress);
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
@@ -176,11 +173,10 @@ describe("Test wallet", function () {
 		}).retries(2);
 
 		it("Test get reward for undefined period", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
 				return value;
 			});
-			const token = await createContractToken(peeranhaContractAddress);
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
@@ -196,7 +192,7 @@ describe("Test wallet", function () {
 		});
 
 		// it("Test twice pick up 1 reward", async function () {
-		// 	const peeranha = await createContract();
+		// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 		// 	const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
 		// 		return value;
 		// 	});
