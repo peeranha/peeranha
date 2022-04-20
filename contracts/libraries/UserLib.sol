@@ -467,7 +467,7 @@ library UserLib {
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low rating to upvote (35 min)";
+      message = "low rating to upvote";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
@@ -541,7 +541,7 @@ library UserLib {
       userEnergy = UserLib.getStatusEnergy(userRating); 
     }
 
-    require(userEnergy >= energy, "Not enough energy!");
+    require(userEnergy >= energy, "low_energy");
     user.energy = userEnergy - energy;
     user.lastUpdatePeriod = currentPeriod;
   }
