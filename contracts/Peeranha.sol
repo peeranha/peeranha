@@ -88,9 +88,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - Must be an existing user.  
      */
     function updateUser(address userAddress, bytes32 ipfsHash) external override {
-        if (!UserLib.isExists(userContext.users, msg.sender)) {
-            UserLib.create(userContext.users, msg.sender, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
-        }
+        UserLib.createIfDoesNotExist(userContext.users, msg.sender);
         UserLib.update(userContext, userAddress, ipfsHash);
     }
 
@@ -434,9 +432,7 @@ contract Peeranha is IPeeranha, Initializable {
     function createPost(address userAddress, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external 
     onlyExistingAndNotFrozenCommunity(communityId)
     checkTags(communityId, tags) override {
-        if (!UserLib.isExists(userContext.users, msg.sender)) {
-            UserLib.create(userContext.users, msg.sender, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
-        }
+        UserLib.createIfDoesNotExist(userContext.users, msg.sender);
         posts.createPost(userContext, userAddress, communityId, ipfsHash, postType, tags);
     }
 
@@ -477,9 +473,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a new reply. 
     */
     function createReply(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        if (!UserLib.isExists(userContext.users, msg.sender)) {
-            UserLib.create(userContext.users, msg.sender, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
-        }
+        UserLib.createIfDoesNotExist(userContext.users, msg.sender);
         posts.createReply(userContext, userAddress, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
@@ -517,9 +511,7 @@ contract Peeranha is IPeeranha, Initializable {
      * - must be a post or a reply.
     */
     function createComment(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
-        if (!UserLib.isExists(userContext.users, msg.sender)) {
-            UserLib.create(userContext.users, msg.sender, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
-        }
+        UserLib.createIfDoesNotExist(userContext.users, msg.sender);
         posts.createComment(userContext, userAddress, postId, parentReplyId, ipfsHash);
     }
 

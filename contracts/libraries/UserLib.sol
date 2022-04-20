@@ -189,6 +189,18 @@ library UserLib {
     create(self.users, userAddress, ipfsHash);
   }
 
+  /// @notice Create new user info record
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to create 
+  function createIfDoesNotExist(
+    UserCollection storage self,
+    address userAddress
+  ) internal {
+    if (!UserLib.isExists(self, userAddress)) {
+      UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
+    }
+  }
+
   /// @notice Update new user info record
   /// @param userContext All information about users
   /// @param userAddress Address of the user to update
