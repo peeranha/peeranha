@@ -3,6 +3,10 @@ const crypto = require("crypto");
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
 const { wait } = require('./utils');
 
+///
+// to do
+// create post/reply/comment/update profile (not exist user)
+///
 
 describe("Test post", function () {
 
