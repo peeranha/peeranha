@@ -14,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable
 contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
-  uint256 public constant REWARD_WEEK = 100000;
+  uint256 public constant REWARD_WEEK = 1000;
   uint256 public constant USER_REWARD = 1000;
 
   
@@ -25,6 +25,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   // TODO: add actions that allow owner to mint 40% of total token supply
   // rewrite transfer - boost, balanceOf - boost
   // add method getUserStakedBalance
+  // getstakedbalance (transfer + get balance)
   ///
 
   uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
@@ -167,18 +168,17 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
 
   function getUserReward(RewardLib.WeekReward memory weekReward, address user, uint16 period, uint256 poolToken) private view returns(uint256) {
     int32 ratingToReward;
-    uint256 tokenReward;
+    int32 tokenReward;
     uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
-    for (uint32 i; i < rewardCommunities.length; i++) {   //вынести
+    for (uint32 i; i < rewardCommunities.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
-      if (ratingToReward == 0) continue;
-      tokenReward += uint256(ratingToReward);
+      tokenReward += ratingToReward;
     }
+    if (tokenReward == 0) return 0;
 
-    uint256 userReward = (poolToken * tokenReward) * 1000;
-    if (userReward == 0) return 0;
-      userReward /= weekReward.tokens;
-    return userReward * TokenLib.getRewardCoefficient() * FRACTION / 1000;
+    uint256 userReward = (poolToken * getBoost(user, period, tokenReward));
+    userReward /= weekReward.tokens;
+    return userReward;
   }
 
   function getUserRewardGraph(address user, uint16 period) public view returns(uint256) {
@@ -202,7 +202,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     return boostContainer.updateBoostInPeriod;
   }
 
-  function getBoost(address user, uint16 period, int32 rating) external override view returns (uint256) {    // name
+  function getBoost(address user, uint16 period, int32 rating) public override view returns (uint256) {    // name
     uint256 averageStake = getAverageStake(period);
     uint256 userStake = getUserStake(user, period);
     uint256 boost;

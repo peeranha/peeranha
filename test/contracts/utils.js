@@ -52,6 +52,10 @@ const createContractToken = async function (peeranhaAddress) {
     return token;
 };
 
+const getUserReward = async function (userRating, weekRating) {
+    return (userRating * coefficientToken * fraction) * poolToken / (weekRating * coefficientToken * fraction);
+}
+
 const createPeerenhaAndTokenContract = async function () {
     const PostLib = await ethers.getContractFactory("PostLib")
     const CommunityLib = await ethers.getContractFactory("CommunityLib")
@@ -131,6 +135,7 @@ const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;
 const fraction = (10 ** 18);
+const poolToken = 1000 * fraction;
 
 const ratingChanges = [
 	{actions: ['add', 'add'], ratings: [4, 3], result: 4},
@@ -224,9 +229,9 @@ const ModeratorDeleteComment = -1;
 
 
 module.exports = { 
-    wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers,
+    wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
-    StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction,
+    StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
     ratingChanges, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,

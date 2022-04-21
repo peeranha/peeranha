@@ -18,7 +18,6 @@ describe("Test boost", function () {
 			await token.setBoost(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getUserBoostPeriods(accountDeployed);
 
-
 			let userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[0]); 
 			userStakeTokens = await (await getInt(userStakeTokens)).toString();
 
@@ -26,11 +25,9 @@ describe("Test boost", function () {
 			let stakeTokens = await token.getStake(boostPeriods[0]);
 			let allStake = stakeTokens[0]
 			allStake = await (await getInt(allStake)).toString();
-			console.log(allStake)
 
 			let countStaking = stakeTokens[1]
 			countStaking = await (await getInt(countStaking)).toString();
-			console.log(countStaking)
 			
 			await expect(userStakeTokens).to.equal(parseEther("1"));
 		});
@@ -80,7 +77,6 @@ describe("Test boost", function () {
 			await wait(PeriodTime * 3)
 
 			const userBoostPeriods = await token.getUserBoostPeriods(accountDeployed);
-			// const boostPeriods = await token.getBoostPeriods();
 
 			let userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[0] - 2); 
 			userStakeTokens = await (await getInt(userStakeTokens)).toString();
@@ -94,10 +90,6 @@ describe("Test boost", function () {
 			userStakeTokens = await (await getInt(userStakeTokens)).toString();
 			await expect(userStakeTokens).to.equal(parseEther("1"));
 
-			userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[1] - 3); 
-			userStakeTokens = await (await getInt(userStakeTokens)).toString();
-			await expect(userStakeTokens).to.equal(parseEther("1"));
-
 			userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[1] - 2); 
 			userStakeTokens = await (await getInt(userStakeTokens)).toString();
 			await expect(userStakeTokens).to.equal(parseEther("1"));
@@ -107,10 +99,6 @@ describe("Test boost", function () {
 			await expect(userStakeTokens).to.equal(parseEther("1"));
 
 			userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[1]); 
-			userStakeTokens = await (await getInt(userStakeTokens)).toString();
-			await expect(userStakeTokens).to.equal(parseEther("1.5"));
-
-			userStakeTokens = await token.getUserStake(accountDeployed, userBoostPeriods[2] - 3); 
 			userStakeTokens = await (await getInt(userStakeTokens)).toString();
 			await expect(userStakeTokens).to.equal(parseEther("1.5"));
 
@@ -171,4 +159,39 @@ describe("Test boost", function () {
 			console.log(countStaking)
 		});
 	});
+
+	describe("add boost and get reward", function () {
+
+		it("add rating the same periods when add boost", async function () {
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			await peeranha.createUser(hashContainer[1]);
+			await token.mintForOwner(parseEther("1"))
+
+			await token.setBoost(accountDeployed, parseEther("1"))
+			const userBoostPeriods = await token.getUserBoostPeriods(accountDeployed);
+
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await wait(PeriodTime);
+
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+			await wait(PeriodTime);
+			
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+
+
+			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			
+			console.log(userBoostPeriods)
+			console.log(rewardPeriods)
+			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+			// expect(ratingToReward).to.equal(5);
+
+			await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
+			const balance = await getBalance(token, peeranha.deployTransaction.from);
+			console.log(balance / fraction)
+			
+			// expect(balance).to.equal(userReward);
+		});
+	})
 });
