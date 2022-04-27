@@ -81,7 +81,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   */
   function claimReward(address user, uint16 period) external {
     // TODO: check that user is sender or admin
-    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period, "This period isn't ended yet!");
+    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period + 1, "This period isn't ended yet!");
 
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
@@ -105,7 +105,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
 
   function setBoost(address user, uint256 stakeTokens) external {
     require(stakeTokens <= balanceOf(user), "Boost amount exceeds balance");
-    uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
+    uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 2;
     TokenLib.UserBoost storage userBoost = weekUserBoost.weekUserBoost[user];
 
     TokenLib.CountBoost storage countBoost = boostContainer.userBoostCount[nextPeriod];
@@ -176,6 +176,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     }
     if (tokenReward == 0) return 0;
 
+    // if (poolToken < weekReward.tokens)
     uint256 userReward = (poolToken * getBoost(user, period, tokenReward));
     userReward /= weekReward.tokens;
     return userReward;
@@ -209,7 +210,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
 
     if (averageStake == 0 || userStake == 0) return uint256(rating) * TokenLib.getRewardCoefficient() * FRACTION;
 
-    if (userStake > averageStake) {
+    if (userStake <= averageStake) {
       boost = ((userStake * 1000 / averageStake) * 5) + 1000;
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;

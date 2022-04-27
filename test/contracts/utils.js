@@ -138,13 +138,33 @@ const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
 
 const ratingChanges = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: 4},
+	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [1, 0]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [0, 0]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [-1, 0]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-1, 0]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [0, 1]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-7, 0]},
+];
+
+const ratingChangesInOneperiod = [
+	{actions: ['add', 'add'], ratings: [4, 3], result: 7},
 	{actions: ['add', 'subtract less'], ratings: [4, -3], result: 1},
 	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: 0},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: 0},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: 0},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: 0},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: 0},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], result: -1},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: -1},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: 1},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: -7},
+];
+
+const ratingChangesSkipPeriod = [
+	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [4, -3]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [4, -4]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [4, -5]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-4, -1]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [-4, 1]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-4, -7]},
 ];
 
 const StartRating = 10
@@ -232,7 +252,7 @@ module.exports = {
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
-    ratingChanges, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
+    ratingChanges, ratingChangesSkipPeriod, ratingChangesInOneperiod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,

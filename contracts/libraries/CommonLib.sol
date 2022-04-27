@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 /// @notice
 /// @dev
 library CommonLib {
-  uint16 constant QUICK_REPLY_TIME_SECONDS = 900; // 6
+  uint16 constant QUICK_REPLY_TIME_SECONDS = 6; // 6
 
   struct IpfsHash {
       bytes32 hash;
