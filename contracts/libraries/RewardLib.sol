@@ -9,8 +9,8 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint256 constant PERIOD_LENGTH = 3;          // 7 day = 1 week //
-  uint256 constant START_PERIOD_TIME = 1651186617;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant PERIOD_LENGTH = 604800;          // 7 day = 1 week //
+  uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
     int32 ratingToReward;
@@ -22,8 +22,7 @@ library RewardLib {
   }
 
   struct WeekReward {
-    int32 tokens;   // name
-    // uint16 countActiveUsersInPeriod;
+    int32 rewards;
     address[] activeUsersInPeriod;
   }
 
@@ -42,7 +41,7 @@ library RewardLib {
   // function findInternal(RewardLib.PeriodRating[] storage periodsRating, uint16 begin, uint16 end, uint16 period, bool look) internal returns (RewardLib.PeriodRating storage, bool) {
   //   uint16 len = end - begin;
   //   // if (len == 0 || (len == 1 && periodsRating[begin].period != period)) {
-  //     require(!look, "No reward for you in this period");
+  //     require(!look, "no_reward");
       
   //     RewardLib.PeriodRating memory periodRating;
   //     periodsRating.push(periodRating);

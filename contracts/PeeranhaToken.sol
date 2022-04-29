@@ -19,7 +19,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   
   ///
   // 100 000  - 100 token * 1000 user
-  // 40 000 000 - компания
+  // 40 000 000 - company
   ///
   // TODO: add actions that allow owner to mint 40% of total token supply
   // rewrite transfer - boost, balanceOf - boost
@@ -27,17 +27,17 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   // getstakedbalance (transfer + get balance)
   ///
 
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   mapping(uint16 => uint256) poolTokens;
 
   TokenLib.StatusRewardContainer statusRewardContainer;
-  TokenLib.WeekUserBoost weekUserBoost;
-  TokenLib.BoostContainer boostContainer;
+  TokenLib.UserPeriodStake userPeriodStake;
+  TokenLib.StakeTotalContainer stakeTotalContainer;
   IPeeranha peeranha;
 
   event GetReward(address user, uint16 period);
-  event SetBoost(address user, uint16 period, uint256 stake);
+  event SetStake(address user, uint16 period, uint256 stake);
 
 
   function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
@@ -60,10 +60,24 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function stakeBalanceOf(address account) external view returns(uint256) {
-    return balanceOf(account) - getUserStake(account, RewardLib.getPeriod(CommonLib.getTimestamp()) + 1);
+  function stakeBalanceOf(address account) external view returns(uint256) { // unitTest
+    TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[account];
+    uint16 period = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
+
+    uint256 stakedToken;
+    (uint256 correctPeriod, bool status) = findInternal(stakeUserContainer.stakeChangePeriods, 0, stakeUserContainer.stakeChangePeriods.length, period);
+    if (status && correctPeriod == period) {
+      TokenLib.UserStake storage userStake = stakeUserContainer.userStake[uint16(correctPeriod)];
+      stakedToken = userStake.totalStakedAmount + userStake.changedStake;
+    }
+
+    return balanceOf(account) - stakedToken;
   }
 
+
+  ///
+  // to do cap
+  ///
   function mintForOwner(uint256 mintTokens) external onlyOwner() {
     _mint(owner(), mintTokens);
   }
@@ -78,12 +92,12 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
    * - must be a period less then now.
   */
   function claimReward(address user, uint16 period) external {
-    // TODO: check that user is sender or admin
-    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period + 1, "This period isn't ended yet!");
+    require(msg.sender == user || msg.sender == owner(), "get_reward_security");  // unitTest
+    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period + 1, "period_not_ended");
 
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
-      "You already picked up this reward."
+      "reward_was_pick_up."
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;
@@ -95,48 +109,50 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     }
     uint256 userReward = getUserReward(weekReward, user, period, poolToken);
 
-    require(userReward != 0, "No reward for you in this period");
+    require(userReward != 0, "no_reward");
 
     emit GetReward(user, period);
     _mint(user, userReward);
   }
 
-  function setBoost(address user, uint256 stakeTokens) external {
-    require(stakeTokens <= balanceOf(user), "Boost amount exceeds balance");
+  function setStake(address user, uint256 stakeTokens) external {
+    require(stakeTokens <= balanceOf(user), "wrong_stack");
     uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
-    TokenLib.UserBoost storage userBoost = weekUserBoost.weekUserBoost[user];
+    TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
 
-    TokenLib.CountBoost storage countBoost = boostContainer.userBoostCount[nextPeriod];
-    if (boostContainer.updateBoostInPeriod.length != 0 && boostContainer.updateBoostInPeriod[boostContainer.updateBoostInPeriod.length - 1] != nextPeriod) {
-      uint16 previousPeriod = boostContainer.updateBoostInPeriod[boostContainer.updateBoostInPeriod.length - 1];
-      countBoost.allStake = boostContainer.userBoostCount[previousPeriod].allStake;
-      countBoost.countStaking = boostContainer.userBoostCount[previousPeriod].countStaking;
-      boostContainer.updateBoostInPeriod.push(nextPeriod);
-    } else if (boostContainer.updateBoostInPeriod.length == 0) {
-      boostContainer.updateBoostInPeriod.push(nextPeriod);
+    TokenLib.StakeTotal storage stakeTotal = stakeTotalContainer.stakeTotals[nextPeriod];
+    if (stakeTotalContainer.stakeChangePeriods.length != 0 && stakeTotalContainer.stakeChangePeriods[stakeTotalContainer.stakeChangePeriods.length - 1] != nextPeriod) {
+      uint16 previousPeriod = stakeTotalContainer.stakeChangePeriods[stakeTotalContainer.stakeChangePeriods.length - 1];
+      stakeTotal.totalStakedAmount = stakeTotalContainer.stakeTotals[previousPeriod].totalStakedAmount;
+      stakeTotal.stakingUsersCount = stakeTotalContainer.stakeTotals[previousPeriod].stakingUsersCount;
+      stakeTotalContainer.stakeChangePeriods.push(nextPeriod);
+    } else if (stakeTotalContainer.stakeChangePeriods.length == 0) {
+      stakeTotalContainer.stakeChangePeriods.push(nextPeriod);
     }
 
-    if (userBoost.updateUserBoostInPeriod.length != 0) {
-      uint16 lastBoostPeriod = userBoost.updateUserBoostInPeriod[userBoost.updateUserBoostInPeriod.length - 1];
-      if (lastBoostPeriod != nextPeriod) {
-        userBoost.updateUserBoostInPeriod.push(nextPeriod);
+    if (stakeUserContainer.stakeChangePeriods.length != 0) {
+      uint16 lastStakePeriod = stakeUserContainer.stakeChangePeriods[stakeUserContainer.stakeChangePeriods.length - 1];
+      if (lastStakePeriod != nextPeriod) {
+        stakeUserContainer.stakeChangePeriods.push(nextPeriod);
       }
 
-      if (userBoost.stakedTokens[lastBoostPeriod] > stakeTokens) {
-        countBoost.allStake += userBoost.stakedTokens[lastBoostPeriod] - stakeTokens;
-        if (stakeTokens == 0) countBoost.countStaking--;
+      if (stakeUserContainer.userStake[lastStakePeriod].totalStakedAmount > stakeTokens) {
+        stakeTotal.totalStakedAmount += stakeUserContainer.userStake[lastStakePeriod].totalStakedAmount - stakeTokens;
+        if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
+        stakeUserContainer.userStake[nextPeriod].changedStake = stakeUserContainer.userStake[lastStakePeriod].totalStakedAmount - stakeTokens;
+
       } else {
-        countBoost.allStake += stakeTokens - userBoost.stakedTokens[lastBoostPeriod];
-        if (userBoost.stakedTokens[lastBoostPeriod] == 0) countBoost.countStaking++;
+        stakeTotal.totalStakedAmount += stakeTokens - stakeUserContainer.userStake[lastStakePeriod].totalStakedAmount;
+        if (stakeUserContainer.userStake[lastStakePeriod].totalStakedAmount == 0) stakeTotal.stakingUsersCount++;
       }
-      userBoost.stakedTokens[nextPeriod] = stakeTokens;
+      stakeUserContainer.userStake[nextPeriod].totalStakedAmount = stakeTokens;
 
     } else {
-      userBoost.updateUserBoostInPeriod.push(nextPeriod);
-      userBoost.stakedTokens[nextPeriod] = stakeTokens;
+      stakeUserContainer.stakeChangePeriods.push(nextPeriod);
+      stakeUserContainer.userStake[nextPeriod].totalStakedAmount = stakeTokens;
 
-      countBoost.allStake += stakeTokens;
-      countBoost.countStaking++;
+      stakeTotal.totalStakedAmount += stakeTokens;
+      stakeTotal.stakingUsersCount++;
     }
   }
 
@@ -174,7 +190,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     if (tokenReward <= 0) return 0;
 
     uint256 userReward = (poolToken * uint256(tokenReward * getBoost(user, period))) ;
-    userReward /= uint256(weekReward.tokens);
+    userReward /= uint256(weekReward.rewards);
     return userReward;
   }
 
@@ -190,13 +206,13 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     return poolTokens[period];
   }
 
-  function getUserBoostPeriods(address user) external view returns (uint16[] memory) {
-    TokenLib.UserBoost storage userBoost = weekUserBoost.weekUserBoost[user];
-    return userBoost.updateUserBoostInPeriod;
+  function getStakeUserPeriods(address user) external view returns (uint16[] memory) {
+    TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
+    return stakeUserContainer.stakeChangePeriods;
   }
 
-  function getBoostPeriods() external view returns (uint16[] memory) {
-    return boostContainer.updateBoostInPeriod;
+  function getStakeTotalPeriods() external view returns (uint16[] memory) {
+    return stakeTotalContainer.stakeChangePeriods;
   }
 
   function getBoost(address user, uint16 period) public override view returns (int32) {
@@ -205,41 +221,36 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     uint256 boost;
     if (averageStake == 0 || userStake == 0) return 1000;
 
-    // if (averageStake == 0 || userStake == 0) return uint256(rating) * TokenLib.getRewardCoefficient() * FRACTION;
-
     if (userStake <= averageStake) {
       boost = ((userStake * 1000 / averageStake) * 5) + 1000;
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;
     }
     return int32(boost);
-
-    // return (uint256(rating) * boost) / 1000 * TokenLib.getRewardCoefficient() * FRACTION;
   }
 
   function getUserStake(address user, uint16 findingPeriod) public view returns (uint256) {
-    TokenLib.UserBoost storage userBoost = weekUserBoost.weekUserBoost[user];
-    // require(userBoost.updateUserBoostInPeriod.length > 0, "You do not have any boost");
+    TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
 
-    (uint256 correctPeriod, bool status) = findInternal(userBoost.updateUserBoostInPeriod, 0, userBoost.updateUserBoostInPeriod.length, findingPeriod);
+    (uint256 correctPeriod, bool status) = findInternal(stakeUserContainer.stakeChangePeriods, 0, stakeUserContainer.stakeChangePeriods.length, findingPeriod);
     if (status)
-      return userBoost.stakedTokens[uint16(correctPeriod)];
+      return stakeUserContainer.userStake[uint16(correctPeriod)].totalStakedAmount;
     else
       return 0;
   }
 
   function getAverageStake(uint16 findingPeriod) public view returns (uint256) {
-    (uint256 allStake, uint64 countStaking) = getStake(findingPeriod);
-    if (allStake == 0 || countStaking == 0) return 0;
+    (uint256 totalStakedAmount, uint64 stakingUsersCount) = getStake(findingPeriod);
+    if (totalStakedAmount == 0 || stakingUsersCount == 0) return 0;
 
-    return allStake / countStaking;
+    return totalStakedAmount / stakingUsersCount;
   }
 
   function getStake(uint16 findingPeriod) public view returns (uint256, uint64) {
-    (uint256 correctPeriod, bool status) = findInternal(boostContainer.updateBoostInPeriod, 0, boostContainer.updateBoostInPeriod.length, findingPeriod);
+    (uint256 correctPeriod, bool status) = findInternal(stakeTotalContainer.stakeChangePeriods, 0, stakeTotalContainer.stakeChangePeriods.length, findingPeriod);
     if (status) {
-      TokenLib.CountBoost storage countBoost = boostContainer.userBoostCount[uint16(correctPeriod)];
-      return (countBoost.allStake, countBoost.countStaking);
+      TokenLib.StakeTotal storage stakeTotal = stakeTotalContainer.stakeTotals[uint16(correctPeriod)];
+      return (stakeTotal.totalStakedAmount, stakeTotal.stakingUsersCount);
     }
     else
       return (0, 0);

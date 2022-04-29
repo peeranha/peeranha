@@ -16,22 +16,27 @@ library TokenLib {
     bool isPaid;
   }
 
-  struct BoostContainer {
-    mapping(uint16 => CountBoost) userBoostCount;               // period
-    uint16[] updateBoostInPeriod;
+  struct StakeTotalContainer {
+    mapping(uint16 => StakeTotal) stakeTotals;               // period
+    uint16[] stakeChangePeriods;
   }
 
-  struct CountBoost {
-    uint256 allStake;
-    uint64 countStaking;    //name?
+  struct StakeTotal {
+    uint256 totalStakedAmount;
+    uint64 stakingUsersCount;
   }
 
-  struct WeekUserBoost {
-    mapping(address => UserBoost) weekUserBoost;
+  struct UserPeriodStake {
+    mapping(address => StakeUserContainer) userPeriodStake;
   }
 
-  struct UserBoost {
-    mapping(uint16 => uint256) stakedTokens;                    // period
-    uint16[] updateUserBoostInPeriod;
+  struct StakeUserContainer {
+    mapping(uint16 => UserStake) userStake;                    // period
+    uint16[] stakeChangePeriods;
+  }
+
+  struct UserStake {
+    uint256 totalStakedAmount;
+    uint256 changedStake; // name (only negative value) // unittest
   }
 }

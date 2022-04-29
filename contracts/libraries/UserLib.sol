@@ -411,7 +411,7 @@ library UserLib {
 
         lastRatingToRewardPreviousPeriod = getRatingToReward(lastRatingToRewardPreviousPeriod, previousPeriodRating.ratingToReward); 
         if (lastRatingToRewardPreviousPeriod != 0) {
-          userContext.weekRewardContainer.weekReward[previousPeriod].tokens += getBoostedReward(userContext, userAddr, previousPeriod, lastRatingToRewardPreviousPeriod);
+          userContext.weekRewardContainer.weekReward[previousPeriod].rewards += getBoostReward(userContext, userAddr, previousPeriod, lastRatingToRewardPreviousPeriod);
         }
 
       } else {
@@ -421,10 +421,13 @@ library UserLib {
           periodRating.ratingToReward += rating;
       }
     }
+    ///
+    // to do check downvoted/upvote twice
+    ///
 
     lastRatingToReward = getRatingToReward(lastRatingToReward, periodRating.ratingToReward);
     if (lastRatingToReward != 0) {
-      weekReward.tokens += getBoostedReward(userContext, userAddr, currentPeriod, lastRatingToReward);
+      weekReward.rewards += getBoostReward(userContext, userAddr, currentPeriod, lastRatingToReward);
     }
     communityUser.userRating[communityId].rating += rating;
 
@@ -433,7 +436,7 @@ library UserLib {
     }
   }
 
-  function getBoostedReward(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
+  function getBoostReward(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
     return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
   }
 
