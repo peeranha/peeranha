@@ -134,17 +134,26 @@ const PeriodTime = 3000
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;
+const weekUserReward = 100;
 const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
+const weekRewardCoefficient = 1000;
 
 const ratingChanges = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3]},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [1, 0]},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [0, 0]},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [-1, 0]},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-1, 0]},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [0, 1]},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-7, 0]},
+	{actions: ['add', 'add'], ratings: [4, 3], results: [4, 3], weekRewards: [4 * weekRewardCoefficient, 3 * weekRewardCoefficient]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], results: [1, 0], weekRewards: [1 * weekRewardCoefficient, 0]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], results: [0, 0], weekRewards: [0, 0]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], results: [0, -1], weekRewards: [0, 0]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], results: [-4, -1], weekRewards: [0, 0]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], results: [-4, 1], weekRewards: [0, 1 * weekRewardCoefficient]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], results: [-4, -7], weekRewards: [0, 0]},
+];
+
+const setReting = [
+	{actions: 'positive', ratings: 4, result: 4, weekRewards: 4 * weekRewardCoefficient},
+	{actions: 'positive', ratings: 1, result: 1, weekRewards: 1 * weekRewardCoefficient},
+	{actions: 'negative', ratings: -1, result: -1, weekRewards: 0},
+    {actions: 'negative', ratings: -4, result: -4, weekRewards: 0},
 ];
 
 const ratingChangesInOneperiod = [
@@ -158,13 +167,13 @@ const ratingChangesInOneperiod = [
 ];
 
 const ratingChangesSkipPeriod = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3]},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [4, -3]},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [4, -4]},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [4, -5]},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-4, -1]},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [-4, 1]},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-4, -7]},
+	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3], weekRewards: [4 * weekRewardCoefficient, 3 * weekRewardCoefficient]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [4, -3], weekRewards: [4 * weekRewardCoefficient, 0]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [4, -4], weekRewards: [4 * weekRewardCoefficient, 0]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [4, -5], weekRewards: [4 * weekRewardCoefficient, 0]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-4, -1], weekRewards: [0, 0]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [-4, 1], weekRewards: [0, 1 * weekRewardCoefficient]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-4, -7], weekRewards: [0, 0]},
 ];
 
 const StartRating = 10
@@ -251,8 +260,8 @@ const ModeratorDeleteComment = -1;
 module.exports = { 
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
-    StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
-    ratingChanges, ratingChangesSkipPeriod, ratingChangesInOneperiod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
+    StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, weekUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
+    setReting, ratingChanges, ratingChangesSkipPeriod, ratingChangesInOneperiod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,

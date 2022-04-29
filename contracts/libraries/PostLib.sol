@@ -801,10 +801,7 @@ library PostLib  {
             communityId, 
             isCancel ? 
                 UserLib.Action.cancelVote :
-                (ratingChange > 0 ?
-                    UserLib.Action.upVoteComment :
-                    UserLib.Action.downVoteComment
-                )
+                UserLib.Action.voteComment
         );
         
         commentContainer.info.rating += ratingChange;

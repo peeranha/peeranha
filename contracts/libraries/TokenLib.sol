@@ -34,9 +34,4 @@ library TokenLib {
     mapping(uint16 => uint256) stakedTokens;                    // period
     uint16[] updateUserBoostInPeriod;
   }
-
-  /// @notice Get tokens' coefficient to 1 rating
-  function getRewardCoefficient() internal view returns (uint256) {
-    return COEFFICIENT_TOKEN;
-  }
 }

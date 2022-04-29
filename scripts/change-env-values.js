@@ -40,7 +40,7 @@ const unitTest = [
 	{ field: 'constant DELETE_TIME', value: 10, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'constant PERIOD_LENGTH', value: 3, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant START_PERIOD_TIME', value: Math.floor(Date.now() / 1000), path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
-	{ field: 'constant REWARD_WEEK', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant REWARD_WEEK', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },
 	{ field: 'function setEnergy', value: ``, path: `../contracts/Peeranha.sol`, isFunction: true },

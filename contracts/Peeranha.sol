@@ -639,6 +639,11 @@ contract Peeranha is IPeeranha, Initializable {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId].ratingToReward;
     }
 
+    // only unitTest
+    function getWeekReward(uint16 rewardPeriod) external view override returns(int32) {
+        return userContext.weekRewardContainer.weekReward[rewardPeriod].tokens;
+    }
+
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return PostLib.getStatusHistory(posts, user, postId, replyId, commentId);
     }

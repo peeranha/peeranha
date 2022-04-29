@@ -9,13 +9,12 @@ import "./interfaces/IPeeranhaToken.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
 
-contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable {
+contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
-  uint256 public constant REWARD_WEEK = 1000;
-  uint256 public constant USER_REWARD = 1000;
+  uint256 public constant REWARD_WEEK = 100000;
+  uint256 public constant USER_REWARD = 100;
 
   
   ///
@@ -50,7 +49,6 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   function __Token_init(string memory name, string memory symbol) internal initializer {
     __ERC20_init_unchained(name, symbol);
     __Pausable_init_unchained();
-    __ERC20Burnable_init_unchained();
     __ERC20Pausable_init_unchained();
     __Token_init_unchained();
   }
@@ -105,7 +103,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
 
   function setBoost(address user, uint256 stakeTokens) external {
     require(stakeTokens <= balanceOf(user), "Boost amount exceeds balance");
-    uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 2;
+    uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
     TokenLib.UserBoost storage userBoost = weekUserBoost.weekUserBoost[user];
 
     TokenLib.CountBoost storage countBoost = boostContainer.userBoostCount[nextPeriod];
@@ -150,7 +148,6 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
         uint256 userRewardWeek = weekReward.activeUsersInPeriod.length * USER_REWARD * FRACTION;  // < 1000
         poolToken = CommonLib.minUint256(poolToken, userRewardWeek);
       }
-      poolToken = CommonLib.minUint256(poolToken, weekReward.tokens);   // earned 
     }
 
     return poolToken;
@@ -172,13 +169,12 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
     for (uint32 i; i < rewardCommunities.length; i++) {
       ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
-      tokenReward += ratingToReward;
+      tokenReward += ratingToReward;  // negetive add to?
     }
-    if (tokenReward == 0) return 0;
+    if (tokenReward <= 0) return 0;
 
-    // if (poolToken < weekReward.tokens)
-    uint256 userReward = (poolToken * getBoost(user, period, tokenReward));
-    userReward /= weekReward.tokens;
+    uint256 userReward = (poolToken * uint256(tokenReward * getBoost(user, period))) ;
+    userReward /= uint256(weekReward.tokens);
     return userReward;
   }
 
@@ -203,20 +199,22 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     return boostContainer.updateBoostInPeriod;
   }
 
-  function getBoost(address user, uint16 period, int32 rating) public override view returns (uint256) {    // name
+  function getBoost(address user, uint16 period) public override view returns (int32) {
     uint256 averageStake = getAverageStake(period);
     uint256 userStake = getUserStake(user, period);
     uint256 boost;
+    if (averageStake == 0 || userStake == 0) return 1000;
 
-    if (averageStake == 0 || userStake == 0) return uint256(rating) * TokenLib.getRewardCoefficient() * FRACTION;
+    // if (averageStake == 0 || userStake == 0) return uint256(rating) * TokenLib.getRewardCoefficient() * FRACTION;
 
     if (userStake <= averageStake) {
       boost = ((userStake * 1000 / averageStake) * 5) + 1000;
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;
     }
+    return int32(boost);
 
-    return (uint256(rating) * boost) / 1000 * TokenLib.getRewardCoefficient() * FRACTION;
+    // return (uint256(rating) * boost) / 1000 * TokenLib.getRewardCoefficient() * FRACTION;
   }
 
   function getUserStake(address user, uint16 findingPeriod) public view returns (uint256) {
