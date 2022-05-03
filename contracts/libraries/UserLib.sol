@@ -94,7 +94,7 @@ library UserLib {
     UserLib.UserCollection users;
     UserLib.UserRatingCollection userRatingCollection;
     UserLib.UserDelegationCollection userDelegationCollection;
-    RewardLib.WeekRewardContainer weekRewardContainer;
+    RewardLib.PeriodRewardContainer periodRewardContainer;
     UserLib.Roles roles;
     UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
@@ -357,9 +357,9 @@ library UserLib {
     RewardLib.UserPeriodRewards storage userPeriodRewards = communityUser.userPeriodRewards[currentPeriod];
     RewardLib.PeriodRating storage periodRating = communityUser.userPeriodRewards[currentPeriod].periodRating[communityId];
 
-    RewardLib.WeekReward storage weekReward = userContext.weekRewardContainer.weekReward[currentPeriod];
+    RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
     if (pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
-      weekReward.activeUsersInPeriod.push(userAddr);
+      periodRewardShares.activeUsersInPeriod.push(userAddr);
       communityUser.rewardPeriods.push(currentPeriod);
       pastPeriodsCount++;
     }
@@ -411,7 +411,7 @@ library UserLib {
 
         lastRatingToRewardPreviousPeriod = getRatingToReward(lastRatingToRewardPreviousPeriod, previousPeriodRating.ratingToReward); 
         if (lastRatingToRewardPreviousPeriod != 0) {
-          userContext.weekRewardContainer.weekReward[previousPeriod].rewards += getBoostReward(userContext, userAddr, previousPeriod, lastRatingToRewardPreviousPeriod);
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += getBoostReward(userContext, userAddr, previousPeriod, lastRatingToRewardPreviousPeriod);
         }
 
       } else {
@@ -427,7 +427,7 @@ library UserLib {
 
     lastRatingToReward = getRatingToReward(lastRatingToReward, periodRating.ratingToReward);
     if (lastRatingToReward != 0) {
-      weekReward.rewards += getBoostReward(userContext, userAddr, currentPeriod, lastRatingToReward);
+      periodRewardShares.totalRewardShares += getBoostReward(userContext, userAddr, currentPeriod, lastRatingToReward);
     }
     communityUser.userRating[communityId].rating += rating;
 

@@ -18,6 +18,18 @@ const NFT = {
     attributes: "TestInfo",
 };
 
+const testCommunity = {
+  title: "testCommunity6.new",
+  description: "testCommunity.new",
+  website: "www.new",
+  language: "ua.new",
+};
+
+const testTag = {
+  title: "testTagNew",
+  description: "testNewTag1",
+};
+
 const AchievementsType = { "Rating": 0 }
 
 const achievements = (env) => {
@@ -79,4 +91,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, NFT, testAccount, PATH };
+module.exports = { achievements, NFT, testAccount, PATH, testCommunity, testTag };

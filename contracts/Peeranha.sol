@@ -58,8 +58,8 @@ contract Peeranha is IPeeranha, Initializable {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
-    function getWeekRewardContainer(uint16 period) external view override returns(RewardLib.WeekReward memory) {
-        return userContext.weekRewardContainer.weekReward[period];
+    function getPeriodRewardContainer(uint16 period) external view override returns(RewardLib.PeriodRewardShares memory) {
+        return userContext.periodRewardContainer.periodRewardShares[period];
     }
 
     /**
@@ -640,8 +640,8 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     // only unitTest
-    function getWeekReward(uint16 rewardPeriod) external view override returns(int32) {
-        return userContext.weekRewardContainer.weekReward[rewardPeriod].rewards;
+    function getPeriodReward(uint16 rewardPeriod) external view override returns(int32) {
+        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }
 
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
@@ -657,7 +657,7 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
-        return userContext.weekRewardContainer.weekReward[period].activeUsersInPeriod;
+        return userContext.periodRewardContainer.periodRewardShares[period].activeUsersInPeriod;
     }
 
     ///
@@ -676,13 +676,13 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
         PostLib.addUserRating(userContext, userAddr, rating, communityId);
-    }*/
+    }
 
-    /*function setEnergy(address userAddr, uint16 energy) external {
+    function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     function onlyExisitingOrDelegatingUser(address user) private {
         if (user != msg.sender) {
