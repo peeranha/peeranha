@@ -139,41 +139,41 @@ const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
 const periodRewardCoefficient = 1000;
 
-const ratingChanges = [
-	{actions: ['add', 'add'], ratings: [4, 3], results: [4, 3], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], results: [1, 0], periodRewards: [1 * periodRewardCoefficient, 0]},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], results: [0, 0], periodRewards: [0, 0]},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], results: [0, -1], periodRewards: [0, 0]},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], results: [-4, -1], periodRewards: [0, 0]},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], results: [-4, 1], periodRewards: [0, 1 * periodRewardCoefficient]},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], results: [-4, -7], periodRewards: [0, 0]},
-];
-
-const setReting = [
-	{actions: 'positive', ratings: 4, result: 4, periodRewards: 4 * periodRewardCoefficient},
-	{actions: 'positive', ratings: 1, result: 1, periodRewards: 1 * periodRewardCoefficient},
-	{actions: 'negative', ratings: -1, result: -1, periodRewards: 0},
-    {actions: 'negative', ratings: -4, result: -4, periodRewards: 0},
+const setRetingOnePeriod = [
+	{actions: 'positive', ratings: 4, result: {ratingToReward: 4, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: 'positive', ratings: 1, result: {ratingToReward: 1, penalty: 0}, periodRewards: 1 * periodRewardCoefficient},
+	{actions: 'negative', ratings: -1, result: {ratingToReward: 0, penalty: 1}, periodRewards: 0},
+    {actions: 'negative', ratings: -4, result: {ratingToReward: 0, penalty: 4}, periodRewards: 0},
 ];
 
 const ratingChangesInOneperiod = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: 7},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: 1},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: 0},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: -1},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: -1},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: 1},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: -7},
+	{actions: ['add', 'add'], ratings: [4, 3], result: {ratingToReward: 7, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], result: {ratingToReward: 1, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: {ratingToReward: 0, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], result: {ratingToReward: 0, penalty: 1}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: {ratingToReward: 0, penalty: 1}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: {ratingToReward: 1, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: {ratingToReward: 0, penalty: 7}, periodRewards: 4 * periodRewardCoefficient},
+];
+
+const ratingChanges = [
+	{actions: ['add', 'add'], ratings: [4, 3], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
 ];
 
 const ratingChangesSkipPeriod = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: [4, 3], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: [4, -3], periodRewards: [4 * periodRewardCoefficient, 0]},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: [4, -4], periodRewards: [4 * periodRewardCoefficient, 0]},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: [4, -5], periodRewards: [4 * periodRewardCoefficient, 0]},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: [-4, -1], periodRewards: [0, 0]},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: [-4, 1], periodRewards: [0, 1 * periodRewardCoefficient]},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: [-4, -7], periodRewards: [0, 0]},
+	{actions: ['add', 'add'], ratings: [4, 3], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
+	{actions: ['add', 'subtract less'], ratings: [4, -3], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 3}], periodRewards: [4 * periodRewardCoefficient, 0]},
+	{actions: ['add', 'subtract equal'], ratings: [4, -4], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 4}], periodRewards: [4 * periodRewardCoefficient, 0]},
+	{actions: ['add', 'subtract more'], ratings: [4, -5], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 5}], periodRewards: [4 * periodRewardCoefficient, 0]},
+	{actions: ['subtract', 'add less'], ratings: [-4, 3], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+	{actions: ['subtract', 'add more'], ratings: [-4, 5], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+	{actions: ['subtract', 'subtract'], ratings: [-4, -3], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
 ];
 
 const StartRating = 10
@@ -261,7 +261,7 @@ module.exports = {
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
-    setReting, ratingChanges, ratingChangesSkipPeriod, ratingChangesInOneperiod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
+    setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, ratingChangesInOneperiod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,

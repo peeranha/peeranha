@@ -94,12 +94,19 @@ async function main() {
     }
   });
   const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
+
+  console.log("1")
+  peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
+  console.log("2")
+  peeranha.giveCommunityModeratorPermission("0xc4ed6fc2e633430b4b982a8b3baa6fc8c62a037e", 1)
+  console.log("3")
+
   // console.log("Posting action");
   // await peeranha.createUser(await getBytes32FromData(testAccount));
   // console.log(JSON.stringify(result))
 
   // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
+  // await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
   // console.log(JSON.stringify(result))
 
   // await peeranha.updateUser(await getBytes32FromData(testAccount));

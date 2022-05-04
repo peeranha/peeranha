@@ -88,6 +88,13 @@ library UserLib {
     bool isActive;
   }
 
+  struct DataUpdateUserRating {
+    int32 ratingToReward;
+    int32 penalty;
+    int32 changeRating;
+    int32 ratingToRewardChange;
+  }
+
 
   /// users The mapping containing all users
   struct UserContext {
@@ -343,107 +350,153 @@ library UserLib {
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     
-    CommunityRatingForUser storage communityUser = userContext.userRatingCollection.communityRatingForUser[userAddr];
-    if (!communityUser.userRating[communityId].isActive) {
-      communityUser.userRating[communityId].rating = START_USER_RATING;
-      communityUser.userRating[communityId].isActive = true;
+    CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
+    // Initialize user rating in the community if this is the first rating change
+    if (!userCommunityRating.userRating[communityId].isActive) {
+      userCommunityRating.userRating[communityId].rating = START_USER_RATING;
+      userCommunityRating.userRating[communityId].isActive = true;
     }
 
-    uint256 pastPeriodsCount = communityUser.rewardPeriods.length;
-
-    RewardLib.UserPeriodRewards storage userPeriodRewards = communityUser.userPeriodRewards[currentPeriod];
-    RewardLib.PeriodRating storage periodRating = communityUser.userPeriodRewards[currentPeriod].periodRating[communityId];
-
+    uint256 pastPeriodsCount = userCommunityRating.rewardPeriods.length;
     RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
-    if (pastPeriodsCount == 0 || communityUser.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
+    
+    // If this is the first user rating change in any community
+    if (pastPeriodsCount == 0 || userCommunityRating.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
       periodRewardShares.activeUsersInPeriod.push(userAddr);
-      communityUser.rewardPeriods.push(currentPeriod);
-      pastPeriodsCount++;
+      userCommunityRating.rewardPeriods.push(currentPeriod);
     }
 
-    bool isFirstTransactionInPeriod;
-    if (!periodRating.isActive) {
-      periodRating.isActive = true;
-      isFirstTransactionInPeriod = true;
+    RewardLib.UserPeriodRewards storage userPeriodRewards = userCommunityRating.userPeriodRewards[currentPeriod];
+    RewardLib.PeriodRating storage userPeriodCommuntiyRating = userPeriodRewards.periodRating[communityId];
+
+    // If this is the first user rating change in this period for current community
+    if (!userPeriodCommuntiyRating.isActive) {
       userPeriodRewards.rewardCommunities.push(communityId);
     }
 
-    // pastPeriodsCount = communityUser.rewardPeriods.length; // ?? rewrite
-
-    int32 lastRatingToReward = periodRating.ratingToReward;
-    int32 lastRatingToRewardPreviousPeriod;
-    if (pastPeriodsCount == 1) {
-      periodRating.ratingToReward += rating;
-
+    uint16 previousPeriod;
+    if(pastPeriodsCount > 0) {
+      previousPeriod = userCommunityRating.rewardPeriods[pastPeriodsCount - 1];
     } else {
-      uint16 previousPeriod = communityUser.rewardPeriods[pastPeriodsCount - 2];
-      RewardLib.PeriodRating storage previousPeriodRating = communityUser.userPeriodRewards[previousPeriod].periodRating[communityId];
-      lastRatingToRewardPreviousPeriod = previousPeriodRating.ratingToReward;
-
-      if (previousPeriod == currentPeriod - 1) {
-        if (previousPeriodRating.ratingToReward <= 0) {
-          if (isFirstTransactionInPeriod)
-            periodRating.ratingToReward = previousPeriodRating.ratingToReward + rating;
-          else
-            periodRating.ratingToReward += rating;
-
-        } else {
-          if (rating > 0) {
-            periodRating.ratingToReward += rating;
-
-          } else {
-            if (previousPeriodRating.ratingToReward > 0) {
-              if (previousPeriodRating.ratingToReward + rating <= 0){
-                periodRating.ratingToReward += rating + previousPeriodRating.ratingToReward;
-                previousPeriodRating.ratingToReward = 0;
-              } else {
-                previousPeriodRating.ratingToReward += rating;
-              }
-
-            } else {
-              periodRating.ratingToReward += rating;
-            }
-          }
-        }
-
-        lastRatingToRewardPreviousPeriod = getRatingToReward(lastRatingToRewardPreviousPeriod, previousPeriodRating.ratingToReward); 
-        if (lastRatingToRewardPreviousPeriod != 0) {
-          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += getBoostReward(userContext, userAddr, previousPeriod, lastRatingToRewardPreviousPeriod);
-        }
-
-      } else {
-        if (isFirstTransactionInPeriod && previousPeriodRating.ratingToReward < 0)
-          periodRating.ratingToReward = previousPeriodRating.ratingToReward + rating;
-        else
-          periodRating.ratingToReward += rating;
-      }
+      // this means that there is no other previous period
+      previousPeriod = currentPeriod;
     }
-    ///
-    // to do check downvoted/upvote twice
-    ///
 
-    lastRatingToReward = getRatingToReward(lastRatingToReward, periodRating.ratingToReward);
-    if (lastRatingToReward != 0) {
-      periodRewardShares.totalRewardShares += getBoostReward(userContext, userAddr, currentPeriod, lastRatingToReward);
-    }
-    communityUser.userRating[communityId].rating += rating;
+    updateUserPeriodRating(userContext, userCommunityRating, userAddr, rating, communityId, currentPeriod, previousPeriod);
+
+    userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
-      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(communityUser.userRating[communityId].rating));
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));
     }
   }
 
-  function getBoostReward(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
+  function updateUserPeriodRating(UserContext storage userContext, CommunityRatingForUser storage userCommunityRating, address userAddr, int32 rating, uint32 communityId, uint16 currentPeriod, uint16 previousPeriod) private {
+    RewardLib.PeriodRating storage currentPeriodRating = userCommunityRating.userPeriodRewards[currentPeriod].periodRating[communityId];
+    bool isFirstTransactionInPeriod = !currentPeriodRating.isActive;
+
+    DataUpdateUserRating memory dataUpdateUserRatingCurrentPeriod;
+    dataUpdateUserRatingCurrentPeriod.ratingToReward = currentPeriodRating.ratingToReward;
+    dataUpdateUserRatingCurrentPeriod.penalty = currentPeriodRating.penalty;
+    
+    if (currentPeriod == previousPeriod) {   //first period rating?
+      dataUpdateUserRatingCurrentPeriod.changeRating = rating;
+
+    } else {
+      RewardLib.PeriodRating storage previousPeriodRating = userCommunityRating.userPeriodRewards[previousPeriod].periodRating[communityId];
+      
+      DataUpdateUserRating memory dataUpdateUserRatingPreviousPeriod;
+      dataUpdateUserRatingPreviousPeriod.ratingToReward = previousPeriodRating.ratingToReward;
+      dataUpdateUserRatingPreviousPeriod.penalty = previousPeriodRating.penalty;
+      
+      if (previousPeriod != currentPeriod - 1) {
+        if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
+          dataUpdateUserRatingCurrentPeriod.changeRating = rating + dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+        } else {
+          dataUpdateUserRatingCurrentPeriod.changeRating = rating;
+        }
+      } else {
+        if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
+          dataUpdateUserRatingCurrentPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+        }
+
+        int32 differentRatingPreviousPeriod; // name
+        if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
+          differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+          if (differentRatingPreviousPeriod >= 0) {/// check
+            dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+            dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
+          } else {
+            dataUpdateUserRatingPreviousPeriod.changeRating = rating;
+            dataUpdateUserRatingCurrentPeriod.changeRating += rating;
+          }
+          
+        } else if (rating < 0 && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
+          differentRatingPreviousPeriod = dataUpdateUserRatingPreviousPeriod.penalty - rating;   // penalty is always positive, we need add rating to penalty
+          if (differentRatingPreviousPeriod > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
+            dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.ratingToReward;
+            dataUpdateUserRatingCurrentPeriod.changeRating -= differentRatingPreviousPeriod + dataUpdateUserRatingPreviousPeriod.changeRating;
+          } else {
+            dataUpdateUserRatingPreviousPeriod.changeRating = rating;
+            // dataUpdateUserRatingCurrentPeriod.changeRating += 0;
+          }
+        } else {
+          dataUpdateUserRatingCurrentPeriod.changeRating += rating;
+        }
+      }
+
+      if (dataUpdateUserRatingPreviousPeriod.changeRating != 0) {
+        previousPeriodRating.penalty += -dataUpdateUserRatingPreviousPeriod.changeRating;
+
+        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty, dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty + dataUpdateUserRatingPreviousPeriod.changeRating);
+        if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange != 0)
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange);
+      }
+    }
+
+    if (dataUpdateUserRatingCurrentPeriod.changeRating != 0) {
+      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty, dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty + dataUpdateUserRatingCurrentPeriod.changeRating);
+      if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange != 0)
+        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange);
+
+      int32 changeRating;
+      if (dataUpdateUserRatingCurrentPeriod.changeRating > 0) {
+        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - dataUpdateUserRatingCurrentPeriod.penalty;
+        if (changeRating >= 0) {
+          currentPeriodRating.penalty = 0;
+          currentPeriodRating.ratingToReward += changeRating;
+        } else {
+          currentPeriodRating.penalty = -changeRating;
+        }
+
+      } else if (dataUpdateUserRatingCurrentPeriod.changeRating < 0) {
+        changeRating = dataUpdateUserRatingCurrentPeriod.ratingToReward + dataUpdateUserRatingCurrentPeriod.changeRating;
+        if (changeRating <= 0) {
+          currentPeriodRating.ratingToReward = 0;
+          currentPeriodRating.penalty += -changeRating;
+        } else {
+          currentPeriodRating.ratingToReward = changeRating;
+        }
+      }
+    }
+
+    // Activate period rating for community if this is the first change
+    if (isFirstTransactionInPeriod) {
+      currentPeriodRating.isActive = true;
+    }
+  }
+
+  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
     return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
   }
 
-  function getRatingToReward(int32 lastRatingToReward, int32 newRatingToReward) private pure returns (int32) {
-    if (lastRatingToReward >= 0 && newRatingToReward >= 0) return newRatingToReward - lastRatingToReward;
-    else if(lastRatingToReward > 0 && newRatingToReward < 0) return -lastRatingToReward;
-    else if(lastRatingToReward < 0 && newRatingToReward > 0) return newRatingToReward;
+  function getRatingToRewardChange(int32 previosRatingToReward, int32 newRatingToReward) private pure returns (int32) {
+    if (previosRatingToReward >= 0 && newRatingToReward >= 0) return newRatingToReward - previosRatingToReward;
+    else if(previosRatingToReward > 0 && newRatingToReward < 0) return -previosRatingToReward;
+    else if(previosRatingToReward < 0 && newRatingToReward > 0) return newRatingToReward;
     return 0; // from negative to negative
   }
 
@@ -515,32 +568,34 @@ library UserLib {
       message = "low_rating_vote_comment";
       energy = ENERGY_VOTE_COMMENT;
 
-    } else if (action == Action.downVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");
-      ratingAllowed = DOWNVOTE_POST_ALLOWED;
-      message = "low_rating_downvote_post";
-      energy = ENERGY_DOWNVOTE_QUESTION;
+    }
+    //  else if (action == Action.downVotePost) {
+    //   require(actionCaller != dataUser, "not_allowed_vote_post");
+    //   ratingAllowed = DOWNVOTE_POST_ALLOWED;
+    //   message = "low_rating_downvote_post";
+    //   energy = ENERGY_DOWNVOTE_QUESTION;
 
-    } else if (action == Action.downVoteReply) {
-      require(actionCaller != dataUser, "not_allowed_vote_reply");
-      ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
-      message = "low_rating_downvote_reply";
-      energy = ENERGY_DOWNVOTE_ANSWER;
+    // } else if (action == Action.downVoteReply) {
+    //   require(actionCaller != dataUser, "not_allowed_vote_reply");
+    //   ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
+    //   message = "low_rating_downvote_reply";
+    //   energy = ENERGY_DOWNVOTE_ANSWER;
 
-    } else if (action == Action.cancelVote) {
-      ratingAllowed = CANCEL_VOTE;
-      message = "low_rating_cancel_vote";
-      energy = ENERGY_FORUM_VOTE_CANCEL;
+    // } else if (action == Action.cancelVote) {
+    //   ratingAllowed = CANCEL_VOTE;
+    //   message = "low_rating_cancel_vote";
+    //   energy = ENERGY_FORUM_VOTE_CANCEL;
 
-    } else if (action == Action.bestReply) {
-      ratingAllowed = MINIMUM_RATING;
-      message = "low_rating_mark_best";
-      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+    // } else if (action == Action.bestReply) {
+    //   ratingAllowed = MINIMUM_RATING;
+    //   message = "low_rating_mark_best";
+    //   energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
-    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
-      energy = ENERGY_UPDATE_PROFILE;
+    // } else if (action == Action.updateProfile) { //userRating - always 0 (const)
+    //   energy = ENERGY_UPDATE_PROFILE;
 
-    } else if (action == Action.followCommunity) {
+    // } 
+    else if (action == Action.followCommunity) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_follow_comm";
       energy = ENERGY_FOLLOW_COMMUNITY;

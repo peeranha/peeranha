@@ -37,6 +37,6 @@ library TokenLib {
 
   struct UserStake {
     uint256 stakedAmount;
-    uint256 changedStake; // name (only negative value) // unittest
+    uint256 changedStake; // (only negative value) // unittest
   }
 }
