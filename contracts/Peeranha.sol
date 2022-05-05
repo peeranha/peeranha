@@ -683,14 +683,14 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     // Used for unit tests
-    function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
+    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
         PostLib.addUserRating(userContext, userAddr, rating, communityId);
-    }
+    }*/
 
     // Used for unit tests
-    function setEnergy(address userAddr, uint16 energy) external {
+    /*function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }
+    }*/
 
     function onlyExisitingOrDelegatingUser(address user) private {
         if (user != msg.sender) {
