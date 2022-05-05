@@ -636,8 +636,8 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(int32) {
-        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId].ratingToReward -
-                userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId].penalty;
+        RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
+        return periodRating.ratingToReward - periodRating.penalty;
     }
 
     // only unitTest
@@ -682,17 +682,19 @@ contract Peeranha is IPeeranha, Initializable {
         return PostLib.getVotedUsers(posts, postId, replyId, commentId);
     }
 
+    // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
         PostLib.addUserRating(userContext, userAddr, rating, communityId);
     }*/
 
+    // Used for unit tests
     /*function setEnergy(address userAddr, uint16 energy) external {
         userContext.users.getUserByAddress(userAddr).energy = energy;
     }*/
 
     function onlyExisitingOrDelegatingUser(address user) private {
         if (user != msg.sender) {
-            require(UserLib.isDelegateUser(userContext.userDelegationCollection, msg.sender, user), "erro_deligate");
+            require(UserLib.isDelegateUser(userContext.userDelegationCollection, msg.sender, user), "error_deligate");
         }
 
         onlyExisitingUser(user);
