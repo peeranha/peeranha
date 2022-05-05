@@ -367,6 +367,8 @@ library UserLib {
     if (pastPeriodsCount == 0 || userCommunityRating.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
       periodRewardShares.activeUsersInPeriod.push(userAddr);
       userCommunityRating.rewardPeriods.push(currentPeriod);
+    } else {  // rewrite
+      pastPeriodsCount--;
     }
 
     RewardLib.UserPeriodRewards storage userPeriodRewards = userCommunityRating.userPeriodRewards[currentPeriod];
@@ -424,23 +426,39 @@ library UserLib {
         }
 
         int32 differentRatingPreviousPeriod; // name
+        int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
-          differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
-          if (differentRatingPreviousPeriod >= 0) {/// check
-            dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
-            dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
+          if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
+            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            if (differentRatingPreviousPeriod >= 0) {
+              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
+            } else {
+              dataUpdateUserRatingPreviousPeriod.changeRating = rating;
+              dataUpdateUserRatingCurrentPeriod.changeRating += rating;
+            }
           } else {
-            dataUpdateUserRatingPreviousPeriod.changeRating = rating;
-            dataUpdateUserRatingCurrentPeriod.changeRating += rating;
+            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            if (differentRatingPreviousPeriod >= 0) {
+              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
+            } else {
+              dataUpdateUserRatingPreviousPeriod.changeRating = rating;
+            }
           }
-          
         } else if (rating < 0 && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
-          differentRatingPreviousPeriod = dataUpdateUserRatingPreviousPeriod.penalty - rating;   // penalty is always positive, we need add rating to penalty
-          if (differentRatingPreviousPeriod > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-            dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.ratingToReward;
-            dataUpdateUserRatingCurrentPeriod.changeRating -= differentRatingPreviousPeriod + dataUpdateUserRatingPreviousPeriod.changeRating;
+
+          differentRatingCurrentPeriod = dataUpdateUserRatingCurrentPeriod.penalty - rating;   // penalty is always positive, we need add rating to penalty
+          if (differentRatingCurrentPeriod > dataUpdateUserRatingCurrentPeriod.ratingToReward) {
+            dataUpdateUserRatingCurrentPeriod.changeRating -= dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty;  // - current ratingToReward
+            dataUpdateUserRatingPreviousPeriod.changeRating = rating - dataUpdateUserRatingCurrentPeriod.changeRating;                                       // + previous penalty
+            if (dataUpdateUserRatingPreviousPeriod.ratingToReward < dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating) {
+              int32 extraPenalty = dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating - dataUpdateUserRatingPreviousPeriod.ratingToReward;
+              dataUpdateUserRatingPreviousPeriod.changeRating += extraPenalty;  // - extra previous penalty
+              dataUpdateUserRatingCurrentPeriod.changeRating -= extraPenalty;   // + extra current penalty
+            }
           } else {
-            dataUpdateUserRatingPreviousPeriod.changeRating = rating;
+            dataUpdateUserRatingCurrentPeriod.changeRating = rating;
             // dataUpdateUserRatingCurrentPeriod.changeRating += 0;
           }
         } else {
@@ -562,13 +580,14 @@ library UserLib {
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
-    } else if (action == Action.voteComment) {
-      require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
-      ratingAllowed = VOTE_COMMENT_ALLOWED;
-      message = "low_rating_vote_comment";
-      energy = ENERGY_VOTE_COMMENT;
+    } 
+    // else if (action == Action.voteComment) {
+    //   require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
+    //   ratingAllowed = VOTE_COMMENT_ALLOWED;
+    //   message = "low_rating_vote_comment";
+    //   energy = ENERGY_VOTE_COMMENT;
 
-    }
+    // }
     //  else if (action == Action.downVotePost) {
     //   require(actionCaller != dataUser, "not_allowed_vote_post");
     //   ratingAllowed = DOWNVOTE_POST_ALLOWED;
@@ -595,14 +614,15 @@ library UserLib {
     //   energy = ENERGY_UPDATE_PROFILE;
 
     // } 
-    else if (action == Action.followCommunity) {
-      ratingAllowed = MINIMUM_RATING;
-      message = "low_rating_follow_comm";
-      energy = ENERGY_FOLLOW_COMMUNITY;
+    // else if (action == Action.followCommunity) {
+    //   ratingAllowed = MINIMUM_RATING;
+    //   message = "low_rating_follow_comm";
+    //   energy = ENERGY_FOLLOW_COMMUNITY;
 
-    } else {
-      require(false, "not_allowed_action");
-    }
+    // } 
+    // else {
+    //   require(false, "not_allowed_action");
+    // }
 
     require(userRating >= ratingAllowed, message);
     reduceEnergy(user, userRating, energy);

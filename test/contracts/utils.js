@@ -167,51 +167,56 @@ const ratingChanges = [
 ];
 
 const twiceChengeRatingIn2NDPeriod = [
-	{actions: ['add', 'add', 'add'], ratings: [4, 3, 2], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'add', 'subtract less'], ratings: [4, 3, -2], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'add', 'subtract equal'], ratings: [4, 3, -3], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'add', 'subtract more'], ratings: [4, 3, -4], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
-	{actions: ['add', 'add', 'subtract more2'], ratings: [4, 3, -5], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
+	{actions: ['add', 'add', 'add'], ratings: [4, 3, 2], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 5, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 5 * periodRewardCoefficient]},
+	{actions: ['add', 'add', 'subtract less'], ratings: [4, 3, -2], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 1 * periodRewardCoefficient]},
+	{actions: ['add', 'add', 'subtract equal'], ratings: [4, 3, -3], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 0]},
+	{actions: ['add', 'add', 'subtract more'], ratings: [4, 3, -4], results: [{ratingToReward: 4, penalty: 1}, {ratingToReward: 0, penalty: 0}], periodRewards: [3 * periodRewardCoefficient, 0]},
+	{actions: ['add', 'add', 'subtract more2'], ratings: [4, 3, -7], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
+	{actions: ['add', 'add', 'subtract more2'], ratings: [4, 3, -8], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
     
 
-    {actions: ['add', 'subtract less', 'add less'], ratings: [4, -2, 1], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
-    {actions: ['add', 'subtract less', 'add equal'], ratings: [4, -2, 2], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
-    {actions: ['add', 'subtract less', 'add more'], ratings: [4, -2, 5], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract less', 'add less'], ratings: [4, -2, 1], results: [{ratingToReward: 4, penalty: 1}, {ratingToReward: 0, penalty: 0}], periodRewards: [3 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract less', 'add equal'], ratings: [4, -2, 2], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract less', 'add more'], ratings: [4, -2, 5], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 3, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 3 * periodRewardCoefficient]},
     {actions: ['add', 'subtract less', 'subtract less'], ratings: [4, -2, -1], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
-    {actions: ['add', 'subtract less', 'subtract equal'], ratings: [4, -2, -2], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
-    {actions: ['add', 'subtract less', 'subtract more'], ratings: [4, -2, -3], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
-    {actions: ['add', 'subtract less', 'subtract more'], ratings: [4, -2, -5], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 0}], periodRewards: [1 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract less', 'subtract equal'], ratings: [4, -2, -2], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
+    {actions: ['add', 'subtract less', 'subtract more'], ratings: [4, -2, -3], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    {actions: ['add', 'subtract less', 'subtract more'], ratings: [4, -2, -5], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 3}], periodRewards: [0, 0]},
 
 
-    {actions: ['add', 'subtract equal', 'add less'], ratings: [4, -4, 3], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract equal', "add equal"], ratings: [4, -4, 4], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract equal', "add more"], ratings: [4, -4, 5], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract equal', "subtract"], ratings: [4, -4, -2], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 0}], periodRewards: [0, 0]},
+    {actions: ['add', 'subtract equal', 'add less'], ratings: [4, -4, 3], results: [{ratingToReward: 4, penalty: 1}, {ratingToReward: 0, penalty: 0}], periodRewards: [3 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract equal', "add equal"], ratings: [4, -4, 4], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 0, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 0]},
+    {actions: ['add', 'subtract equal', "add more"], ratings: [4, -4, 5], results: [{ratingToReward: 4, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [4 * periodRewardCoefficient, 1 * periodRewardCoefficient]},
+    {actions: ['add', 'subtract equal', "subtract"], ratings: [4, -4, -2], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 2}], periodRewards: [0, 0]},
 	
     
-    {actions: ['add', 'subtract more', 'add less'], ratings: [4, -6, 1], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract more', 'add less2'], ratings: [4, -6, 3], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract more', 'add equal'], ratings: [4, -6, 6], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract more', 'add more'], ratings: [4, -6, 7], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['add', 'subtract more', 'subtract'], ratings: [4, -6, -1], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    {actions: ['add', 'subtract more', 'add less'], ratings: [4, -6, 1], results: [{ratingToReward: 4, penalty: 3}, {ratingToReward: 0, penalty: 2}], periodRewards: [1 * periodRewardCoefficient, 0]},   ///
+    // {actions: ['add', 'subtract more', 'add less2'], ratings: [4, -6, 3], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['add', 'subtract more', 'add equal'], ratings: [4, -6, 6], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['add', 'subtract more', 'add more'], ratings: [4, -6, 7], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['add', 'subtract more', 'subtract'], ratings: [4, -6, -1], results: [{ratingToReward: 4, penalty: 4}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
 	
     
-    {actions: ['subtract', 'add less', 'add less'], ratings: [-5, 3, 1], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['subtract', 'add less', 'add equal'], ratings: [-5, 3, 2], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['subtract', 'add less', 'add more'], ratings: [-5, 3, 4], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['subtract', 'add less', 'subtract less'], ratings: [-5, 3, -1], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['subtract', 'add less', 'subtract equal'], ratings: [-5, 3, -3], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
-    {actions: ['subtract', 'add less', 'subtract more'], ratings: [-5, 3, -4], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'add less'], ratings: [-5, 3, 1], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'add equal'], ratings: [-5, 3, 2], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'add more'], ratings: [-5, 3, 4], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'subtract less'], ratings: [-5, 3, -1], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'subtract equal'], ratings: [-5, 3, -3], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'add less', 'subtract more'], ratings: [-5, 3, -4], results: [{ratingToReward: 0, penalty: 1}, {ratingToReward: 0, penalty: 1}], periodRewards: [0, 0]},
 	
     
-    {actions: ['subtract', 'add more', 'add'], ratings: [-4, 6, 2], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
-    {actions: ['subtract', 'add more', 'subtract less'], ratings: [-4, 6, -1], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
-    {actions: ['subtract', 'add more', 'subtract equal'], ratings: [-4, 6, -2], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
-    {actions: ['subtract', 'add more', 'subtract more'], ratings: [-4, 6, -4], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
-    {actions: ['subtract', 'add more', 'subtract more2'], ratings: [-4, 6, -7], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+    // {actions: ['subtract', 'add more', 'add'], ratings: [-4, 6, 2], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+    // {actions: ['subtract', 'add more', 'subtract less'], ratings: [-4, 6, -1], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+    // {actions: ['subtract', 'add more', 'subtract equal'], ratings: [-4, 6, -2], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+    // {actions: ['subtract', 'add more', 'subtract more'], ratings: [-4, 6, -4], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
+    // {actions: ['subtract', 'add more', 'subtract more2'], ratings: [-4, 6, -7], results: [{ratingToReward: 0, penalty: 0}, {ratingToReward: 1, penalty: 0}], periodRewards: [0, 1 * periodRewardCoefficient]},
 	
     
-    {actions: ['subtract', 'subtract', 'subtract'], ratings: [-4, -3, -2], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'subtract', 'subtract'], ratings: [-4, -3, -2], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'subtract', 'add less'], ratings: [-4, -3, 2], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'subtract', 'add less 2'], ratings: [-4, -3, 3], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'subtract', 'add equal'], ratings: [-4, -3, 7], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
+    // {actions: ['subtract', 'subtract', 'add more'], ratings: [-4, -3, 9], results: [{ratingToReward: 0, penalty: 4}, {ratingToReward: 0, penalty: 7}], periodRewards: [0, 0]},
 ];
 
 const ratingChangesSkipPeriod = [
@@ -309,7 +314,7 @@ module.exports = {
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
-    setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
+    setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
