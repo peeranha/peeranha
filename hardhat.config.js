@@ -4,7 +4,7 @@ require('@openzeppelin/hardhat-upgrades');
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
 
-const { INFURA_API_KEY, ADMIN_PRIVATE_KEY } = require('./env.json');
+const { INFURA_API_KEY, ADMIN_PRIVATE_KEY } = require('./secrets.json');
 
 
 /**
