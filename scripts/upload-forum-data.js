@@ -7,7 +7,7 @@ const {
   POSTLIB_ADDRESS,
   COMMUNITYLIB_ADDRESS,
   IPFS_API_URL_THE_GRAPH,
-  infuraApiKey
+  INFURA_API_KEY
 } = require("../env.json");
 const crypto = require("crypto");
 const fs = require("fs");

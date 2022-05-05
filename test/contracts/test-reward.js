@@ -1,281 +1,317 @@
 const { expect } = require("chai");
-const { wait, getInt, getBalance } = require('./utils');
+const {
+	wait, getBalance, getInt, createPeerenhaAndTokenContract, getHashContainer, getUserReward,
+	periodUserReward, PeriodTime, fraction, setRetingOnePeriod, ratingChanges, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, ratingChangesSkipPeriod, poolToken,
+} = require('./utils');
 
-const ratingChanges = [
-	{actions: ['add', 'add'], ratings: [4, 3], result: 4},
-	{actions: ['add', 'subtract less'], ratings: [4, -3], result: 1},
-	{actions: ['add', 'subtract equal'], ratings: [4, -4], result: 0},
-	{actions: ['add', 'subtract more'], ratings: [4, -5], result: 0},
-	{actions: ['subtract', 'add less'], ratings: [-4, 3], result: 0},
-	{actions: ['subtract', 'add more'], ratings: [-4, 5], result: 0},
-	{actions: ['subtract', 'subtract'], ratings: [-4, -3], result: 0},
-];
-const fraction = (10 ** 18);
+///
+// to do: active users
+// active in 2 community
+// reduce reward 52 periods?
+// несколько обновлений рейтинга в период!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! twiceChengeRatingIn1Period... (в 1-й период готово)
+// в проверке ревордов добавить проверку PeriodRewardShares (for)
+///
 
 describe("Test wallet", function () {
 
-	describe("Test payout rating", function () {
+	describe("Test add rating to reward", function () {
 
-		for (const {actions, ratings, result} of ratingChanges) {
+		for (const {actions, ratings, result, periodRewards} of setRetingOnePeriod) {
+			it(`Test ${actions} rating in 1st period`, async function () {
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+				const hashContainer = getHashContainer();
+		
+				await peeranha.createUser(hashContainer[1]);
+		
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings, 1);
+
+				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			
+				const userPeriodRating = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+				expect(userPeriodRating.ratingToReward).to.equal(result.ratingToReward);
+				expect(userPeriodRating.penalty).to.equal(result.penalty);
+
+				const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+				expect(periodRewardShares).to.equal(periodRewards);
+			});
+		}
+
+		for (const {actions, ratings, result, periodRewards} of twiceChengeRatingIn1Period) {
+			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 1st period`, async function () {
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+				const hashContainer = getHashContainer();
+				await peeranha.createUser(hashContainer[1]);
+		
+		 		await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[0], 1);
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[1], 1);
+
+				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+				console.log(rewardPeriods)
+				expect(rewardPeriods.length).to.equal(1);
+
+				const userPeriodRating = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+				expect(userPeriodRating.ratingToReward).to.equal(result.ratingToReward);
+				expect(userPeriodRating.penalty).to.equal(result.penalty);
+
+				const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+				expect(periodRewardShares).to.equal(periodRewards);
+			}).retries(2);
+		}
+
+		for (const {actions, ratings, results, periodRewards} of ratingChanges) {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period`, async function () {
-				const peeranha = await createContract();
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+				const hashContainer = getHashContainer();
+				await peeranha.createUser(hashContainer[1]);
+		
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[0], 1);
+				
+				await wait(PeriodTime);
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[1], 1);
+		
+				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+				console.log(rewardPeriods)
+				expect(rewardPeriods.length).to.equal(2);
+				
+				const userPeriodRating = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+				expect(userPeriodRating.ratingToReward).to.equal(results[0].ratingToReward);
+				expect(userPeriodRating.penalty).to.equal(results[0].penalty);
+				
+				const userPeriodRating1 = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
+				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
+
+				const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+				expect(periodRewardShares).to.equal(periodRewards[0]);
+				
+				const periodRewardShares2 = await peeranha.getPeriodReward(rewardPeriods[1]);
+				expect(periodRewardShares2).to.equal(periodRewards[1]);
+			});
+		}
+
+		for (const {actions, ratings, results, periodRewards} of twiceChengeRatingIn2NDPeriod) {		// new
+			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period and ${actions[2]} rating in 2nt`, async function () {
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+				const hashContainer = getHashContainer();
+				await peeranha.createUser(hashContainer[1]);
+		
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[0], 1);
+				
+				await wait(PeriodTime);
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[1], 1);
+				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[2], 1);
+		
+				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+				console.log(rewardPeriods)
+				expect(rewardPeriods.length).to.equal(2);
+				
+				const userPeriodRating = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+				expect(userPeriodRating.ratingToReward).to.equal(results[0].ratingToReward);
+				expect(userPeriodRating.penalty).to.equal(results[0].penalty);
+				
+				const userPeriodRating1 = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
+				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
+
+				const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+				expect(periodRewardShares).to.equal(periodRewards[0]);
+				
+				const periodRewardShares2 = await peeranha.getPeriodReward(rewardPeriods[1]);
+				expect(periodRewardShares2).to.equal(periodRewards[1]);
+			}).retries(2);
+		}
+
+		for (const {actions, ratings, results, periodRewards} of ratingChangesSkipPeriod) {
+			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 3nt period`, async function () {
+				const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 		
 				await peeranha.createUser(hashContainer[1]);
 		
 				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[0], 1);
 				
-				await wait(periodLength);
+				await wait(PeriodTime * 2);
 				await peeranha.addUserRating(peeranha.deployTransaction.from, ratings[1], 1);
 		
 				const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 				console.log(rewardPeriods)
+
+				const userPeriodRating = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+				expect(userPeriodRating.ratingToReward).to.equal(results[0].ratingToReward);
+				expect(userPeriodRating.penalty).to.equal(results[0].penalty);
 				
-				const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
-				console.log(userRewardPerid)
-				console.log("**************************");
-				const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
-				console.log(userRewardPerid2)
-				
-				expect(userRewardPerid).to.equal(0);
-				expect(userRewardPerid2).to.equal(result);
+				const userPeriodRating1 = await peeranha.getPeriodRating(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
+				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
+
+				const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+				expect(periodRewardShares).to.equal(periodRewards[0]);
+
+				const periodReward2 = await peeranha.getPeriodReward(rewardPeriods[1]);
+				expect(periodReward2).to.equal(periodRewards[1]);
 			});
 		}
-
-		it("Test subtract rating in 1st and add rating in 2nd and 3rd periods", async function () {
-			const peeranha = await createContract();
-			const hashContainer = getHashContainer();
-
-			await peeranha.createUser(hashContainer[1]);
-
-			await peeranha.addUserRating(peeranha.deployTransaction.from, -4, 1);
-			// console.log(userRating.rewardPeriods[0])
-			await wait(periodLength);
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			
-			await wait(periodLength);
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
-
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
-			console.log(rewardPeriods)
-			
-
-			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
-			console.log(userRewardPerid)
-			console.log("**************************");
-			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
-			console.log(userRewardPerid2)
-			console.log("-----------------------");
-			const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[2], 1);
-			console.log(userRewardPerid3)
-
-			expect(userRewardPerid).to.equal(0);
-			expect(userRewardPerid2).to.equal(0);
-			expect(userRewardPerid3).to.equal(1);
-		});
-
-		it("Test add rating in 1st and 3rd period", async function () {
-			const peeranha = await createContract();
-			const hashContainer = getHashContainer();
-
-			await peeranha.createUser(hashContainer[1]);
-
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			// console.log(userRating.rewardPeriods[0])
-			await wait(periodLength * 2);
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
-			
-			
-			await wait(periodLength * 2);
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 2, 1);
-
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
-
-			const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
-			console.log(userRewardPerid)
-			console.log("**************************");
-			const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
-			console.log(userRewardPerid2)
-			console.log("++++++++++++++++++++++++++");
-			const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[2], 1);
-			console.log(userRewardPerid3)
-
-			expect(userRewardPerid).to.equal(0);
-			expect(userRewardPerid2).to.equal(5);
-			expect(userRewardPerid3).to.equal(3);
-		});
 	});
 
 	describe('Get reward', function(){
 
 		it("Test get reward", async function () {
-			const peeranha = await createContract();
-			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
-				return value;
-			});
-			const token = await createContractToken(peeranhaContractAddress);
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
-			await wait(periodLength);
-			
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+			await wait(PeriodTime);
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 			
-			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await token.claimReward(rewardPeriods[1]);
+			await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0]);
 			const balance = await getBalance(token, peeranha.deployTransaction.from);
 
-			expect(balance).to.equal(5 * coefficientToken * fraction);
-		});
-
-		it("Test get reward for 1st period", async function () {
-			const peeranha = await createContract();
-			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
-				return value;
-			});
-			const token = await createContractToken(peeranhaContractAddress);
-			const hashContainer = getHashContainer();
-
-			await peeranha.createUser(hashContainer[1]);
-
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
-
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
-
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
-
-			await expect(token.claimReward(rewardPeriods[0]))
-			.to.be.revertedWith('No reward for you in this period');
-			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
+			expect(balance).to.equal(periodUserReward * fraction);
 		});
 
 		it("Test get reward for the ongoing period", async function () {
-			const peeranha = await createContract();
-			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
-				return value;
-			});
-			const token = await createContractToken(peeranhaContractAddress);
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await wait(PeriodTime);
 
-			await wait(periodLength);
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[1]), 'Transaction was not reverted')
-			.to.be.revertedWith("This period isn't ended yet!");
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0]), 'Transaction was not reverted')
+			.to.be.revertedWith("period_not_ended");
 			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
 		}).retries(2);
 
 		it("Test get reward for undefined period", async function () {
-			const peeranha = await createContract();
-			const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
-				return value;
-			});
-			const token = await createContractToken(peeranhaContractAddress);
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 
 			await peeranha.createUser(hashContainer[1]);
 
 			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-			await wait(periodLength);
+			await wait(PeriodTime);
 
 			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[0] - 1))
-			.to.be.revertedWith('No reward for you in this period');
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0] - 1))
+			.to.be.revertedWith('no_reward');
 			expect(await getBalance(token, peeranha.deployTransaction.from)).to.eql(0);
 		});
 
-		// it("Test twice pick up 1 reward", async function () {
-		// 	const peeranha = await createContract();
-		// 	const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
-		// 		return value;
-		// 	});
-		// 	const token = await createContractToken(peeranhaContractAddress);
-		// 	const hashContainer = getHashContainer();
+		it("Test twice pick up 1 reward", async function () {
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
 
-		// 	await peeranha.createUser(hashContainer[1]);
+			await peeranha.createUser(hashContainer[1]);
 
-		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
-		// 	await wait(periodLength);
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await wait(PeriodTime);
 
-		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
-			
-		// 	await wait(periodLength);
-		// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 3, 1);
+			await peeranha.addUserRating(peeranha.deployTransaction.from, 4, 1);
+			await wait(PeriodTime);
 
-		// 	const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0]);
+			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
+		});
 
-		// 	const userRewardPerid = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
-		// 	const userRewardPerid2 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
-		// 	const userRewardPerid3 = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[2], 1);
-
-		// 	console.log()
-		// 	expect(userRewardPerid).to.equal(0);
-		// 	expect(userRewardPerid2).to.equal(5);
-		// 	expect(userRewardPerid3).to.equal(4);
-
-		// 	console.log(userRewardPerid2);
-		// 	console.log(rewardPeriods[1])
-
-		// 	await token.claimReward(rewardPeriods[1]);
-
-		// 	console.log("|||||||||||||||||||||||||||||||")
-		// 	const shiftReward = await token.getShiftRewards(rewardPeriods[0]);
-		// 	console.log(await getInt(shiftReward))
-		// 	const shiftRewardd = await token.getShiftRewards(rewardPeriods[1]);
-		// 	console.log(await getInt(shiftRewardd))
-		// 	const balance = await getBalance(token, peeranha.deployTransaction.from);
-		// 	console.log(balance);
-
-		// 	await expect(token.claimReward(rewardPeriods[1])).to.be.revertedWith('You already picked up this reward.');
-		// });
+		///
+		// to do max reward
+		///
 	});
 
-	const createContract = async function () {
-		const PostLib = await ethers.getContractFactory("PostLib")
-		const postLib = await PostLib.deploy();
-		const Peeranha = await ethers.getContractFactory("Peeranha", {
-		libraries: {
-				PostLib: postLib.address,
-		}
-		});
-		const peeranha = await Peeranha.deploy();
-		await peeranha.deployed();
-        await peeranha.__Peeranha_init();
-		return peeranha;
-	};
+	// describe('Split reward', function(){
 
-	const createContractToken = async function (peeranhaAddress) {
-		const Token = await ethers.getContractFactory("PeeranhaToken");
-		const token = await Token.deploy();
-		await token.deployed();
-        await token.initialize("token", "ecs", peeranhaAddress);
-		return token;
-	};
+	// 	it("split reward (2 users)", async function () {
+	// 		const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+	// 		const hashContainer = getHashContainer();
+	// 		const signers = await ethers.getSigners();
 
-	const getHashContainer = () => {
-		return [
-			"0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-			"0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-			"0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-		];
-	};
+	// 		await peeranha.createUser(hashContainer[1]);
+	// 		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
 
-	const coefficientToken = 10;
-	const periodLength = 3000;
+
+	// 		await peeranha.addUserRating(peeranha.deployTransaction.from, 60, 1);
+	// 		await peeranha.addUserRating(signers[1].address, 50, 1);
+	// 		await wait(PeriodTime);
+
+	// 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+	// 		await peeranha.addUserRating(signers[1].address, 1, 1);
+	// 		await wait(PeriodTime);
+			
+	// 		await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+	// 		await peeranha.addUserRating(signers[1].address, 1, 1);
+
+
+	// 		const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			
+	// 		const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+	// 		expect(ratingToReward).to.equal(60);
+
+	// 		await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
+	// 		const balance = await getBalance(token, peeranha.deployTransaction.from);
+
+	// 		await token.claimReward(signers[1].address, rewardPeriods[1]);
+	// 		const balance2 = await getBalance(token, signers[1].address);
+			
+	// 		const userReward = await getUserReward(60, 110);
+	// 		const userReward2 = await getUserReward(50, 110);
+	// 		expect(balance).to.equal(userReward);
+	// 		expect(balance2).to.equal(userReward2);
+	// 	});
+	// });
+
+
+
+
+
+
+	// it("split reward (2 users)", async function () {
+	// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+	// 	const hashContainer = getHashContainer();
+	// 	const signers = await ethers.getSigners();
+
+	// 	await peeranha.createUser(hashContainer[1]);
+
+
+	// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 60, 1);
+	// 	await wait(PeriodTime);
+
+	// 	// await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+	// 	await wait(PeriodTime);
+		
+	// 	await peeranha.addUserRating(peeranha.deployTransaction.from, 1, 1);
+
+	// 	const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+		
+	// 	const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+	// 	expect(ratingToReward).to.equal(60);
+
+	// 	console.log(rewardPeriods)
+	// 	console.log(await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1))
+
+
+	// 	// await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
+	// 	// const balance = await getBalance(token, peeranha.deployTransaction.from);
+
+	// 	// await token.claimReward(signers[1].address, rewardPeriods[1]);
+	// 	// const balance2 = await getBalance(token, signers[1].address);
+		
+	// 	// const userReward = await getUserReward(60, 110);
+	// 	// const userReward2 = await getUserReward(50, 110);
+	// 	// expect(balance).to.equal(userReward);
+	// 	// expect(balance2).to.equal(userReward2);
+	// });
 });

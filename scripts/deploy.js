@@ -28,6 +28,9 @@ async function main() {
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
   const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEER", "PEER", peeranha.address]);
   console.log("Peeranha token deployed to:", peeranhaToken.address);
+
+  await peeranha.setTokenContract(peeranhaToken.address);
+  console.log("Set peeranhaToken address to peeranha", peeranhaToken.address);
 }
 
 main()

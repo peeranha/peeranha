@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
+const { createContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
 
 describe("Test community permissions", function() {
     it("Test community moderator", async function() {
@@ -32,29 +33,29 @@ describe("Test community permissions", function() {
 
         // User makes actions without Moderator permission
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        // User makes actions with Moderator permission
+        // // User makes actions with Moderator permission
         await peeranha.giveCommunityModeratorPermission(userAddress, communitiesIds[0]);
         await peeranha.connect(user).updateCommunity(communitiesIds[0], getHash());
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[1], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(user).freezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(user).unfreezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        //User with Moderator permission gives Moderator permission
+        // //User with Moderator permission gives Moderator permission
         await expect(peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
-        .to.be.revertedWith('Peeranha: must have community admin role');
+        .to.be.revertedWith('not_allowed_not_comm_admin');
         await peeranha.giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranha.connect(user).revokeCommunityModeratorPermission(userAddress, communitiesIds[0]))
-        .to.be.revertedWith('Peeranha: must have community admin role');
+        .to.be.revertedWith('not_allowed_not_comm_admin');
 
-        //Revoke Moderator permission
+        // //Revoke Moderator permission
         await peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
     });
 
     it("Test community administrator", async function() {
@@ -85,9 +86,9 @@ describe("Test community permissions", function() {
 
         // User makes actions without Admin permission
         await expect(peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
-        .to.be.revertedWith("Peeranha: must have community admin role");
+        .to.be.revertedWith("not_allowed_not_comm_admin");
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         await peeranha.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
         
@@ -101,23 +102,23 @@ describe("Test community permissions", function() {
 
         //// User with Admin permission makes actions for other community
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[1], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(user).freezeCommunity(communitiesIds[1]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(user).unfreezeCommunity(communitiesIds[1]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         //User with Admin permission gives Moderator permission
         await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash())
         await expect(peeranha.connect(signers[2]).freezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(signers[2]).unfreezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         //User with Admin permission gives Admin permission for other user
         await peeranha.connect(user).giveCommunityAdminPermission(signers[2].address, communitiesIds[0]);
@@ -126,9 +127,9 @@ describe("Test community permissions", function() {
 
         //User with Admin permission gives Admin permission for other community
         await expect(peeranha.connect(user).giveCommunityAdminPermission(userAddress, communitiesIds[1]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(user).giveCommunityAdminPermission(signers[2].address, communitiesIds[1]))
-        .to.be.revertedWith("Peeranha: must have admin or community admin role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         //Revoke Admin permission
         await peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
@@ -136,9 +137,9 @@ describe("Test community permissions", function() {
         await peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
         await peeranha.revokeCommunityAdminPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Peeranha: must have admin or community moderator role");
+        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
     });
 
     // Send admin invite functionality must be created before
@@ -162,7 +163,7 @@ describe("Test community permissions", function() {
 
         peeranha.createCommunity(getHash(), createTags(5));
         await expect (peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.revertedWith('Peeranha: must have admin or community moderator role');
+        .to.revertedWith('not_allowed_admin_or_comm_admin');
         await expect (peeranha.connect(user).freezeCommunity(communitiesIds[0]))
         .to.revertedWith('Peeranha: must have admin role');
         await expect (peeranha.connect(user).unfreezeCommunity(communitiesIds[0]))
@@ -181,43 +182,14 @@ describe("Test community permissions", function() {
         // // await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
         // await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         // // await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        // // .to.be.revertedWith("Peeranha: must have community admin role");
+        // // .to.be.revertedWith("not_allowed_not_comm_admin");
 
         // peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
         // peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
 
         // await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        // .to.be.revertedWith("Peeranha: must have community admin role");
+        // .to.be.revertedWith("not_allowed_not_comm_admin");
     });
-
-    const createContract = async function() {
-        const PostLib = await ethers.getContractFactory("PostLib")
-        const postLib = await PostLib.deploy();
-        const Peeranha = await ethers.getContractFactory("Peeranha", {
-        libraries: {
-            PostLib: postLib.address,
-        }
-        });
-       
-        const peeranha = await Peeranha.deploy();
-        await peeranha.deployed();
-        await peeranha.__Peeranha_init();
-        return peeranha;
-    }
-
-    const getIdsContainer = (countOfCommunities) =>
-        Array.apply(null, { length: countOfCommunities }).map((undefined, index) => ++index);
-
-    const getHashesContainer = (size) =>
-        Array.apply(null, { length: size }).map(() => "0x" + crypto.randomBytes(32).toString("hex"));
-
-    const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
-
-    const createTags = (countOfTags) =>
-        getHashesContainer(countOfTags).map((hash) => {
-            const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-            return {"ipfsDoc": {hash, hash2}}
-        });
 
     const createCommunities = async (peeranha, countOfCommunities, communitiesIds) => {
         const ipfsHashes = getHashesContainer(countOfCommunities);
@@ -241,12 +213,4 @@ describe("Test community permissions", function() {
     //         }
     //       ))
     //     }
-    
-    const getHashContainer = () => {
-        return [
-            "0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-            "0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-            "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-        ];
-    };
 });

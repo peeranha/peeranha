@@ -16,8 +16,27 @@ library TokenLib {
     bool isPaid;
   }
 
-  /// @notice Get tokens' coefficient to 1 rating
-  function getRewardCoefficient() internal view returns (uint256) {
-    return COEFFICIENT_TOKEN;
+  struct StakeTotalContainer {
+    mapping(uint16 => StakeTotal) stakeTotals;               // period
+    uint16[] stakeChangePeriods;
+  }
+
+  struct StakeTotal {
+    uint256 totalStakedAmount;
+    uint64 stakingUsersCount;
+  }
+
+  struct UserPeriodStake {
+    mapping(address => StakeUserContainer) userPeriodStake;
+  }
+
+  struct StakeUserContainer {
+    mapping(uint16 => UserStake) userStake;                    // period
+    uint16[] stakeChangePeriods;
+  }
+
+  struct UserStake {
+    uint256 stakedAmount;
+    uint256 changedStake; // (only negative value) // unittest
   }
 }
