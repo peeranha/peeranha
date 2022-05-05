@@ -6,6 +6,9 @@ const {
 ////
 //	TO DO AcceptReply, Tutorial posts
 ///
+// to do
+// create post/reply/comment/update profile (not exist user)
+///
 
 describe("Test post", function () {
 

@@ -197,6 +197,18 @@ library UserLib {
     create(self.users, userAddress, ipfsHash);
   }
 
+  /// @notice Create new user info record
+  /// @param self The mapping containing all users
+  /// @param userAddress Address of the user to create 
+  function createIfDoesNotExist(
+    UserCollection storage self,
+    address userAddress
+  ) internal {
+    if (!UserLib.isExists(self, userAddress)) {
+      UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
+    }
+  }
+
   /// @notice Update new user info record
   /// @param userContext All information about users
   /// @param userAddress Address of the user to update
@@ -571,7 +583,7 @@ library UserLib {
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");   // в функции есть You can not vote for own post
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low rating to upvote (35 min)";
+      message = "low rating to upvote";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
@@ -642,7 +654,7 @@ library UserLib {
       user.lastUpdatePeriod = currentPeriod;
     }
 
-    require(userEnergy >= energy, "Not enough energy!");
+    require(userEnergy >= energy, "low_energy");
     user.energy = userEnergy - energy;
   }
 
