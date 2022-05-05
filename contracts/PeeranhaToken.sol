@@ -27,7 +27,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   // getstakedbalance (transfer + get balance)
   ///
 
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 3;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 4;
 
   TokenLib.StatusRewardContainer statusRewardContainer;
   TokenLib.UserPeriodStake userPeriodStake;
