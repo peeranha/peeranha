@@ -641,12 +641,12 @@ contract Peeranha is IPeeranha, Initializable {
     }
 
     // only unitTest
-    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) external view override returns(RewardLib.PeriodRating memory) {
+    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) external view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
     }
 
     // only unitTest
-    function getPeriodReward(uint16 rewardPeriod) external view override returns(int32) {
+    function getPeriodReward(uint16 rewardPeriod) external view returns(int32) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }
 

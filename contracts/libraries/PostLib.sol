@@ -10,7 +10,7 @@ import "./AchievementLib.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 10;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 3600;    //7 days (10)     // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }

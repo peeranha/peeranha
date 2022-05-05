@@ -27,7 +27,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   // getstakedbalance (transfer + get balance)
   ///
 
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 3;
 
   TokenLib.StatusRewardContainer statusRewardContainer;
   TokenLib.UserPeriodStake userPeriodStake;
@@ -80,6 +80,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   // to do cap
   ///
   function mintForOwner(uint256 mintTokens) external onlyOwner() {
+    // add limit
     _mint(owner(), mintTokens);
   }
 
