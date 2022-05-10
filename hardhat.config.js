@@ -12,7 +12,7 @@ const { INFURA_API_KEY, ADMIN_PRIVATE_KEY } = require('./secrets.json');
  */
 module.exports = {
   solidity: {
-    version: "0.7.5",
+    version: "0.8.2",
     settings: {
       optimizer: {
         enabled: true,
