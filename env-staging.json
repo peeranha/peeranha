@@ -11,5 +11,6 @@
   "IPFS_API_HOST": "ipfs.testpeeranha.io",
   "IPFS_API_PORT": "5001",
   "IPFS_PROTOCOL": "https",
-  "IPFS_CDN_HOST": "ipfs-cdn.testpeeranha.io"
+  "IPFS_CDN_HOST": "ipfs-cdn.testpeeranha.io",
+  "POLYGON_CHILD_MANAGER_ADDRESS": "0xb5505a6d998549090530911180f38aC5130101c6"
 }
