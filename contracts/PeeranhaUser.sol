@@ -1,7 +1,7 @@
 pragma solidity ^0.7.3;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/UserLib.sol";
 import "./libraries/AchievementLib.sol";

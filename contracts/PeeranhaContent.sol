@@ -1,7 +1,7 @@
 pragma solidity ^0.7.3;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // import "./libraries/UserLib.sol";
 // import "./libraries/CommunityLib.sol";
@@ -24,13 +24,13 @@ contract PeeranhaContent is IPeeranhaContent, Initializable {
 
     PostLib.PostCollection posts;
 
-    function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
+    function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public onlyInitializing {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         posts.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
     }
 
 
-    function __AccessControl_init_unchained() internal initializer {
+    function __AccessControl_init_unchained() internal onlyInitializing {
     }
 
     /**

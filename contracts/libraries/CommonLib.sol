@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 /// @title CommonLib
 /// @notice
