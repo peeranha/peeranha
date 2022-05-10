@@ -10,6 +10,7 @@ import "./AchievementLib.sol";
 import "./AchievementCommonLib.sol";
 import "./AchievementCommonLib.sol";
 import "../interfaces/IPeeranhaToken.sol";
+import "../interfaces/IPeeranhaCommunity.sol";
 
 
 /// @title Users
@@ -66,7 +67,6 @@ library UserLib {
 
   struct User {
     CommonLib.IpfsHash ipfsDoc;
-    uint256 creationTime;
     uint16 energy;
     uint16 lastUpdatePeriod;
     uint32[] followedCommunities;
@@ -98,14 +98,15 @@ library UserLib {
 
   /// users The mapping containing all users
   struct UserContext {
-    UserLib.UserCollection users;
+    UserLib.UserCollection users;     // rename to usersCollection
     UserLib.UserRatingCollection userRatingCollection;
-    UserLib.UserDelegationCollection userDelegationCollection;
     RewardLib.PeriodRewardContainer periodRewardContainer;
     UserLib.Roles roles;
     UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
     IPeeranhaToken peeranhaToken;
+    IPeeranhaCommunity peeranhaCommunity;
+    address peeranhaCommunityAddress;
   }
   
   struct UserCollection {
@@ -124,6 +125,7 @@ library UserLib {
   }
 
   enum Action {
+    NONE,
     publicationPost,
     publicationReply,
     publicationComment,
@@ -174,27 +176,11 @@ library UserLib {
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
-    user.creationTime = CommonLib.getTimestamp();
     user.energy = getStatusEnergy(START_USER_RATING);
 
     self.userList.push(userAddress);
 
     emit UserCreated(userAddress);
-  }
-
-  /// @notice Create new user info record
-  /// @param self The mapping containing all users
-  /// @param userAddress Address of the user to create 
-  /// @param ipfsHash IPFS hash of document with user information
-  function createByDelegate(
-    UserContext storage self,
-    address msgSender,
-    address userAddress,
-    bytes32 ipfsHash
-  ) internal {
-    require(msgSender == self.userDelegationCollection.delegateUser, "invld_user");
-    self.userDelegationCollection.userDelegations[userAddress] = 1;
-    create(self.users, userAddress, ipfsHash);
   }
 
   /// @notice Create new user info record
@@ -214,19 +200,20 @@ library UserLib {
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    UserLib.UserContext storage userContext,
+    UserContext storage userContext,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
     User storage user = getUserByAddress(userContext.users, userAddress);
-    UserLib.checkRatingAndEnergy(
+    checkRatingAndEnergy(
       userContext.roles,
       user,
       0,
       userAddress,
       userAddress,
       0,
-      UserLib.Action.updateProfile
+      Action.updateProfile,
+      Permission.NONE
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -238,19 +225,21 @@ library UserLib {
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function followCommunity(
-    UserLib.UserContext storage userContext,
+    UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
     User storage user = getUserByAddress(userContext.users, userAddress);
-    UserLib.checkRatingAndEnergy(
+
+    checkRatingAndEnergy(
       userContext.roles,
       user,
       getUserRating(userContext.userRatingCollection, userAddress, communityId),
       userAddress,
       userAddress,
       0,
-      UserLib.Action.followCommunity
+      Action.followCommunity,
+      Permission.NONE
     );
 
     bool isAdded;
@@ -321,23 +310,8 @@ library UserLib {
   /// @notice Check user existence
   /// @param self The mapping containing all users
   /// @param addr Address of the user to check
-  function isExists(UserCollection storage self, address addr) internal view returns (bool) {
+  function isExists(UserCollection storage self, address addr) internal view returns (bool) { // need?
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
-  }
-
-  /// @notice Check user delegated permissions for certain actions
-  /// @param delegations User delegations
-  /// @param delegateUser Delegate user address
-  function setDelegateUser(UserDelegationCollection storage delegations, address delegateUser) internal {
-    delegations.delegateUser = delegateUser;
-  }
-  
-  
-  /// @notice Check user delegated permissions for certain actions
-  /// @param delegateUser Delegate user address
-  /// @param userAddress Address of the user to check
-  function isDelegateUser(UserDelegationCollection storage delegations, address delegateUser, address userAddress) internal view returns (bool) {
-    return delegateUser == delegations.delegateUser && delegations.userDelegations[userAddress] == 1;
   }
 
   function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
@@ -519,7 +493,7 @@ library UserLib {
     }
   }
 
-  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
+  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) { // FIX
     return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
   }
 
@@ -534,23 +508,66 @@ library UserLib {
     return bytes32(role + communityId);
   }
 
+  // function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
+  //   require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
+  //       "not_allowed_not_moderator");
+  // }
+
+  
+  enum Permission {
+    NONE,
+    admin,
+    adminOrCommunityModerator,
+    adminOrCommunityAdmin,
+    communityAdmin,
+    communityModerator
+  }
+
   function checkRatingAndEnergy(
+    // UserContext storage userContext,
     Roles storage role,
     UserLib.User storage user,
     int32 userRating,
     address actionCaller,
     address dataUser,
     uint32 communityId,
-    Action action
+    Action action,
+    Permission permission
   )
     internal
   {
-    if (hasModeratorRole(role, actionCaller, communityId)) return;
+    if (permission == Permission.NONE) {
+      if (hasModeratorRole(role, actionCaller, communityId))
+        return;
+    } else if (permission == Permission.admin) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller), 
+        "not_allowed_not_admin");
+    
+    } else if (permission == Permission.adminOrCommunityModerator) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) ||
+        (hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+        "not_allowed_admin_or_comm_admin");
+
+    } else if (permission == Permission.adminOrCommunityAdmin) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) || 
+        (hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+        "not_allowed_admin_or_comm_admin");
+
+    } else if (permission == Permission.communityAdmin) {
+      require((hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+        "not_allowed_not_comm_admin");
+
+    } else if (permission == Permission.communityModerator) {
+      require((hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+        "not_allowed_not_moderator");
+    }
     
     int16 ratingAllowed;
     string memory message;
     uint8 energy;
-    if (action == Action.publicationPost) {
+    if (action == Action.NONE) {
+      return;
+    } else if (action == Action.publicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
@@ -592,49 +609,48 @@ library UserLib {
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
+    } else if (action == Action.voteComment) {
+      require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
+      ratingAllowed = VOTE_COMMENT_ALLOWED;
+      message = "low_rating_vote_comment";
+      energy = ENERGY_VOTE_COMMENT;
+
+    }
+     else if (action == Action.downVotePost) {
+      require(actionCaller != dataUser, "not_allowed_vote_post");
+      ratingAllowed = DOWNVOTE_POST_ALLOWED;
+      message = "low_rating_downvote_post";
+      energy = ENERGY_DOWNVOTE_QUESTION;
+
+    } else if (action == Action.downVoteReply) {
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
+      ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
+      message = "low_rating_downvote_reply";
+      energy = ENERGY_DOWNVOTE_ANSWER;
+
+    } else if (action == Action.cancelVote) {
+      ratingAllowed = CANCEL_VOTE;
+      message = "low_rating_cancel_vote";
+      energy = ENERGY_FORUM_VOTE_CANCEL;
+
+    } else if (action == Action.bestReply) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_mark_best";
+      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+
+    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
+      energy = ENERGY_UPDATE_PROFILE;
+
     } 
-    // else if (action == Action.voteComment) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
-    //   ratingAllowed = VOTE_COMMENT_ALLOWED;
-    //   message = "low_rating_vote_comment";
-    //   energy = ENERGY_VOTE_COMMENT;
+    else if (action == Action.followCommunity) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_follow_comm";
+      energy = ENERGY_FOLLOW_COMMUNITY;
 
-    // }
-    //  else if (action == Action.downVotePost) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_post");
-    //   ratingAllowed = DOWNVOTE_POST_ALLOWED;
-    //   message = "low_rating_downvote_post";
-    //   energy = ENERGY_DOWNVOTE_QUESTION;
-
-    // } else if (action == Action.downVoteReply) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_reply");
-    //   ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
-    //   message = "low_rating_downvote_reply";
-    //   energy = ENERGY_DOWNVOTE_ANSWER;
-
-    // } else if (action == Action.cancelVote) {
-    //   ratingAllowed = CANCEL_VOTE;
-    //   message = "low_rating_cancel_vote";
-    //   energy = ENERGY_FORUM_VOTE_CANCEL;
-
-    // } else if (action == Action.bestReply) {
-    //   ratingAllowed = MINIMUM_RATING;
-    //   message = "low_rating_mark_best";
-    //   energy = ENERGY_MARK_REPLY_AS_CORRECT;
-
-    // } else if (action == Action.updateProfile) { //userRating - always 0 (const)
-    //   energy = ENERGY_UPDATE_PROFILE;
-
-    // } 
-    // else if (action == Action.followCommunity) {
-    //   ratingAllowed = MINIMUM_RATING;
-    //   message = "low_rating_follow_comm";
-    //   energy = ENERGY_FOLLOW_COMMUNITY;
-
-    // } 
-    // else {
-    //   require(false, "not_allowed_action");
-    // }
+    } 
+    else {
+      require(false, "not_allowed_action");
+    }
 
     require(userRating >= ratingAllowed, message);
     reduceEnergy(user, userRating, energy);
@@ -642,8 +658,7 @@ library UserLib {
 
   function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
     int32 rating = userRating;
-    uint256 currentTime = CommonLib.getTimestamp();
-    uint16 currentPeriod = uint16((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
+    uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
     uint16 userEnergy;
@@ -836,33 +851,6 @@ library UserLib {
       userContext.userRoles.userRoles[account].push(role);   
       emit RoleGranted(role, account, msg.sender);
     }
-  }
-
-  function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
-    require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "not_allowed_not_moderator");
-  }
-
-    function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
-    require((hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "not_allowed_not_comm_admin");
-  }
-
-  function onlyAdminOrCommunityAdmin(Roles storage self, uint32 communityId) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) || 
-        (hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "not_allowed_admin_or_comm_admin");
-  }
-
-  function onlyAdminOrCommunityModerator(Roles storage self, uint32 communityId) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) ||
-        (hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "not_allowed_admin_or_comm_admin");
-  }
-
-  function onlyAdmin(Roles storage self) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender), 
-        "not_allowed_not_admin");
   }
 
   function getStatusEnergy(int32 rating) internal returns (uint16) {

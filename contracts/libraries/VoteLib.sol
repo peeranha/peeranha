@@ -188,7 +188,7 @@ library VoteLib  {
     /// @param historyVote history vote all users
     // return value:
     // downVote = -1
-    // nothing = 0
+    // NONE = 0
     // upVote = 1
     function getHistoryVote(
         address user,

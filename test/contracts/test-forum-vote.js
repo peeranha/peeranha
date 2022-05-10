@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { 
-	wait, createContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags,
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags,
 	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
@@ -23,7 +23,7 @@ describe("Test vote", function () {
 	describe("Test upVote post", function () {
 
 		it("Test upVote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -45,7 +45,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -67,7 +67,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test upVote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -92,7 +92,7 @@ describe("Test vote", function () {
 	describe("Test double upVote post", function () {
 
 		it("Test double upVote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -117,7 +117,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test double upVote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -142,7 +142,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test double upVote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -165,7 +165,7 @@ describe("Test vote", function () {
 	describe("Test upVote own post", function () {
 
 		it("Test upVote own expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -183,7 +183,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote own common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -200,7 +200,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote own tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -220,7 +220,7 @@ describe("Test vote", function () {
 	describe("Test downVote post", function () {
 
 		it("Test downVote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -244,7 +244,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -268,7 +268,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -295,7 +295,7 @@ describe("Test vote", function () {
 	describe("Test double downVote post", function () {
 
 		it("Test double downVote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -320,7 +320,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test double downVote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -345,7 +345,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test double downVote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -373,7 +373,7 @@ describe("Test vote", function () {
 	describe("Test downVote own post", function () {
 
 		it("Test downVote own expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -390,7 +390,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote own common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -407,7 +407,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote own tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -427,7 +427,7 @@ describe("Test vote", function () {
 	describe("Test change vote for post", function () {
 
 		it("Test downVote after upvote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -452,7 +452,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upvote after downvote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -476,7 +476,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downvote after upvote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -500,7 +500,7 @@ describe("Test vote", function () {
 		});
 		
 		it("Test upvote after downvote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -524,7 +524,7 @@ describe("Test vote", function () {
 		});
 
         it("Test downvote after upvote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -548,7 +548,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upvote after downvote tutorial post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -575,7 +575,7 @@ describe("Test vote", function () {
 	describe("Test delete post after vote for post", function () {
 
 		it("Test delete post after upvote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -601,7 +601,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after upvote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -627,7 +627,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after upvote tutorial ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -654,7 +654,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after downvote expert post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -681,7 +681,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after downvote common post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -708,7 +708,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after downvote tutorial", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -737,7 +737,7 @@ describe("Test vote", function () {
 	describe("Test delete post after vote for reply", function () {
 
 		it("Test delete post after upvote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -769,7 +769,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after upvote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -801,7 +801,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post after upvote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -832,7 +832,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after downvote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -861,7 +861,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after downvote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -889,7 +889,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post after downvote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -916,7 +916,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after choosing best expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -946,7 +946,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post after choosing best common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -976,7 +976,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post after choosing best tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1010,7 +1010,7 @@ describe("Test vote", function () {
 	describe("Test delete post one period after vote for reply", function () {
 
 		it("Test delete post one period after create expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1035,7 +1035,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post one period after create common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1061,7 +1061,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post one period after create tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1086,7 +1086,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post one period after upvote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1113,7 +1113,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post one period after upvote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1140,7 +1140,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post one period after upvote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1164,7 +1164,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post one period after choosing best expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1191,7 +1191,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete post one period after choosing best common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1218,7 +1218,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete post one period after choosing best tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1245,7 +1245,7 @@ describe("Test vote", function () {
 	describe("Test delete own post/reply", function () {
 
 		it("Test delete own post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -1260,7 +1260,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete own reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1281,7 +1281,7 @@ describe("Test vote", function () {
 	describe("Test create first reply", function () {
 
 		it("Test create first expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1303,7 +1303,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test create first common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1325,7 +1325,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test create first tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1350,7 +1350,7 @@ describe("Test vote", function () {
 	describe("Test create first and quick reply", function () {
 
 		it("Test create first and quick expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1371,7 +1371,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test create first and quick common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1392,7 +1392,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test create first and quick tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1416,7 +1416,7 @@ describe("Test vote", function () {
 	describe("Test create first and quick reply for own post", function () {
 
 		it("Test create first and quick expert reply for own post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -1435,7 +1435,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test create first and quick common reply for own post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -1454,7 +1454,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test create first and quick tutorial reply for own post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -1476,7 +1476,7 @@ describe("Test vote", function () {
 	describe("Test upVote reply", function () {
 
 		it("Test upVote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1499,7 +1499,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1522,7 +1522,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test upVote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1548,7 +1548,7 @@ describe("Test vote", function () {
 	describe("Test downVote reply", function () {
 
 		it("Test downVote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1571,7 +1571,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1594,7 +1594,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test downVote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1620,7 +1620,7 @@ describe("Test vote", function () {
 	describe("Test double upVote reply", function () {
 
 		it("Test double upVote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1645,7 +1645,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test double upVote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1670,7 +1670,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test double upVote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1697,7 +1697,7 @@ describe("Test vote", function () {
 	describe("Test double downVote reply", function () {
 
 		it("Test double downVote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1721,7 +1721,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test double downVote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1745,7 +1745,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test double downVote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1772,7 +1772,7 @@ describe("Test vote", function () {
 	describe("Test upVote own reply", function () {
 
 		it("Test upVote own expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1791,7 +1791,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote own common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1810,7 +1810,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test upVote own tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1832,7 +1832,7 @@ describe("Test vote", function () {
 	describe("Test downVote own reply", function () {
 
 		it("Test downVote own expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1851,7 +1851,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote own common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1873,7 +1873,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test downVote own tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1895,7 +1895,7 @@ describe("Test vote", function () {
 	describe("Test create 2 reply, one first and two quick", function () {
 
 		it("Test create 2 expert reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1923,7 +1923,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test create 2 common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1951,7 +1951,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test create 2 tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1982,7 +1982,7 @@ describe("Test vote", function () {
 	describe("Test change vote for 2 reply, one first and two quick", function () {
 
 		it("Test downVote after upVote 2 expert reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2014,7 +2014,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote after upVote 2 common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2046,7 +2046,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test downVote after upVote 2 tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2078,7 +2078,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote after downVote 2 expert reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2112,7 +2112,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote after downVote 2 common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2146,7 +2146,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test upVote after downVote 2 tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2183,7 +2183,7 @@ describe("Test vote", function () {
 	describe("Test delete 2 reply, one first and two quick", function () {
 
 		it("Test delete 2 expert reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2207,7 +2207,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete 2 common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2231,7 +2231,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete 2 tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2258,7 +2258,7 @@ describe("Test vote", function () {
 	describe("Test delete 2 upVoted reply, one first and two quick", function () {
 
 		/* - */ xit("Test delete 2 upVoted expert reply, one first and two quick", async function () { // time
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2293,7 +2293,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete 2 upVoted common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2320,7 +2320,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete 2 upVoted tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2350,7 +2350,7 @@ describe("Test vote", function () {
 	describe("Test delete 2 downVoted reply, one first and two quick", function () {
 
 		it("Test delete 2 downVoted expert reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2377,7 +2377,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete 2 downVoted common reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2404,7 +2404,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete 2 downVoted tutorial reply, one first and two quick ", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2434,7 +2434,7 @@ describe("Test vote", function () {
 	describe("Test delete first reply and post one more", function () {
 
 		it("Test delete first expert reply and post one more by another user", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2463,7 +2463,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete first common reply and post one more by another user", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2493,7 +2493,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete first expert reply and post one more by same user", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2521,7 +2521,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete first common reply and post one more by same user", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2553,7 +2553,7 @@ describe("Test vote", function () {
 	describe("Test delete reply one period after vote for reply", function () {
 
 		it("Test delete reply one period after create expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2575,7 +2575,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete reply one period after create common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2597,7 +2597,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete reply one period after create tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2618,7 +2618,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete reply one period after upvote expert reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2641,7 +2641,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete reply one period after upvote common reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2664,7 +2664,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test delete reply one period after upvote tutorial reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2689,7 +2689,7 @@ describe("Test vote", function () {
 	describe("Test mark reply as best", function () {
 
 		it("Test mark expert reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2711,7 +2711,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test mark common reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2733,7 +2733,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test mark tutorial reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2758,7 +2758,7 @@ describe("Test vote", function () {
 	describe("Test mark own reply as best", function () {
 
 		it("Test mark own expert reply as best", async function () { // Need to be fixed
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2776,7 +2776,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test mark own common reply as best", async function () { // Need to be fixed
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2794,7 +2794,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test mark own tutorial reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2815,7 +2815,7 @@ describe("Test vote", function () {
 	describe("Test unmark reply as best", function () {
 
 		it("Test unmark expert reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2835,7 +2835,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test unmark common reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2855,7 +2855,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test unmark tutorial reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2878,7 +2878,7 @@ describe("Test vote", function () {
 	describe("Test unmark own reply as best", function () {
 
 		it("Test unmark own expert reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2897,7 +2897,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test unmark own common reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2916,7 +2916,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test unmark own tutorial reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2938,7 +2938,7 @@ describe("Test vote", function () {
 	describe("Test choose another reply as best", function () {
 
 		it("Test choose another expert reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -2974,7 +2974,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test choose another common reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3010,7 +3010,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test choose another tutorial reply as best", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3049,7 +3049,7 @@ describe("Test vote", function () {
 	describe("Test choose another reply as best (new reply is own)", function () {
 
 		it("Test choose another expert reply as best (new reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3079,7 +3079,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test choose another common reply as best (new reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3109,7 +3109,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test choose another tutorial reply as best (new reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3142,7 +3142,7 @@ describe("Test vote", function () {
 	describe("Test choose another reply as best (old reply is own)", function () {
 
 		it("Test choose another expert reply as best (old reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3172,7 +3172,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test choose another common reply as best (old reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3202,7 +3202,7 @@ describe("Test vote", function () {
 		});
 
 		/* - */ xit("Test choose another tutorial reply as best (old reply is own)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3235,7 +3235,7 @@ describe("Test vote", function () {
 	describe("Test vote after delete post", function () {
 
 		it("Test upvote post after delete post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3249,7 +3249,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downvote post after delete post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3263,7 +3263,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upvote reply after delete post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3278,7 +3278,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downvote reply after delete post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3293,7 +3293,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test choose reply as the best after delete post", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3311,7 +3311,7 @@ describe("Test vote", function () {
 	describe("Test vote after delete reply", function () {
 
 		it("Test upvote reply after delete reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3326,7 +3326,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downvote reply after delete reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3341,7 +3341,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test choose reply as the best after delete reply", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
@@ -3358,7 +3358,7 @@ describe("Test vote", function () {
 
 	describe('Change post type', function () {
 		it("Test upVote post expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3382,7 +3382,7 @@ describe("Test vote", function () {
 		});
 
 		xit("Test upVote post expert -> tutorial", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3403,7 +3403,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote post common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3427,7 +3427,7 @@ describe("Test vote", function () {
 		});
 
 		xit("Test upVote post tutorial -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3448,7 +3448,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote post expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3478,7 +3478,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote post common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3507,7 +3507,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 4 zero vote post expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3540,7 +3540,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test zero vote post common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3573,7 +3573,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote reply expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3595,7 +3595,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote reply common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3617,7 +3617,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote reply expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3639,7 +3639,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote reply common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3661,7 +3661,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote reply expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3691,7 +3691,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote reply common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3721,7 +3721,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 4 zero vote reply expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3755,7 +3755,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test zero vote reply common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3790,7 +3790,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test first/best reply expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3811,7 +3811,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test first/best reply common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3832,7 +3832,7 @@ describe("Test vote", function () {
 		});
 
 		xit("Test best reply expert -> common", async function () {		//// merge develop
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3859,7 +3859,7 @@ describe("Test vote", function () {
 	describe('Change the same type post', function () {
 
 		it("Change the same type post (expert)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -3873,7 +3873,7 @@ describe("Test vote", function () {
 		});
 
 		it("Change the same type post (common)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -3887,7 +3887,7 @@ describe("Test vote", function () {
 		});
 
         it("Change the same type post (common)", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
@@ -3903,7 +3903,7 @@ describe("Test vote", function () {
 
 	describe('Actions after change post type', function () {
 		it("Test upVote post after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3925,7 +3925,7 @@ describe("Test vote", function () {
 		});
 
 		xit("Test upVote post after expert -> tutorial", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3943,7 +3943,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote post after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3964,7 +3964,7 @@ describe("Test vote", function () {
 		});
 
 		xit("Test upVote post after tutorial -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -3982,7 +3982,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote post after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4009,7 +4009,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote post after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4036,7 +4036,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test cancel vote post after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4068,7 +4068,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test cancel vote post after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4100,7 +4100,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote reply after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4119,7 +4119,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test upVote reply after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4138,7 +4138,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote reply after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4157,7 +4157,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test downVote reply after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4176,7 +4176,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote reply after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4203,7 +4203,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test 2 upVote 2 downVote reply after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4230,7 +4230,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test cancel vote reply after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4262,7 +4262,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test cancel vote reply after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4294,7 +4294,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test first/best reply after expert -> common", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4312,7 +4312,7 @@ describe("Test vote", function () {
 		});
 
 		it("Test first/best reply after common -> expert", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4330,7 +4330,7 @@ describe("Test vote", function () {
 		});
 
 		// xit("Test best reply expert -> common", async function () {		//// merge develop
-		// 	const peeranha = await createContract();
+		// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 		// 	const signers = await ethers.getSigners();
 		// 	const hashContainer = getHashContainer();
 		// 	const ipfsHashes = getHashesContainer(2);
@@ -4355,7 +4355,7 @@ describe("Test vote", function () {
 		// best reply
 
 		it("Test delete post after change post type", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4373,7 +4373,7 @@ describe("Test vote", function () {
 		});
 		
 		it("Test delete reply after change post type", async function () {
-			const peeranha = await createContract();
+			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -4393,7 +4393,7 @@ describe("Test vote", function () {
 	});
 
 	// it("Test upVote own comment", async function () {
-	// 	const peeranha = await createContract();
+	// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 	// 	const signers = await ethers.getSigners();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);
@@ -4409,7 +4409,7 @@ describe("Test vote", function () {
 
 
 	// it("Test upVote expert comment", async function () {
-	// 	const peeranha = await createContract();
+	// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 	// 	const signers = await ethers.getSigners();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);
@@ -4433,7 +4433,7 @@ describe("Test vote", function () {
 	// });
 
 	// it("Test downVote expert comment", async function () {
-	// 	const peeranha = await createContract();
+	// 	const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
 	// 	const signers = await ethers.getSigners();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);

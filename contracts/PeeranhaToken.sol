@@ -3,8 +3,8 @@ pragma abicoder v2;
 import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/TokenLib.sol";
-import "./interfaces/IPeeranha.sol";
 import "./interfaces/IPeeranhaToken.sol";
+import "./interfaces/IPeeranhaUser.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -32,16 +32,16 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   TokenLib.StatusRewardContainer statusRewardContainer;
   TokenLib.UserPeriodStake userPeriodStake;
   TokenLib.StakeTotalContainer stakeTotalContainer;
-  IPeeranha peeranha;
+  IPeeranhaUser peeranhaUser;
 
   event GetReward(address user, uint16 period);
   event SetStake(address user, uint16 period, uint256 stake);
 
 
-  function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress) public initializer {
     __Token_init(name, symbol);
-    peeranha = IPeeranha(peeranhaNFTContractAddress);
     __Ownable_init_unchained();
+    peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
   }
 
   function __Token_init(string memory name, string memory symbol) internal initializer {
@@ -103,7 +103,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranha.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardContainer(period);
     
     uint256 totalPeriodReward = getTotalPeriodReward(periodRewardShares, period);
 
@@ -183,9 +183,9 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, address user, uint16 period, uint256 poolToken) private view returns(uint256) {
     int32 ratingToReward;
     int32 tokenReward;
-    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
+    uint32[] memory rewardCommunities = peeranhaUser.getUserRewardCommunities(user, period);
     for (uint32 i; i < rewardCommunities.length; i++) {
-      ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
+      ratingToReward = peeranhaUser.getRatingToReward(user, period, rewardCommunities[i]);
       if (ratingToReward > 0)
         tokenReward += ratingToReward;
     }
@@ -197,7 +197,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   }
 
   function getUserRewardGraph(address user, uint16 period) public view returns(uint256) {
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranha.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardContainer(period);
     uint256 poolToken = getTotalPeriodReward(periodRewardShares, period);
     uint256 userReward = getUserReward(periodRewardShares, user, period, poolToken);
     

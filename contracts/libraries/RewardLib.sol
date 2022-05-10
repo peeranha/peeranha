@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0;
 pragma abicoder v2;
-import "../Peeranha.sol";
 import "./CommonLib.sol";
 import "./UserLib.sol";
 

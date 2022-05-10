@@ -57,35 +57,51 @@ const getUserReward = async function (userRating, periodRating) {
 }
 
 const createPeerenhaAndTokenContract = async function () {
-    const PostLib = await ethers.getContractFactory("PostLib")
-    const CommunityLib = await ethers.getContractFactory("CommunityLib")
-    const postLib = await PostLib.deploy();
-    const communityLib = await CommunityLib.deploy();
-    const Peeranha = await ethers.getContractFactory("Peeranha", {
-    libraries: {
-            PostLib: postLib.address,
-            CommunityLib: communityLib.address,
-    }
+    const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+    const peeranhaNFT = await PeeranhaNFT.deploy();
+    await peeranhaNFT.deployed();
+    const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
+        return value;
     });
-    const peeranha = await Peeranha.deploy();
-    await peeranha.deployed();
-    await peeranha.__Peeranha_init();
-
-    const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+    
+    const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+    const peeranhaCommunity = await PeeranhaCommunity.deploy();
+    await peeranhaCommunity.deployed();
+    const peeranhaCommunityContractAddress = await peeranhaCommunity.resolvedAddress.then((value) => {
         return value;
     });
 
     const Token = await ethers.getContractFactory("PeeranhaToken");
     const token = await Token.deploy();
     await token.deployed();
-    await token.initialize("token", "ecs", peeranhaContractAddress);
-
-    const tokenContractAddress = await token.resolvedAddress.then((value) => {
+    const peeranhaTokenContractAddress = await token.resolvedAddress.then((value) => {
         return value;
     });
-    await peeranha.setTokenContract(tokenContractAddress);
+    
+    const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+    const peeranhaUser = await PeeranhaUser.deploy();
+    await peeranhaUser.deployed();
+    await peeranhaUser.initialize(peeranhaCommunityContractAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
+    const peeranhaUserContractAddress = await peeranhaUser.resolvedAddress.then((value) => {
+        return value;
+    });
 
-    return { peeranha: peeranha, token: token, accountDeployed: peeranha.deployTransaction.from};
+    const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent");
+    const peeranhaContent = await PeeranhaContent.deploy();
+    await peeranhaContent.deployed();
+    await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
+
+    await peeranhaCommunity.initialize(peeranhaUserContractAddress);
+    await token.initialize("token", "ecs", peeranhaUserContractAddress);
+
+    return {
+        peeranhaContent: peeranhaContent,
+        peeranhaUser: peeranhaUser,
+        peeranhaCommunity: peeranhaCommunity,
+        token: token,
+        peeranhaNFT: peeranhaNFT,
+        accountDeployed: peeranhaContent.deployTransaction.from
+    }
 };
 
 const getIdsContainer = (countOfCommunities) =>

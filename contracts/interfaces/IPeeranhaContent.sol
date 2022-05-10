@@ -3,7 +3,7 @@ pragma abicoder v2;
 
 import "../libraries/PostLib.sol";
 
-interface IPeeranhaPost {
+interface IPeeranhaContent {
     function createPost(address userAddress, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external;
     function createReply(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external;
     function createComment(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external;
