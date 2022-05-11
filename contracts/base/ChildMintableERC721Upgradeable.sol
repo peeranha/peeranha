@@ -46,7 +46,9 @@ contract ChildMintableERC721Upgradeable is
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IChildToken).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**
