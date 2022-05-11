@@ -1,5 +1,4 @@
-pragma solidity ^0.7.3;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
 import "./libraries/AchievementCommonLib.sol";
@@ -71,8 +70,8 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
     uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
 
     _safeMint(user, tokenId);          // || _mint
-    _setTokenURI(tokenId, achievementNFT.achievementURI);
-
+    // TODO: Learn how to set token URL in new version
+    // _setTokenURI(tokenId, achievementNFT.achievementURI);
     // check uri?
   }
 

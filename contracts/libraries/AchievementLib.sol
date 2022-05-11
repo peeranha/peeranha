@@ -1,5 +1,4 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
 import "../interfaces/IPeeranhaNFT.sol";
 import "./AchievementCommonLib.sol";

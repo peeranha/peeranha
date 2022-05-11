@@ -1,5 +1,4 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
@@ -19,7 +18,7 @@ library CommonLib {
     return SafeCastUpgradeable.toUint32(block.timestamp);
   }
 
-  function toInt32(int value) internal view returns (int32) {
+  function toInt32(int value) internal pure returns (int32) {
     return SafeCastUpgradeable.toInt32(value);
   }
 

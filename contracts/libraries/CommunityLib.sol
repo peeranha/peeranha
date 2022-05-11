@@ -1,5 +1,5 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
+
 import "./CommonLib.sol";
 import "./PostLib.sol";
 
