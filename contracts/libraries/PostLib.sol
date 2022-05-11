@@ -115,7 +115,7 @@ library PostLib  {
         bytes32 ipfsHash,
         PostType postType,
         uint8[] memory tags
-    ) internal {
+    ) public {
         self.peeranhaUser.checkPermission(
             userAddr,
             userAddr,
@@ -153,7 +153,7 @@ library PostLib  {
         uint16 parentReplyId,
         bytes32 ipfsHash,
         bool isOfficialReply
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial, "You can not publish replies in tutorial.");
 
@@ -233,7 +233,7 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
 
@@ -278,7 +278,7 @@ library PostLib  {
         uint256 postId,
         bytes32 ipfsHash,
         uint8[] memory tags
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -305,7 +305,7 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -332,7 +332,7 @@ library PostLib  {
         uint16 parentReplyId,
         uint8 commentId,
         bytes32 ipfsHash
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
@@ -360,7 +360,7 @@ library PostLib  {
         PostCollection storage self,
         address userAddr,
         uint256 postId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaUser.checkPermission(
             userAddr,
@@ -407,7 +407,7 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.bestReply != replyId, "You can not delete the best reply."); // unit test
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -483,7 +483,7 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
         self.peeranhaUser.checkPermission(
@@ -514,7 +514,7 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         // check + energy?
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaUser.checkPermission(
@@ -546,7 +546,7 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 replyId
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.author == userAddr, "Only owner by post can change statust best reply.");
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -617,7 +617,7 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId,
         bool isUpvote
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
@@ -653,7 +653,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) internal {
+    ) public {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkPermission(
             votedUser,
@@ -686,7 +686,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) internal {
+    ) public {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         self.peeranhaUser.checkPermission(
             votedUser,
@@ -813,7 +813,7 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         PostType newPostType
-    ) internal {
+    ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaUser.checkPermission(
             userAddr,
@@ -874,7 +874,7 @@ library PostLib  {
 
     function getTypesRating(        //name?
         PostType postType
-    ) internal view returns (VoteLib.StructRating memory) {
+    ) private view returns (VoteLib.StructRating memory) {
         if (postType == PostType.ExpertPost)
             return VoteLib.getExpertRating();
         else if (postType == PostType.CommonPost)
@@ -890,7 +890,7 @@ library PostLib  {
     function getPostContainer(
         PostCollection storage self,
         uint256 postId
-    ) internal view returns (PostContainer storage) {
+    ) public view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
         require(!CommonLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
         require(!post.info.isDeleted, "Post has been deleted.");
@@ -904,7 +904,7 @@ library PostLib  {
     function getReplyContainer(
         PostContainer storage postContainer,
         uint16 replyId
-    ) internal view returns (ReplyContainer storage) {
+    ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer = postContainer.replies[replyId];
 
         require(!CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply does not exist.");
@@ -917,7 +917,7 @@ library PostLib  {
     function getReplyContainerSafe(
         PostContainer storage postContainer,
         uint16 replyId
-    ) internal view returns (ReplyContainer storage) {
+    ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
         require(!replyContainer.info.isDeleted, "Reply has been deleted.");
 
@@ -932,7 +932,7 @@ library PostLib  {
         PostContainer storage postContainer,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal view returns (CommentContainer storage) {
+    ) public view returns (CommentContainer storage) {
         CommentContainer storage commentContainer;
 
         if (parentReplyId == 0) {
@@ -954,7 +954,7 @@ library PostLib  {
         PostContainer storage postContainer,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal view returns (CommentContainer storage) {
+    ) public view returns (CommentContainer storage) {
         CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
 
         require(!commentContainer.info.isDeleted, "Comment has been deleted.");
@@ -967,7 +967,7 @@ library PostLib  {
     function getPost(
         PostCollection storage self,
         uint256 postId
-    ) internal view returns (Post memory) {        
+    ) public view returns (Post memory) {        
         return self.posts[postId].info;
     }
 
@@ -979,7 +979,7 @@ library PostLib  {
         PostCollection storage self, 
         uint256 postId, 
         uint16 replyId
-    ) internal view returns (Reply memory) {
+    ) public view returns (Reply memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getReplyContainer(postContainer, replyId).info;
     }
@@ -994,7 +994,7 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId
-    ) internal view returns (Comment memory) {
+    ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
     }
@@ -1015,7 +1015,7 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         uint8 commentId
-    ) internal view returns (int256) {
+    ) public view returns (int256) {
         PostContainer storage postContainer = getPostContainer(self, postId);
 
         int256 statusHistory;
@@ -1042,7 +1042,7 @@ library PostLib  {
     //     uint256 postId,
     //     uint16 replyId,
     //     uint8 commentId
-    // ) internal view returns (address[] memory) {
+    // ) public view returns (address[] memory) {
     //     PostContainer storage postContainer = getPostContainer(self, postId);
 
     //     address[] memory votedUsers;
