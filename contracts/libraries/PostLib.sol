@@ -828,8 +828,8 @@ library PostLib  {
         VoteLib.StructRating memory oldTypeRating = getTypesRating(postContainer.info.postType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
-        uint8 positive;
-        uint8 negative;
+        int32 positive;
+        int32 negative;
         for (uint32 i; i < postContainer.votedUsers.length; i++) {
             if(postContainer.historyVotes[postContainer.votedUsers[i]] == 1) positive++;
             else if(postContainer.historyVotes[postContainer.votedUsers[i]] == -1) negative++;

@@ -189,10 +189,12 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
       if (ratingToReward > 0)
         tokenReward += ratingToReward;
     }
-    if (tokenReward == 0) return 0;
+    // TODO: tokenReward must be of type uint32
+    // TODO: totalRewardShares must be of type uint32
+    if (tokenReward <= 0 || periodRewardShares.totalRewardShares <= 0) return 0;
 
-    uint256 userReward = (poolToken * uint256(tokenReward * getBoost(user, period))) ;
-    userReward /= uint256(periodRewardShares.totalRewardShares);
+    uint256 userReward = (poolToken * uint256(uint32(tokenReward * getBoost(user, period))));
+    userReward /= uint256(uint32(periodRewardShares.totalRewardShares));
     return userReward;
   }
 
@@ -228,7 +230,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;
     }
-    return int32(boost);
+    return int32(int256(boost));
   }
 
   function getUserStake(address user, uint16 findingPeriod) public view returns (uint256) {
