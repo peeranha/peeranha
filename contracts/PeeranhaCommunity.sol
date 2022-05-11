@@ -3,12 +3,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/CommunityLib.sol";
+import "./base/NativeMetaTransaction.sol";
 
 import "./interfaces/IPeeranhaCommunity.sol";
 import "./interfaces/IPeeranhaUser.sol";
 
 
-contract PeeranhaCommunity is IPeeranhaCommunity, Initializable {
+contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTransaction {
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
 

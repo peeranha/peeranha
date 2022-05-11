@@ -3,14 +3,16 @@ pragma solidity ^0.8.0;
 import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/TokenLib.sol";
+import "./base/ChildMintableERC20Upgradeable.sol";
 import "./interfaces/IPeeranhaToken.sol";
 import "./interfaces/IPeeranhaUser.sol";
+
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
-contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable {
+contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
@@ -38,24 +40,35 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   event SetStake(address user, uint16 period, uint256 stake);
 
 
-  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress) public initializer {
-    __Token_init(name, symbol);
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public onlyInitializing {
+    __Token_init(name, symbol, childChainManager);
     __Ownable_init_unchained();
     peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
   }
 
-  function __Token_init(string memory name, string memory symbol) internal initializer {
-    __ERC20_init_unchained(name, symbol);
+  function __Token_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
+    __ChildMintableERC20Upgradeable_init(name, symbol, childChainManager);
     __Pausable_init_unchained();
     __ERC20Pausable_init_unchained();
     __Token_init_unchained();
   }
 
-  function __Token_init_unchained() internal initializer {
+  function __Token_init_unchained() internal onlyInitializing {
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable/*, ERC20CappedUpgradeable*/) {
     super._beforeTokenTransfer(from, to, amount);
+  }
+
+  // This is to support Native meta transactions
+  // never use msg.sender directly, use _msgSender() instead
+  function _msgSender()
+      internal
+      override(ContextUpgradeable, ChildMintableERC20Upgradeable)
+      view
+      returns (address sender)
+  {
+      return ChildMintableERC20Upgradeable._msgSender();
   }
 
   function availableBalanceOf(address account) external view returns(uint256) { // unitTest

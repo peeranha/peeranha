@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
 import "./libraries/AchievementCommonLib.sol";
+import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -13,23 +14,34 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // peeranhaNFT.transferOwnership(peeranhaAddress)
 ///
 
-contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
+contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpgradeable {
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
-  function initialize(string memory name, string memory symbol) public initializer {
-    __NFT_init(name, symbol);
+  function initialize(string memory name, string memory symbol, address childChainManager) public onlyInitializing {
+    __NFT_init(name, symbol, childChainManager);
     __Ownable_init_unchained();
   }
 
-  function __NFT_init(string memory name, string memory symbol) internal initializer {
-    __ERC721_init(name, symbol);
+  function __NFT_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
+    __ChildMintableERC721Upgradeable_init(name, symbol, childChainManager);
   }
 
-  function __Token_init_unchained() internal initializer {
+  function __Token_init_unchained() internal onlyInitializing {
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721Upgradeable) {
     super._beforeTokenTransfer(from, to, amount);
+  }
+
+  // This is to support Native meta transactions
+  // never use msg.sender directly, use _msgSender() instead
+  function _msgSender()
+      internal
+      override(ContextUpgradeable, ChildMintableERC721Upgradeable)
+      view
+      returns (address sender)
+  {
+      return ChildMintableERC721Upgradeable._msgSender();
   }
 
   event ConfigureNewAchievementNFT(uint64 achievementId);

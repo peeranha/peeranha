@@ -5,13 +5,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./libraries/UserLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
+import "./base/NativeMetaTransaction.sol";
 
 import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 import "./interfaces/IPeeranhaToken.sol";
 
 
-contract PeeranhaUser is IPeeranhaUser, Initializable {
+contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
     using UserLib for UserLib.User;
@@ -19,7 +20,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable {
 
     UserLib.UserContext userContext;
 
-    function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public initializer {
+    function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public onlyInitializing {
         __Peeranha_init();
         userContext.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         userContext.peeranhaCommunityAddress = peeranhaCommunityContractAddress;
@@ -28,14 +29,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable {
         // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
-    function __Peeranha_init() public initializer {
+    function __Peeranha_init() public onlyInitializing {
         __Peeranha_init_unchained();
     }
 
-    function __AccessControl_init_unchained() internal initializer {
+    function __AccessControl_init_unchained() internal onlyInitializing {
     }
 
-    function __Peeranha_init_unchained() internal initializer {
+    function __Peeranha_init_unchained() internal onlyInitializing {
         UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, msg.sender);
     }
 

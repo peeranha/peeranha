@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 // import "./libraries/UserLib.sol";
 // import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
+import "./base/NativeMetaTransaction.sol";
 // import "./libraries/RewardLib.sol";
 // import "./libraries/AchievementLib.sol";
 // import "./libraries/AchievementCommonLib.sol";
@@ -15,7 +16,7 @@ import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 
 
-contract PeeranhaContent is IPeeranhaContent, Initializable {
+contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransaction {
     using PostLib for PostLib.Post;
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;

@@ -30,7 +30,8 @@ contract ChildMintableERC20Upgradeable is
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
         internal
-        override(NativeMetaTransaction, ContextUpgradeable)
+        override(ContextUpgradeable, NativeMetaTransaction)
+        virtual
         view
         returns (address sender)
     {
