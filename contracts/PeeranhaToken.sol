@@ -17,6 +17,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
   // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
   uint256 public constant MAX_REWARD_PER_USER = 100;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   
   ///
@@ -29,8 +30,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
   // getstakedbalance (transfer + get balance)
   ///
 
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
-
   TokenLib.StatusRewardContainer statusRewardContainer;
   TokenLib.UserPeriodStake userPeriodStake;
   TokenLib.StakeTotalContainer stakeTotalContainer;
@@ -40,7 +39,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
   event SetStake(address user, uint16 period, uint256 stake);
 
 
-  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public onlyInitializing {
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public initializer {
     __Token_init(name, symbol, childChainManager);
     __Ownable_init_unchained();
     peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);

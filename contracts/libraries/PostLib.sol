@@ -162,8 +162,8 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.publicationReply,
-            // parentReplyId == 0 && isOfficialReply ? 
-            //     UserLib.Permission.communityModerator :
+            parentReplyId == 0 && isOfficialReply ? 
+                UserLib.Permission.communityModerator :
                 UserLib.Permission.NONE,
             true
         );
@@ -819,7 +819,7 @@ library PostLib  {
             userAddr,
             userAddr,
             postContainer.info.communityId,
-            UserLib.Action.changePostType,
+            UserLib.Action.NONE,
             UserLib.Permission.adminOrCommunityModerator,       // will chech
             false
         );

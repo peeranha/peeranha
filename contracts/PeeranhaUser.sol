@@ -20,7 +20,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
 
     UserLib.UserContext userContext;
 
-    function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public onlyInitializing {
+    function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public initializer {
         __Peeranha_init();
         userContext.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         userContext.peeranhaCommunityAddress = peeranhaCommunityContractAddress;
@@ -31,9 +31,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     
     function __Peeranha_init() public onlyInitializing {
         __Peeranha_init_unchained();
-    }
-
-    function __AccessControl_init_unchained() internal onlyInitializing {
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
@@ -157,7 +154,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      */
     function giveAdminPermission(address userAddr) external {
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, userAddr, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
         
         UserLib.grantRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
     }
@@ -174,7 +171,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) external {
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, userAddr, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
 
         UserLib.revokeRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
     }
@@ -210,10 +207,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) external {
+    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) external {  // add check user
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, userAddr, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
         UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -229,7 +226,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     function revokeCommunityAdminPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, userAddr, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);  // communityAdmin? mb admin and communityAdmin
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);  // communityAdmin? mb admin and communityAdmin
         UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -246,7 +243,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, userAddr, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
         UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 

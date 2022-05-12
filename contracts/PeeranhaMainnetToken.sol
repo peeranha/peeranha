@@ -14,7 +14,7 @@ contract PeeranhaMainnetToken is
 {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
-    function initialize(string memory name_, string memory symbol_, address predicateProxyAddress) public onlyInitializing {
+    function initialize(string memory name_, string memory symbol_, address predicateProxyAddress) public initializer {
          __ERC20_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(PREDICATE_ROLE, predicateProxyAddress);

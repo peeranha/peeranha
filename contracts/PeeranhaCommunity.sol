@@ -16,7 +16,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     CommunityLib.CommunityCollection communities;
     IPeeranhaUser peeranhaUser;
 
-    function initialize(address peeranhaUserContractAddress) public onlyInitializing {
+    function initialize(address peeranhaUserContractAddress) public initializer {
         peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
         __Peeranha_init();
     }

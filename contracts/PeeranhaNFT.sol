@@ -17,16 +17,13 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpgradeable {
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
-  function initialize(string memory name, string memory symbol, address childChainManager) public onlyInitializing {
+  function initialize(string memory name, string memory symbol, address childChainManager) public initializer {
     __NFT_init(name, symbol, childChainManager);
     __Ownable_init_unchained();
   }
 
   function __NFT_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
     __ChildMintableERC721Upgradeable_init(name, symbol, childChainManager);
-  }
-
-  function __Token_init_unchained() internal onlyInitializing {
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721Upgradeable) {

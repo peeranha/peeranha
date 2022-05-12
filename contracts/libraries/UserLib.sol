@@ -130,7 +130,6 @@ library UserLib {
     publicationComment,
     editItem,
     deleteItem,
-    changePostType,
     upVotePost,
     downVotePost,
     upVoteReply,
@@ -176,6 +175,7 @@ library UserLib {
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
     user.energy = getStatusEnergy(START_USER_RATING);
+    user.lastUpdatePeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
 
     self.userList.push(userAddress);
 
@@ -593,9 +593,6 @@ library UserLib {
       message = "low_rating_delete_own"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
-    } else if (action == Action.changePostType) {
-      require(false, "not_allowed_change_type");
-
     } else if (action == Action.upVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");   // в функции есть You can not vote for own post
       ratingAllowed = UPVOTE_POST_ALLOWED;
@@ -656,7 +653,6 @@ library UserLib {
   }
 
   function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
-    int32 rating = userRating;
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
@@ -852,7 +848,7 @@ library UserLib {
     }
   }
 
-  function getStatusEnergy(int32 rating) internal returns (uint16) {
+  function getStatusEnergy(int32 rating) internal pure returns (uint16) {
     if (rating < 0) {
       return 0;
     } else if (rating < 100) {

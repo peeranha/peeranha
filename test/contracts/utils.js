@@ -60,6 +60,7 @@ const createPeerenhaAndTokenContract = async function () {
     const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
     const peeranhaNFT = await PeeranhaNFT.deploy();
     await peeranhaNFT.deployed();
+    await peeranhaNFT.initialize("token", "ecs", "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
     const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
         return value;
     });
@@ -86,13 +87,20 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
-    const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent");
+    const PostLib = await ethers.getContractFactory("PostLib")
+    const postLib = await PostLib.deploy();
+
+    const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent", {
+        libraries: {
+            PostLib: postLib.address,
+        }
+    })
     const peeranhaContent = await PeeranhaContent.deploy();
     await peeranhaContent.deployed();
     await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
 
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
-    await token.initialize("token", "ecs", peeranhaUserContractAddress);
+    await token.initialize("token", "ecs", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
 
     return {
         peeranhaContent: peeranhaContent,
@@ -126,14 +134,14 @@ const getHashContainer = () => {
 
 const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
-const registerTwoUsers = async function (peeranha, signers, hashContainer) {
-	await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-	await peeranha.createUser(hashContainer[1]);
+const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
+	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+	await peeranhaUser.createUser(hashContainer[1]);
 }
 
-const createUserWithAnotherRating = async function (signer, rating, peeranha, hashContainer) {
-	await peeranha.connect(signer).createUser(hashContainer[0]);
-	await peeranha.addUserRating(signer.address, rating, 1);
+const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer) {
+	await peeranhaUser.connect(signer).createUser(hashContainer[0]);
+	await peeranhaUser.addUserRating(signer.address, rating, 1);
 };
 
 const getUsers = (hashes) => {
@@ -146,7 +154,7 @@ const getUsers = (hashes) => {
 }
 
 const StartEnergy = 300;
-const PeriodTime = 3000
+const PeriodTime = 4000
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;

@@ -24,13 +24,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
 
     PostLib.PostCollection posts;
 
-    function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public onlyInitializing {
+    function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         posts.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
-    }
-
-
-    function __AccessControl_init_unchained() internal onlyInitializing {
     }
 
     /**
