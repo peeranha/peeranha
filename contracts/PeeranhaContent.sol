@@ -39,10 +39,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags.
     */
     function createPost(address userAddress, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
-        posts.peeranhaCommunity.checkTags(communityId, tags);
         posts.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        posts.peeranhaCommunity.checkTags(communityId, tags);
 
-        // UserLib.createIfDoesNotExist(userContext.users, msg.sender);
         posts.createPost(userAddress, communityId, ipfsHash, postType, tags);
     }
 

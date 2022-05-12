@@ -24,7 +24,7 @@ describe("Test post", function () {
 
 			await Promise.all(
 				hashContainer.map(async (hash, index) => {
-					return await peeranha
+					return await peeranhaContent
 						.createPost(peeranhaUser.deployTransaction.from, 1, hash, PostTypeEnum.ExpertPost, [1]);
 				})
 			);
@@ -50,7 +50,7 @@ describe("Test post", function () {
 
 			await Promise.all(
 				hashContainer.map(async (hash, index) => {
-					return await peeranha
+					return await peeranhaContent
 						.createPost(peeranhaContent.deployTransaction.from, 1, hash, PostTypeEnum.CommonPost, [1]);
 				})
 			);
@@ -75,7 +75,7 @@ describe("Test post", function () {
 
 			await Promise.all(
 				hashContainer.map(async (hash, index) => {
-					return await peeranha
+					return await peeranhaContent
 						.createPost(peeranhaContent.deployTransaction.from, 1, hash, PostTypeEnum.Tutorial, [1]);
 				})
 			);
@@ -126,7 +126,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('Invalid ipfsHash.');
 		});
 
-		it("Test create post by not registered user", async function () {
+		xit("Test create post by not registered user", async function () { // create user createIfDoesNotExist
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -366,7 +366,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('Invalid ipfsHash.');
 		});
 
-		it("Test create reply by not registered user", async function () {
+		xit("Test create reply by not registered user", async function () { // create user createIfDoesNotExist
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -390,7 +390,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(peeranhaContent.deployTransaction.from, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			
 			await expect(peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[0], true))
-			.to.be.revertedWith('Must have community moderator role');
+			.to.be.revertedWith('not_allowed_not_comm_moderator');
 		});
 	});
 
@@ -477,7 +477,7 @@ describe("Test post", function () {
 			await expect(peeranhaContent.createComment(peeranhaContent.deployTransaction.from, 1, 1, hashContainer[1])).to.be.revertedWith('Reply does not exist.');
 		});
 
-		it("Test create comment by not registered user", async function () {
+		xit("Test create comment by not registered user", async function () {  // create user createIfDoesNotExist
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -569,7 +569,7 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(peeranhaContent.deployTransaction.from, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[2], []))
-			.to.be.revertedWith('You can not edit this post. It is not your.');
+			.to.be.revertedWith('not_allowed_edit');
 		});
 
 		it("Test edit post with invalid ipfs hash", async function () {
@@ -668,7 +668,7 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(peeranhaContent.deployTransaction.from, 1, 0, hashContainer[1], false);
 			
 			await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[2]))
-			.to.be.revertedWith('You can not edit this Reply. It is not your.');
+			.to.be.revertedWith('not_allowed_edit');
 		});
 
 		it("Test edit reply, without post", async function () {
@@ -782,7 +782,7 @@ describe("Test post", function () {
 			await peeranhaContent.createComment(peeranhaContent.deployTransaction.from, 1, 0, hashContainer[1]);
 
 			await expect(peeranhaContent.connect(signers[1]).editComment(signers[1].address, 1, 0, 1, hashContainer[2]))
-			.to.be.revertedWith('You can not edit this comment. It is not your.');
+			.to.be.revertedWith('not_allowed_edit');
 		});
 
 		it("Test edit comment, without post", async function () {

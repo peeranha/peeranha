@@ -221,7 +221,7 @@ describe("Test permissions", function () {
 			await peeranhaContent.createPost(peeranhaContent.deployTransaction.from, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranhaContent.connect(signers[1]).changePostType(signers[1].address, 1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
         })
     });
 

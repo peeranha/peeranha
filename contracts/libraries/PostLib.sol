@@ -281,9 +281,16 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+        self.peeranhaUser.checkPermission(
+            userAddr,
+            postContainer.info.author,
+            postContainer.info.communityId,
+            UserLib.Action.editItem,
+            UserLib.Permission.NONE,
+            false
+        );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");
-        self.peeranhaUser.checkPermission(userAddr, postContainer.info.author, postContainer.info.communityId, UserLib.Action.editItem, UserLib.Permission.NONE, false);
+        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // error for moderator (fix? will add new flag)
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
@@ -308,9 +315,16 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+        self.peeranhaUser.checkPermission(
+            userAddr,
+            replyContainer.info.author,
+            postContainer.info.communityId,
+            UserLib.Action.editItem,
+            UserLib.Permission.NONE,
+            false
+        );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
-        self.peeranhaUser.checkPermission(userAddr, replyContainer.info.author, postContainer.info.communityId, UserLib.Action.editItem, UserLib.Permission.NONE, false);
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
@@ -335,8 +349,6 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
-        require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
         self.peeranhaUser.checkPermission(
             userAddr,
             commentContainer.info.author,
@@ -345,6 +357,8 @@ library PostLib  {
             UserLib.Permission.NONE,
             false
         );
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;

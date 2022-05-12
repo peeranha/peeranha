@@ -545,7 +545,7 @@ library UserLib {
     } else if (permission == Permission.adminOrCommunityModerator) {
       require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) ||
         (hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_admin_or_comm_admin");
+        "not_allowed_admin_or_comm_moderator");
 
     } else if (permission == Permission.adminOrCommunityAdmin) {
       require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) || 
@@ -558,7 +558,7 @@ library UserLib {
 
     } else if (permission == Permission.communityModerator) {
       require((hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_not_moderator");
+        "not_allowed_not_comm_moderator");
     }
     
     int16 ratingAllowed;

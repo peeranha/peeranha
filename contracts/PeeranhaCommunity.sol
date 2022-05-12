@@ -61,8 +61,6 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be community moderator.
      */
     function freezeCommunity(uint32 communityId) external {
-        // onlyExisitingOrDelegatingUser(msg.sender);
-        // onlyAdminOrCommunityAdmin(communityId);
         onlyExistingAndNotFrozenCommunityy(communityId);
         peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin, false);
 
