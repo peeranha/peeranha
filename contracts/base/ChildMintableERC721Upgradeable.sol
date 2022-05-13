@@ -2,15 +2,21 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import "./IChildToken.sol";
 import "./NativeMetaTransaction.sol";
 
-
+///
+// check ERC721Upgradeable already in ERC721URIStorageUpgradeable
+///
 contract ChildMintableERC721Upgradeable is
     IChildToken,
     NativeMetaTransaction,
     ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
+    ERC721URIStorageUpgradeable,
     AccessControlUpgradeable
 {
     bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
@@ -33,6 +39,18 @@ contract ChildMintableERC721Upgradeable is
         _initializeEIP712(name_);
     }
 
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721EnumerableUpgradeable, ERC721Upgradeable) {
+        super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override (ERC721URIStorageUpgradeable, ERC721Upgradeable) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    function _burn(uint256 tokenId) internal virtual override (ERC721URIStorageUpgradeable, ERC721Upgradeable) {
+        super._burn(tokenId);
+    }
+
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
@@ -45,7 +63,7 @@ contract ChildMintableERC721Upgradeable is
         return NativeMetaTransaction._msgSender();
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
         return
             interfaceId == type(IChildToken).interfaceId ||
             super.supportsInterface(interfaceId);

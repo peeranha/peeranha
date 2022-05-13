@@ -5,28 +5,23 @@ import "./libraries/AchievementCommonLib.sol";
 import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-///
-//   Init contract owner
-// owner init by peranhaNFTAddress
-// peeranhaNFT.transferOwnership(peeranhaAddress)
-///
 
 contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpgradeable {
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
-  function initialize(string memory name, string memory symbol, address childChainManager) public initializer {
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public initializer {
     __NFT_init(name, symbol, childChainManager);
     __Ownable_init_unchained();
+    transferOwnership(peeranhaUserContractAddress);
   }
 
   function __NFT_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
     __ChildMintableERC721Upgradeable_init(name, symbol, childChainManager);
   }
 
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721Upgradeable) {
+  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ChildMintableERC721Upgradeable) {
     super._beforeTokenTransfer(from, to, amount);
   }
 
@@ -76,9 +71,10 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpg
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
     achievementNFT.factCount++;
-    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
+    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;    // uint256?
 
     _safeMint(user, tokenId);          // || _mint
+    _setTokenURI(tokenId, achievementNFT.achievementURI);
     // TODO: Learn how to set token URL in new version
     // _setTokenURI(tokenId, achievementNFT.achievementURI);
     // check uri?

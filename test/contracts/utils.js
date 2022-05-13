@@ -60,7 +60,6 @@ const createPeerenhaAndTokenContract = async function () {
     const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
     const peeranhaNFT = await PeeranhaNFT.deploy();
     await peeranhaNFT.deployed();
-    await peeranhaNFT.initialize("token", "ecs", "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
     const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
         return value;
     });
@@ -101,6 +100,7 @@ const createPeerenhaAndTokenContract = async function () {
 
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
     await token.initialize("token", "ecs", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
+    await peeranhaNFT.initialize("token", "ecs", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
 
     return {
         peeranhaContent: peeranhaContent,
@@ -131,6 +131,8 @@ const getHashContainer = () => {
         "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
     ];
 };
+
+const hashContainer = getHashContainer();
 
 const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
@@ -336,7 +338,7 @@ const ModeratorDeleteComment = -1;
 
 module.exports = { 
     wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
-    getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
+    getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,

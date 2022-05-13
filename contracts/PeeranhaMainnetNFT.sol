@@ -2,12 +2,16 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import "./base/NativeMetaTransaction.sol";
 import "./interfaces/IPeeranhaMainnetNFT.sol";
 
 contract PeeranhaMainnetNFT is
     ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
+    ERC721URIStorageUpgradeable,
     AccessControlUpgradeable,
     NativeMetaTransaction,
     IPeeranhaMainnetNFT
@@ -30,7 +34,7 @@ contract PeeranhaMainnetNFT is
       return NativeMetaTransaction._msgSender();
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable, IERC165Upgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable, IERC165Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
         return
             interfaceId == type(IPeeranhaMainnetNFT).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -41,6 +45,18 @@ contract PeeranhaMainnetNFT is
      */
     function mint(address user, uint256 tokenId) external override onlyRole(PREDICATE_ROLE) {
         _mint(user, tokenId);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721EnumerableUpgradeable, ERC721Upgradeable) {
+        super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override (ERC721URIStorageUpgradeable, ERC721Upgradeable) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    function _burn(uint256 tokenId) internal virtual override (ERC721URIStorageUpgradeable, ERC721Upgradeable) {
+        super._burn(tokenId);
     }
 
     /**
