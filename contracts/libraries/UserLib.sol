@@ -1,7 +1,5 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "./CommonLib.sol";
 import "./RewardLib.sol";
@@ -16,11 +14,7 @@ import "../interfaces/IPeeranhaContent.sol";
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
-  using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
-  using AddressUpgradeable for address;
-
   int32 constant START_USER_RATING = 10;
-  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 14; // 259200 - 3 Days
 
   int16 constant MINIMUM_RATING = -300;
   int16 constant POST_QUESTION_ALLOWED = 0;

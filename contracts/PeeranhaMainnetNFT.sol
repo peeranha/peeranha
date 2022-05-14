@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -73,8 +74,7 @@ contract PeeranhaMainnetNFT is
         // for L2 -> L1 token metadata transfer
         string memory uri = abi.decode(data, (string));
 
-        // TODO: why now _setTokenURI in new version
-        // _setTokenURI(tokenId, uri);
+        _setTokenURI(tokenId, uri);
     }
 
     /**

@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./CommonLib.sol";
@@ -34,7 +35,7 @@ library RewardLib {
 
   /// @notice Get perion
   /// @param time Unix time. Usual now()
-  function getPeriod(uint32 time) internal view returns (uint16) {
+  function getPeriod(uint32 time) internal pure returns (uint16) {
     return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 }

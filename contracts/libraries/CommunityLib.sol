@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./CommonLib.sol";
@@ -200,7 +201,7 @@ library CommunityLib {
         emit CommunityUnfrozen(msg.sender, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal {
+    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal view {
         Community storage community = self.communities[communityId].info;
 
         require(
@@ -219,7 +220,7 @@ library CommunityLib {
         );
     }
 
-    function checkTags(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal {
+    function checkTags(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal view {
         Community storage community = self.communities[communityId].info;
 
         for (uint32 i; i < tags.length; i++) {
@@ -228,7 +229,7 @@ library CommunityLib {
         }
     }
 
-    function checkTagsByPostId(CommunityCollection storage self, uint32 communityId, uint256 postId, uint8[] memory tags) internal {
+    function checkTagsExist(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal view {
         checkTags(self, communityId, tags);
     }
 }

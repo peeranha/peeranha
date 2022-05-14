@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -180,7 +181,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user.
      */
-    function getUserPermissions(address addr) external view returns (bytes32[] memory) {
+    function getUserPermissions(address addr) external pure returns (bytes32[] memory) {
         // TODO: Remove this function. Retrieve the data from the graph
         bytes32[] memory emptyResult;
         return emptyResult;

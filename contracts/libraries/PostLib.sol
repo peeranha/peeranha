@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./VoteLib.sol";
@@ -724,7 +725,6 @@ library PostLib  {
         int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
         if (replyContainer.info.isFirstReply) {
-            int32 changeRating;
             if (oldRating < 0 && newRating >= 0) {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
             } else if (oldRating >= 0 && newRating < 0) {
@@ -888,7 +888,7 @@ library PostLib  {
 
     function getTypesRating(        //name?
         PostType postType
-    ) private view returns (VoteLib.StructRating memory) {
+    ) private pure returns (VoteLib.StructRating memory) {
         if (postType == PostType.ExpertPost)
             return VoteLib.getExpertRating();
         else if (postType == PostType.CommonPost)

@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./libraries/RewardLib.sol";
@@ -172,7 +173,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
     }
   }
 
-  function getTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) private view returns(uint256) {
+  function getTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) private pure returns(uint256) {
     uint256 totalPeriodReward = reduceRewards(MAX_REWARD_PER_PERIOD * FRACTION, period);
     if (periodRewardShares.activeUsersInPeriod.length <= ACTIVE_USERS_IN_PERIOD) {
       uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * MAX_REWARD_PER_USER * FRACTION;   // min?
@@ -182,7 +183,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
     return totalPeriodReward;
   }
 
-  function reduceRewards(uint256 rewardPeriod, uint16 period) private view returns(uint256) {
+  function reduceRewards(uint256 rewardPeriod, uint16 period) private pure returns(uint256) {
     uint16 countReduce = period / 52;
 
     for (uint16 i = 0; i < countReduce; i++) {

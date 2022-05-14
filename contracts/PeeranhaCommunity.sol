@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -167,11 +168,11 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         return communities.getTag(communityId, tagId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId) external override {
+    function onlyExistingAndNotFrozenCommunity(uint32 communityId) external view override {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunityy(uint32 communityId) private {       // 2 function?
+    function onlyExistingAndNotFrozenCommunityy(uint32 communityId) private view {       // 2 function?
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
     }
     
@@ -180,7 +181,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         _;
     }
     
-    function checkTags(uint32 communityId, uint8[] memory tags) external override {
+    function checkTags(uint32 communityId, uint8[] memory tags) external view override {
         CommunityLib.checkTags(communities, communityId, tags);
     }
 
