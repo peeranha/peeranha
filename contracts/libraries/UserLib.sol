@@ -59,11 +59,6 @@ library UserLib {
   uint8 constant ENERGY_REPORT_ANSWER = 2;          //
   uint8 constant ENERGY_REPORT_COMMENT = 1;         //
 
-  bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-  uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
-  uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
-
   struct User {
     CommonLib.IpfsHash ipfsDoc;
     uint16 energy;
@@ -100,8 +95,6 @@ library UserLib {
     UserLib.UserCollection users;     // rename to usersCollection
     UserLib.UserRatingCollection userRatingCollection;
     RewardLib.PeriodRewardContainer periodRewardContainer;
-    UserLib.Roles roles;
-    UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
     
     IPeeranhaToken peeranhaToken;
@@ -145,6 +138,7 @@ library UserLib {
   }
 
   // TODO: Rename enum memers to begin with capital and use camel case
+  // TODO: Rename enum to ActionRole
   enum Permission {
     NONE,
     admin,
@@ -152,21 +146,6 @@ library UserLib {
     adminOrCommunityAdmin,
     communityAdmin,
     communityModerator
-  }
-
-
-  struct RoleData {
-    EnumerableSetUpgradeable.AddressSet members;
-    bytes32 adminRole;
-  }
-
-  struct Roles {
-    // TODO: rename mapping to `roles`
-    mapping (bytes32 => RoleData) _roles;
-  }
-
-  struct UserRoles {
-    mapping (address => bytes32[]) userRoles;
   }
 
   event UserCreated(address indexed userAddress);
@@ -217,16 +196,12 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-    checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      0,
+    User storage user = checkRatingAndEnergy(
+      userContext,
       userAddress,
       userAddress,
       0,
-      Action.updateProfile,
-      Permission.NONE
+      Action.updateProfile
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -242,17 +217,12 @@ library UserLib {
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-
-    checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      getUserRating(userContext.userRatingCollection, userAddress, communityId),
+    User storage user = checkRatingAndEnergy(
+      userContext,
       userAddress,
       userAddress,
       0,
-      Action.followCommunity,
-      Permission.NONE
+      Action.followCommunity
     );
 
     bool isAdded;
@@ -506,31 +476,25 @@ library UserLib {
     return 0; // from negative to negative
   }
 
-  function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
-    return bytes32(role + communityId);
-  }
-
   function checkRatingAndEnergy(
-    // UserContext storage userContext,
-    Roles storage role,
-    UserLib.User storage user,
-    int32 userRating,
+    UserContext storage userContext,
     address actionCaller,
     address dataUser,
     uint32 communityId,
-    Action action,
-    Permission permission
+    Action action
   )
-    internal
+    internal 
+    returns (User storage)
   {
-    verifyHasRole(role, permission, actionCaller, communityId);
-    
+    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
+    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
+        
     // TODO: create a separate function that returns energy and min rating for an action
     int16 ratingAllowed;
     string memory message;
     uint8 energy;
     if (action == Action.NONE) {
-      return;
+      return user;
     } else if (action == Action.publicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
@@ -615,36 +579,10 @@ library UserLib {
 
     require(userRating >= ratingAllowed, message);
     reduceEnergy(user, userRating, energy);
+
+    return user;
   }
 
-  function verifyHasRole(Roles storage role, Permission permission, address actionCaller, uint32 communityId) internal view {
-    if (permission == Permission.NONE) {
-      if (hasModeratorRole(role, actionCaller, communityId))
-        return;
-    } else if (permission == Permission.admin) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller), 
-        "not_allowed_not_admin");
-    
-    } else if (permission == Permission.adminOrCommunityModerator) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) ||
-        (hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_admin_or_comm_moderator");
-
-    } else if (permission == Permission.adminOrCommunityAdmin) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) || 
-        (hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-        "not_allowed_admin_or_comm_admin");
-
-    } else if (permission == Permission.communityAdmin) {
-      require((hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-        "not_allowed_not_comm_admin");
-
-    } else if (permission == Permission.communityModerator) {
-      require((hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_not_comm_moderator");
-    }
-  }
-  
   function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
@@ -659,186 +597,6 @@ library UserLib {
 
     require(userEnergy >= energy, "low_energy");
     user.energy = userEnergy - energy;
-  }
-
-  function hasModeratorRole(
-    Roles storage self,
-    address user,
-    uint32 communityId
-  ) 
-    internal view
-    returns (bool) 
-  {
-    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
-      hasRole(self, DEFAULT_ADMIN_ROLE, user))) return true;
-    
-    return false;
-  }
-
-  /**
-    * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
-    *
-    * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
-    * {RoleAdminChanged} not being emitted signaling this.
-    *
-    * _Available since v3.1._
-    */
-  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
-  /**
-    * @dev Emitted when `account` is granted `role`.
-    *
-    * `sender` is the account that originated the contract call, an admin role
-    * bearer except when using {setupRole}.
-    */
-  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
-
-  /**
-    * @dev Emitted when `account` is revoked `role`.
-    *
-    * `sender` is the account that originated the contract call:
-    *   - if using `revokeRole`, it is the admin role bearer
-    *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
-    */
-  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
-
-  /**
-    * @dev Returns `true` if `account` has been granted `role`.
-    */
-  function hasRole(Roles storage self, bytes32 role, address account) internal view returns (bool) {
-      return self._roles[role].members.contains(account);
-  }
-
-  /**
-    * @dev Returns the number of accounts that have `role`. Can be used
-    * together with {getRoleMember} to enumerate all bearers of a role.
-    */
-  function getRoleMemberCount(Roles storage self, bytes32 role) internal view returns (uint256) {
-      return self._roles[role].members.length();
-  }
-
-  /**
-    * @dev Returns one of the accounts that have `role`. `index` must be a
-    * value between 0 and {getRoleMemberCount}, non-inclusive.
-    *
-    * Role bearers are not sorted in any particular way, and their ordering may
-    * change at any point.
-    *
-    * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure
-    * you perform all queries on the same block. See the following
-    * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
-    * for more information.
-    */
-  function getRoleMember(Roles storage self, bytes32 role, uint256 index) internal view returns (address) {
-      return self._roles[role].members.at(index);
-  }
-
-  /**
-    * @dev Returns the admin role that controls `role`. See {grantRole} and
-    * {revokeRole}.
-    *
-    * To change a role's admin, use {_setRoleAdmin}.
-    */
-  function getRoleAdmin(Roles storage self, bytes32 role) internal view returns (bytes32) {
-      return self._roles[role].adminRole;
-  }
-
-  /**
-    * @dev Grants `role` to `account`.
-    *
-    * If `account` had not been already granted `role`, emits a {RoleGranted}
-    * event.
-    *
-    * Requirements:
-    *
-    * - the caller must have ``role``'s admin role.
-    */
-  // function grantRole(bytes32 role, address account) public virtual {
-  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to grant");
-
-  //     _grantRole(role, account);
-  // }
-
-  /**
-    * @dev Revokes `role` from `account`.
-    *
-    * If `account` had been granted `role`, emits a {RoleRevoked} event.
-    *
-    * Requirements:
-    *
-    * - the caller must have ``role``'s admin role.
-    */
-  // function revokeRole(bytes32 role, address account) public virtual {
-  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to revoke");
-
-  //     revokeRole(role, account);
-  // }
-
-  /**
-    * @dev Revokes `role` from the calling account.
-    *
-    * Roles are often managed via {grantRole} and {revokeRole}: this function's
-    * purpose is to provide a mechanism for accounts to lose their privileges
-    * if they are compromised (such as when a trusted device is misplaced).
-    *
-    * If the calling account had been granted `role`, emits a {RoleRevoked}
-    * event.
-    *
-    * Requirements:
-    *
-    * - the caller must be `account`.
-    */
-  // function renounceRole(bytes32 role, address account) public virtual {
-  //     require(account == _msgSender(), "AccessControl: can only renounce roles for self");
-
-  //     revokeRole(role, account);
-  // }
-
-  /**
-    * @dev Grants `role` to `account`.
-    *
-    * If `account` had not been already granted `role`, emits a {RoleGranted}
-    * event. Note that unlike {grantRole}, this function doesn't perform any
-    * checks on the calling account.
-    *
-    * [WARNING]
-    * ====
-    * This function should only be called from the constructor when setting
-    * up the initial roles for the system.
-    *
-    * Using this function in any other way is effectively circumventing the admin
-    * system imposed by {AccessControl}.
-    * ====
-    */
-  function setupRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-      grantRole(userContext, role, account);
-  }
-
-  function revokeRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.remove(account)) {
-      emit RoleRevoked(role, account, msg.sender);
-
-      uint256 length = userContext.userRoles.userRoles[account].length;
-      for(uint32 i = 0; i < length; i++) {
-        if(userContext.userRoles.userRoles[account][i] == role) {
-          if (i < length - 1) {
-            userContext.userRoles.userRoles[account][i] = userContext.userRoles.userRoles[account][length - 1];
-            userContext.userRoles.userRoles[account].pop();
-          } else userContext.userRoles.userRoles[account].pop();
-        }
-      }
-    }
-  }
-
-  function getPermissions(UserRoles storage self, address account) internal view returns (bytes32[] memory) {
-    return self.userRoles[account];
-  }
-
-  function grantRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.add(account)) {
-      userContext.userRoles.userRoles[account].push(role);   
-      emit RoleGranted(role, account, msg.sender);
-    }
   }
 
   function getStatusEnergy(int32 rating) internal pure returns (uint16) {

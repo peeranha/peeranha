@@ -1,6 +1,8 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+
 
 import "./libraries/UserLib.sol";
 import "./libraries/AchievementLib.sol";
@@ -12,13 +14,17 @@ import "./interfaces/IPeeranhaCommunity.sol";
 import "./interfaces/IPeeranhaToken.sol";
 
 
-contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
+contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
     using UserLib for UserLib.User;
     using AchievementLib for AchievementLib.AchievementsContainer;
 
+    uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
+    uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
+
     UserLib.UserContext userContext;
+
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public initializer {
         __Peeranha_init();
@@ -33,7 +39,19 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
-        UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    }
+
+    // This is to support Native meta transactions
+    // never use msg.sender directly, use _msgSender() instead
+    function _msgSender()
+        internal
+        override(ContextUpgradeable, NativeMetaTransaction)
+        virtual
+        view
+        returns (address sender)
+    {
+        return NativeMetaTransaction._msgSender();
     }
 
     /**
@@ -44,6 +62,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be an existing user and valid period.
      */
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
+        // TODO: add function for that to UserLib and call it from here
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
@@ -55,6 +74,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be a valid period.
      */
     function getPeriodRewardShares(uint16 period) external view override returns(RewardLib.PeriodRewardShares memory) {
+        // TODO: add function for that to UserLib and call it from here
         return userContext.periodRewardContainer.periodRewardShares[period];
     }
 
@@ -162,7 +182,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be an existing user.
      */
     function getUserPermissions(address addr) external view returns (bytes32[] memory) {
-        return UserLib.getPermissions(userContext.userRoles, addr);
+        // TODO: Remove this function. Retrieve the data from the graph
+        bytes32[] memory emptyResult;
+        return emptyResult;
     }
 
 
@@ -175,8 +197,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be an existing user. 
      */
     function giveAdminPermission(address userAddr) external {
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.admin, _msgSender(), 0);
-        UserLib.grantRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
+        verifyHasRole(_msgSender(), UserLib.Permission.admin, 0);
+        _grantRole(DEFAULT_ADMIN_ROLE, userAddr);
     }
 
     /**
@@ -190,8 +212,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
 
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) external {
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.admin, _msgSender(), 0);
-        UserLib.revokeRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
+        verifyHasRole(_msgSender(), UserLib.Permission.admin, 0);
+        _revokeRole(DEFAULT_ADMIN_ROLE, userAddr);
     }
 
     /**
@@ -209,9 +231,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
             onlyExistingAndNotFrozenCommunity(communityId);
             actionCaller = _msgSender();
         }
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.adminOrCommunityAdmin, _msgSender(), communityId);
-        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), userAddr);
-        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
+        
+        verifyHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
+        _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
+        _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
     /**
@@ -225,8 +248,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      */
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) external {  // add check user
         onlyExistingAndNotFrozenCommunity(communityId);
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.communityAdmin, _msgSender(), communityId);
-        UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
+        verifyHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
+        _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
     /**
@@ -240,8 +263,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      */
     function revokeCommunityAdminPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.communityAdmin, _msgSender(), communityId);
-        UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), userAddr);
+        verifyHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
+        revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
     /**
@@ -256,8 +279,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.communityAdmin, _msgSender(), communityId);
-        UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
+        verifyHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
+        _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
     // TODO: Add doc comment
@@ -269,7 +292,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     )   
         external
     {
-        UserLib.verifyHasRole(userContext.roles, UserLib.Permission.admin, _msgSender(), 0);
+        verifyHasRole(_msgSender(), UserLib.Permission.admin, 0);
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
@@ -326,9 +349,52 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
         }
-        UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
-        int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, userRating, actionCaller, dataUser, communityId, action, permission);
+        verifyHasRole(actionCaller, permission, communityId);
+        UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
+    }
+
+    function verifyHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) internal view {
+        if (permission == UserLib.Permission.NONE) {
+            if (hasModeratorRole(actionCaller, communityId))
+                return;
+        } else if (permission == UserLib.Permission.admin) {
+            require(hasRole(DEFAULT_ADMIN_ROLE, actionCaller), 
+                "not_allowed_not_admin");
+        
+        } else if (permission == UserLib.Permission.adminOrCommunityModerator) {
+            require(hasRole(DEFAULT_ADMIN_ROLE, actionCaller) ||
+                (hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+                "not_allowed_admin_or_comm_moderator");
+
+        } else if (permission == UserLib.Permission.adminOrCommunityAdmin) {
+            require(hasRole(DEFAULT_ADMIN_ROLE, actionCaller) || 
+                (hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+                "not_allowed_admin_or_comm_admin");
+
+        } else if (permission == UserLib.Permission.communityAdmin) {
+            require((hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+                "not_allowed_not_comm_admin");
+
+        } else if (permission == UserLib.Permission.communityModerator) {
+            require((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+                "not_allowed_not_comm_moderator");
+        }
+    }
+    
+    function hasModeratorRole(
+        address user,
+        uint32 communityId
+    ) 
+        internal view
+        returns (bool) 
+    {
+        if ((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
+            hasRole(DEFAULT_ADMIN_ROLE, user))) return true;
+        return false;
+    }
+
+    function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
+        return bytes32(role + communityId);
     }
 
     function onlyExistingAndNotFrozenCommunity(uint32 communityId) private {
