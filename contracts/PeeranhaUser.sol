@@ -15,6 +15,7 @@ import "./interfaces/IPeeranhaToken.sol";
 
 
 contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+    // TODO: Actually use usings or remove
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
     using UserLib for UserLib.User;
@@ -25,13 +26,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     UserLib.UserContext userContext;
 
-
     function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public initializer {
         __Peeranha_init();
         userContext.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaNFTContractAddress);
         userContext.peeranhaToken = IPeeranhaToken(peeranhaTokenContractAddress);
-        // configuration.setConfiguration(CommonLib.getTimestamp());
     }
     
     function __Peeranha_init() public onlyInitializing {
@@ -318,18 +317,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function getPeriodReward(uint16 rewardPeriod) external view returns(int32) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }
-
-
-    // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }*/
-
-    // Used for unit tests
-    /*function setEnergy(address userAddr, uint16 energy) external {
-        userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
-
     
     // TODO: Add doc comment
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external override {
@@ -353,7 +340,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
     }
 
-    function verifyHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) internal view {
+    function getActiveUserPeriods(address userAddr) external view returns (uint16[] memory) {
+        return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
+    }
+
+    function verifyHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) private view {
         if (permission == UserLib.Permission.NONE) {
             if (hasModeratorRole(actionCaller, communityId))
                 return;
@@ -385,7 +376,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         address user,
         uint32 communityId
     ) 
-        internal view
+        private view
         returns (bool) 
     {
         if ((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
@@ -393,7 +384,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return false;
     }
 
-    function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
+    function getCommunityRole(uint256 role, uint32 communityId) private pure returns (bytes32) {
         return bytes32(role + communityId);
     }
 
@@ -401,7 +392,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
     }
 
-    function getActiveUserPeriods(address userAddr) external view returns (uint16[] memory) {
-        return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
-    }
+    // Used for unit tests
+    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) external {
+        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+    }*/
+
+    // Used for unit tests
+    /*function setEnergy(address userAddr, uint16 energy) external {
+        userContext.users.getUserByAddress(userAddr).energy = energy;
+    }*/
+
 }
