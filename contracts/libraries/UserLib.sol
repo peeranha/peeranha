@@ -7,9 +7,9 @@ import "./CommonLib.sol";
 import "./RewardLib.sol";
 import "./AchievementLib.sol";
 import "./AchievementCommonLib.sol";
-import "./AchievementCommonLib.sol";
 import "../interfaces/IPeeranhaToken.sol";
 import "../interfaces/IPeeranhaCommunity.sol";
+import "../interfaces/IPeeranhaContent.sol";
 
 
 /// @title Users
@@ -103,9 +103,10 @@ library UserLib {
     UserLib.Roles roles;
     UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
+    
     IPeeranhaToken peeranhaToken;
     IPeeranhaCommunity peeranhaCommunity;
-    address peeranhaCommunityAddress;
+    IPeeranhaContent peeranhaContent;
   }
   
   struct UserCollection {
@@ -123,6 +124,7 @@ library UserLib {
     address delegateUser;
   }
 
+  // TODO: Rename enum memers to begin with capital
   enum Action {
     NONE,
     publicationPost,
@@ -142,12 +144,24 @@ library UserLib {
     followCommunity
   }
 
+  // TODO: Rename enum memers to begin with capital and use camel case
+  enum Permission {
+    NONE,
+    admin,
+    adminOrCommunityModerator,
+    adminOrCommunityAdmin,
+    communityAdmin,
+    communityModerator
+  }
+
+
   struct RoleData {
     EnumerableSetUpgradeable.AddressSet members;
     bytes32 adminRole;
   }
 
   struct Roles {
+    // TODO: rename mapping to `roles`
     mapping (bytes32 => RoleData) _roles;
   }
 
@@ -155,10 +169,10 @@ library UserLib {
     mapping (address => bytes32[]) userRoles;
   }
 
-  event UserCreated(address userAddress);
-  event UserUpdated(address userAddress);
-  event FollowedCommunity(address userAddress, uint32 communityId);
-  event UnfollowedCommunity(address userAddress, uint32 communityId);
+  event UserCreated(address indexed userAddress);
+  event UserUpdated(address indexed userAddress);
+  event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
+  event UnfollowedCommunity(address indexed userAddress, uint32 indexed communityId);
 
 
   /// @notice Create new user info record
@@ -319,19 +333,8 @@ library UserLib {
     }
   }
 
-  /// @notice Add rating to user
-  /// @param userAddr user's rating will be change
-  /// @param rating value for add to user's rating
-  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating, uint32 communityId) internal { // delete "user" argument
-    if (rating == 0) return;
-
-    updateRatingBase(userContext, userAddr, rating, communityId);
-  }
-
   function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
     if (rating == 0) return;
-
-    User storage user = getUserByAddress(userContext.users, userAddr);
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
@@ -492,7 +495,7 @@ library UserLib {
     }
   }
 
-  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) { // FIX
+  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private view returns (int32) { // FIX
     return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
   }
 
@@ -505,21 +508,6 @@ library UserLib {
 
   function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
     return bytes32(role + communityId);
-  }
-
-  // function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
-  //   require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-  //       "not_allowed_not_moderator");
-  // }
-
-  
-  enum Permission {
-    NONE,
-    admin,
-    adminOrCommunityModerator,
-    adminOrCommunityAdmin,
-    communityAdmin,
-    communityModerator
   }
 
   function checkRatingAndEnergy(
@@ -535,32 +523,9 @@ library UserLib {
   )
     internal
   {
-    if (permission == Permission.NONE) {
-      if (hasModeratorRole(role, actionCaller, communityId))
-        return;
-    } else if (permission == Permission.admin) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller), 
-        "not_allowed_not_admin");
+    verifyHasRole(role, permission, actionCaller, communityId);
     
-    } else if (permission == Permission.adminOrCommunityModerator) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) ||
-        (hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_admin_or_comm_moderator");
-
-    } else if (permission == Permission.adminOrCommunityAdmin) {
-      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) || 
-        (hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-        "not_allowed_admin_or_comm_admin");
-
-    } else if (permission == Permission.communityAdmin) {
-      require((hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-        "not_allowed_not_comm_admin");
-
-    } else if (permission == Permission.communityModerator) {
-      require((hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-        "not_allowed_not_comm_moderator");
-    }
-    
+    // TODO: create a separate function that returns energy and min rating for an action
     int16 ratingAllowed;
     string memory message;
     uint8 energy;
@@ -594,19 +559,19 @@ library UserLib {
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.upVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");   // в функции есть You can not vote for own post
+      require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "low rating to upvote";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
-      require(actionCaller != dataUser, "not_allowed_vote_reply"); // в функции есть You can not vote for own reply
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.voteComment) {
-      require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
       ratingAllowed = VOTE_COMMENT_ALLOWED;
       message = "low_rating_vote_comment";
       energy = ENERGY_VOTE_COMMENT;
@@ -652,6 +617,34 @@ library UserLib {
     reduceEnergy(user, userRating, energy);
   }
 
+  function verifyHasRole(Roles storage role, Permission permission, address actionCaller, uint32 communityId) internal view {
+    if (permission == Permission.NONE) {
+      if (hasModeratorRole(role, actionCaller, communityId))
+        return;
+    } else if (permission == Permission.admin) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller), 
+        "not_allowed_not_admin");
+    
+    } else if (permission == Permission.adminOrCommunityModerator) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) ||
+        (hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+        "not_allowed_admin_or_comm_moderator");
+
+    } else if (permission == Permission.adminOrCommunityAdmin) {
+      require(hasRole(role, DEFAULT_ADMIN_ROLE, actionCaller) || 
+        (hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+        "not_allowed_admin_or_comm_admin");
+
+    } else if (permission == Permission.communityAdmin) {
+      require((hasRole(role, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
+        "not_allowed_not_comm_admin");
+
+    } else if (permission == Permission.communityModerator) {
+      require((hasRole(role, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
+        "not_allowed_not_comm_moderator");
+    }
+  }
+  
   function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
@@ -673,7 +666,7 @@ library UserLib {
     address user,
     uint32 communityId
   ) 
-    internal 
+    internal view
     returns (bool) 
   {
     if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
