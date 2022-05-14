@@ -115,7 +115,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardShares(period);
     
     uint256 totalPeriodReward = getTotalPeriodReward(periodRewardShares, period);
 
@@ -211,7 +211,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Pa
   }
 
   function getUserRewardGraph(address user, uint16 period) public view returns(uint256) {
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardShares(period);
     uint256 poolToken = getTotalPeriodReward(periodRewardShares, period);
     uint256 userReward = getUserReward(periodRewardShares, user, period, poolToken);
     

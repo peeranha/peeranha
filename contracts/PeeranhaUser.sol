@@ -34,14 +34,28 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
-        UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, msg.sender);
+        UserLib.setupRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    /**
+     * @dev List of communities where user has rewards in a given period.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and valid period.
+     */
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external override view returns(uint32[] memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
     }
 
-    function getPeriodRewardContainer(uint16 period) external view override returns(RewardLib.PeriodRewardShares memory) {
+    /**
+     * @dev Total reward shares for a given period.
+     *
+     * Requirements:
+     *
+     * - Must be a valid period.
+     */
+    function getPeriodRewardShares(uint16 period) external view override returns(RewardLib.PeriodRewardShares memory) {
         return userContext.periodRewardContainer.periodRewardShares[period];
     }
 
@@ -53,7 +67,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be a new user.
      */
     function createUser(bytes32 ipfsHash) external override {
-        UserLib.create(userContext.users, msg.sender, ipfsHash);
+        UserLib.create(userContext.users, _msgSender(), ipfsHash);
     }
 
     /**
@@ -64,7 +78,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      * - Must be an existing user.  
      */
     function updateUser(address userAddress, bytes32 ipfsHash) external override {
-        UserLib.createIfDoesNotExist(userContext.users, msg.sender);
+        UserLib.createIfDoesNotExist(userContext.users, _msgSender());
         UserLib.update(userContext, userAddress, ipfsHash);
     }
 
@@ -75,9 +89,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      *
      * - Must be an community.  
      */
-    function followCommunity(address userAddress, uint32 communityId) external override {  // onlyExisitingUser(userAddress); // createUser // ///////// FIX PeeranhaCommunity
-    onlyExistingAndNotFrozenCommunity(communityId);
-        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+    function followCommunity(address userAddress, uint32 communityId) external override {
+        onlyExistingAndNotFrozenCommunity(communityId);
+        UserLib.createIfDoesNotExist(userContext.users, _msgSender());
         UserLib.followCommunity(userContext, userAddress, communityId);
     }
 
@@ -88,7 +102,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(address userAddress, uint32 communityId) external override { // onlyExisitingUser(userAddress); // createUser
+    function unfollowCommunity(address userAddress, uint32 communityId) external override {
+        onlyExistingAndNotFrozenCommunity(communityId);
+        UserLib.createIfDoesNotExist(userContext.users, _msgSender());
         UserLib.unfollowCommunity(userContext.users, userAddress, communityId);
     }
 
@@ -121,14 +137,21 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
         return userContext.users.getUserByAddress(addr);
     }
 
+    /**
+     * @dev Get user rating in a given community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and existing community.
+     */
     function getUserRating(address addr, uint32 communityId) external view returns (int32) {
         return userContext.userRatingCollection.getUserRating(addr, communityId);
     }
 
     /**
-     * @dev Check user existence.
+     * @dev Check if user with given address exists.
      */
-    function isUserExists(address addr) external view returns (bool) {
+    function userExists(address addr) external view returns (bool) {
         return userContext.users.isExists(addr);
     }
 
@@ -154,8 +177,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      */
     function giveAdminPermission(address userAddr) external {
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
-        
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
         UserLib.grantRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
     }
 
@@ -171,7 +193,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) external {
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), userAddr, 0, UserLib.Action.NONE, UserLib.Permission.admin);
 
         UserLib.revokeRole(userContext, UserLib.DEFAULT_ADMIN_ROLE, userAddr);
     }
@@ -187,9 +209,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
      */
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) external override {
         address actionCaller = userAddr;
-        if (msg.sender != userContext.peeranhaCommunityAddress) {
+        if (_msgSender() != userContext.peeranhaCommunityAddress) {
             onlyExistingAndNotFrozenCommunity(communityId);
-            actionCaller = msg.sender;
+            actionCaller = _msgSender();
         }
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
         UserLib.checkRatingAndEnergy(userContext.roles, user, 0, actionCaller, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin);
@@ -210,7 +232,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) external {  // add check user
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
         UserLib.grantRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -226,7 +248,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     function revokeCommunityAdminPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);  // communityAdmin? mb admin and communityAdmin
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);  // communityAdmin? mb admin and communityAdmin
         UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -243,7 +265,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) external {
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.User storage user = UserLib.getUserByAddress(userContext.users, userAddr);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), userAddr, communityId, UserLib.Action.NONE, UserLib.Permission.communityAdmin);
         UserLib.revokeRole(userContext, UserLib.getCommunityRole(UserLib.COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -255,8 +277,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     )   
         external
     {
-        UserLib.User storage user = UserLib.getUserByAddress(userContext.users, msg.sender);
-        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, msg.sender, address(0), 0, UserLib.Action.NONE, UserLib.Permission.admin);
+        UserLib.User storage user = UserLib.getUserByAddress(userContext.users, _msgSender());
+        UserLib.checkRatingAndEnergy(userContext.roles, user, 0, _msgSender(), address(0), 0, UserLib.Action.NONE, UserLib.Permission.admin);
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
@@ -315,7 +337,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction {
     // TO DO
     // remove it in prod ?
     /// 
-    function getAcctiveUserPeriods(address userAddr) external view returns (uint16[] memory) {
+    function getActiveUserPeriods(address userAddr) external view returns (uint16[] memory) {
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
 }

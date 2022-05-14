@@ -11,7 +11,7 @@ interface IPeeranhaUser {
     function giveCommunityAdminPermission(address user, uint32 communityId) external;
     function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool isCreate) external;
     function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);
-    function getPeriodRewardContainer(uint16 period) external view returns(RewardLib.PeriodRewardShares memory);
+    function getPeriodRewardShares(uint16 period) external view returns(RewardLib.PeriodRewardShares memory);
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external view returns(uint32[] memory);
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external;
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) external;
