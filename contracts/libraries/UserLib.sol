@@ -177,6 +177,7 @@ library UserLib {
     address userAddress
   ) internal {
     if (!UserLib.isExists(self, userAddress)) {
+      // TODO: move default IPFS hash to constats
       UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
     }
   }

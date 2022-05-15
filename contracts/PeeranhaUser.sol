@@ -20,7 +20,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     using UserLib for UserLib.User;
     using AchievementLib for AchievementLib.AchievementsContainer;
 
-    uint256 public constant PROTOCOL_ADMIN_ROLE = uint256(keccak256("PROTOCOL_ADMIN_ROLE"));
+    bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
+    
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
@@ -100,9 +101,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user.  
      */
     function updateUser(bytes32 ipfsHash) public override {
-        UserLib.createIfDoesNotExist(userContext.users, _msgSender());
-        // TODO: reduce energy here
-        UserLib.update(userContext, _msgSender(), ipfsHash);
+        address userAddress = _msgSender();
+        UserLib.createIfDoesNotExist(userContext.users, userAddress);
+        UserLib.update(userContext, userAddress, ipfsHash);
     }
 
     /**
@@ -202,6 +203,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function giveAdminPermission(address userAddr) public {
         // grantRole checks that sender is role admin
+        // TODO: verify there is unit test that only defaul admin can assign protocol admin
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -217,6 +219,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) public {
         // revokeRole checks that sender is role admin
+        // TODO: verify there is unit test that only defaul admin can assign protocol admin
         revokeRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -253,7 +256,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
         onlyExistingAndNotFrozenCommunity(communityId);
-        verifyHasRole(_msgSender(), UserLib.Permission.admin, communityId);
+        checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
@@ -270,7 +273,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {  // add check user
         onlyExistingAndNotFrozenCommunity(communityId);
-        verifyHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
+        checkHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -285,7 +288,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityAdminPermission(address userAddr, uint32 communityId) public {
         onlyExistingAndNotFrozenCommunity(communityId);
-        verifyHasRole(_msgSender(), UserLib.Permission.admin, communityId);
+        checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -300,7 +303,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) public {
         onlyExistingAndNotFrozenCommunity(communityId);
-        verifyHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
+        checkHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -313,7 +316,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     )   
         external
     {
-        verifyHasRole(_msgSender(), UserLib.Permission.admin, 0);
+        checkHasRole(_msgSender(), UserLib.Permission.admin, 0);
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
@@ -341,18 +344,21 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
     
     // TODO: Add doc comment
+    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
     // TODO: Add doc comment
+    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
     // TODO: Add doc comment
+    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool createUserIfDoesNotExist) public override {
         require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
@@ -363,7 +369,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             return;
         }
                 
-        verifyHasRole(actionCaller, permission, communityId);
+        checkHasRole(actionCaller, permission, communityId);
         UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
     }
 
@@ -371,7 +377,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
 
-    function verifyHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) private view {
+    function checkHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) public override view {
         if (permission == UserLib.Permission.NONE) {
             return;
         } else if (permission == UserLib.Permission.admin) {
