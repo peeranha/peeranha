@@ -204,7 +204,7 @@ describe("Test permissions", function () {
 			await peeranhaContent.createPost(peeranhaContent.deployTransaction.from, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranhaContent.connect(signers[1]).changePostType(signers[1].address, 1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("user_not_found");
+            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
         })
 
         it("Test change post type by common user", async function () {

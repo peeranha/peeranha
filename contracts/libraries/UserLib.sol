@@ -480,8 +480,8 @@ library UserLib {
     internal 
     returns (User storage)
   {
-    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, dataUser);
-    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, dataUser, communityId);
+    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
+    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
         
     // TODO: create a separate function that returns energy and min rating for an action
     int16 ratingAllowed;

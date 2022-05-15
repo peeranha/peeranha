@@ -339,6 +339,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
         }
+
+        if (hasModeratorRole(actionCaller, communityId)) {
+            return;
+        }
+                
         verifyHasRole(actionCaller, permission, communityId);
         UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
     }
@@ -349,8 +354,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     function verifyHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) private view {
         if (permission == UserLib.Permission.NONE) {
-            if (hasModeratorRole(actionCaller, communityId))
-                return;
+            return;
         } else if (permission == UserLib.Permission.admin) {
             require(hasRole(DEFAULT_ADMIN_ROLE, actionCaller), 
                 "not_allowed_not_admin");
