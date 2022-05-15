@@ -37,7 +37,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         address msgSender = _msgSender();
         peeranhaUser.checkPermission(msgSender, msgSender, 0, UserLib.Action.NONE, UserLib.Permission.admin, false);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
-        peeranhaUser.giveCommunityAdminPermission(msgSender, communityId);
+        peeranhaUser.initCommunityAdminPermission(msgSender, communityId);
     }
 
     /**
