@@ -11,8 +11,6 @@ import "./libraries/AchievementCommonLib.sol";
 import "./base/NativeMetaTransaction.sol";
 
 import "./interfaces/IPeeranhaUser.sol";
-import "./interfaces/IPeeranhaCommunity.sol";
-import "./interfaces/IPeeranhaToken.sol";
 
 
 contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
@@ -27,11 +25,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     UserLib.UserContext userContext;
 
-    function initialize(address peeranhaCommunityContractAddress, address peeranhaNFTContractAddress, address peeranhaTokenContractAddress) public initializer {
+    function initialize(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public initializer {
         __Peeranha_init();
-        userContext.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
-        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(peeranhaNFTContractAddress);
-        userContext.peeranhaToken = IPeeranhaToken(peeranhaTokenContractAddress);
+        userContext.peeranhaCommunity = IPeeranhaCommunity(communityContractAddress);
+        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
+        userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
+        userContext.peeranhaContent = IPeeranhaContent(contentContractAddress);
     }
     
     function __Peeranha_init() public onlyInitializing {
@@ -323,19 +322,19 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     
     // TODO: Add doc comment
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external override {
-        // require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
+        require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
     // TODO: Add doc comment
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) external override {
-        // require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
+        require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
     // TODO: Add doc comment
     function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool createUserIfDoesNotExist) external override {
-        // require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
+        require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
         }

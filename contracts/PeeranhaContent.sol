@@ -3,14 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-// import "./libraries/UserLib.sol";
-// import "./libraries/CommunityLib.sol";
 import "./libraries/PostLib.sol";
 import "./base/NativeMetaTransaction.sol";
-// import "./libraries/RewardLib.sol";
-// import "./libraries/AchievementLib.sol";
-// import "./libraries/AchievementCommonLib.sol";
-// import "./libraries/ConfigurationLib.sol";
 
 import "./interfaces/IPeeranhaContent.sol";
 import "./interfaces/IPeeranhaUser.sol";

@@ -185,10 +185,4 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     function checkTags(uint32 communityId, uint8[] memory tags) external view override {
         CommunityLib.checkTags(communities, communityId, tags);
     }
-
-    // modifier checkTagsByPostId(uint256 postId, uint8[] memory tags) {
-    //     PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
-    //     CommunityLib.checkTagsByPostId(communities, postContainer.info.communityId, postId, tags);
-    //     _;
-    // }
 }
