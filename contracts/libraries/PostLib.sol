@@ -117,6 +117,9 @@ library PostLib  {
         PostType postType,
         uint8[] memory tags
     ) public {
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        self.peeranhaCommunity.checkTags(communityId, tags);
+        
         self.peeranhaUser.checkPermission(
             userAddr,
             userAddr,
@@ -282,6 +285,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+
         self.peeranhaUser.checkPermission(
             userAddr,
             postContainer.info.author,

@@ -6,9 +6,9 @@ pragma abicoder v2;
 
 interface IPeeranhaUser {
     function createUser(bytes32 ipfsHash) external;
-    function updateUser(address userAddress, bytes32 ipfsHash) external;
-    function followCommunity(address userAddress, uint32 communityId) external;
-    function unfollowCommunity(address userAddress, uint32 communityId) external;
+    function updateUser(bytes32 ipfsHash) external;
+    function followCommunity(uint32 communityId) external;
+    function unfollowCommunity(uint32 communityId) external;
     function giveCommunityAdminPermission(address user, uint32 communityId) external;
     function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool isCreate) external;
     function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);

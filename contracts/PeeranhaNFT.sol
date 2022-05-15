@@ -76,9 +76,6 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpg
 
     _safeMint(user, tokenId);          // || _mint
     _setTokenURI(tokenId, achievementNFT.achievementURI);
-    // TODO: Learn how to set token URL in new version
-    // _setTokenURI(tokenId, achievementNFT.achievementURI);
-    // check uri?
   }
 
   function getAchievementsNFTConfig(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {

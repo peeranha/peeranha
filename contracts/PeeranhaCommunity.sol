@@ -33,10 +33,11 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      *
      * - Must be a new community.
      */
-    function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
-        peeranhaUser.checkPermission(msg.sender, msg.sender, 0, UserLib.Action.NONE, UserLib.Permission.admin, false);
+    function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public  {
+        address msgSender = _msgSender();
+        peeranhaUser.checkPermission(msgSender, msgSender, 0, UserLib.Action.NONE, UserLib.Permission.admin, false);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
-        peeranhaUser.giveCommunityAdminPermission(msg.sender, communityId);
+        peeranhaUser.giveCommunityAdminPermission(msgSender, communityId);
     }
 
     /**
@@ -47,9 +48,10 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function updateCommunity(uint32 communityId, bytes32 ipfsHash) external {
-        onlyExistingAndNotFrozenCommunityy(communityId);
-        peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
+    function updateCommunity(uint32 communityId, bytes32 ipfsHash) public  {
+        address msgSender = _msgSender();
+        onlyExistingAndNotFrozenCommunity(communityId);
+        peeranhaUser.checkPermission(msgSender, msgSender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
 
         communities.updateCommunity(communityId, ipfsHash);
     }
@@ -62,9 +64,10 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function freezeCommunity(uint32 communityId) external {
-        onlyExistingAndNotFrozenCommunityy(communityId);
-        peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin, false);
+    function freezeCommunity(uint32 communityId) public  {
+        address msgSender = _msgSender();
+        onlyExistingAndNotFrozenCommunity(communityId);
+        peeranhaUser.checkPermission(msgSender, msgSender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin, false);
 
         communities.freeze(communityId);
     }
@@ -77,9 +80,9 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be community moderator.
      */
-    function unfreezeCommunity(uint32 communityId) external {
-        peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin, false);
-
+    function unfreezeCommunity(uint32 communityId) public  {
+        address msgSender = _msgSender();
+        peeranhaUser.checkPermission(msgSender, msgSender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityAdmin, false);
         communities.unfreeze(communityId);
     }
 
@@ -91,10 +94,10 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be a new tag.
      * - Must be an existing community. 
      */
-    function createTag(uint32 communityId, bytes32 ipfsHash) external { // community admin || global moderator
-        onlyExistingAndNotFrozenCommunityy(communityId);
-        peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
-
+    function createTag(uint32 communityId, bytes32 ipfsHash) public  { // community admin || global moderator
+        onlyExistingAndNotFrozenCommunity(communityId);
+        address msgSender = _msgSender();
+        peeranhaUser.checkPermission(msgSender, msgSender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
         communities.createTag(communityId, ipfsHash);
     }
 
@@ -107,17 +110,16 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing tag.  
      * - Sender must be community moderator.
      */
-    function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) external 
-    onlyExistingTag(tagId, communityId) {
-        peeranhaUser.checkPermission(msg.sender, msg.sender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
-
+    function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) public  onlyExistingTag(tagId, communityId) {
+        address msgSender = _msgSender();
+        peeranhaUser.checkPermission(msgSender, msgSender, communityId, UserLib.Action.NONE, UserLib.Permission.adminOrCommunityModerator, false);
         communities.updateTag(tagId, communityId, ipfsHash);
     }
 
     /**
      * @dev Get communities count.
      */
-    function getCommunitiesCount() external view returns (uint32 count) {
+    function getCommunitiesCount() public  view returns (uint32 count) {
         return communities.getCommunitiesCount();
     }
 
@@ -128,7 +130,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      *
      * - Must be an existing community.
      */
-    function getCommunity(uint32 communityId) external view returns (CommunityLib.Community memory) {
+    function getCommunity(uint32 communityId) public  view returns (CommunityLib.Community memory) {
         return communities.getCommunity(communityId);
     }
 
@@ -139,7 +141,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      *
      * - Must be an existing community.
      */
-    function getTagsCount(uint32 communityId) external view returns (uint8 count) {
+    function getTagsCount(uint32 communityId) public  view returns (uint8 count) {
         return communities.getTagsCount(communityId);
     }
 
@@ -151,7 +153,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.
      * - must be a tags.
      */
-    function getTags(uint32 communityId) external view returns (CommunityLib.Tag[] memory) {
+    function getTags(uint32 communityId) public  view returns (CommunityLib.Tag[] memory) {
         return communities.getTags(communityId);
     }
 
@@ -163,26 +165,22 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.
      * - Must be a tag.
      */
-    function getTag(uint32 communityId, uint8 tagId) external view
+    function getTag(uint32 communityId, uint8 tagId) public  view
     onlyExistingTag(tagId, communityId) 
     returns (CommunityLib.Tag memory) {
         return communities.getTag(communityId, tagId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId) external view override {
+    function onlyExistingAndNotFrozenCommunity(uint32 communityId) public view override {
         CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunityy(uint32 communityId) private view {       // 2 function?
-        CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
-    }
-    
     modifier onlyExistingTag(uint8 tagId, uint32 communityId) {
         CommunityLib.onlyExistingTag(communities, tagId, communityId);
         _;
     }
     
-    function checkTags(uint32 communityId, uint8[] memory tags) external view override {
+    function checkTags(uint32 communityId, uint8[] memory tags) public  view override {
         CommunityLib.checkTags(communities, communityId, tags);
     }
 }
