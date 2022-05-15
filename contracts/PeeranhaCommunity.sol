@@ -34,6 +34,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be a new community.
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) external {
+        peeranhaUser.checkPermission(msg.sender, msg.sender, 0, UserLib.Action.NONE, UserLib.Permission.admin, false);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
         peeranhaUser.giveCommunityAdminPermission(msg.sender, communityId);
     }

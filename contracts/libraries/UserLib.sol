@@ -480,8 +480,8 @@ library UserLib {
     internal 
     returns (User storage)
   {
-    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
-    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
+    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, dataUser);
+    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, dataUser, communityId);
         
     // TODO: create a separate function that returns energy and min rating for an action
     int16 ratingAllowed;
@@ -493,7 +493,6 @@ library UserLib {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
-
     } else if (action == Action.publicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
       message = "low_rating_reply";

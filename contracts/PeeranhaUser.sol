@@ -226,15 +226,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) external override {
-        address actionCaller = userAddr;
+        bytes32 communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
+        bytes32 communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+        
         if (_msgSender() != address(userContext.peeranhaCommunity)) {
             onlyExistingAndNotFrozenCommunity(communityId);
-            actionCaller = _msgSender();
+            verifyHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
+        } else {
+            _setRoleAdmin(communityModeratorRole, communityAdminRole);
         }
-        
-        verifyHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
-        _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
-        _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
+        _grantRole(communityAdminRole, userAddr);
+        _grantRole(communityModeratorRole, userAddr);
     }
 
     /**
@@ -321,19 +323,19 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     
     // TODO: Add doc comment
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external override {
-        require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
+        // require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
     // TODO: Add doc comment
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) external override {
-        require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
+        // require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
     // TODO: Add doc comment
     function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool createUserIfDoesNotExist) external override {
-        require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
+        // require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
         }
