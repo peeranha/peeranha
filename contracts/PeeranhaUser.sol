@@ -98,6 +98,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUser(address userAddress, bytes32 ipfsHash) external override {
         UserLib.createIfDoesNotExist(userContext.users, _msgSender());
+        // TODO: reduce energy here
         UserLib.update(userContext, userAddress, ipfsHash);
     }
 
@@ -123,8 +124,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function unfollowCommunity(address userAddress, uint32 communityId) external override {
         onlyExistingAndNotFrozenCommunity(communityId);
-        UserLib.createIfDoesNotExist(userContext.users, _msgSender());
-        UserLib.unfollowCommunity(userContext.users, userAddress, communityId);
+        UserLib.unfollowCommunity(userContext, userAddress, communityId);
     }
 
     /**

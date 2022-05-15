@@ -234,16 +234,22 @@ library UserLib {
     emit FollowedCommunity(userAddress, communityId);
   }
 
-  /// @notice User usfollows community
-  /// @param users The mapping containing all users
+  /// @notice User unfollows community
+  /// @param userContext The mapping containing all users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
-    UserCollection storage users,
+    UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = getUserByAddress(users, userAddress);
+    User storage user = checkRatingAndEnergy(
+      userContext,
+      userAddress,
+      userAddress,
+      0,
+      Action.followCommunity
+    );
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {

@@ -179,7 +179,7 @@ describe("Test boost", function () {
 			await wait(PeriodTime * 2);
 
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
 			console.log(periodRewardShares);
@@ -212,7 +212,7 @@ describe("Test boost", function () {
 
 			// const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
@@ -245,7 +245,7 @@ describe("Test boost", function () {
 
 			const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
