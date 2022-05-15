@@ -5,8 +5,6 @@ pragma solidity ^0.8.0;
 /// @notice
 /// @dev
 library TokenLib {
-  uint256 constant COEFFICIENT_TOKEN = 10;
-
   struct StatusRewardContainer {
     mapping(address => mapping(uint16 => StatusReward)) statusReward;
   }

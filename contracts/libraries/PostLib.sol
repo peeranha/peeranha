@@ -90,19 +90,19 @@ library PostLib  {
         IPeeranhaUser peeranhaUser; 
     }
 
-    event PostCreated(address user, uint32 communityId, uint256 postId); 
-    event ReplyCreated(address user, uint256 postId, uint16 parentReplyId, uint16 replyId);
-    event CommentCreated(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event PostEdited(address user, uint256 postId);
-    event ReplyEdited(address user, uint256 postId, uint16 replyId);
-    event CommentEdited(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event PostDeleted(address user, uint256 postId);
-    event ReplyDeleted(address user, uint256 postId, uint16 replyId);
-    event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
-    event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address user, uint256 postId, PostType newPostType);
+    event PostCreated(address indexed user, uint32 indexed communityId, uint256 indexed postId); 
+    event ReplyCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint16 replyId);
+    event CommentCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event PostEdited(address indexed user, uint256 indexed postId);
+    event ReplyEdited(address indexed user, uint256 indexed postId, uint16 replyId);
+    event CommentEdited(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event PostDeleted(address indexed user, uint256 indexed postId);
+    event ReplyDeleted(address indexed user, uint256 indexed postId, uint16 replyId);
+    event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event StatusOfficialReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
+    event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
+    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -1049,31 +1049,4 @@ library PostLib  {
 
         return statusHistory;
     }
-
-    // /// @notice Get users which voted for post/reply/comment
-    // /// @param self The mapping containing all posts
-    // /// @param postId The post where need to get users
-    // /// @param replyId The reply where need to get users
-    // /// @param commentId The comment where need to get users
-    // function getVotedUsers(
-    //     PostCollection storage self, 
-    //     uint256 postId,
-    //     uint16 replyId,
-    //     uint8 commentId
-    // ) public view returns (address[] memory) {
-    //     PostContainer storage postContainer = getPostContainer(self, postId);
-
-    //     address[] memory votedUsers;
-    //     if (commentId != 0) {
-    //         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-    //         votedUsers = commentContainer.votedUsers;
-    //     } else if (replyId != 0) {
-    //         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-    //         votedUsers = replyContainer.votedUsers;
-    //     } else {
-    //         votedUsers = postContainer.votedUsers;
-    //     }
-
-    //     return votedUsers;
-    // }
 }
