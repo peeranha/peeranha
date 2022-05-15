@@ -212,7 +212,7 @@ describe("Test post", function () {
 			await peeranhaContent.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.connect(signers[3]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.connect(signers[4]).createReply(1, 0, hashContainer[1], false);
-			await peeranhaContent.connect(signers[5]).createReply(signers[5].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[5]).createReply(1, 0, hashContainer[1], false);
 		});
 
 		it("Test create official reply", async function () {
