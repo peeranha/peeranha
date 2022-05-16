@@ -2826,16 +2826,17 @@ describe("Test vote", function () {
 
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[1].address, 1);          
-			const oldUser2Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
+			const oldUser2Rating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await peeranhaContent.connect(signers[1]).changeStatusBestReply(1, 1);
 			const user1Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
-			const user2Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
+			const user2Rating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await expect(user2Rating).to.equal(oldUser2Rating + AcceptExpertReply);
 			await expect(user1Rating).to.equal(oldUser1Rating + StartRating + AcceptedExpertReply);
 		});

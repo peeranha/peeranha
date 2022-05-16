@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 
 
 import "./libraries/UserLib.sol";
+import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
 import "./base/NativeMetaTransaction.sol";
@@ -328,7 +329,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // TODO: Add doc comment
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) public view override returns(int32) {
         RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-        return periodRating.ratingToReward - periodRating.penalty;
+        return CommonLib.toInt32FromUint32(periodRating.ratingToReward) - CommonLib.toInt32FromUint32(periodRating.penalty);
     }
 
     // only unitTest
@@ -339,7 +340,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     // only unitTest
     // TODO: Add comment
-    function getPeriodReward(uint16 rewardPeriod) public view returns(int32) {
+    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }
     

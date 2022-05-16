@@ -10,11 +10,11 @@ import "./UserLib.sol";
 /// @dev
 library RewardLib {
   uint256 constant PERIOD_LENGTH = 4;          // 7 day = 1 period //
-  uint256 constant START_PERIOD_TIME = 1652673369;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant START_PERIOD_TIME = 1652710581;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
-    int32 ratingToReward; // uint32
-    int32 penalty;        // uint32
+    uint32 ratingToReward;
+    uint32 penalty;
     bool isActive;
   }
 
@@ -23,7 +23,7 @@ library RewardLib {
   }
 
   struct PeriodRewardShares {
-    int32 totalRewardShares;    // uint256
+    uint256 totalRewardShares;
     address[] activeUsersInPeriod;
   }
 

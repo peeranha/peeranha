@@ -63,6 +63,13 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   }
 
   /**
+   * @dev Returns the cap on the token's for owner.
+   */
+  function _ownerMinted() public view virtual returns (uint256) {
+    return ownerMinted;
+  }
+
+  /**
   * @dev See {ERC20-_mint}.
   */
   function _mint(address account, uint256 amount) internal virtual override (ERC20Upgradeable, ERC20CappedUpgradeable) {
