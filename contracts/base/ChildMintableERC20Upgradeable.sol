@@ -1,6 +1,7 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "./IChildToken.sol";
@@ -11,7 +12,7 @@ contract ChildMintableERC20Upgradeable is
     IChildToken,
     NativeMetaTransaction,
     ERC20Upgradeable,
-    AccessControlUpgradeable
+    AccessControlEnumerableUpgradeable
 {
     bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
@@ -62,16 +63,5 @@ contract ChildMintableERC20Upgradeable is
      */
     function withdraw(uint256 amount) external {
         _burn(_msgSender(), amount);
-    }
-
-    /**
-     * @notice Example function to handle minting tokens on matic chain
-     * @dev Minting can be done as per requirement,
-     * This implementation allows only admin to mint tokens but it can be changed as per requirement
-     * @param user user for whom tokens are being minted
-     * @param amount amount of token to mint
-     */
-    function mint(address user, uint256 amount) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _mint(user, amount);
     }
 }

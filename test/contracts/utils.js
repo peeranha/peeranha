@@ -81,7 +81,6 @@ const createPeerenhaAndTokenContract = async function () {
     const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
     const peeranhaUser = await PeeranhaUser.deploy();
     await peeranhaUser.deployed();
-    await peeranhaUser.initialize(peeranhaCommunityContractAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
     const peeranhaUserContractAddress = await peeranhaUser.resolvedAddress.then((value) => {
         return value;
     });
@@ -96,11 +95,16 @@ const createPeerenhaAndTokenContract = async function () {
     })
     const peeranhaContent = await PeeranhaContent.deploy();
     await peeranhaContent.deployed();
-    await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
+    const peeranhaContentAddress = await peeranhaContent.resolvedAddress.then((value) => {
+        return value;
+    });
 
+    
+    await peeranhaUser.initialize(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
+    await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
-    await token.initialize("token", "ecs", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
-    await peeranhaNFT.initialize("token", "ecs", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
+    await token.initialize("Peeranha", "PEER", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
+    await peeranhaNFT.initialize("PeeranhaNFT", "PEERNFT", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
 
     return {
         peeranhaContent: peeranhaContent,

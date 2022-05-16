@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./PostLib.sol";
@@ -63,6 +64,7 @@ library VoteLib  {
         });
     }
 
+    // give proper names to constaints, e.g. DOWNVOTE_EXPERT_POST
     //expert post
     int32 constant DownvoteExpertPost = -1;
     int32 constant UpvotedExpertPost = 5;

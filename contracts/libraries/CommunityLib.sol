@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./CommonLib.sol";
@@ -29,12 +30,12 @@ library CommunityLib {
     }
 
 
-    event CommunityCreated(address user, uint32 id);
-    event CommunityUpdated(address user, uint32 id);
-    event TagCreated(address user, uint8 tagId, uint32 communityId);
-    event TagUpdated(address user, uint8 tagId, uint32 communityId);
-    event CommunityFrozen(address user, uint32 communityId);
-    event CommunityUnfrozen(address user, uint32 communityId);
+    event CommunityCreated(address indexed user, uint32 indexed id);
+    event CommunityUpdated(address indexed user, uint32 indexed id);
+    event TagCreated(address indexed user, uint8 indexed tagId, uint32 indexed communityId);
+    event TagUpdated(address indexed user, uint8 indexed tagId, uint32 indexed communityId);
+    event CommunityFrozen(address indexed user, uint32 indexed communityId);
+    event CommunityUnfrozen(address indexed user, uint32 indexed communityId);
 
     /// @notice Create new community info record
     /// @param self The mapping containing all communities
@@ -200,7 +201,7 @@ library CommunityLib {
         emit CommunityUnfrozen(msg.sender, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal {
+    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal view {
         Community storage community = self.communities[communityId].info;
 
         require(
@@ -219,7 +220,7 @@ library CommunityLib {
         );
     }
 
-    function checkTags(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal {
+    function checkTags(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal view {
         Community storage community = self.communities[communityId].info;
 
         for (uint32 i; i < tags.length; i++) {
@@ -228,7 +229,7 @@ library CommunityLib {
         }
     }
 
-    function checkTagsByPostId(CommunityCollection storage self, uint32 communityId, uint256 postId, uint8[] memory tags) internal {
+    function checkTagsExist(CommunityCollection storage self, uint32 communityId, uint8[] memory tags) internal view {
         checkTags(self, communityId, tags);
     }
 }

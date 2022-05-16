@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./VoteLib.sol";
@@ -11,7 +12,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 10;    //7 days (10)     // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -89,19 +90,19 @@ library PostLib  {
         IPeeranhaUser peeranhaUser; 
     }
 
-    event PostCreated(address user, uint32 communityId, uint256 postId); 
-    event ReplyCreated(address user, uint256 postId, uint16 parentReplyId, uint16 replyId);
-    event CommentCreated(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event PostEdited(address user, uint256 postId);
-    event ReplyEdited(address user, uint256 postId, uint16 replyId);
-    event CommentEdited(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event PostDeleted(address user, uint256 postId);
-    event ReplyDeleted(address user, uint256 postId, uint16 replyId);
-    event CommentDeleted(address user, uint256 postId, uint16 parentReplyId, uint8 commentId);
-    event StatusOfficialReplyChanged(address user, uint256 postId, uint16 replyId);
-    event StatusBestReplyChanged(address user, uint256 postId, uint16 replyId);
-    event ForumItemVoted(address user, uint256 postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address user, uint256 postId, PostType newPostType);
+    event PostCreated(address indexed user, uint32 indexed communityId, uint256 indexed postId); 
+    event ReplyCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint16 replyId);
+    event CommentCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event PostEdited(address indexed user, uint256 indexed postId);
+    event ReplyEdited(address indexed user, uint256 indexed postId, uint16 replyId);
+    event CommentEdited(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event PostDeleted(address indexed user, uint256 indexed postId);
+    event ReplyDeleted(address indexed user, uint256 indexed postId, uint16 replyId);
+    event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    event StatusOfficialReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
+    event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
+    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -116,6 +117,9 @@ library PostLib  {
         PostType postType,
         uint8[] memory tags
     ) public {
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        self.peeranhaCommunity.checkTags(communityId, tags);
+        
         self.peeranhaUser.checkPermission(
             userAddr,
             userAddr,
@@ -281,6 +285,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+
         self.peeranhaUser.checkPermission(
             userAddr,
             postContainer.info.author,
@@ -744,7 +749,6 @@ library PostLib  {
         int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
         if (replyContainer.info.isFirstReply) {
-            int32 changeRating;
             if (oldRating < 0 && newRating >= 0) {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
             } else if (oldRating >= 0 && newRating < 0) {
@@ -908,7 +912,7 @@ library PostLib  {
 
     function getTypesRating(        //name?
         PostType postType
-    ) private view returns (VoteLib.StructRating memory) {
+    ) private pure returns (VoteLib.StructRating memory) {
         if (postType == PostType.ExpertPost)
             return VoteLib.getExpertRating();
         else if (postType == PostType.CommonPost)
@@ -1065,31 +1069,4 @@ library PostLib  {
 
         return statusHistory;
     }
-
-    // /// @notice Get users which voted for post/reply/comment
-    // /// @param self The mapping containing all posts
-    // /// @param postId The post where need to get users
-    // /// @param replyId The reply where need to get users
-    // /// @param commentId The comment where need to get users
-    // function getVotedUsers(
-    //     PostCollection storage self, 
-    //     uint256 postId,
-    //     uint16 replyId,
-    //     uint8 commentId
-    // ) public view returns (address[] memory) {
-    //     PostContainer storage postContainer = getPostContainer(self, postId);
-
-    //     address[] memory votedUsers;
-    //     if (commentId != 0) {
-    //         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-    //         votedUsers = commentContainer.votedUsers;
-    //     } else if (replyId != 0) {
-    //         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-    //         votedUsers = replyContainer.votedUsers;
-    //     } else {
-    //         votedUsers = postContainer.votedUsers;
-    //     }
-
-    //     return votedUsers;
-    // }
 }

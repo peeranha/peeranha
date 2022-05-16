@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./CommonLib.sol";
@@ -8,8 +9,8 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint256 constant PERIOD_LENGTH = 604800;          // 7 day = 1 period //
-  uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
+  uint256 constant PERIOD_LENGTH = 4;          // 7 day = 1 period //
+  uint256 constant START_PERIOD_TIME = 1652673369;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
     int32 ratingToReward; // uint32

@@ -25,7 +25,7 @@ describe("Test wallet", function () {
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings, 1);
 
-				const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 				expect(userPeriodRating.ratingToReward).to.equal(result.ratingToReward);
@@ -45,7 +45,7 @@ describe("Test wallet", function () {
 		 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 
-				const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(1);
 
@@ -69,7 +69,7 @@ describe("Test wallet", function () {
 				await wait(PeriodTime);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 		
-				const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(2);
 				
@@ -101,7 +101,7 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[2], 1);
 		
-				const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(2);
 				
@@ -133,7 +133,7 @@ describe("Test wallet", function () {
 				await wait(PeriodTime * 2);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 		
-				const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 				console.log(rewardPeriods)
 
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
@@ -167,12 +167,12 @@ describe("Test wallet", function () {
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
 			await wait(PeriodTime);
 
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0]);
+			await token.claimReward(rewardPeriods[0]);
 			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
 			expect(balance).to.equal(periodUserReward * fraction);
@@ -187,9 +187,9 @@ describe("Test wallet", function () {
 			await wait(PeriodTime);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 4, 1);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0]), 'Transaction was not reverted')
+			await expect(token.claimReward(rewardPeriods[0]), 'Transaction was not reverted')
 			.to.be.revertedWith("period_not_ended");
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		}).retries(2);
@@ -203,9 +203,9 @@ describe("Test wallet", function () {
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
 
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0] - 1))
+			await expect(token.claimReward(rewardPeriods[0] - 1))
 			.to.be.revertedWith('no_reward');
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		});
@@ -222,9 +222,9 @@ describe("Test wallet", function () {
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 4, 1);
 			await wait(PeriodTime);
 
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
-			await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0]);
-			await expect(token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
+			await token.claimReward(rewardPeriods[0]);
+			await expect(token.claimReward(rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
 		});
 
 		///
@@ -259,15 +259,15 @@ describe("Test wallet", function () {
 	// 		await peeranhaUser.addUserRating(signers[1].address, 1, 1);
 
 
-	// 		const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+	// 		const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 	// 		const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 	// 		expect(ratingToReward).to.equal(60);
 
-	// 		await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[1]);
+	// 		await token.claimReward(rewardPeriods[1]);
 	// 		const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
-	// 		await token.claimReward(signers[1].address, rewardPeriods[1]);
+	// 		await token.claimReward(rewardPeriods[1]);
 	// 		const balance2 = await getBalance(token, signers[1].address);
 			
 	// 		const userReward = await getUserReward(60, 110);
@@ -298,7 +298,7 @@ describe("Test wallet", function () {
 		
 	// 	await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
 
-	// 	const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+	// 	const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 		
 	// 	const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 	// 	expect(ratingToReward).to.equal(60);
@@ -307,10 +307,10 @@ describe("Test wallet", function () {
 	// 	console.log(await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1))
 
 
-	// 	// await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[1]);
+	// 	// await token.claimReward(rewardPeriods[1]);
 	// 	// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
-	// 	// await token.claimReward(signers[1].address, rewardPeriods[1]);
+	// 	// await token.claimReward(rewardPeriods[1]);
 	// 	// const balance2 = await getBalance(token, signers[1].address);
 		
 	// 	// const userReward = await getUserReward(60, 110);

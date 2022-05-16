@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
@@ -6,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 /// @notice
 /// @dev
 library CommonLib {
-  uint16 constant QUICK_REPLY_TIME_SECONDS = 900; // 6
+  uint16 constant QUICK_REPLY_TIME_SECONDS = 6; // 6
 
   struct IpfsHash {
       bytes32 hash;

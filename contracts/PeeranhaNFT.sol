@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
@@ -5,38 +6,28 @@ import "./libraries/AchievementCommonLib.sol";
 import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
+  
+  bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
 
-contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpgradeable {
+  event ConfigureNewAchievementNFT(uint64 indexed achievementId);
+  
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
   function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public initializer {
-    __NFT_init(name, symbol, childChainManager);
-    __Ownable_init_unchained();
-    transferOwnership(peeranhaUserContractAddress);
+    __NFT_init(name, symbol, peeranhaUserContractAddress, childChainManager);
   }
 
-  function __NFT_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
+  function __NFT_init(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) internal onlyInitializing {
     __ChildMintableERC721Upgradeable_init(name, symbol, childChainManager);
+    _grantRole(OWNER_MINTER_ROLE, peeranhaUserContractAddress);
+    _setRoleAdmin(OWNER_MINTER_ROLE, DEFAULT_ADMIN_ROLE);
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ChildMintableERC721Upgradeable) {
     super._beforeTokenTransfer(from, to, amount);
   }
-
-  // This is to support Native meta transactions
-  // never use msg.sender directly, use _msgSender() instead
-  function _msgSender()
-      internal
-      override(ContextUpgradeable, ChildMintableERC721Upgradeable)
-      view
-      returns (address sender)
-  {
-      return ChildMintableERC721Upgradeable._msgSender();
-  }
-
-  event ConfigureNewAchievementNFT(uint64 achievementId);
 
   function configureNewAchievementNFT(
     uint64 achievementId,
@@ -45,7 +36,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpg
     AchievementCommonLib.AchievementsType achievementsType
   ) 
     external
-    onlyOwner()
+    onlyRole(OWNER_MINTER_ROLE)
     override
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[++achievementsNFTContainer.achievementsCount];
@@ -66,7 +57,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpg
     uint64 achievementId
   )
     external
-    onlyOwner()
+    onlyRole(OWNER_MINTER_ROLE)
     override
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
@@ -75,9 +66,6 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable, OwnableUpg
 
     _safeMint(user, tokenId);          // || _mint
     _setTokenURI(tokenId, achievementNFT.achievementURI);
-    // TODO: Learn how to set token URL in new version
-    // _setTokenURI(tokenId, achievementNFT.achievementURI);
-    // check uri?
   }
 
   function getAchievementsNFTConfig(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {

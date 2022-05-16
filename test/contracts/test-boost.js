@@ -179,7 +179,7 @@ describe("Test boost", function () {
 			await wait(PeriodTime * 2);
 
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
 			console.log(periodRewardShares);
@@ -192,7 +192,7 @@ describe("Test boost", function () {
 			// const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			// expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[1]);
+			// await token.claimReward(rewardPeriods[1]);
 			// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 			
 			// expect(balance).to.equal(5 * coefficientToken * fraction);
@@ -212,7 +212,7 @@ describe("Test boost", function () {
 
 			// const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
@@ -223,7 +223,7 @@ describe("Test boost", function () {
 			expect(periodRewardShares).to.equal(5 * 6 * periodRewardCoefficient);
 			expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[1]);
+			// await token.claimReward(rewardPeriods[1]);
 			// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 			// expect(balance).to.equal(5 * 6 * coefficientToken * fraction);
 		});
@@ -245,14 +245,14 @@ describe("Test boost", function () {
 
 			const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranhaUser.getAcctiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			expect(ratingToReward).to.equal(0);
 
-			await expect(token.claimReward(peeranhaUser.deployTransaction.from, rewardPeriods[0]))
+			await expect(token.claimReward(rewardPeriods[0]))
 			.to.be.revertedWith('no_reward');
 		});
 	})
