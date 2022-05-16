@@ -174,7 +174,7 @@ library UserLib {
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
-    user.energy = getStatusEnergy(START_USER_RATING);
+    user.energy = getStatusEnergy();
     user.lastUpdatePeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
 
     self.userList.push(userAddress);
@@ -190,7 +190,7 @@ library UserLib {
     address userAddress
   ) internal {
     if (!UserLib.isExists(self, userAddress)) {
-      UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
+      UserLib.create(self, userAddress, bytes32(0xc09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc));
     }
   }
 
@@ -649,10 +649,10 @@ library UserLib {
     }
 
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, userRating, energy);
+    reduceEnergy(user, energy);
   }
 
-  function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
@@ -660,7 +660,7 @@ library UserLib {
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy(userRating);
+      userEnergy = UserLib.getStatusEnergy();
       user.lastUpdatePeriod = currentPeriod;
     }
 
@@ -673,7 +673,8 @@ library UserLib {
     address user,
     uint32 communityId
   ) 
-    internal 
+    internal
+    view
     returns (bool) 
   {
     if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
@@ -848,23 +849,7 @@ library UserLib {
     }
   }
 
-  function getStatusEnergy(int32 rating) internal pure returns (uint16) {
-    if (rating < 0) {
-      return 0;
-    } else if (rating < 100) {
-      return 300;
-    } else if (rating < 500) {
-      return 600;
-    } else if (rating < 1000) {
-      return 900;
-    } else if (rating < 2500) {
-      return 1200;
-    } else if (rating < 5000) {
-      return 1500;
-    } else if (rating < 10000) {
-      return 1800;
-    } else {
-      return 2100;
-    }
+  function getStatusEnergy() internal pure returns (uint16) {
+    return 1000;
   }
 }

@@ -232,6 +232,10 @@ describe("Test wallet", function () {
 		///
 	});
 
+	describe("mint for company", function () {
+
+	});
+
 	// describe('Split reward', function(){
 
 	// 	it("split reward (2 users)", async function () {

@@ -384,8 +384,11 @@ library PostLib  {
             UserLib.Permission.NONE,
             false
         );
-
-        if (postContainer.info.rating > 0) {
+    
+        // DownvoteExpertPost = -1;
+        // UpvotedExpertPost = 5;
+        // + 1 upvote and 1 down vote -> postRating = 0 but userRating +4 (need fix?)
+        if (postContainer.info.rating > 0 && (postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author)) {
             self.peeranhaUser.updateUserRating(postContainer.info.author,
                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                 VoteLib.ResourceAction.Upvoted,
@@ -423,12 +426,29 @@ library PostLib  {
         uint16 replyId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.bestReply != replyId, "You can not delete the best reply."); // unit test
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        self.peeranhaUser.checkPermission(userAddr, replyContainer.info.author, postContainer.info.communityId, UserLib.Action.deleteItem, UserLib.Permission.NONE, false);
+        self.peeranhaUser.checkPermission(
+            userAddr,
+            replyContainer.info.author,
+            postContainer.info.communityId,
+            UserLib.Action.deleteItem,
+            UserLib.Permission.NONE,
+            false
+        );
+        ///
+        // bug
+        // checkPermission has check "require(actionCaller == dataUser, "not_allowed_delete");"
+        // behind this check is "if actionCaller == moderator -> return"
+        // in this step can be only a moderator or reply's owner
+        // a reply owner can not delete best reply, but a moderator can
+        // next require check that reply's owner can not delete best reply
+        // bug if reply's owner is moderator any way error
+        ///
+        require(postContainer.info.bestReply != replyId || userAddr != replyContainer.info.author, "You can not delete the best reply.");
+
 
         uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < DELETE_TIME) {  //unit test ?
+        if (time - postContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
             deductReplyRating(
                 self,
                 postContainer.info.postType,
@@ -580,7 +600,7 @@ library PostLib  {
         }
         self.peeranhaUser.checkPermission(
             userAddr,
-            userAddr,
+            postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.bestReply,
             UserLib.Permission.NONE,

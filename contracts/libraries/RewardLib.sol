@@ -12,8 +12,8 @@ library RewardLib {
   uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
-    int32 ratingToReward;
-    int32 penalty;
+    int32 ratingToReward; // uint32
+    int32 penalty;        // uint32
     bool isActive;
   }
 
@@ -22,7 +22,7 @@ library RewardLib {
   }
 
   struct PeriodRewardShares {
-    int32 totalRewardShares;
+    int32 totalRewardShares;    // uint256
     address[] activeUsersInPeriod;
   }
 
@@ -34,7 +34,7 @@ library RewardLib {
 
   /// @notice Get perion
   /// @param time Unix time. Usual now()
-  function getPeriod(uint32 time) internal view returns (uint16) {
+  function getPeriod(uint32 time) internal pure returns (uint16) {
     return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 }
