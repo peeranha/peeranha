@@ -30,9 +30,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function initialize(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public initializer {
         __Peeranha_init();
         userContext.peeranhaCommunity = IPeeranhaCommunity(communityContractAddress);
-        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
-        userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
         userContext.peeranhaContent = IPeeranhaContent(contentContractAddress);
+        userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
+        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
     }
     
     function __Peeranha_init() public onlyInitializing {

@@ -73,7 +73,6 @@ contract PeeranhaMainnetNFT is
         // free to define your own encoding/ decoding scheme
         // for L2 -> L1 token metadata transfer
         string memory uri = abi.decode(data, (string));
-
         _setTokenURI(tokenId, uri);
     }
 
