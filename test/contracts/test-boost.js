@@ -17,7 +17,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -40,7 +40,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -55,7 +55,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -69,7 +69,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("3"))
+			await token.mint(parseEther("3"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime * 3)
@@ -171,7 +171,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 
@@ -202,7 +202,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime);
@@ -232,7 +232,7 @@ describe("Test boost", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime);
