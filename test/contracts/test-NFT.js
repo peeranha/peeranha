@@ -120,7 +120,7 @@ describe("Test NFT", function () {
 		await expect(await getInt(tokensCount)).to.equal(0);
 
 		await expect(peeranhaNFT.configureNewAchievementNFT(1, 15, URIContainer[0], AchievementsType.Rating))
-		.to.be.revertedWith('Ownable: caller is not the owner');
+		.to.be.revertedWith('AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 	});
 
 	it("Test give 1st NFT", async function () {

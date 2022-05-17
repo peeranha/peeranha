@@ -15,6 +15,7 @@ import "../interfaces/IPeeranhaContent.sol";
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
   int32 constant START_USER_RATING = 10;
+  bytes32 constant DEFAULT_IPFS = bytes32(0xc09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc);
 
   int16 constant MINIMUM_RATING = -300;
   int16 constant POST_QUESTION_ALLOWED = 0;
@@ -77,8 +78,8 @@ library UserLib {
   }
 
   struct DataUpdateUserRating {
-    int32 ratingToReward;
-    int32 penalty;
+    uint32 ratingToReward;
+    uint32 penalty;
     int32 changeRating;
     int32 ratingToRewardChange;
   }
@@ -161,7 +162,7 @@ library UserLib {
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
-    user.energy = getStatusEnergy(START_USER_RATING);
+    user.energy = getStatusEnergy();
     user.lastUpdatePeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
 
     self.userList.push(userAddress);
@@ -177,8 +178,7 @@ library UserLib {
     address userAddress
   ) internal {
     if (!UserLib.isExists(self, userAddress)) {
-      // TODO: move default IPFS hash to constats
-      UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
+      UserLib.create(self, userAddress, DEFAULT_IPFS);
     }
   }
 
@@ -375,31 +375,31 @@ library UserLib {
       
       if (previousPeriod != currentPeriod - 1) {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = rating + dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+          dataUpdateUserRatingCurrentPeriod.changeRating = rating + CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
         } else {
           dataUpdateUserRatingCurrentPeriod.changeRating = rating;
         }
       } else {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+          dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
         int32 differentRatingPreviousPeriod; // name
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
-            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
               dataUpdateUserRatingCurrentPeriod.changeRating += rating;
             }
           } else {
-            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
@@ -407,12 +407,12 @@ library UserLib {
           }
         } else if (rating < 0 && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
 
-          differentRatingCurrentPeriod = dataUpdateUserRatingCurrentPeriod.penalty - rating;   // penalty is always positive, we need add rating to penalty
-          if (differentRatingCurrentPeriod > dataUpdateUserRatingCurrentPeriod.ratingToReward) {
-            dataUpdateUserRatingCurrentPeriod.changeRating -= dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty;  // - current ratingToReward
+          differentRatingCurrentPeriod = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) - rating;   // penalty is always positive, we need add rating to penalty
+          if (differentRatingCurrentPeriod > CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward)) {
+            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
             dataUpdateUserRatingPreviousPeriod.changeRating = rating - dataUpdateUserRatingCurrentPeriod.changeRating;                                       // + previous penalty
-            if (dataUpdateUserRatingPreviousPeriod.ratingToReward < dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating) {
-              int32 extraPenalty = dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating - dataUpdateUserRatingPreviousPeriod.ratingToReward;
+            if (CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) < CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - dataUpdateUserRatingPreviousPeriod.changeRating) {
+              int32 extraPenalty = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - dataUpdateUserRatingPreviousPeriod.changeRating;
               dataUpdateUserRatingPreviousPeriod.changeRating += extraPenalty;  // - extra previous penalty
               dataUpdateUserRatingCurrentPeriod.changeRating -= extraPenalty;   // + extra current penalty
             }
@@ -426,36 +426,43 @@ library UserLib {
       }
 
       if (dataUpdateUserRatingPreviousPeriod.changeRating != 0) {
-        previousPeriodRating.penalty += -dataUpdateUserRatingPreviousPeriod.changeRating;
+        if (dataUpdateUserRatingPreviousPeriod.changeRating > 0) previousPeriodRating.penalty -= CommonLib.toUInt32FromInt32(dataUpdateUserRatingPreviousPeriod.changeRating);
+        else previousPeriodRating.penalty += CommonLib.toUInt32FromInt32(-dataUpdateUserRatingPreviousPeriod.changeRating);
 
-        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty, dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty + dataUpdateUserRatingPreviousPeriod.changeRating);
-        if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange != 0)
-          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange);
+        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) + dataUpdateUserRatingPreviousPeriod.changeRating);
+        if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange > 0) {
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
+        } else {
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares -= CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
+        }
       }
     }
 
     if (dataUpdateUserRatingCurrentPeriod.changeRating != 0) {
-      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty, dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty + dataUpdateUserRatingCurrentPeriod.changeRating);
-      if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange != 0)
-        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange);
+      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) + dataUpdateUserRatingCurrentPeriod.changeRating);
+      if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange > 0) {
+        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+      } else {
+        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares -= CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+      }
 
       int32 changeRating;
       if (dataUpdateUserRatingCurrentPeriod.changeRating > 0) {
-        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - dataUpdateUserRatingCurrentPeriod.penalty;
+        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);
         if (changeRating >= 0) {
           currentPeriodRating.penalty = 0;
-          currentPeriodRating.ratingToReward += changeRating;
+          currentPeriodRating.ratingToReward += CommonLib.toUInt32FromInt32(changeRating);
         } else {
-          currentPeriodRating.penalty = -changeRating;
+          currentPeriodRating.penalty = CommonLib.toUInt32FromInt32(-changeRating);
         }
 
       } else if (dataUpdateUserRatingCurrentPeriod.changeRating < 0) {
-        changeRating = dataUpdateUserRatingCurrentPeriod.ratingToReward + dataUpdateUserRatingCurrentPeriod.changeRating;
+        changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) + dataUpdateUserRatingCurrentPeriod.changeRating;
         if (changeRating <= 0) {
           currentPeriodRating.ratingToReward = 0;
-          currentPeriodRating.penalty += -changeRating;
+          currentPeriodRating.penalty += CommonLib.toUInt32FromInt32(-changeRating);
         } else {
-          currentPeriodRating.ratingToReward = changeRating;
+          currentPeriodRating.ratingToReward = CommonLib.toUInt32FromInt32(changeRating);
         }
       }
     }
@@ -578,12 +585,12 @@ library UserLib {
     }
 
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, userRating, energy);
+    reduceEnergy(user, energy);
 
     return user;
   }
 
-  function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
     uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
@@ -591,7 +598,7 @@ library UserLib {
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy(userRating);
+      userEnergy = UserLib.getStatusEnergy();
       user.lastUpdatePeriod = currentPeriod;
     }
 
@@ -599,23 +606,7 @@ library UserLib {
     user.energy = userEnergy - energy;
   }
 
-  function getStatusEnergy(int32 rating) internal pure returns (uint16) {
-    if (rating < 0) {
-      return 0;
-    } else if (rating < 100) {
-      return 300;
-    } else if (rating < 500) {
-      return 600;
-    } else if (rating < 1000) {
-      return 900;
-    } else if (rating < 2500) {
-      return 1200;
-    } else if (rating < 5000) {
-      return 1500;
-    } else if (rating < 10000) {
-      return 1800;
-    } else {
-      return 2100;
-    }
+  function getStatusEnergy() internal pure returns (uint16) {
+    return 1000;
   }
 }

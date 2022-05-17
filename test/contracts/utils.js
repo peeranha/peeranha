@@ -1,4 +1,5 @@
 const delay = ms => new Promise(res => setTimeout(res, ms));
+const { parseEther }  = require("ethers/lib/utils");
 const crypto = require("crypto");
 
 ///
@@ -14,6 +15,16 @@ async function wait(ms) {
 async function getBalance(contract, user) {
     const balance = await contract.availableBalanceOf(user);
 	return await getInt(balance);
+}
+
+async function getOwnerMinted(contract) {
+    const ownerMinted = await contract.ownerMinted();
+	return await getInt(ownerMinted);
+}
+
+async function getTotalSupply(contract) {
+    const totalSupply = await contract.totalSupply();
+	return await getInt(totalSupply);
 }
 
 async function getInt(value) {
@@ -341,7 +352,7 @@ const ModeratorDeleteComment = -1;
 
 
 module.exports = { 
-    wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
+    wait, getBalance, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,

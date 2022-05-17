@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const {
-	wait, getBalance, getInt, createPeerenhaAndTokenContract, getHashContainer, getUserReward,
+	wait, getBalance, getInt, createPeerenhaAndTokenContract, getHashContainer, getUserReward, parseEther, getOwnerMinted, getTotalSupply,
 	periodUserReward, PeriodTime, fraction, setRetingOnePeriod, ratingChanges, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, ratingChangesSkipPeriod, poolToken,
 } = require('./utils');
 
@@ -230,6 +230,61 @@ describe("Test wallet", function () {
 		///
 		// to do max reward
 		///
+	});
+
+	describe("mint for owner", function () {
+		it("mint 5 tokens", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			const ownerMintTokens = parseEther("5");
+			await token.mint(ownerMintTokens)
+			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
+
+			await expect(await getInt(ownerMintTokens)).to.equal(balance);
+			await expect(balance).to.equal(await getOwnerMinted(token));
+			await expect(balance).to.equal(await getTotalSupply(token));
+		});
+
+		it("mint 5 and 2 tokens", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			await token.mint(parseEther("5"))
+			await token.mint(parseEther("2"))
+			const sumOwnerMintTokens = parseEther("7");
+
+			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
+
+			await expect(await getInt(sumOwnerMintTokens)).to.equal(balance);
+			await expect(balance).to.equal(await getOwnerMinted(token));
+			await expect(balance).to.equal(await getTotalSupply(token));
+		});
+
+		it("mint max tokens", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			const ownerMintTokens = parseEther("40000000");
+			await token.mint(ownerMintTokens)
+			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
+
+			await expect(await getInt(ownerMintTokens)).to.equal(balance);
+			await expect(balance).to.equal(await getOwnerMinted(token));
+			await expect(balance).to.equal(await getTotalSupply(token));
+		});
+
+		it("mint more than max tokens", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			const ownerMintTokens = parseEther("40000001");
+			await expect(token.mint(ownerMintTokens)).to.be.revertedWith('max_owner_mint_exceeded');
+		});
 	});
 
 	// describe('Split reward', function(){

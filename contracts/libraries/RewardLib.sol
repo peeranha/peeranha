@@ -13,8 +13,8 @@ library RewardLib {
   uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
-    int32 ratingToReward;
-    int32 penalty;
+    uint32 ratingToReward;
+    uint32 penalty;
     bool isActive;
   }
 
@@ -23,7 +23,7 @@ library RewardLib {
   }
 
   struct PeriodRewardShares {
-    int32 totalRewardShares;
+    uint256 totalRewardShares;
     address[] activeUsersInPeriod;
   }
 

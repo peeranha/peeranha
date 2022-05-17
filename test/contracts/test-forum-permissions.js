@@ -1205,8 +1205,8 @@ describe("Test permissions", function () {
             await peeranhaContent.voteItem(1, 1, 0, 1);
             await peeranhaContent.voteItem(1, 2, 0, 1);
     
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 1);
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 2);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 1);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 2);
             
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -1234,8 +1234,8 @@ describe("Test permissions", function () {
             await peeranhaContent.voteItem(1, 1, 0, 1);
             await peeranhaContent.voteItem(1, 2, 0, 1);
     
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 1);
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 2);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 1);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 2);
             
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -1263,8 +1263,8 @@ describe("Test permissions", function () {
             await peeranhaContent.voteItem(1, 1, 0, 0);
             await peeranhaContent.voteItem(1, 2, 0, 0);
     
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 1);
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 2);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 1);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 2);
             
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -1292,8 +1292,8 @@ describe("Test permissions", function () {
             await peeranhaContent.voteItem(1, 1, 0, 0);
             await peeranhaContent.voteItem(1, 2, 0, 0);
     
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 1);
-            await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 2);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 1);
+            await peeranhaContent.connect(signers[3]).deleteReply(1, 2);
             
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);

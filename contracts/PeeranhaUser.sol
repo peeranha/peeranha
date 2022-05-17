@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 
 
 import "./libraries/UserLib.sol";
+import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
 import "./base/NativeMetaTransaction.sol";
@@ -128,7 +129,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be follow the community.  
      */
     function unfollowCommunity(uint32 communityId) public override {
-        onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.unfollowCommunity(userContext, _msgSender(), communityId);
     }
 
@@ -175,8 +175,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     /**
      * @dev Check if user with given address exists.
      */
-    function userExists(address addr) public view returns (bool) {
-        return userContext.users.isExists(addr);
+    function isUserExists(address addr) public view {
+        require(userContext.users.isExists(addr), "user_not_found");
     }
 
     /**
@@ -204,6 +204,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveAdminPermission(address userAddr) public {
         // grantRole checks that sender is role admin
         // TODO: verify there is unit test that only defaul admin can assign protocol admin
+        isUserExists(userAddr);
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -233,6 +234,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function initCommunityAdminPermission(address userAddr, uint32 communityId) public override {
+        isUserExists(userAddr);
         require(_msgSender() == address(userContext.peeranhaCommunity), "unauthorized");
         
         bytes32 communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
@@ -255,6 +257,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
+        isUserExists(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
         
@@ -271,7 +274,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {  // add check user
+    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
+        isUserExists(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
@@ -328,7 +332,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // TODO: Add doc comment
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) public view override returns(int32) {
         RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-        return periodRating.ratingToReward - periodRating.penalty;
+        return CommonLib.toInt32FromUint32(periodRating.ratingToReward) - CommonLib.toInt32FromUint32(periodRating.penalty);
     }
 
     // only unitTest
@@ -339,7 +343,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     // only unitTest
     // TODO: Add comment
-    function getPeriodReward(uint16 rewardPeriod) public view returns(int32) {
+    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }
     

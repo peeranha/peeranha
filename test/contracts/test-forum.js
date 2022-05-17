@@ -25,7 +25,7 @@ describe("Test post", function () {
 			await Promise.all(
 				hashContainer.map(async (hash, index) => {
 					return await peeranhaContent
-						.createPost(peeranhaUser.deployTransaction.from, 1, hash, PostTypeEnum.ExpertPost, [1]);
+						.createPost(1, hash, PostTypeEnum.ExpertPost, [1]);
 				})
 			);
 
@@ -996,7 +996,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('not_allowed_delete');
 		});
 
-		it("Test delete accepted reply", async function () {	// moderator delete & delete own reply
+		it("Test delete accepted reply by moderator", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1008,7 +1008,43 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.changeStatusBestReply(1, 1);
-			await expect(peeranhaContent.deleteReply(1, 1)).to.be.revertedWith('You can not delete the best reply.');
+			await peeranhaContent.deleteReply(1, 1);
+
+			const reply = await peeranhaContent.getReply(1, 1);
+			expect(reply.isDeleted).to.equal(true);
+		});
+
+		it("Test delete own accepted reply", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.changeStatusBestReply(1, 1);
+			await expect(peeranhaContent.connect(signers[1]).deleteReply(1, 1)).to.be.revertedWith('You can not delete the best reply.');
+		});
+
+		it("Test delete own accepted reply by moderator (bug need fix)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).changeStatusBestReply(1, 1);
+			await peeranhaContent.deleteReply(1, 1);
+
+			const reply = await peeranhaContent.getReply(1, 1);
+			expect(reply.isDeleted).to.equal(true);
 		});
 
 		it("Test delete reply, without post", async function () {
