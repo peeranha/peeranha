@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, PEERANHA_ADDRESS, POSTLIB_ADDRESS, COMMUNITYLIB_ADDRESS, NFT_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
+const { IPFS_API_URL, USER_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
 const { achievements, PATH } = require('./common-action');
 var fs = require('fs');
 
@@ -34,11 +34,11 @@ function getBytes32FromIpfsHash(ipfsListing) {
 
 async function saveFile(file) {
   const buf = Buffer.from(file);
-  await getIpfsApiTheGraph().add(buf);
+  const graphSaveResult = await getIpfsApiTheGraph().add(buf);
+  console.log(`Saved file to the graph IPFS - ${graphSaveResult.cid.toString()}`)
   const saveResult = await getIpfsApi().add(buf);
-
-  await saveFileTheGraph(buf);
-
+  console.log(`Saved file to our IPFS - ${saveResult.cid.toString()}`)
+  
   return saveResult.cid.toString();
 }
 
@@ -52,38 +52,24 @@ async function main() {
   console.log("Begin initializing NFTs");
   console.log(`Images path: ${PATH}`);
   
-  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
-  const peeranhaNft = await PeeranhaNFT.attach(NFT_ADDRESS);
-  const tx = await peeranhaNft.transferOwnership(PEERANHA_ADDRESS);
-  console.log(`Send transaction to set owner for NFT contract - ${tx}.`);
-  
-  console.log(`Waiting for transaction ${tx.hash} to confirm.`)
-  await tx.wait();
-  console.log(`Transaction confirmed.`)
-
-  const Peeranha = await ethers.getContractFactory("Peeranha", {
-		libraries: {
-			PostLib: POSTLIB_ADDRESS,
-      CommunityLib: COMMUNITYLIB_ADDRESS,
-		}
-	});
-  const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
-  await initAchievement(peeranha);
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+  await initAchievement(peeranhaUser);
 
   console.log('DONE!');
 }
 
-async function initAchievement(peeranha) {
+async function initAchievement(peeranhaUser) {
   for (const { maxCount, lowerBound, type, path, name, description, attributes } of achievements("prod")) {
     const buffer = fs.readFileSync(path)
-    const imgHash = await saveFile(buffer)  
+    const imgHash = await saveFile(buffer)
     let nft = {
       name: name,
       description: description,
       image: imgHash,
       attributes: attributes,
     };
-    const tx = await peeranha.configureNewAchievement(maxCount, lowerBound, await getBytes32FromData(nft), type);
+    const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, await getBytes32FromData(nft), type);
     console.log(`Sent transaction ${tx.hash} to init NFT ${name}`);
 
     console.log(`Waiting for confirmation`)
