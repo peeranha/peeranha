@@ -24,11 +24,13 @@ library CommonLib {
   }
 
   function toInt32FromUint32(uint32 value) internal pure returns (int32) {
+    // TODO: remove double cast. Instead add own implementation similar to SafeCastUpgradeable
     int256 buffValue = SafeCastUpgradeable.toInt256(value);
     return SafeCastUpgradeable.toInt32(buffValue);
   }
 
   function toUInt32FromInt32(int256 value) internal pure returns (uint32) {
+    // TODO: remove double cast. Instead add own implementation similar to SafeCastUpgradeable
     uint256 buffValue = SafeCastUpgradeable.toUint256(value);
     return SafeCastUpgradeable.toUint32(buffValue);
   }
