@@ -69,6 +69,7 @@ const getUserReward = async function (userRating, periodRating) {
 
 const createPeerenhaAndTokenContract = async function () {
     const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+    // TODO: use deployProxy
     const peeranhaNFT = await PeeranhaNFT.deploy();
     await peeranhaNFT.deployed();
     const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
@@ -76,6 +77,7 @@ const createPeerenhaAndTokenContract = async function () {
     });
     
     const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+    // TODO: use deployProxy
     const peeranhaCommunity = await PeeranhaCommunity.deploy();
     await peeranhaCommunity.deployed();
     const peeranhaCommunityContractAddress = await peeranhaCommunity.resolvedAddress.then((value) => {
@@ -83,6 +85,7 @@ const createPeerenhaAndTokenContract = async function () {
     });
 
     const Token = await ethers.getContractFactory("PeeranhaToken");
+    // TODO: use deployProxy
     const token = await Token.deploy();
     await token.deployed();
     const peeranhaTokenContractAddress = await token.resolvedAddress.then((value) => {
@@ -104,6 +107,7 @@ const createPeerenhaAndTokenContract = async function () {
             PostLib: postLib.address,
         }
     })
+    // TODO: use deployProxy
     const peeranhaContent = await PeeranhaContent.deploy();
     await peeranhaContent.deployed();
     const peeranhaContentAddress = await peeranhaContent.resolvedAddress.then((value) => {
@@ -111,11 +115,13 @@ const createPeerenhaAndTokenContract = async function () {
     });
 
     
-    await peeranhaUser.initialize(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
+    await peeranhaUser.initialize();
     await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
     await token.initialize("Peeranha", "PEER", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
     await peeranhaNFT.initialize("PeeranhaNFT", "PEERNFT", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
+    
+    await peeranhaUser.setContractAddresses(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
 
     return {
         peeranhaContent: peeranhaContent,

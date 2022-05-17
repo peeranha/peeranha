@@ -28,12 +28,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     UserLib.UserContext userContext;
 
-    function initialize(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public initializer {
+    function initialize() public initializer {
         __Peeranha_init();
-        userContext.peeranhaCommunity = IPeeranhaCommunity(communityContractAddress);
-        userContext.peeranhaContent = IPeeranhaContent(contentContractAddress);
-        userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
-        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
     }
     
     function __Peeranha_init() public onlyInitializing {
@@ -57,6 +53,13 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         returns (address sender)
     {
         return NativeMetaTransaction._msgSender();
+    }
+
+    function setContractAddresses(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        userContext.peeranhaCommunity = IPeeranhaCommunity(communityContractAddress);
+        userContext.peeranhaContent = IPeeranhaContent(contentContractAddress);
+        userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
+        userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
     }
 
     /**

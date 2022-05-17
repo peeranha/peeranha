@@ -8,31 +8,37 @@ async function main() {
   const postLib = await PostLib.deploy();
   console.log("PostLib deployed to:", postLib.address);
 
-  const CommunityLib = await ethers.getContractFactory("CommunityLib");
-  console.log("Deploying CommunityLib...");
-  const communityLib = await CommunityLib.deploy();
-  console.log("CommunityLib deployed to:", communityLib.address);
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  console.log("Deploying PeeranhaUser...");
+  const peeranhaUser = await upgrades.deployProxy(PeeranhaUser, []);
+  console.log("Peeranha User deployed to:", peeranhaUser.address);
 
+  const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+  console.log("Deploying PeeranhaCommunity...");
+  const peeranhaCommunity = await upgrades.deployProxy(PeeranhaCommunity, [peeranhaUser.address]);
+  console.log("Peeranha Community deployed to:", peeranhaCommunity.address);
+
+  const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent", {
+    libraries: {
+      PostLib: postLib.address
+    }
+  });
+  console.log("Deploying PeeranhaContent...");
+  const peeranhaContent = await upgrades.deployProxy(PeeranhaContent, [peeranhaCommunity.address, peeranhaUser.address], {unsafeAllowLinkedLibraries: true});
+  console.log("PeeranhaContent deployed to:", peeranhaContent.address);
+  
   const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  console.log("Deploying PeeranhaNFT...");
   const peeranhaNFT = await upgrades.deployProxy(PeeranhaNFT, ["PEERNFT", "PEERNFT", POLYGON_CHILD_MANAGER_ADDRESS]);
   console.log("Peeranha NFT deployed to:", peeranhaNFT.address);
 
-  const Peeranha = await ethers.getContractFactory("Peeranha", {
-    libraries: {
-      PostLib: postLib.address,
-      CommunityLib: communityLib.address,
-    }
-  });
-  console.log("Deploying Peeranha...");
-  const peeranha = await upgrades.deployProxy(Peeranha, [peeranhaNFT.address], {unsafeAllowLinkedLibraries: true});
-  console.log("Peeranha deployed to:", peeranha.address);
-  
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
-  const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEER", "PEER", peeranha.address, POLYGON_CHILD_MANAGER_ADDRESS]);
+  console.log("Deploying PeeranhaToken...");
+  const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEER", "PEER", peeranhaUser.address, POLYGON_CHILD_MANAGER_ADDRESS]);
   console.log("Peeranha token deployed to:", peeranhaToken.address);
 
-  await peeranha.setTokenContract(peeranhaToken.address);
-  console.log("Set peeranhaToken address to peeranha", peeranhaToken.address);
+  await peeranhaUser.setContractAddresses(peeranhaCommunity.address, peeranhaContent.address, peeranhaNFT.address, peeranhaToken.address);
+  console.log("Set contract addresses to Peeranha User", peeranhaToken.address);
 }
 
 main()
