@@ -441,4 +441,28 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         userContext.users.getUserByAddress(userAddr).energy = energy;
     }*/
 
+    /**
+     * @dev Get informations about contract.
+     *
+     * - Get deployed time.
+     * - Get period length
+     *
+    */
+    function getContractInformation() external pure returns (uint256 startPeriodTime, uint256 periodLength) {
+        return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
+    }
+
+    /**
+     * @dev Get active users in period.
+    */
+    function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
+        return userContext.periodRewardContainer.periodRewardShares[period].activeUsersInPeriod;
+    }
+
+    /**
+     * @dev Get current period.
+    */
+    function getPeriod() external view returns (uint16) {
+        return RewardLib.getPeriod(CommonLib.getTimestamp());
+    }
 }
