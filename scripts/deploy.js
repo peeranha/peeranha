@@ -29,7 +29,7 @@ async function main() {
   
   const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   console.log("Deploying PeeranhaNFT...");
-  const peeranhaNFT = await upgrades.deployProxy(PeeranhaNFT, ["PEERNFT", "PEERNFT", POLYGON_CHILD_MANAGER_ADDRESS]);
+  const peeranhaNFT = await upgrades.deployProxy(PeeranhaNFT, ["PEERNFT", "PEERNFT", peeranhaUser.address, POLYGON_CHILD_MANAGER_ADDRESS]);
   console.log("Peeranha NFT deployed to:", peeranhaNFT.address);
 
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
