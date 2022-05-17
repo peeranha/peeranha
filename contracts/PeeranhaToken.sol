@@ -89,9 +89,18 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
 
 
   ///
-  // TODO: add doc comment
   // TODO: add unit tests
+  // TODO: update comment about ownerMinted
   ///
+  /**
+   * @dev Mint token for owner.
+   *
+   * Requirements:
+   *
+   * - must be a user.
+   * - user must has role OWNER_MINTER_ROLE.
+   * - 
+  */
   function mint(uint256 mintTokens) external onlyRole(OWNER_MINTER_ROLE) {
     require(ownerMinted + mintTokens <= OWNER_MINT_MAX, "max_owner_mint_exceeded");
     ownerMinted += mintTokens;

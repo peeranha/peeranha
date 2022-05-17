@@ -185,10 +185,10 @@ library PostLib  {
             "User is forbidden to reply on reply for Expert and Common type of posts"
         ); // unit tests (reply on reply)
 
+        ReplyContainer storage replyContainer;
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
 
-          PostLib.ReplyContainer storage replyContainer;
           for (uint16 i = 1; i <= countReplies; i++) {
             replyContainer = getReplyContainer(postContainer, i);
             require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
@@ -196,7 +196,7 @@ library PostLib  {
           }
         }
 
-        ReplyContainer storage replyContainer = postContainer.replies[++postContainer.info.replyCount];
+        replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
         if (parentReplyId == 0) {
             if (isOfficialReply) {
@@ -617,7 +617,7 @@ library PostLib  {
 
     function updateRatingForBestReply (
         PostCollection storage self,
-        PostLib.PostType postType,
+        PostType postType,
         address authorPost,
         address authorReply,
         bool isMark,
@@ -918,8 +918,7 @@ library PostLib  {
         else if (postType == PostType.CommonPost)
             return VoteLib.getCommonRating();
         
-        require(false, "At this release you can not publish tutorial.");
-        return VoteLib.getTutorialRating();
+        revert("At this release you can not publish tutorial.");
     }
 
     /// @notice Return post

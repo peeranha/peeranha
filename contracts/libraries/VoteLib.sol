@@ -135,7 +135,8 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "invalid_post_type");
+        
+        revert("invalid_post_type");
     }
 
     /// @notice Get value Rating for rating action
@@ -168,7 +169,7 @@ library VoteLib  {
             return 0;
         }
         
-        require(false, "invalid_resource_type");
+        revert("invalid_resource_type");
     }
 
     function getUserRatingChange(

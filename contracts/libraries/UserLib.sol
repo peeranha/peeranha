@@ -260,7 +260,7 @@ library UserLib {
         return;
       }
     }
-    require(false, "comm_not_followed");
+    revert("comm_not_followed");
   }
 
   /// @notice Get the number of users
@@ -294,7 +294,7 @@ library UserLib {
   /// @notice Check user existence
   /// @param self The mapping containing all users
   /// @param addr Address of the user to check
-  function isExists(UserCollection storage self, address addr) internal view returns (bool) { // need?
+  function isExists(UserCollection storage self, address addr) internal view returns (bool) {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
@@ -581,7 +581,7 @@ library UserLib {
 
     } 
     else {
-      require(false, "not_allowed_action");
+      revert("not_allowed_action");
     }
 
     require(userRating >= ratingAllowed, message);
