@@ -2325,7 +2325,7 @@ describe("Test vote", function () {
 			await wait(QuickReplyTime);
 			await peeranhaContent.connect(signers[3]).createReply(1, 0, hashContainer[2], false);
 			await peeranhaContent.voteItem(1, 3, 0, 1);
-			await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 3);
+			await peeranhaContent.connect(signers[3]).deleteReply(1, 3);
 
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);

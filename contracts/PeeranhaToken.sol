@@ -20,7 +20,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   uint256 public constant OWNER_MINT_MAX = 40000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
   uint256 public constant MAX_REWARD_PER_USER = 100;
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
 
@@ -60,13 +60,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       returns (address sender)
   {
       return ChildMintableERC20Upgradeable._msgSender();
-  }
-
-  /**
-   * @dev Returns the cap on the token's for owner.
-   */
-  function _ownerMinted() public view virtual returns (uint256) {
-    return ownerMinted;
   }
 
   /**

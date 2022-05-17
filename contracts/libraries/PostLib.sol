@@ -12,7 +12,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 10;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -393,7 +393,8 @@ library PostLib  {
         // DownvoteExpertPost = -1;
         // UpvotedExpertPost = 5;
         // + 1 upvote and 1 down vote -> postRating = 0 but userRating +4 (need fix?)
-        if (postContainer.info.rating > 0 && (postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author)) {
+        uint256 time = CommonLib.getTimestamp();
+        if (postContainer.info.rating > 0 && (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author)) {
             self.peeranhaUser.updateUserRating(postContainer.info.author,
                 -VoteLib.getUserRatingChange(   postContainer.info.postType, 
                                                 VoteLib.ResourceAction.Upvoted,
@@ -403,7 +404,6 @@ library PostLib  {
             self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
         }
 
-        uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < DELETE_TIME) {    
             for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
                 deductReplyRating(self, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
@@ -453,7 +453,7 @@ library PostLib  {
 
 
         uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
+        if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
             deductReplyRating(
                 self,
                 postContainer.info.postType,

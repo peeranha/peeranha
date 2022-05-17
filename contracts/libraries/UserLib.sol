@@ -409,7 +409,7 @@ library UserLib {
 
           differentRatingCurrentPeriod = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) - rating;   // penalty is always positive, we need add rating to penalty
           if (differentRatingCurrentPeriod > CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward)) {
-            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
+            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
             dataUpdateUserRatingPreviousPeriod.changeRating = rating - dataUpdateUserRatingCurrentPeriod.changeRating;                                       // + previous penalty
             if (CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) < CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - dataUpdateUserRatingPreviousPeriod.changeRating) {
               int32 extraPenalty = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - dataUpdateUserRatingPreviousPeriod.changeRating;
