@@ -1,62 +1,74 @@
-pragma solidity ^0.7.3;
-pragma abicoder v2;
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
 import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/TokenLib.sol";
-import "./interfaces/IPeeranha.sol";
+import "./base/ChildMintableERC20Upgradeable.sol";
 import "./interfaces/IPeeranhaToken.sol";
+import "./interfaces/IPeeranhaUser.sol";
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 
-contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgradeable, OwnableUpgradeable {
+
+contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20CappedUpgradeable {
+  
   uint256 public constant FRACTION = (10 ** 18);
-  // uint256 public constant TOTAL_SUPPLY = 1000000000 * FRACTION;
+  uint256 public constant MAX_TOTAL_SUPPLY = 100000000 * FRACTION;
+  uint256 public constant OWNER_MINT_MAX = 40000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
   uint256 public constant MAX_REWARD_PER_USER = 100;
-
-  
-  ///
-  // 100 000  - 100 token * 1000 user
-  // 40 000 000 - company
-  ///
-  // TODO: add actions that allow owner to mint 40% of total token supply
-  // rewrite transfer - boost, balanceOf - boost
-  // add method getUserStakedBalance
-  // getstakedbalance (transfer + get balance)
-  ///
-
   uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
+  bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
+
+  uint256 public ownerMinted;
+  
   TokenLib.StatusRewardContainer statusRewardContainer;
   TokenLib.UserPeriodStake userPeriodStake;
   TokenLib.StakeTotalContainer stakeTotalContainer;
-  IPeeranha peeranha;
+  IPeeranhaUser peeranhaUser;
 
-  event GetReward(address user, uint16 period);
-  event SetStake(address user, uint16 period, uint256 stake);
+  event GetReward(address indexed user, uint16 indexed period);
+  event SetStake(address indexed user, uint16 indexed period, uint256 stake);
 
 
-  function initialize(string memory name, string memory symbol, address peeranhaNFTContractAddress) public initializer {
-    __Token_init(name, symbol);
-    peeranha = IPeeranha(peeranhaNFTContractAddress);
-    __Ownable_init_unchained();
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public initializer {
+    __Token_init(name, symbol, childChainManager);
+    peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
   }
 
-  function __Token_init(string memory name, string memory symbol) internal initializer {
-    __ERC20_init_unchained(name, symbol);
-    __Pausable_init_unchained();
-    __ERC20Pausable_init_unchained();
+  function __Token_init(string memory name, string memory symbol, address childChainManager) internal onlyInitializing {
+    __ChildMintableERC20Upgradeable_init(name, symbol, childChainManager);
+    __ERC20Capped_init_unchained(MAX_TOTAL_SUPPLY);
     __Token_init_unchained();
   }
 
-  function __Token_init_unchained() internal initializer {
+  function __Token_init_unchained() internal onlyInitializing {
+    _grantRole(OWNER_MINTER_ROLE, _msgSender());
+    _setRoleAdmin(OWNER_MINTER_ROLE, DEFAULT_ADMIN_ROLE);
   }
 
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable/*, ERC20CappedUpgradeable*/) {
-    super._beforeTokenTransfer(from, to, amount);
+  // This is to support Native meta transactions
+  // never use msg.sender directly, use _msgSender() instead
+  function _msgSender()
+      internal
+      override(ContextUpgradeable, ChildMintableERC20Upgradeable)
+      view
+      returns (address sender)
+  {
+      return ChildMintableERC20Upgradeable._msgSender();
   }
+
+  /**
+  * @dev See {ERC20-_mint}.
+  */
+  function _mint(address account, uint256 amount) internal virtual override (ERC20Upgradeable, ERC20CappedUpgradeable) {
+      ERC20CappedUpgradeable._mint(account, amount);
+  }
+
 
   function availableBalanceOf(address account) external view returns(uint256) { // unitTest
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[account];
@@ -77,11 +89,22 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
 
 
   ///
-  // to do cap
+  // TODO: add unit tests
+  // TODO: update comment about ownerMinted
   ///
-  function mintForOwner(uint256 mintTokens) external onlyOwner() {
-    // add limit
-    _mint(owner(), mintTokens);
+  /**
+   * @dev Mint token for owner.
+   *
+   * Requirements:
+   *
+   * - must be a user.
+   * - user must has role OWNER_MINTER_ROLE.
+   * - 
+  */
+  function mint(uint256 mintTokens) external onlyRole(OWNER_MINTER_ROLE) {
+    require(ownerMinted + mintTokens <= OWNER_MINT_MAX, "max_owner_mint_exceeded");
+    ownerMinted += mintTokens;
+    _mint(_msgSender(), mintTokens);
   }
 
   /**
@@ -93,17 +116,18 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
    * - must be a reward in this period.
    * - must be a period less then now.
   */
-  function claimReward(address user, uint16 period) external {
-    require(msg.sender == user || msg.sender == owner(), "get_reward_security");  // unitTest
+  function claimReward(uint16 period) external {
     require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period + 1, "period_not_ended");
 
+    address user = _msgSender();
+    
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
       "reward_already_picked_up."
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranha.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardShares(period);
     
     uint256 totalPeriodReward = getTotalPeriodReward(periodRewardShares, period);
 
@@ -160,7 +184,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     }
   }
 
-  function getTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) private view returns(uint256) {
+  function getTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) private pure returns(uint256) {
     uint256 totalPeriodReward = reduceRewards(MAX_REWARD_PER_PERIOD * FRACTION, period);
     if (periodRewardShares.activeUsersInPeriod.length <= ACTIVE_USERS_IN_PERIOD) {
       uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * MAX_REWARD_PER_USER * FRACTION;   // min?
@@ -170,7 +194,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     return totalPeriodReward;
   }
 
-  function reduceRewards(uint256 rewardPeriod, uint16 period) private view returns(uint256) {
+  function reduceRewards(uint256 rewardPeriod, uint16 period) private pure returns(uint256) {
     uint16 countReduce = period / 52;
 
     for (uint16 i = 0; i < countReduce; i++) {
@@ -183,21 +207,23 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, address user, uint16 period, uint256 poolToken) private view returns(uint256) {
     int32 ratingToReward;
     int32 tokenReward;
-    uint32[] memory rewardCommunities = peeranha.getUserRewardCommunities(user, period);
+    uint32[] memory rewardCommunities = peeranhaUser.getUserRewardCommunities(user, period);
     for (uint32 i; i < rewardCommunities.length; i++) {
-      ratingToReward = peeranha.getRatingToReward(user, period, rewardCommunities[i]);
+      ratingToReward = peeranhaUser.getRatingToReward(user, period, rewardCommunities[i]);
       if (ratingToReward > 0)
         tokenReward += ratingToReward;
     }
-    if (tokenReward == 0) return 0;
+    // TODO: tokenReward must be of type uint32
+    // TODO: totalRewardShares must be of type uint32
+    if (tokenReward <= 0 || periodRewardShares.totalRewardShares <= 0) return 0;
 
-    uint256 userReward = (poolToken * uint256(tokenReward * getBoost(user, period))) ;
-    userReward /= uint256(periodRewardShares.totalRewardShares);
+    uint256 userReward = (poolToken * uint256(uint32(tokenReward * getBoost(user, period))));
+    userReward /= uint256(uint32(periodRewardShares.totalRewardShares));
     return userReward;
   }
 
   function getUserRewardGraph(address user, uint16 period) public view returns(uint256) {
-    RewardLib.PeriodRewardShares memory periodRewardShares = peeranha.getPeriodRewardContainer(period);
+    RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardShares(period);
     uint256 poolToken = getTotalPeriodReward(periodRewardShares, period);
     uint256 userReward = getUserReward(periodRewardShares, user, period, poolToken);
     
@@ -228,7 +254,7 @@ contract PeeranhaToken is IPeeranhaToken, ERC20Upgradeable, ERC20PausableUpgrade
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;
     }
-    return int32(boost);
+    return int32(int256(boost));
   }
 
   function getUserStake(address user, uint16 findingPeriod) public view returns (uint256) {

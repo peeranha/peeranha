@@ -1,26 +1,21 @@
-pragma abicoder v2;
-pragma solidity >=0.5.0;
-
-import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
 import "./CommonLib.sol";
 import "./RewardLib.sol";
 import "./AchievementLib.sol";
 import "./AchievementCommonLib.sol";
-import "./AchievementCommonLib.sol";
 import "../interfaces/IPeeranhaToken.sol";
+import "../interfaces/IPeeranhaCommunity.sol";
+import "../interfaces/IPeeranhaContent.sol";
 
 
 /// @title Users
 /// @notice Provides information about registered user
 /// @dev Users information is stored in the mapping on the main contract
 library UserLib {
-  using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
-  using AddressUpgradeable for address;
-
   int32 constant START_USER_RATING = 10;
-  uint256 constant ACCOUNT_STAT_RESET_PERIOD = 14; // 259200 - 3 Days
+  bytes32 constant DEFAULT_IPFS = bytes32(0xc09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc);
 
   int16 constant MINIMUM_RATING = -300;
   int16 constant POST_QUESTION_ALLOWED = 0;
@@ -59,14 +54,8 @@ library UserLib {
   uint8 constant ENERGY_REPORT_ANSWER = 2;          //
   uint8 constant ENERGY_REPORT_COMMENT = 1;         //
 
-  bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-  uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
-  uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
-
   struct User {
     CommonLib.IpfsHash ipfsDoc;
-    uint256 creationTime;
     uint16 energy;
     uint16 lastUpdatePeriod;
     uint32[] followedCommunities;
@@ -89,8 +78,8 @@ library UserLib {
   }
 
   struct DataUpdateUserRating {
-    int32 ratingToReward;
-    int32 penalty;
+    uint32 ratingToReward;
+    uint32 penalty;
     int32 changeRating;
     int32 ratingToRewardChange;
   }
@@ -98,14 +87,14 @@ library UserLib {
 
   /// users The mapping containing all users
   struct UserContext {
-    UserLib.UserCollection users;
+    UserLib.UserCollection users;     // rename to usersCollection
     UserLib.UserRatingCollection userRatingCollection;
-    UserLib.UserDelegationCollection userDelegationCollection;
     RewardLib.PeriodRewardContainer periodRewardContainer;
-    UserLib.Roles roles;
-    UserLib.UserRoles userRoles;
     AchievementLib.AchievementsContainer achievementsContainer;
+    
     IPeeranhaToken peeranhaToken;
+    IPeeranhaCommunity peeranhaCommunity;
+    IPeeranhaContent peeranhaContent;
   }
   
   struct UserCollection {
@@ -123,13 +112,14 @@ library UserLib {
     address delegateUser;
   }
 
+  // TODO: Rename enum memers to begin with capital
   enum Action {
+    NONE,
     publicationPost,
     publicationReply,
     publicationComment,
     editItem,
     deleteItem,
-    changePostType,
     upVotePost,
     downVotePost,
     upVoteReply,
@@ -142,23 +132,21 @@ library UserLib {
     followCommunity
   }
 
-  struct RoleData {
-    EnumerableSetUpgradeable.AddressSet members;
-    bytes32 adminRole;
+  // TODO: Rename enum memers to begin with capital and use camel case
+  // TODO: Rename enum to ActionRole
+  enum Permission {
+    NONE,
+    admin,
+    adminOrCommunityModerator,
+    adminOrCommunityAdmin,
+    communityAdmin,
+    communityModerator
   }
 
-  struct Roles {
-    mapping (bytes32 => RoleData) _roles;
-  }
-
-  struct UserRoles {
-    mapping (address => bytes32[]) userRoles;
-  }
-
-  event UserCreated(address userAddress);
-  event UserUpdated(address userAddress);
-  event FollowedCommunity(address userAddress, uint32 communityId);
-  event UnfollowedCommunity(address userAddress, uint32 communityId);
+  event UserCreated(address indexed userAddress);
+  event UserUpdated(address indexed userAddress);
+  event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
+  event UnfollowedCommunity(address indexed userAddress, uint32 indexed communityId);
 
 
   /// @notice Create new user info record
@@ -174,27 +162,12 @@ library UserLib {
 
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
-    user.creationTime = CommonLib.getTimestamp();
-    user.energy = getStatusEnergy(START_USER_RATING);
+    user.energy = getStatusEnergy();
+    user.lastUpdatePeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
 
     self.userList.push(userAddress);
 
     emit UserCreated(userAddress);
-  }
-
-  /// @notice Create new user info record
-  /// @param self The mapping containing all users
-  /// @param userAddress Address of the user to create 
-  /// @param ipfsHash IPFS hash of document with user information
-  function createByDelegate(
-    UserContext storage self,
-    address msgSender,
-    address userAddress,
-    bytes32 ipfsHash
-  ) internal {
-    require(msgSender == self.userDelegationCollection.delegateUser, "invld_user");
-    self.userDelegationCollection.userDelegations[userAddress] = 1;
-    create(self.users, userAddress, ipfsHash);
   }
 
   /// @notice Create new user info record
@@ -205,7 +178,7 @@ library UserLib {
     address userAddress
   ) internal {
     if (!UserLib.isExists(self, userAddress)) {
-      UserLib.create(self, userAddress, bytes32(0xf5cd5e9d6332d6b2a532459dfc262f67d4111a914d00edb7aadd29c30d8ac322));
+      UserLib.create(self, userAddress, DEFAULT_IPFS);
     }
   }
 
@@ -214,19 +187,16 @@ library UserLib {
   /// @param userAddress Address of the user to update
   /// @param ipfsHash IPFS hash of document with user information
   function update(
-    UserLib.UserContext storage userContext,
+    UserContext storage userContext,
     address userAddress,
     bytes32 ipfsHash
   ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-    UserLib.checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      0,
+    User storage user = checkRatingAndEnergy(
+      userContext,
       userAddress,
       userAddress,
       0,
-      UserLib.Action.updateProfile
+      Action.updateProfile
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -238,19 +208,16 @@ library UserLib {
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function followCommunity(
-    UserLib.UserContext storage userContext,
+    UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = getUserByAddress(userContext.users, userAddress);
-    UserLib.checkRatingAndEnergy(
-      userContext.roles,
-      user,
-      getUserRating(userContext.userRatingCollection, userAddress, communityId),
+    User storage user = checkRatingAndEnergy(
+      userContext,
       userAddress,
       userAddress,
       0,
-      UserLib.Action.followCommunity
+      Action.followCommunity
     );
 
     bool isAdded;
@@ -268,16 +235,22 @@ library UserLib {
     emit FollowedCommunity(userAddress, communityId);
   }
 
-  /// @notice User usfollows community
-  /// @param users The mapping containing all users
+  /// @notice User unfollows community
+  /// @param userContext The mapping containing all users
   /// @param userAddress Address of the user to update
   /// @param communityId User follows om this community
   function unfollowCommunity(
-    UserCollection storage users,
+    UserContext storage userContext,
     address userAddress,
     uint32 communityId
   ) internal {
-    User storage user = getUserByAddress(users, userAddress);
+    User storage user = checkRatingAndEnergy(
+      userContext,
+      userAddress,
+      userAddress,
+      0,
+      Action.followCommunity
+    );
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
@@ -287,7 +260,7 @@ library UserLib {
         return;
       }
     }
-    require(false, "comm_not_followed");
+    revert("comm_not_followed");
   }
 
   /// @notice Get the number of users
@@ -325,40 +298,14 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  /// @notice Check user delegated permissions for certain actions
-  /// @param delegations User delegations
-  /// @param delegateUser Delegate user address
-  function setDelegateUser(UserDelegationCollection storage delegations, address delegateUser) internal {
-    delegations.delegateUser = delegateUser;
-  }
-  
-  
-  /// @notice Check user delegated permissions for certain actions
-  /// @param delegateUser Delegate user address
-  /// @param userAddress Address of the user to check
-  function isDelegateUser(UserDelegationCollection storage delegations, address delegateUser, address userAddress) internal view returns (bool) {
-    return delegateUser == delegations.delegateUser && delegations.userDelegations[userAddress] == 1;
-  }
-
   function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  /// @notice Add rating to user
-  /// @param userAddr user's rating will be change
-  /// @param rating value for add to user's rating
-  function updateUserRating(UserLib.UserContext storage userContext, User storage user, address userAddr, int32 rating, uint32 communityId) internal { // delete "user" argument
-    if (rating == 0) return;
-
-    updateRatingBase(userContext, userAddr, rating, communityId);
-  }
-
   function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
     if (rating == 0) return;
-
-    User storage user = getUserByAddress(userContext.users, userAddr);
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
@@ -428,31 +375,31 @@ library UserLib {
       
       if (previousPeriod != currentPeriod - 1) {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = rating + dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+          dataUpdateUserRatingCurrentPeriod.changeRating = rating + CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
         } else {
           dataUpdateUserRatingCurrentPeriod.changeRating = rating;
         }
       } else {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty;
+          dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
         int32 differentRatingPreviousPeriod; // name
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
-            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
               dataUpdateUserRatingCurrentPeriod.changeRating += rating;
             }
           } else {
-            differentRatingPreviousPeriod = rating - dataUpdateUserRatingPreviousPeriod.penalty;
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = dataUpdateUserRatingPreviousPeriod.penalty;
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
@@ -460,12 +407,12 @@ library UserLib {
           }
         } else if (rating < 0 && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
 
-          differentRatingCurrentPeriod = dataUpdateUserRatingCurrentPeriod.penalty - rating;   // penalty is always positive, we need add rating to penalty
-          if (differentRatingCurrentPeriod > dataUpdateUserRatingCurrentPeriod.ratingToReward) {
-            dataUpdateUserRatingCurrentPeriod.changeRating -= dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty;  // - current ratingToReward
+          differentRatingCurrentPeriod = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) - rating;   // penalty is always positive, we need add rating to penalty
+          if (differentRatingCurrentPeriod > CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward)) {
+            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
             dataUpdateUserRatingPreviousPeriod.changeRating = rating - dataUpdateUserRatingCurrentPeriod.changeRating;                                       // + previous penalty
-            if (dataUpdateUserRatingPreviousPeriod.ratingToReward < dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating) {
-              int32 extraPenalty = dataUpdateUserRatingPreviousPeriod.penalty - dataUpdateUserRatingPreviousPeriod.changeRating - dataUpdateUserRatingPreviousPeriod.ratingToReward;
+            if (CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) < CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - dataUpdateUserRatingPreviousPeriod.changeRating) {
+              int32 extraPenalty = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - dataUpdateUserRatingPreviousPeriod.changeRating;
               dataUpdateUserRatingPreviousPeriod.changeRating += extraPenalty;  // - extra previous penalty
               dataUpdateUserRatingCurrentPeriod.changeRating -= extraPenalty;   // + extra current penalty
             }
@@ -479,36 +426,43 @@ library UserLib {
       }
 
       if (dataUpdateUserRatingPreviousPeriod.changeRating != 0) {
-        previousPeriodRating.penalty += -dataUpdateUserRatingPreviousPeriod.changeRating;
+        if (dataUpdateUserRatingPreviousPeriod.changeRating > 0) previousPeriodRating.penalty -= CommonLib.toUInt32FromInt32(dataUpdateUserRatingPreviousPeriod.changeRating);
+        else previousPeriodRating.penalty += CommonLib.toUInt32FromInt32(-dataUpdateUserRatingPreviousPeriod.changeRating);
 
-        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty, dataUpdateUserRatingPreviousPeriod.ratingToReward - dataUpdateUserRatingPreviousPeriod.penalty + dataUpdateUserRatingPreviousPeriod.changeRating);
-        if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange != 0)
-          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange);
+        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) + dataUpdateUserRatingPreviousPeriod.changeRating);
+        if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange > 0) {
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
+        } else {
+          userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares -= CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
+        }
       }
     }
 
     if (dataUpdateUserRatingCurrentPeriod.changeRating != 0) {
-      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty, dataUpdateUserRatingCurrentPeriod.ratingToReward - dataUpdateUserRatingCurrentPeriod.penalty + dataUpdateUserRatingCurrentPeriod.changeRating);
-      if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange != 0)
-        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange);
+      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) + dataUpdateUserRatingCurrentPeriod.changeRating);
+      if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange > 0) {
+        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+      } else {
+        userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares -= CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+      }
 
       int32 changeRating;
       if (dataUpdateUserRatingCurrentPeriod.changeRating > 0) {
-        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - dataUpdateUserRatingCurrentPeriod.penalty;
+        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);
         if (changeRating >= 0) {
           currentPeriodRating.penalty = 0;
-          currentPeriodRating.ratingToReward += changeRating;
+          currentPeriodRating.ratingToReward += CommonLib.toUInt32FromInt32(changeRating);
         } else {
-          currentPeriodRating.penalty = -changeRating;
+          currentPeriodRating.penalty = CommonLib.toUInt32FromInt32(-changeRating);
         }
 
       } else if (dataUpdateUserRatingCurrentPeriod.changeRating < 0) {
-        changeRating = dataUpdateUserRatingCurrentPeriod.ratingToReward + dataUpdateUserRatingCurrentPeriod.changeRating;
+        changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) + dataUpdateUserRatingCurrentPeriod.changeRating;
         if (changeRating <= 0) {
           currentPeriodRating.ratingToReward = 0;
-          currentPeriodRating.penalty += -changeRating;
+          currentPeriodRating.penalty += CommonLib.toUInt32FromInt32(-changeRating);
         } else {
-          currentPeriodRating.ratingToReward = changeRating;
+          currentPeriodRating.ratingToReward = CommonLib.toUInt32FromInt32(changeRating);
         }
       }
     }
@@ -519,7 +473,7 @@ library UserLib {
     }
   }
 
-  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private returns (int32) {
+  function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private view returns (int32) { // FIX
     return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
   }
 
@@ -530,31 +484,29 @@ library UserLib {
     return 0; // from negative to negative
   }
 
-  function getCommunityRole(uint256 role, uint32 communityId) internal pure returns (bytes32) {
-    return bytes32(role + communityId);
-  }
-
   function checkRatingAndEnergy(
-    Roles storage role,
-    UserLib.User storage user,
-    int32 userRating,
+    UserContext storage userContext,
     address actionCaller,
     address dataUser,
     uint32 communityId,
     Action action
   )
-    internal
+    internal 
+    returns (User storage)
   {
-    if (hasModeratorRole(role, actionCaller, communityId)) return;
-    
+    UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
+    int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
+        
+    // TODO: create a separate function that returns energy and min rating for an action
     int16 ratingAllowed;
     string memory message;
     uint8 energy;
-    if (action == Action.publicationPost) {
+    if (action == Action.NONE) {
+      return user;
+    } else if (action == Action.publicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
-
     } else if (action == Action.publicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
       message = "low_rating_reply";
@@ -577,80 +529,76 @@ library UserLib {
       message = "low_rating_delete_own"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
-    } else if (action == Action.changePostType) {
-      require(false, "not_allowed_change_type");
-
     } else if (action == Action.upVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");   // в функции есть You can not vote for own post
+      require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "low rating to upvote";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.upVoteReply) {
-      require(actionCaller != dataUser, "not_allowed_vote_reply"); // в функции есть You can not vote for own reply
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
+    } else if (action == Action.voteComment) {
+      require(actionCaller != dataUser, "not_allowed_vote_comment");
+      ratingAllowed = VOTE_COMMENT_ALLOWED;
+      message = "low_rating_vote_comment";
+      energy = ENERGY_VOTE_COMMENT;
+
+    }
+     else if (action == Action.downVotePost) {
+      require(actionCaller != dataUser, "not_allowed_vote_post");
+      ratingAllowed = DOWNVOTE_POST_ALLOWED;
+      message = "low_rating_downvote_post";
+      energy = ENERGY_DOWNVOTE_QUESTION;
+
+    } else if (action == Action.downVoteReply) {
+      require(actionCaller != dataUser, "not_allowed_vote_reply");
+      ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
+      message = "low_rating_downvote_reply";
+      energy = ENERGY_DOWNVOTE_ANSWER;
+
+    } else if (action == Action.cancelVote) {
+      ratingAllowed = CANCEL_VOTE;
+      message = "low_rating_cancel_vote";
+      energy = ENERGY_FORUM_VOTE_CANCEL;
+
+    } else if (action == Action.bestReply) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_mark_best";
+      energy = ENERGY_MARK_REPLY_AS_CORRECT;
+
+    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
+      energy = ENERGY_UPDATE_PROFILE;
+
     } 
-    // else if (action == Action.voteComment) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_comment"); // в функции есть You can not vote for own comment
-    //   ratingAllowed = VOTE_COMMENT_ALLOWED;
-    //   message = "low_rating_vote_comment";
-    //   energy = ENERGY_VOTE_COMMENT;
+    else if (action == Action.followCommunity) {
+      ratingAllowed = MINIMUM_RATING;
+      message = "low_rating_follow_comm";
+      energy = ENERGY_FOLLOW_COMMUNITY;
 
-    // }
-    //  else if (action == Action.downVotePost) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_post");
-    //   ratingAllowed = DOWNVOTE_POST_ALLOWED;
-    //   message = "low_rating_downvote_post";
-    //   energy = ENERGY_DOWNVOTE_QUESTION;
-
-    // } else if (action == Action.downVoteReply) {
-    //   require(actionCaller != dataUser, "not_allowed_vote_reply");
-    //   ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
-    //   message = "low_rating_downvote_reply";
-    //   energy = ENERGY_DOWNVOTE_ANSWER;
-
-    // } else if (action == Action.cancelVote) {
-    //   ratingAllowed = CANCEL_VOTE;
-    //   message = "low_rating_cancel_vote";
-    //   energy = ENERGY_FORUM_VOTE_CANCEL;
-
-    // } else if (action == Action.bestReply) {
-    //   ratingAllowed = MINIMUM_RATING;
-    //   message = "low_rating_mark_best";
-    //   energy = ENERGY_MARK_REPLY_AS_CORRECT;
-
-    // } else if (action == Action.updateProfile) { //userRating - always 0 (const)
-    //   energy = ENERGY_UPDATE_PROFILE;
-
-    // } 
-    // else if (action == Action.followCommunity) {
-    //   ratingAllowed = MINIMUM_RATING;
-    //   message = "low_rating_follow_comm";
-    //   energy = ENERGY_FOLLOW_COMMUNITY;
-
-    // } 
-    // else {
-    //   require(false, "not_allowed_action");
-    // }
+    } 
+    else {
+      revert("not_allowed_action");
+    }
 
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, userRating, energy);
+    reduceEnergy(user, energy);
+
+    return user;
   }
 
-  function reduceEnergy(UserLib.User storage user, int32 userRating, uint8 energy) internal {    
-    int32 rating = userRating;
-    uint256 currentTime = CommonLib.getTimestamp();
-    uint16 currentPeriod = uint16((currentTime - user.creationTime) / UserLib.ACCOUNT_STAT_RESET_PERIOD);
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
+    uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
     uint16 userEnergy;
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy(userRating);
+      userEnergy = UserLib.getStatusEnergy();
       user.lastUpdatePeriod = currentPeriod;
     }
 
@@ -658,230 +606,7 @@ library UserLib {
     user.energy = userEnergy - energy;
   }
 
-  function hasModeratorRole(
-    Roles storage self,
-    address user,
-    uint32 communityId
-  ) 
-    internal 
-    returns (bool) 
-  {
-    if ((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
-      hasRole(self, DEFAULT_ADMIN_ROLE, user))) return true;
-    
-    return false;
-  }
-
-  /**
-    * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
-    *
-    * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
-    * {RoleAdminChanged} not being emitted signaling this.
-    *
-    * _Available since v3.1._
-    */
-  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-
-  /**
-    * @dev Emitted when `account` is granted `role`.
-    *
-    * `sender` is the account that originated the contract call, an admin role
-    * bearer except when using {setupRole}.
-    */
-  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
-
-  /**
-    * @dev Emitted when `account` is revoked `role`.
-    *
-    * `sender` is the account that originated the contract call:
-    *   - if using `revokeRole`, it is the admin role bearer
-    *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
-    */
-  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
-
-  /**
-    * @dev Returns `true` if `account` has been granted `role`.
-    */
-  function hasRole(Roles storage self, bytes32 role, address account) internal view returns (bool) {
-      return self._roles[role].members.contains(account);
-  }
-
-  /**
-    * @dev Returns the number of accounts that have `role`. Can be used
-    * together with {getRoleMember} to enumerate all bearers of a role.
-    */
-  function getRoleMemberCount(Roles storage self, bytes32 role) internal view returns (uint256) {
-      return self._roles[role].members.length();
-  }
-
-  /**
-    * @dev Returns one of the accounts that have `role`. `index` must be a
-    * value between 0 and {getRoleMemberCount}, non-inclusive.
-    *
-    * Role bearers are not sorted in any particular way, and their ordering may
-    * change at any point.
-    *
-    * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure
-    * you perform all queries on the same block. See the following
-    * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
-    * for more information.
-    */
-  function getRoleMember(Roles storage self, bytes32 role, uint256 index) internal view returns (address) {
-      return self._roles[role].members.at(index);
-  }
-
-  /**
-    * @dev Returns the admin role that controls `role`. See {grantRole} and
-    * {revokeRole}.
-    *
-    * To change a role's admin, use {_setRoleAdmin}.
-    */
-  function getRoleAdmin(Roles storage self, bytes32 role) internal view returns (bytes32) {
-      return self._roles[role].adminRole;
-  }
-
-  /**
-    * @dev Grants `role` to `account`.
-    *
-    * If `account` had not been already granted `role`, emits a {RoleGranted}
-    * event.
-    *
-    * Requirements:
-    *
-    * - the caller must have ``role``'s admin role.
-    */
-  // function grantRole(bytes32 role, address account) public virtual {
-  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to grant");
-
-  //     _grantRole(role, account);
-  // }
-
-  /**
-    * @dev Revokes `role` from `account`.
-    *
-    * If `account` had been granted `role`, emits a {RoleRevoked} event.
-    *
-    * Requirements:
-    *
-    * - the caller must have ``role``'s admin role.
-    */
-  // function revokeRole(bytes32 role, address account) public virtual {
-  //     require(hasRole(_roles[role].adminRole, _msgSender()), "AccessControl: sender must be an admin to revoke");
-
-  //     revokeRole(role, account);
-  // }
-
-  /**
-    * @dev Revokes `role` from the calling account.
-    *
-    * Roles are often managed via {grantRole} and {revokeRole}: this function's
-    * purpose is to provide a mechanism for accounts to lose their privileges
-    * if they are compromised (such as when a trusted device is misplaced).
-    *
-    * If the calling account had been granted `role`, emits a {RoleRevoked}
-    * event.
-    *
-    * Requirements:
-    *
-    * - the caller must be `account`.
-    */
-  // function renounceRole(bytes32 role, address account) public virtual {
-  //     require(account == _msgSender(), "AccessControl: can only renounce roles for self");
-
-  //     revokeRole(role, account);
-  // }
-
-  /**
-    * @dev Grants `role` to `account`.
-    *
-    * If `account` had not been already granted `role`, emits a {RoleGranted}
-    * event. Note that unlike {grantRole}, this function doesn't perform any
-    * checks on the calling account.
-    *
-    * [WARNING]
-    * ====
-    * This function should only be called from the constructor when setting
-    * up the initial roles for the system.
-    *
-    * Using this function in any other way is effectively circumventing the admin
-    * system imposed by {AccessControl}.
-    * ====
-    */
-  function setupRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-      grantRole(userContext, role, account);
-  }
-
-  function revokeRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.remove(account)) {
-      emit RoleRevoked(role, account, msg.sender);
-
-      uint256 length = userContext.userRoles.userRoles[account].length;
-      for(uint32 i = 0; i < length; i++) {
-        if(userContext.userRoles.userRoles[account][i] == role) {
-          if (i < length - 1) {
-            userContext.userRoles.userRoles[account][i] = userContext.userRoles.userRoles[account][length - 1];
-            userContext.userRoles.userRoles[account].pop();
-          } else userContext.userRoles.userRoles[account].pop();
-        }
-      }
-    }
-  }
-
-  function getPermissions(UserRoles storage self, address account) internal view returns (bytes32[] memory) {
-    return self.userRoles[account];
-  }
-
-  function grantRole(UserLib.UserContext storage userContext, bytes32 role, address account) internal {
-    if (userContext.roles._roles[role].members.add(account)) {
-      userContext.userRoles.userRoles[account].push(role);   
-      emit RoleGranted(role, account, msg.sender);
-    }
-  }
-
-  function onlyCommunityModerator(Roles storage self, uint32 communityId) internal {
-    require((hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "not_allowed_not_moderator");
-  }
-
-    function onlyCommunityAdmin(Roles storage self, uint32 communityId) internal {
-    require((hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "not_allowed_not_comm_admin");
-  }
-
-  function onlyAdminOrCommunityAdmin(Roles storage self, uint32 communityId) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) || 
-        (hasRole(self, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), msg.sender)), 
-        "not_allowed_admin_or_comm_admin");
-  }
-
-  function onlyAdminOrCommunityModerator(Roles storage self, uint32 communityId) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender) ||
-        (hasRole(self, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), msg.sender)), 
-        "not_allowed_admin_or_comm_admin");
-  }
-
-  function onlyAdmin(Roles storage self) internal {
-    require(hasRole(self, DEFAULT_ADMIN_ROLE, msg.sender), 
-        "not_allowed_not_admin");
-  }
-
-  function getStatusEnergy(int32 rating) internal returns (uint16) {
-    if (rating < 0) {
-      return 0;
-    } else if (rating < 100) {
-      return 300;
-    } else if (rating < 500) {
-      return 600;
-    } else if (rating < 1000) {
-      return 900;
-    } else if (rating < 2500) {
-      return 1200;
-    } else if (rating < 5000) {
-      return 1500;
-    } else if (rating < 10000) {
-      return 1800;
-    } else {
-      return 2100;
-    }
+  function getStatusEnergy() internal pure returns (uint16) {
+    return 1000;
   }
 }

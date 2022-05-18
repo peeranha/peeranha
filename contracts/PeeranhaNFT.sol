@@ -1,39 +1,33 @@
-pragma solidity ^0.7.3;
-pragma abicoder v2;
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
 import "./libraries/AchievementCommonLib.sol";
+import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-///
-//   Init contract owner
-// owner init by peranhaNFTAddress
-// peeranhaNFT.transferOwnership(peeranhaAddress)
-///
+contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
+  
+  bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
 
-contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
+  event ConfigureNewAchievementNFT(uint64 indexed achievementId);
+  
   NFTLib.AchievementNFTsContainer achievementsNFTContainer;
 
-  function initialize(string memory name, string memory symbol) public initializer {
-    __NFT_init(name, symbol);
-    __Ownable_init_unchained();
+  function initialize(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) public initializer {
+    __NFT_init(name, symbol, peeranhaUserContractAddress, childChainManager);
   }
 
-  function __NFT_init(string memory name, string memory symbol) internal initializer {
-    __ERC721_init(name, symbol);
+  function __NFT_init(string memory name, string memory symbol, address peeranhaUserContractAddress, address childChainManager) internal onlyInitializing {
+    __ChildMintableERC721Upgradeable_init(name, symbol, childChainManager);
+    _grantRole(OWNER_MINTER_ROLE, peeranhaUserContractAddress);
+    _setRoleAdmin(OWNER_MINTER_ROLE, DEFAULT_ADMIN_ROLE);
   }
 
-  function __Token_init_unchained() internal initializer {
-  }
-
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721Upgradeable) {
+  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ChildMintableERC721Upgradeable) {
     super._beforeTokenTransfer(from, to, amount);
   }
-
-  event ConfigureNewAchievementNFT(uint64 achievementId);
 
   function configureNewAchievementNFT(
     uint64 achievementId,
@@ -42,7 +36,7 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
     AchievementCommonLib.AchievementsType achievementsType
   ) 
     external
-    onlyOwner()
+    onlyRole(OWNER_MINTER_ROLE)
     override
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[++achievementsNFTContainer.achievementsCount];
@@ -63,17 +57,15 @@ contract PeeranhaNFT is ERC721Upgradeable, IPeeranhaNFT, OwnableUpgradeable {
     uint64 achievementId
   )
     external
-    onlyOwner()
+    onlyRole(OWNER_MINTER_ROLE)
     override
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
     achievementNFT.factCount++;
-    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
+    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;    // uint256?
 
     _safeMint(user, tokenId);          // || _mint
     _setTokenURI(tokenId, achievementNFT.achievementURI);
-
-    // check uri?
   }
 
   function getAchievementsNFTConfig(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {

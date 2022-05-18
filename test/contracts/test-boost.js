@@ -14,10 +14,10 @@ describe("Test boost", function () {
 	describe("add boost", function () {
 
 		it("Test add boost", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -37,10 +37,10 @@ describe("Test boost", function () {
 		});
 
 		it("Test add boost (get stake in previous period)", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -52,10 +52,10 @@ describe("Test boost", function () {
 		});
 
 		it("Test add boost (get stake in next period)", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1.2"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
@@ -66,10 +66,10 @@ describe("Test boost", function () {
 		});
 
 		it("Test add 3 boost", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("3"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("3"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime * 3)
@@ -168,20 +168,20 @@ describe("Test boost", function () {
 	describe("add boost and get reward", function () {
 
 		it("add rating the same periods when add boost", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime * 2);
 
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
-			const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
 			console.log(periodRewardShares);
 			console.log(rewardPeriods)
 			console.log(userBoostPeriods)
@@ -189,70 +189,70 @@ describe("Test boost", function () {
 			expect(periodRewardShares).to.equal(5 * periodRewardCoefficient);
 
 
-			// const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+			// const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			// expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
-			// const balance = await getBalance(token, peeranha.deployTransaction.from);
+			// await token.claimReward(rewardPeriods[1]);
+			// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 			
 			// expect(balance).to.equal(5 * coefficientToken * fraction);
 		}).retries(2);
 
 		it("add rating in next periods when add boost", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime);
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime * 2);
 
 			// const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
-			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[0], 1);
+			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 
-			const periodRewardShares = await peeranha.getPeriodReward(rewardPeriods[0]);
+			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
 			console.log(periodRewardShares);
 			expect(periodRewardShares).to.equal(5 * 6 * periodRewardCoefficient);
 			expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(peeranha.deployTransaction.from, rewardPeriods[1]);
-			// const balance = await getBalance(token, peeranha.deployTransaction.from);
+			// await token.claimReward(rewardPeriods[1]);
+			// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 			// expect(balance).to.equal(5 * 6 * coefficientToken * fraction);
 		});
 
 		it("add 0 rating in next periods when add boost", async function () {
-			const { peeranha, token, accountDeployed} = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranha.createUser(hashContainer[1]);
-			await token.mintForOwner(parseEther("1"))
+			await peeranhaUser.createUser(hashContainer[1]);
+			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
 			await wait(PeriodTime);
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, 5, 1);
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
 
-			await peeranha.addUserRating(peeranha.deployTransaction.from, -5, 1);
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, -5, 1);
 			await wait(PeriodTime);
 
 			const boostPeriods = await token.getStakeTotalPeriods();
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
-			const rewardPeriods = await peeranha.getAcctiveUserPeriods(peeranha.deployTransaction.from)
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 			console.log(userBoostPeriods)
 			console.log(rewardPeriods)
-			const ratingToReward = await peeranha.getRatingToReward(peeranha.deployTransaction.from, rewardPeriods[1], 1);
+			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			expect(ratingToReward).to.equal(0);
 
-			await expect(token.claimReward(peeranha.deployTransaction.from, rewardPeriods[0]))
+			await expect(token.claimReward(rewardPeriods[0]))
 			.to.be.revertedWith('no_reward');
 		});
 	})

@@ -1,5 +1,5 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
 import "./PostLib.sol";
 
@@ -64,6 +64,7 @@ library VoteLib  {
         });
     }
 
+    // give proper names to constaints, e.g. DOWNVOTE_EXPERT_POST
     //expert post
     int32 constant DownvoteExpertPost = -1;
     int32 constant UpvotedExpertPost = 5;
@@ -134,7 +135,8 @@ library VoteLib  {
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
 
         }
-        require(false, "invalid_post_type");
+        
+        revert("invalid_post_type");
     }
 
     /// @notice Get value Rating for rating action
@@ -167,7 +169,7 @@ library VoteLib  {
             return 0;
         }
         
-        require(false, "invalid_resource_type");
+        revert("invalid_resource_type");
     }
 
     function getUserRatingChange(
@@ -188,7 +190,7 @@ library VoteLib  {
     /// @param historyVote history vote all users
     // return value:
     // downVote = -1
-    // nothing = 0
+    // NONE = 0
     // upVote = 1
     function getHistoryVote(
         address user,

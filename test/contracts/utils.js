@@ -1,4 +1,5 @@
 const delay = ms => new Promise(res => setTimeout(res, ms));
+const { parseEther }  = require("ethers/lib/utils");
 const crypto = require("crypto");
 
 ///
@@ -14,6 +15,16 @@ async function wait(ms) {
 async function getBalance(contract, user) {
     const balance = await contract.availableBalanceOf(user);
 	return await getInt(balance);
+}
+
+async function getOwnerMinted(contract) {
+    const ownerMinted = await contract.ownerMinted();
+	return await getInt(ownerMinted);
+}
+
+async function getTotalSupply(contract) {
+    const totalSupply = await contract.totalSupply();
+	return await getInt(totalSupply);
 }
 
 async function getInt(value) {
@@ -57,35 +68,69 @@ const getUserReward = async function (userRating, periodRating) {
 }
 
 const createPeerenhaAndTokenContract = async function () {
-    const PostLib = await ethers.getContractFactory("PostLib")
-    const CommunityLib = await ethers.getContractFactory("CommunityLib")
-    const postLib = await PostLib.deploy();
-    const communityLib = await CommunityLib.deploy();
-    const Peeranha = await ethers.getContractFactory("Peeranha", {
-    libraries: {
-            PostLib: postLib.address,
-            CommunityLib: communityLib.address,
-    }
+    const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+    // TODO: use deployProxy
+    const peeranhaNFT = await PeeranhaNFT.deploy();
+    await peeranhaNFT.deployed();
+    const peeranhaNFTContractAddress = await peeranhaNFT.resolvedAddress.then((value) => {
+        return value;
     });
-    const peeranha = await Peeranha.deploy();
-    await peeranha.deployed();
-    await peeranha.__Peeranha_init();
-
-    const peeranhaContractAddress = await peeranha.resolvedAddress.then((value) => {
+    
+    const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+    // TODO: use deployProxy
+    const peeranhaCommunity = await PeeranhaCommunity.deploy();
+    await peeranhaCommunity.deployed();
+    const peeranhaCommunityContractAddress = await peeranhaCommunity.resolvedAddress.then((value) => {
         return value;
     });
 
     const Token = await ethers.getContractFactory("PeeranhaToken");
+    // TODO: use deployProxy
     const token = await Token.deploy();
     await token.deployed();
-    await token.initialize("token", "ecs", peeranhaContractAddress);
-
-    const tokenContractAddress = await token.resolvedAddress.then((value) => {
+    const peeranhaTokenContractAddress = await token.resolvedAddress.then((value) => {
         return value;
     });
-    await peeranha.setTokenContract(tokenContractAddress);
+    
+    const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+    const peeranhaUser = await PeeranhaUser.deploy();
+    await peeranhaUser.deployed();
+    const peeranhaUserContractAddress = await peeranhaUser.resolvedAddress.then((value) => {
+        return value;
+    });
 
-    return { peeranha: peeranha, token: token, accountDeployed: peeranha.deployTransaction.from};
+    const PostLib = await ethers.getContractFactory("PostLib")
+    const postLib = await PostLib.deploy();
+
+    const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent", {
+        libraries: {
+            PostLib: postLib.address,
+        }
+    })
+    // TODO: use deployProxy
+    const peeranhaContent = await PeeranhaContent.deploy();
+    await peeranhaContent.deployed();
+    const peeranhaContentAddress = await peeranhaContent.resolvedAddress.then((value) => {
+        return value;
+    });
+
+    
+    await peeranhaUser.initialize();
+    await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
+    await peeranhaCommunity.initialize(peeranhaUserContractAddress);
+    await token.initialize("Peeranha", "PEER", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
+    await peeranhaNFT.initialize("PeeranhaNFT", "PEERNFT", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
+    
+    await peeranhaUser.setContractAddresses(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
+
+    return {
+        peeranhaContent: peeranhaContent,
+        peeranhaUser: peeranhaUser,
+        peeranhaCommunity: peeranhaCommunity,
+        token: token,
+        peeranhaNFT: peeranhaNFT,
+        accountDeployed: peeranhaContent.deployTransaction.from
+    }
 };
 
 const getIdsContainer = (countOfCommunities) =>
@@ -108,16 +153,18 @@ const getHashContainer = () => {
     ];
 };
 
+const hashContainer = getHashContainer();
+
 const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
-const registerTwoUsers = async function (peeranha, signers, hashContainer) {
-	await peeranha.connect(signers[1]).createUser(hashContainer[0]);
-	await peeranha.createUser(hashContainer[1]);
+const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
+	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+	await peeranhaUser.createUser(hashContainer[1]);
 }
 
-const createUserWithAnotherRating = async function (signer, rating, peeranha, hashContainer) {
-	await peeranha.connect(signer).createUser(hashContainer[0]);
-	await peeranha.addUserRating(signer.address, rating, 1);
+const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer) {
+	await peeranhaUser.connect(signer).createUser(hashContainer[0]);
+	await peeranhaUser.addUserRating(signer.address, rating, 1);
 };
 
 const getUsers = (hashes) => {
@@ -130,7 +177,7 @@ const getUsers = (hashes) => {
 }
 
 const StartEnergy = 300;
-const PeriodTime = 3000
+const PeriodTime = 4000
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;
@@ -311,8 +358,8 @@ const ModeratorDeleteComment = -1;
 
 
 module.exports = { 
-    wait, getBalance, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward,
-    getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
+    wait, getBalance, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
+    getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,

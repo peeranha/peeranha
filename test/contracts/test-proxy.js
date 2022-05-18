@@ -25,8 +25,8 @@ describe('Peeranha (proxy)', function () {
   it('check retrieve returns a value previously initialized', async function () {
     const ipfsHashes = getHashesContainer(2);
     const hashContainer = getHashContainer();
-		await peeranha.createUser(hashContainer[1]);
-    await peeranha.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(hashContainer[1]);
+    await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
     const newPeeranha = await upgrades.upgradeProxy(peeranha.address, Peeranha, {unsafeAllowLinkedLibraries: true});
 

@@ -1,6 +1,6 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
-import "../Peeranha.sol";
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
 import "./CommonLib.sol";
 import "./UserLib.sol";
 
@@ -13,8 +13,8 @@ library RewardLib {
   uint256 constant START_PERIOD_TIME = 1648875600;  // September 28, 2021 8:20:23 PM GMT+03:00 DST
 
   struct PeriodRating {
-    int32 ratingToReward;
-    int32 penalty;
+    uint32 ratingToReward;
+    uint32 penalty;
     bool isActive;
   }
 
@@ -23,7 +23,7 @@ library RewardLib {
   }
 
   struct PeriodRewardShares {
-    int32 totalRewardShares;
+    uint256 totalRewardShares;
     address[] activeUsersInPeriod;
   }
 
@@ -35,7 +35,7 @@ library RewardLib {
 
   /// @notice Get perion
   /// @param time Unix time. Usual now()
-  function getPeriod(uint32 time) internal view returns (uint16) {
+  function getPeriod(uint32 time) internal pure returns (uint16) {
     return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 }

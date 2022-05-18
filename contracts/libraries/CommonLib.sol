@@ -1,7 +1,7 @@
-pragma solidity >=0.5.0;
-pragma abicoder v2;
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 /// @title CommonLib
 /// @notice
@@ -19,8 +19,20 @@ library CommonLib {
     return SafeCastUpgradeable.toUint32(block.timestamp);
   }
 
-  function toInt32(int value) internal view returns (int32) {
+  function toInt32(int value) internal pure returns (int32) {
     return SafeCastUpgradeable.toInt32(value);
+  }
+
+  function toInt32FromUint32(uint32 value) internal pure returns (int32) {
+    // TODO: remove double cast. Instead add own implementation similar to SafeCastUpgradeable
+    int256 buffValue = SafeCastUpgradeable.toInt256(value);
+    return SafeCastUpgradeable.toInt32(buffValue);
+  }
+
+  function toUInt32FromInt32(int256 value) internal pure returns (uint32) {
+    // TODO: remove double cast. Instead add own implementation similar to SafeCastUpgradeable
+    uint256 buffValue = SafeCastUpgradeable.toUint256(value);
+    return SafeCastUpgradeable.toUint32(buffValue);
   }
 
   /**

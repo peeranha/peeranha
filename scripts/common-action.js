@@ -3,19 +3,19 @@ const path = require('path');
 const PATH = '../image/';
 
 const testAccount = {
-    displayName: "testAccount",
-    company: "Peeranha",
-    position: "TestInfo",
-    location: "TestInfo",
-    about: "TestInfo",
-    avatar: "f"
+  displayName: "testAccount",
+  company: "Peeranha",
+  position: "TestInfo",
+  location: "TestInfo",
+  about: "TestInfo",
+  avatar: "f"
 };
-  
+
 const NFT = {
-    name: "testAccount",
-    description: "Peeranha",
-    image: "",
-    attributes: "TestInfo",
+  name: "testAccount",
+  description: "Peeranha",
+  image: "",
+  attributes: "TestInfo",
 };
 
 const testCommunity = {
@@ -39,54 +39,54 @@ const achievements = (env) => {
       lowerBound: env === "prod" ? 100 : 10, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Newbie.svg`),
-      name: "Newbie",
-      description: "A beginning of a great journey",
-      attributes: "TestInfo",
+      name: "A beginning of a great journey",
+      description: "NFT for achieving Newbie status among the first",
+      attributes: "",
     },
     {
       maxCount: env === "prod" ? 500 : 5, 
       lowerBound: env === "prod" ? 500 : 50, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Junior.svg`),
-      name: "Junior",
-      description: "Don't call me Junior!",
-      attributes: "TestInfo",
+      name: "Don't call me Junior!",
+      description: "",
+      attributes: "",
     },
     {
       maxCount: env === "prod" ? 300 : 4, 
       lowerBound: env === "prod" ? 1000 : 100, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Resident.svg`),
-      name: "Resident",
-      description: "Peeranha is my home",
-      attributes: "TestInfo",
+      name: "Peeranha is my home",
+      description: "NFT for achieving Resident status among the first",
+      attributes: "",
     },
     {
       maxCount: env === "prod" ? 150 : 3, 
       lowerBound: env === "prod" ? 2500 : 250, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Senior.svg`),
-      name: "Senior",
-      description: "I can teach you anything",
-      attributes: "TestInfo",
+      name: "I can teach you anything",
+      description: "NFT for achieving Senior status among the first",
+      attributes: "",
     },
     {
       maxCount: env === "prod" ? 50 : 2, 
       lowerBound: env === "prod" ? 5000 : 500, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Hero.svg`),
-      name: "Hero",
-      description: "This website needs a hero",
-      attributes: "TestInfo",
+      name: "This website needs a hero",
+      description: "NFT for achieving Hero status among the first",
+      attributes: "",
     },
     {
       maxCount: env === "prod" ? 10 : 1, 
       lowerBound: env === "prod" ? 10000 : 1000, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}suphero.svg`),
-      name: "Superhero",
-      description: "A living Legend",
-      attributes: "TestInfo",
+      name: "A living Legend",
+      description: "NFT for achieving Superhero status among the first",
+      attributes: "",
     },
   ]
 }
