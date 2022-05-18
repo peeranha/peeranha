@@ -192,20 +192,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
-     * @dev Get user permissions by address.
-     *
-     * Requirements:
-     *
-     * - Must be an existing user.
-     */
-    function getUserPermissions(address addr) public pure returns (bytes32[] memory) {
-        // TODO: Remove this function. Retrieve the data from the graph
-        bytes32[] memory emptyResult;
-        return emptyResult;
-    }
-
-
-    /**
      * @dev Give admin permission.
      *
      * Requirements:
