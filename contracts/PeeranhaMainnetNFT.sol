@@ -23,7 +23,7 @@ contract PeeranhaMainnetNFT is
         __ERC721_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(PREDICATE_ROLE, predicateProxyAddress);
-        _initializeEIP712(name_);
+        __NativeMetaTransaction_init(name_);
     }
 
     function _msgSender()

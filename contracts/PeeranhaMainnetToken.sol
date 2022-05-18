@@ -19,7 +19,7 @@ contract PeeranhaMainnetToken is
          __ERC20_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(PREDICATE_ROLE, predicateProxyAddress);
-        _initializeEIP712(name_);
+        __NativeMetaTransaction_init(name_);
     }
 
     /**
