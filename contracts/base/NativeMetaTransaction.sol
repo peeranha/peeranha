@@ -28,6 +28,15 @@ contract NativeMetaTransaction is EIP712Base, ContextUpgradeable {
         bytes functionSignature;
     }
 
+    function __NativeMetaTransaction_init(
+        string memory name
+    )
+        internal
+        onlyInitializing
+    {
+        __EIP712_init(name);
+    }
+
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()

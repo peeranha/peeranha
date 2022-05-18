@@ -35,6 +35,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function __Peeranha_init() public onlyInitializing {
         __AccessControlEnumerable_init();
         __Peeranha_init_unchained();
+        __NativeMetaTransaction_init("PeeranhaUser");
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
@@ -185,6 +186,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     /**
      * @dev Check if user with given address exists.
      */
+    // TODO: remove this duplicate function of isUserExists or give better name, e.g. VerifyUserExists
     function isExistsUser(address addr) public view {
         require(userContext.users.isExists(addr), "user_not_found");
     }
