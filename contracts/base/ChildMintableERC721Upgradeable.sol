@@ -37,7 +37,7 @@ contract ChildMintableERC721Upgradeable is
         __ERC721_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(DEPOSITOR_ROLE, childChainManager);
-        _initializeEIP712(name_);
+        __NativeMetaTransaction_init(name_);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721EnumerableUpgradeable, ERC721Upgradeable) {

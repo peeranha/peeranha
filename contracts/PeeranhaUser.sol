@@ -35,6 +35,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function __Peeranha_init() public onlyInitializing {
         __AccessControlEnumerable_init();
         __Peeranha_init_unchained();
+        __NativeMetaTransaction_init("PeeranhaUser");
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
@@ -188,20 +189,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function checkUser(address addr) public view {
         require(userContext.users.isExists(addr), "user_not_found");
     }
-
-    /**
-     * @dev Get user permissions by address.
-     *
-     * Requirements:
-     *
-     * - Must be an existing user.
-     */
-    function getUserPermissions(address addr) public pure returns (bytes32[] memory) {
-        // TODO: Remove this function. Retrieve the data from the graph
-        bytes32[] memory emptyResult;
-        return emptyResult;
-    }
-
 
     /**
      * @dev Give admin permission.

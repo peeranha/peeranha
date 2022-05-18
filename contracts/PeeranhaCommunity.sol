@@ -23,6 +23,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     }
     
     function __Peeranha_init() public onlyInitializing {
+        __NativeMetaTransaction_init("PeeranhaCommunity");
     }
 
 

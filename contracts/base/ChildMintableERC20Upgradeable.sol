@@ -24,7 +24,7 @@ contract ChildMintableERC20Upgradeable is
         __ERC20_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(DEPOSITOR_ROLE, childChainManager);
-        _initializeEIP712(name_);
+        __NativeMetaTransaction_init(name_);
     }
 
     // This is to support Native meta transactions

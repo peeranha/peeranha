@@ -23,7 +23,7 @@ contract EIP712Base is Initializable {
     // supposed to be called once while initializing.
     // one of the contractsa that inherits this contract follows proxy pattern
     // so it is not possible to do this in a constructor
-    function _initializeEIP712(
+    function __EIP712_init(
         string memory name
     )
         internal

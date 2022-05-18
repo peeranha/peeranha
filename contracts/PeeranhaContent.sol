@@ -22,6 +22,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         posts.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
+        __NativeMetaTransaction_init("PeeranhaContent");
     }
 
     /**
