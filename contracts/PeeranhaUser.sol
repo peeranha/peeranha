@@ -185,7 +185,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     /**
      * @dev Check if user with given address exists.
      */
-    function isExistsUser(address addr) public view {
+    function checkUser(address addr) public view {
         require(userContext.users.isExists(addr), "user_not_found");
     }
 
@@ -214,7 +214,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveAdminPermission(address userAddr) public {
         // grantRole checks that sender is role admin
         // TODO: verify there is unit test that only defaul admin can assign protocol admin
-        isExistsUser(userAddr);
+        checkUser(userAddr);
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -244,7 +244,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function initCommunityAdminPermission(address userAddr, uint32 communityId) public override {
-        isExistsUser(userAddr);
+        checkUser(userAddr);
         require(_msgSender() == address(userContext.peeranhaCommunity), "unauthorized");
         
         bytes32 communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
@@ -267,7 +267,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
-        isExistsUser(userAddr);
+        checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
         
@@ -285,7 +285,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
-        isExistsUser(userAddr);
+        checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
