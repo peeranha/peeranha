@@ -389,16 +389,20 @@ library PostLib  {
             UserLib.Permission.NONE,
             false
         );
-    
-        // DownvoteExpertPost = -1;
-        // UpvotedExpertPost = 5;
-        // + 1 upvote and 1 down vote -> postRating = 0 but userRating +4 (need fix?)
+
         uint256 time = CommonLib.getTimestamp();
-        if (postContainer.info.rating > 0 && (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author)) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author,
-                -VoteLib.getUserRatingChange(   postContainer.info.postType, 
-                                                VoteLib.ResourceAction.Upvoted,
-                                                TypeContent.Post) * postContainer.info.rating, postContainer.info.communityId);
+        if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
+            VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
+            (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers, postContainer.votedUsers.length);
+
+            int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+            if (changeUserRating > 0) {
+                self.peeranhaUser.updateUserRating(
+                    postContainer.info.author,
+                    -changeUserRating,
+                    postContainer.info.communityId
+                );
+            }
         }
         if (postContainer.info.bestReply != 0) {
             self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
@@ -487,9 +491,6 @@ library PostLib  {
 
         int32 changeReplyAuthorRating;
         if (replyContainer.info.rating >= 0) {
-            changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction( postType,
-                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating;
-
             if (replyContainer.info.isFirstReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
@@ -499,6 +500,14 @@ library PostLib  {
             if (isBestReply && postType != PostType.Tutorial) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
+        }
+
+        // change user rating considering reply rating
+        VoteLib.StructRating memory typeRating = getTypesRating(postType);
+        (int32 positive, int32 negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers, replyContainer.votedUsers.length);
+        int32 changeUserRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+        if (changeUserRating > 0) {
+            changeReplyAuthorRating += -changeUserRating;
         }
 
         if (changeReplyAuthorRating != 0) {
@@ -649,6 +658,7 @@ library PostLib  {
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
     /// @param isUpvote Upvote or downvote
+    // TODO voteDirection upvote/downvote cancel upbote, cancel downVote
     function voteForumItem(
         PostCollection storage self,
         address userAddr,
@@ -917,8 +927,10 @@ library PostLib  {
             return VoteLib.getExpertRating();
         else if (postType == PostType.CommonPost)
             return VoteLib.getCommonRating();
+        else if (postType == PostType.Tutorial)
+            return VoteLib.getTutorialRating();
         
-        revert("At this release you can not publish tutorial.");
+        revert("invalid_post_type");
     }
 
     /// @notice Return post
@@ -1067,5 +1079,20 @@ library PostLib  {
         }
 
         return statusHistory;
+    }
+
+    // TODO: Add doc comment
+    function getHistoryInformations(
+        mapping(address => int256) storage historyVotes,
+        address[] storage votedUsers,
+        uint256 countVotedUsers
+    ) private view returns (int32, int32) {
+        int32 positive;
+        int32 negative;
+        for (uint256 i; i < countVotedUsers; i++) {
+            if(historyVotes[votedUsers[i]] == 1) positive++;
+            else if(historyVotes[votedUsers[i]] == -1) negative++;
+        }
+        return (positive, negative);
     }
 }
