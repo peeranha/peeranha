@@ -659,6 +659,7 @@ library PostLib  {
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
     /// @param isUpvote Upvote or downvote
+    // TODO VoteDirection -> int8
     function voteForumItem(
         PostCollection storage self,
         address userAddr,
