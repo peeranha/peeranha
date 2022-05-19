@@ -426,14 +426,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }*/
+    }
 
     // Used for unit tests
-    /*function setEnergy(address userAddr, uint16 energy) public {
+    function setEnergy(address userAddr, uint16 energy) public {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     /**
      * @dev Get informations about contract.

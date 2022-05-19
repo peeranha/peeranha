@@ -20,7 +20,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   uint256 public constant OWNER_MINT_MAX = 40000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
   uint256 public constant MAX_REWARD_PER_USER = 100;
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1;
 
   bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
 
@@ -49,7 +49,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   function __Token_init_unchained() internal onlyInitializing {
     _grantRole(OWNER_MINTER_ROLE, _msgSender());
     _setRoleAdmin(OWNER_MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-<<<<<<< HEAD
   }
 
   // This is to support Native meta transactions
@@ -70,28 +69,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       ERC20CappedUpgradeable._mint(account, amount);
   }
 
-=======
-  }
-
-  // This is to support Native meta transactions
-  // never use msg.sender directly, use _msgSender() instead
-  function _msgSender()
-      internal
-      override(ContextUpgradeable, ChildMintableERC20Upgradeable)
-      view
-      returns (address sender)
-  {
-      return ChildMintableERC20Upgradeable._msgSender();
-  }
-
-  /**
-  * @dev See {ERC20-_mint}.
-  */
-  function _mint(address account, uint256 amount) internal virtual override (ERC20Upgradeable, ERC20CappedUpgradeable) {
-      ERC20CappedUpgradeable._mint(account, amount);
-  }
-
->>>>>>> develop
 
   function availableBalanceOf(address account) external view returns(uint256) { // unitTest
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[account];
@@ -110,14 +87,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     return balanceOf(account) - stakedToken;
   }
 
-<<<<<<< HEAD
-=======
-
-  ///
-  // TODO: add unit tests
-  // TODO: update comment about ownerMinted
-  ///
->>>>>>> develop
   /**
    * @dev Mint token for owner.
    *
@@ -125,11 +94,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
    *
    * - must be a user.
    * - user must has role OWNER_MINTER_ROLE.
-<<<<<<< HEAD
    * - ownerMinted + mintTokens must be less than OWNER_MINT_MAX
-=======
-   * - 
->>>>>>> develop
   */
   function mint(uint256 mintTokens) external onlyRole(OWNER_MINTER_ROLE) {
     require(ownerMinted + mintTokens <= OWNER_MINT_MAX, "max_owner_mint_exceeded");

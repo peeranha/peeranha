@@ -1030,8 +1030,6 @@ describe("Test vote", function () {
             const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
             await expect(newUserRating).to.equal(userRating + ModeratorDeletePost);
 		});
-<<<<<<< HEAD
-=======
 
 		it("Test delete post with upvotes after deleteTime by post's owner", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -1068,7 +1066,6 @@ describe("Test vote", function () {
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
->>>>>>> develop
 
 		it("Test delete post with upvotes after deleteTime by post's owner", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
