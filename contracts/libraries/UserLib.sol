@@ -112,35 +112,31 @@ library UserLib {
     address delegateUser;
   }
 
-  // TODO: Rename enum memers to begin with capital
   enum Action {
     NONE,
-    publicationPost,
-    publicationReply,
-    publicationComment,
-    editItem,
-    deleteItem,
-    upVotePost,
-    downVotePost,
-    upVoteReply,
-    downVoteReply,
-    voteComment,
-    cancelVote,
-    officialReply,
-    bestReply,
-    updateProfile,
-    followCommunity
+    PublicationPost,
+    PublicationReply,
+    PublicationComment,
+    EditItem,
+    DeleteItem,
+    UpVotePost,
+    DownVotePost,
+    UpVoteReply,
+    DownVoteReply,
+    VoteComment,
+    CancelVote,
+    BestReply,
+    UpdateProfile,
+    FollowCommunity
   }
 
-  // TODO: Rename enum memers to begin with capital and use camel case
-  // TODO: Rename enum to ActionRole
-  enum Permission {
+  enum ActionRole {
     NONE,
-    admin,
-    adminOrCommunityModerator,
-    adminOrCommunityAdmin,
-    communityAdmin,
-    communityModerator
+    Admin,
+    AdminOrCommunityModerator,
+    AdminOrCommunityAdmin,
+    CommunityAdmin,
+    CommunityModerator
   }
 
   event UserCreated(address indexed userAddress);
@@ -196,7 +192,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.updateProfile
+      Action.UpdateProfile
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -217,7 +213,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.followCommunity
+      Action.FollowCommunity
     );
 
     bool isAdded;
@@ -249,7 +245,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.followCommunity
+      Action.FollowCommunity
     );
 
     for (uint i; i < user.followedCommunities.length; i++) {
@@ -503,78 +499,78 @@ library UserLib {
     uint8 energy;
     if (action == Action.NONE) {
       return user;
-    } else if (action == Action.publicationPost) {
+    } else if (action == Action.PublicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
-    } else if (action == Action.publicationReply) {
+    } else if (action == Action.PublicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
       message = "low_rating_reply";
       energy = ENERGY_POST_ANSWER;
 
-    } else if (action == Action.publicationComment) {
+    } else if (action == Action.PublicationComment) {
       ratingAllowed = POST_COMMENT_ALLOWED;
       message = "low_rating_own_post_comment";
       energy = ENERGY_POST_COMMENT;
 
-    } else if (action == Action.editItem) {
+    } else if (action == Action.EditItem) {
       require(actionCaller == dataUser, "not_allowed_edit");
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_edit";
       energy = ENERGY_MODIFY_ITEM;
 
-    } else if (action == Action.deleteItem) {
+    } else if (action == Action.DeleteItem) {
       require(actionCaller == dataUser, "not_allowed_delete");
       ratingAllowed = 0;
       message = "low_rating_delete_own"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
-    } else if (action == Action.upVotePost) {
+    } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "low rating to upvote";
       energy = ENERGY_UPVOTE_QUESTION;
 
-    } else if (action == Action.upVoteReply) {
+    } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
-    } else if (action == Action.voteComment) {
+    } else if (action == Action.VoteComment) {
       require(actionCaller != dataUser, "not_allowed_vote_comment");
       ratingAllowed = VOTE_COMMENT_ALLOWED;
       message = "low_rating_vote_comment";
       energy = ENERGY_VOTE_COMMENT;
 
     }
-     else if (action == Action.downVotePost) {
+     else if (action == Action.DownVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = DOWNVOTE_POST_ALLOWED;
       message = "low_rating_downvote_post";
       energy = ENERGY_DOWNVOTE_QUESTION;
 
-    } else if (action == Action.downVoteReply) {
+    } else if (action == Action.DownVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
       message = "low_rating_downvote_reply";
       energy = ENERGY_DOWNVOTE_ANSWER;
 
-    } else if (action == Action.cancelVote) {
+    } else if (action == Action.CancelVote) {
       ratingAllowed = CANCEL_VOTE;
       message = "low_rating_cancel_vote";
       energy = ENERGY_FORUM_VOTE_CANCEL;
 
-    } else if (action == Action.bestReply) {
+    } else if (action == Action.BestReply) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_mark_best";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
-    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
+    } else if (action == Action.UpdateProfile) { //userRating - always 0 (const)
       energy = ENERGY_UPDATE_PROFILE;
 
     } 
-    else if (action == Action.followCommunity) {
+    else if (action == Action.FollowCommunity) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_follow_comm";
       energy = ENERGY_FOLLOW_COMMUNITY;
