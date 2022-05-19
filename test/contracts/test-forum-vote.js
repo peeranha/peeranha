@@ -1030,6 +1030,45 @@ describe("Test vote", function () {
             const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
             await expect(newUserRating).to.equal(userRating + ModeratorDeletePost);
 		});
+<<<<<<< HEAD
+=======
+
+		it("Test delete post with upvotes after deleteTime by post's owner", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			
+			await wait(deleteTime);	
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+
+            const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
+            await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+		
+		it("Test delete post with expert reply after deleteTime", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
+			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
+>>>>>>> develop
 
 		it("Test delete post with upvotes after deleteTime by post's owner", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -2703,6 +2742,29 @@ describe("Test vote", function () {
 		});
 
 		it("Test delete upveted expert reply after deleteTime by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			await wait(deleteTime);
+			await peeranhaContent.deleteReply(1, 1);
+
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(newUserRating).to.equal(userRating + ModeratorDeletePost + UpvotedExpertReply);
+		});
+
+		it("Test delete upveted expert reply after deleteTime by reply's owner", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
