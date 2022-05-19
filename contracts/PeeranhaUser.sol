@@ -15,10 +15,8 @@ import "./interfaces/IPeeranhaUser.sol";
 
 
 contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
-    // TODO: Actually use usings or remove
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
-    using UserLib for UserLib.User;
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
@@ -426,14 +424,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     // Used for unit tests
-    function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }
+    }*/
 
     // Used for unit tests
-    function setEnergy(address userAddr, uint16 energy) public {
+    /*function setEnergy(address userAddr, uint16 energy) public {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }
+    }*/
 
     /**
      * @dev Get informations about contract.
