@@ -4,5 +4,5 @@ pragma abicoder v2;
 
 
 interface IPeeranhaToken {
-  function getBoost(address user, uint16 period) external view returns (int32);
+  function getBoost(address user, uint16 period) external view returns (uint256);
 }

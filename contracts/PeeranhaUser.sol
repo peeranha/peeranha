@@ -329,7 +329,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // TODO: Add doc comment
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) public view override returns(int32) {
         RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-        return CommonLib.toInt32FromUint32(periodRating.ratingToReward) - CommonLib.toInt32FromUint32(periodRating.penalty);
+        return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
     // only unitTest

@@ -23,7 +23,7 @@ library CommonLib {
     return SafeCastUpgradeable.toInt32(value);
   }
 
-  function toInt32FromUint32(uint32 value) internal pure returns (int32) {
+  function toInt32FromUint256(uint256 value) internal pure returns (int32) {
     // TODO: remove double cast. Instead add own implementation similar to SafeCastUpgradeable
     int256 buffValue = SafeCastUpgradeable.toInt256(value);
     return SafeCastUpgradeable.toInt32(buffValue);
