@@ -14,6 +14,7 @@ library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
+    enum VoteDirection { downVote, cancelDownVote, upVote, cancelUpVote }
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
 
@@ -101,7 +102,7 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
-    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
+    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, VoteDirection voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
 
     /// @notice Publication post 
@@ -670,21 +671,21 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
-        int8 voteDirection;
+        VoteDirection voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
             require(userAddr != commentContainer.info.author, "You can not vote for own comment.");
-            voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
+            voteDirection = voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
 
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
             require(userAddr != replyContainer.info.author, "You can not vote for own reply.");
-            voteReply(self, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
+            voteDirection = voteReply(self, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
 
 
         } else {
             require(userAddr != postContainer.info.author, "You can not vote for own post.");
-            votePost(self, postContainer, userAddr, postType, isUpvote);
+            voteDirection = votePost(self, postContainer, userAddr, postType, isUpvote);
         }
 
         emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
@@ -702,7 +703,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public {
+    ) public returns (VoteDirection) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkPermission(
             votedUser,
@@ -720,6 +721,16 @@ library PostLib  {
 
         vote(self, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post, postContainer.info.communityId);
         postContainer.info.rating += ratingChange;
+        
+        return isCancel ?
+                (ratingChange < 0 ?
+                    VoteDirection.cancelUpVote :
+                    VoteDirection.cancelDownVote 
+                ) :
+                (ratingChange > 0 ?
+                    VoteDirection.upVote :
+                    VoteDirection.downVote
+                );
     }
  
     // @notice Vote for reply
@@ -735,7 +746,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public {
+    ) public returns (VoteDirection) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         self.peeranhaUser.checkPermission(
             votedUser,
@@ -750,8 +761,6 @@ library PostLib  {
             UserLib.Permission.NONE,
             false
         ); 
-
-        if (postType == PostType.Tutorial) return;
 
         vote(self, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply, communityId);
         int32 oldRating = replyContainer.info.rating;
@@ -773,6 +782,16 @@ library PostLib  {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
             }
         }
+
+        return isCancel ?
+            (ratingChange < 0 ?
+                VoteDirection.cancelUpVote :
+                VoteDirection.cancelDownVote 
+            ) :
+            (ratingChange > 0 ?
+                VoteDirection.upVote :
+                VoteDirection.downVote
+            );
     }
 
     // @notice Vote for comment
@@ -786,7 +805,7 @@ library PostLib  {
         uint32 communityId,
         address votedUser,
         bool isUpvote
-    ) private {
+    ) private returns (VoteDirection) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         self.peeranhaUser.checkPermission(
             votedUser,
@@ -800,6 +819,16 @@ library PostLib  {
         );
 
         commentContainer.info.rating += ratingChange;
+
+        return isCancel ?
+            (ratingChange < 0 ?
+                VoteDirection.cancelUpVote :
+                VoteDirection.cancelDownVote 
+            ) :
+            (ratingChange > 0 ?
+                VoteDirection.upVote :
+                VoteDirection.downVote
+            );
     }
 
     // @notice Сount users' rating after voting per a reply or post
