@@ -24,15 +24,13 @@ library CommonLib {
   }
 
   function toInt32FromUint256(uint256 value) internal pure returns (int32) {
-    require(value <= type(uint16).max, "SafeCast: value doesn't fit in 32 bits");
-    return int32(int256(value));
+    int256 buffValue = SafeCastUpgradeable.toInt256(value);
+    return SafeCastUpgradeable.toInt32(buffValue);
   }
 
   function toUInt32FromInt32(int256 value) internal pure returns (uint32) {
-    require(value >= 0, "SafeCast: value must be positive");
-    require(value <= type(int64).max, "SafeCast: value doesn't fit in 32 bits");
-
-    return uint32(uint256(value));
+    uint256 buffValue = SafeCastUpgradeable.toUint256(value);
+    return SafeCastUpgradeable.toUint32(buffValue);
   }
 
   /**

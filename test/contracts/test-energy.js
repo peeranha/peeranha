@@ -6,6 +6,7 @@ const {
 	energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray
 } = require('./utils');
 
+// TODO
 describe("Test energy", function () {
 	for (const { rating, energy, status } of energyArray) {
 		

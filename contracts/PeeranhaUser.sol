@@ -69,8 +69,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user and valid period.
      */
     function getUserRewardCommunities(address user, uint16 rewardPeriod) public override view returns(uint32[] memory) {
-        // TODO: add function for that to UserLib and call it from here
-        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
+        return UserLib.getUserRewardCommunities(userContext, user, rewardPeriod);
     }
 
     /**
@@ -81,8 +80,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be a valid period.
      */
     function getPeriodRewardShares(uint16 period) public view override returns(RewardLib.PeriodRewardShares memory) {
-        // TODO: add function for that to UserLib and call it from here
-        return userContext.periodRewardContainer.periodRewardShares[period];
+        return UserLib.getPeriodRewardShares(userContext, period);
     }
 
     /**
@@ -298,7 +296,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Sender must be community or global administrator.
      * - Must be an existing community.
-     * - Must be an existing user. 
+     * - Must be an existing user.
      */
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) public {
         onlyExistingAndNotFrozenCommunity(communityId);
@@ -306,7 +304,13 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Create new achievement.
+     *
+     * Requirements:
+     *
+     * - Only admin can call the action.
+     */
     function configureNewAchievement(
         uint64 maxCount,
         int64 lowerBound,
@@ -319,44 +323,87 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Get information about achievement.
+     *
+     * Requirements:
+     *
+     * - Must be an existing achievement.
+     */
     function getAchievementConfig(uint64 achievementId) public view returns (AchievementLib.AchievementConfig memory) {
         return userContext.achievementsContainer.achievementsConfigs[achievementId];
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Get user reward.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user.
+     */
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) public view override returns(int32) {
         RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
         return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
-    // only unitTest
-    // TODO: Add comment
-    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
+    /**
+     * @dev Get information about user rewards. (Rating to reward and penalty)
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }
+    }*/
 
-    // only unitTest
-    // TODO: Add comment
-    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
+    /**
+     * @dev Get information abour sum rating to reward all users
+     */
+    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
-    }
+    }*/
     
-    // TODO: Add doc comment
+    /**
+     * @dev Change user rating
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user.
+     * - Contract peeranhaContent must call action
+     */
     // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Change users rating
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing users.
+     * - Only contract peeranhaContent can call the action
+     */
     // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Check the role/energy/rating of the user to perform some action
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Only contract peeranhaContent and peeranhaCommunity can call the action
+     */
     // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool createUserIfDoesNotExist) public override {
         require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");

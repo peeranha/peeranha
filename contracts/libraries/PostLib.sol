@@ -102,7 +102,7 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusOfficialReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
-    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, VoteDirection voteDirection);
+    event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
 
     /// @notice Publication post 
@@ -394,7 +394,7 @@ library PostLib  {
         uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
             VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
-            (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers, postContainer.votedUsers.length);
+            (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
 
             int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
             if (changeUserRating > 0) {
@@ -505,7 +505,7 @@ library PostLib  {
 
         // change user rating considering reply rating
         VoteLib.StructRating memory typeRating = getTypesRating(postType);
-        (int32 positive, int32 negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers, replyContainer.votedUsers.length);
+        (int32 positive, int32 negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
         int32 changeUserRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
         if (changeUserRating > 0) {
             changeReplyAuthorRating += -changeUserRating;
@@ -659,7 +659,7 @@ library PostLib  {
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
     /// @param isUpvote Upvote or downvote
-    // TODO VoteDirection -> int8
+    // TODO fix convert voteDirection 
     function voteForumItem(
         PostCollection storage self,
         address userAddr,
@@ -674,21 +674,21 @@ library PostLib  {
         VoteDirection voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-            require(userAddr != commentContainer.info.author, "You can not vote for own comment.");
+            require(userAddr != commentContainer.info.author, "error_vote_comment");    //TODO unit test
             voteDirection = voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
 
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-            require(userAddr != replyContainer.info.author, "You can not vote for own reply.");
+            require(userAddr != replyContainer.info.author, "error_vote_reply");
             voteDirection = voteReply(self, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
 
 
         } else {
-            require(userAddr != postContainer.info.author, "You can not vote for own post.");
+            require(userAddr != postContainer.info.author, "error_vote_post");
             voteDirection = votePost(self, postContainer, userAddr, postType, isUpvote);
         }
 
-        emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
+        emit ForumItemVoted(userAddr, postId, replyId, commentId, int8(int256(uint256(voteDirection))));
     }
 
     // @notice Vote for post
@@ -1110,14 +1110,16 @@ library PostLib  {
         return statusHistory;
     }
 
-    // TODO: Add doc comment
+    /// @notice Get count upvotes and downvotes in item
+    /// @param historyVotes history votes
+    /// @param votedUsers Array voted users
     function getHistoryInformations(
         mapping(address => int256) storage historyVotes,
-        address[] storage votedUsers,
-        uint256 countVotedUsers
+        address[] storage votedUsers
     ) private view returns (int32, int32) {
         int32 positive;
         int32 negative;
+        uint256 countVotedUsers = votedUsers.length;
         for (uint256 i; i < countVotedUsers; i++) {
             if(historyVotes[votedUsers[i]] == 1) positive++;
             else if(historyVotes[votedUsers[i]] == -1) negative++;

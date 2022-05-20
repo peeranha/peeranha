@@ -605,4 +605,12 @@ library UserLib {
   function getStatusEnergy() internal pure returns (uint16) {
     return 1000;
   }
+
+  function getPeriodRewardShares(UserContext storage userContext, uint16 period) internal view returns(RewardLib.PeriodRewardShares memory) {
+    return userContext.periodRewardContainer.periodRewardShares[period];
+  }
+
+  function getUserRewardCommunities(UserContext storage userContext, address user, uint16 rewardPeriod) internal view returns(uint32[] memory) {
+    return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
+  }
 }
