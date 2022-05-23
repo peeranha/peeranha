@@ -493,16 +493,24 @@ library UserLib {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
     int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
         
-    // TODO: create a separate function that returns energy and min rating for an action
-    int16 ratingAllowed;
-    string memory message;
-    uint8 energy;
+    (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
+    require(userRating >= ratingAllowed, message);
+    reduceEnergy(user, energy);
+
+    return user;
+  }
+
+  function getRatingAndRatingForAction(
+    address actionCaller,
+    address dataUser,
+    Action action
+  ) private pure returns (int16 ratingAllowed, string memory message, uint8 energy) {
     if (action == Action.NONE) {
-      return user;
     } else if (action == Action.PublicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
+
     } else if (action == Action.PublicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
       message = "low_rating_reply";
@@ -543,8 +551,7 @@ library UserLib {
       message = "low_rating_vote_comment";
       energy = ENERGY_VOTE_COMMENT;
 
-    }
-     else if (action == Action.DownVotePost) {
+    } else if (action == Action.DownVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = DOWNVOTE_POST_ALLOWED;
       message = "low_rating_downvote_post";
@@ -566,24 +573,17 @@ library UserLib {
       message = "low_rating_mark_best";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
-    } else if (action == Action.UpdateProfile) { //userRating - always 0 (const)
+    } else if (action == Action.UpdateProfile) {
       energy = ENERGY_UPDATE_PROFILE;
 
-    } 
-    else if (action == Action.FollowCommunity) {
+    } else if (action == Action.FollowCommunity) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_follow_comm";
       energy = ENERGY_FOLLOW_COMMUNITY;
 
-    } 
-    else {
+    } else {
       revert("not_allowed_action");
     }
-
-    require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, energy);
-
-    return user;
   }
 
   function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    

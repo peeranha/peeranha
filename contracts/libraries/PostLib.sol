@@ -14,7 +14,11 @@ library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
-    enum VoteDirection { DownVote, CancelDownVote, UpVote, CancelUpVote }
+    int8 constant directionDownVote = -2;
+    int8 constant directionCancelDownVote = -1;
+    int8 constant directionUpVote = 1;
+    int8 constant directionCancelUpVote = 2;
+
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
 
@@ -659,7 +663,6 @@ library PostLib  {
     /// @param replyId Reply which will be change rating
     /// @param commentId Comment which will be change rating
     /// @param isUpvote Upvote or downvote
-    // TODO fix convert voteDirection 
     function voteForumItem(
         PostCollection storage self,
         address userAddr,
@@ -671,10 +674,10 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
-        VoteDirection voteDirection;
+        int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-            require(userAddr != commentContainer.info.author, "error_vote_comment");    //TODO unit test
+            require(userAddr != commentContainer.info.author, "error_vote_comment");
             voteDirection = voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
 
         } else if (replyId != 0) {
@@ -688,7 +691,7 @@ library PostLib  {
             voteDirection = votePost(self, postContainer, userAddr, postType, isUpvote);
         }
 
-        emit ForumItemVoted(userAddr, postId, replyId, commentId, int8(int256(uint256(voteDirection))));
+        emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
     }
 
     // @notice Vote for post
@@ -703,7 +706,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public returns (VoteDirection) {
+    ) public returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -723,14 +726,14 @@ library PostLib  {
         postContainer.info.rating += ratingChange;
         
         return isCancel ?
-                (ratingChange < 0 ?
-                    VoteDirection.CancelUpVote :
-                    VoteDirection.CancelDownVote 
-                ) :
-                (ratingChange > 0 ?
-                    VoteDirection.UpVote :
-                    VoteDirection.DownVote
-                );
+            (ratingChange < 0 ?
+                directionCancelDownVote :
+                directionDownVote 
+            ) :
+            (ratingChange > 0 ?
+                directionUpVote :
+                directionCancelUpVote
+            );
     }
  
     // @notice Vote for reply
@@ -746,7 +749,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public returns (VoteDirection) {
+    ) public returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -785,12 +788,12 @@ library PostLib  {
 
         return isCancel ?
             (ratingChange < 0 ?
-                VoteDirection.CancelUpVote :
-                VoteDirection.CancelDownVote 
+                directionCancelDownVote :
+                directionDownVote 
             ) :
             (ratingChange > 0 ?
-                VoteDirection.UpVote :
-                VoteDirection.DownVote
+                directionUpVote :
+                directionCancelUpVote
             );
     }
 
@@ -805,7 +808,7 @@ library PostLib  {
         uint32 communityId,
         address votedUser,
         bool isUpvote
-    ) private returns (VoteDirection) {
+    ) private returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -822,12 +825,12 @@ library PostLib  {
 
         return isCancel ?
             (ratingChange < 0 ?
-                VoteDirection.CancelUpVote :
-                VoteDirection.CancelDownVote 
+                directionCancelDownVote :
+                directionDownVote 
             ) :
             (ratingChange > 0 ?
-                VoteDirection.UpVote :
-                VoteDirection.DownVote
+                directionUpVote :
+                directionCancelUpVote
             );
     }
 

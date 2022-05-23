@@ -129,7 +129,7 @@ const createPeerenhaAndTokenContract = async function () {
         peeranhaCommunity: peeranhaCommunity,
         token: token,
         peeranhaNFT: peeranhaNFT,
-        accountDeployed: peeranhaContent.deployTransaction.from
+        accountDeployed: peeranhaContent.deployTransaction.from,
     }
 };
 
@@ -176,7 +176,7 @@ const getUsers = (hashes) => {
     })
 }
 
-const StartEnergy = 300;
+const StartEnergy = 1000;       // was 300
 const PeriodTime = 4000
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;

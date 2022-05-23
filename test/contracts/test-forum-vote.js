@@ -4092,6 +4092,7 @@ describe("Test vote", function () {
 	});
 
 	describe('Actions after change post type', function () {
+		
 		it("Test upVote post after expert -> common", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
@@ -5212,73 +5213,70 @@ describe("Test vote", function () {
 		});
 	});
 
-
-
-
-	
-
-	// it("Test upVote own comment", async function () {
-	// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-	// 	const signers = await ethers.getSigners();
-	// 	const hashContainer = getHashContainer();
-    //     const ipfsHashes = getHashesContainer(2);
-
-	// 	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-	// 	await peeranhaUser.createUser(hashContainer[1]);
-    //     await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-	// 	await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-	// 	await peeranhaContent.createComment(1, 0, hashContainer[1]);
-	// 	await expect(peeranhaContent.voteItem(1, 0, 1, 1)).to.be.revertedWith('error_vote_comment');
-	// });
-
-
-	// it("Test upVote expert comment", async function () {
-	// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-	// 	const signers = await ethers.getSigners();
-	// 	const hashContainer = getHashContainer();
-    //     const ipfsHashes = getHashesContainer(2);
-
-	// 	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-	// 	await peeranhaUser.addUserRating(signers[1].address, 25);
-	// 	await peeranhaUser.createUser(hashContainer[1]);
-    //     await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-	// 	await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-	// 	await peeranhaContent.createComment(1, 0, hashContainer[1])
-    //     await peeranhaContent.voteItem(1, 0, 1, 1);
-
-	// 	const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-	// 	const post = await peeranhaContent.getPost(1);
-	// 	await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
-	// 	await expect(post.rating).to.equal(1);
+	describe("Test upVote own comment", function () {
 		
-	// 	const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 1);
-	// 	await expect(statusHistory._hex).to.equal('0x01');
-	// });
+		it("Test upVote own expert comment", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
 
-	// it("Test downVote expert comment", async function () {
-	// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-	// 	const signers = await ethers.getSigners();
-	// 	const hashContainer = getHashContainer();
-    //     const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-	// 	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-	// 	await peeranhaUser.addUserRating(signers[1].address, 25);
-	// 	await peeranhaUser.createUser(hashContainer[1]);
-    //     await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createComment(1, 0, hashContainer[1]);
+			await expect(peeranhaContent.voteItem(1, 0, 1, 1)).to.be.revertedWith('error_vote_comment');
+		});
 
-	// 	await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-	// 	await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1])
-    //     await peeranhaContent.voteItem(1, 0, 1, 0);
+		it("Test upVote own common comment", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
 
-	// 	const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-	// 	const post = await peeranhaContent.getPost(1);
-	// 	// await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
-	// 	// await expect(post.rating).to.equal(1);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createComment(1, 0, hashContainer[1]);
+			await expect(peeranhaContent.voteItem(1, 0, 1, 1)).to.be.revertedWith('error_vote_comment');
+		});
+	});
+
+	describe("Test downVote own comment", function () {
 		
-	// 	const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 1);
-	// 	await expect(statusHistory._hex).to.equal('-0x01');
-	// });
+		it("Test downVote own expert comment", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createComment(1, 0, hashContainer[1]);
+			await expect(peeranhaContent.voteItem(1, 0, 1, 0)).to.be.revertedWith('error_vote_comment');
+		});
+
+		it("Test downVote own common comment", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createComment(1, 0, hashContainer[1]);
+			await expect(peeranhaContent.voteItem(1, 0, 1, 0)).to.be.revertedWith('error_vote_comment');
+		});
+	});
 });
 });

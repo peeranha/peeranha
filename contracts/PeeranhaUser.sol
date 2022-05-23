@@ -196,7 +196,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function giveAdminPermission(address userAddr) public {
         // revokeRole checks that sender is role admin
-        // TODO: verify there is unit test that only defaul admin can assign protocol admin
+        // TODO uniTest can do all action
         checkUser(userAddr);
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
@@ -213,7 +213,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) public {
         // revokeRole checks that sender is role admin
-        // TODO: verify there is unit test that only defaul admin can assign protocol admin
         revokeRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -375,7 +374,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user.
      * - Contract peeranhaContent must call action
      */
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
@@ -390,7 +388,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing users.
      * - Only contract peeranhaContent can call the action
      */
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
@@ -404,7 +401,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Only contract peeranhaContent and peeranhaCommunity can call the action
      */
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
     function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool createUserIfDoesNotExist) public override {
         require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
@@ -487,6 +483,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Get period length
      *
     */
+    // TODO deelete?
     function getContractInformation() external pure returns (uint256 startPeriodTime, uint256 periodLength) {
         return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
     }
