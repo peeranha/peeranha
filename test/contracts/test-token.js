@@ -33,7 +33,7 @@ describe("Test wallet", function () {
 
 				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
 				expect(periodRewardShares).to.equal(periodRewards);
-			});
+			}).retries(2);
 		}
 
 		for (const {actions, ratings, result, periodRewards} of twiceChengeRatingIn1Period) {

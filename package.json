@@ -12,6 +12,7 @@
     "prepare:test": "cp env-test.json env.json",
     "prepare:staging": "cp env-staging.json env.json",
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
+    "deploy-mennet:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network goerli scripts/deployMainnet.js && node scripts/change-env-values.js 0",
     "upgrade-user:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
     "upgrade-user:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
