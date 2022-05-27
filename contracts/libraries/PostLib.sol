@@ -14,10 +14,10 @@ library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
-    int8 constant directionDownVote = -2;
-    int8 constant directionCancelDownVote = -1;
-    int8 constant directionUpVote = 1;
-    int8 constant directionCancelUpVote = 2;
+    int8 constant DIRECTION_DOWNVOTE = -2;
+    int8 constant DIRECTION_CANCEL_DOWNVOTE = -1;
+    int8 constant DIRECTION_UPVOTE = 1;
+    int8 constant DIRECTION_CANCEL_UPVOTE = 2;
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -727,12 +727,12 @@ library PostLib  {
         
         return isCancel ?
             (ratingChange < 0 ?
-                directionCancelDownVote :
-                directionDownVote 
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
             ) :
             (ratingChange > 0 ?
-                directionUpVote :
-                directionCancelUpVote
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
             );
     }
  
@@ -788,12 +788,12 @@ library PostLib  {
 
         return isCancel ?
             (ratingChange < 0 ?
-                directionCancelDownVote :
-                directionDownVote 
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
             ) :
             (ratingChange > 0 ?
-                directionUpVote :
-                directionCancelUpVote
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
             );
     }
 
@@ -825,12 +825,12 @@ library PostLib  {
 
         return isCancel ?
             (ratingChange < 0 ?
-                directionCancelDownVote :
-                directionDownVote 
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
             ) :
             (ratingChange > 0 ?
-                directionUpVote :
-                directionCancelUpVote
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
             );
     }
 
