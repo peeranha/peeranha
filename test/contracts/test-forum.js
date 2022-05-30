@@ -259,18 +259,6 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('Users can not publish 2 replies for expert and common posts.');
 		});
-	
-		xit("Test double replies in tutorial post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-	
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
-			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
-		});
 
 		it("Test create reply on reply in expert post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -295,29 +283,16 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 			await expect(peeranhaContent.createReply(1, 1, hashContainer[1], false)).to.be.revertedWith('User is forbidden to reply on reply for Expert and Common type of posts');
 		});
-	
-		xit("Test create reply on reply in tutorial post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-	
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
-			await peeranhaContent.createReply(1, 1, hashContainer[1], false);
-		});
 
-		xit("Test create two official replies for the same post", async function () {
+		it("Test create two official replies for the same post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
-			await peeranha.setDelegateUser(peeranha.deployTransaction.from)
 			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranha.createUserByDelegate(signers[1].address, hashContainer[2]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranha.giveCommunityModeratorPermission(signers[1].address, 1);
+			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[2], true);

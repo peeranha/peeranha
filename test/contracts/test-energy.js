@@ -499,7 +499,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 0))
 		.to.be.revertedWith('low_energy');	
-	}).retries(2);
+	}).retries(15);
 
 	it("Test energy. Cancel upvote reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -913,7 +913,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 0);
 		await expect(peeranhaUser.connect(signers[1]).updateUser(hashContainer[0]))
 			.to.be.revertedWith('low_energy');
-	}).retries(3);
+	}).retries(15);
 
 	it("Test energy. MarkBestReply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
