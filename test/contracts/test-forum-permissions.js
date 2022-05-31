@@ -134,15 +134,15 @@ describe("Test permissions", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
 
             await peeranhaUser.addUserRating(signers[1].address, 1, 1);
             await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]);
@@ -166,13 +166,13 @@ describe("Test permissions", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low rating to upvote');
+            .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low rating to upvote');
+            .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
 

@@ -134,7 +134,7 @@ library PostLib  {
             true
         );
 
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(tags.length > 0, "At least one tag is required.");
 
         PostContainer storage post = self.posts[++self.postCount];
@@ -183,7 +183,7 @@ library PostLib  {
             remove: require((UserLib.hasRole(userContex ...
             20k in gas contract, +20 gas in common reply (-20 in official reply), but Avg gas -20 ?
          */
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(
             parentReplyId == 0 || 
             (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
@@ -244,7 +244,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         Comment storage comment;    ///
         uint8 commentId;            // struct ?
@@ -299,7 +299,7 @@ library PostLib  {
             UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // error for moderator (fix? will add new flag)
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
@@ -333,7 +333,7 @@ library PostLib  {
             UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
@@ -367,7 +367,7 @@ library PostLib  {
             UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)

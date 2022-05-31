@@ -4,6 +4,7 @@ const bs58 = require("bs58");
 const {
   IPFS_API_URL,
   USER_ADDRESS,
+  NFT_ADDRESS,
   TOKEN_ADDRESS,
   POSTLIB_ADDRESS,
   COMMUNITYLIB_ADDRESS,
@@ -87,8 +88,8 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
-  const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const peeranhaNFT = await PeeranhaNFT.attach(NFT_ADDRESS);
 
   // console.log("1")
   // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
@@ -101,7 +102,7 @@ async function main() {
   // console.log(JSON.stringify(result))
 
   // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  await peeranhaUser.addUserRating("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", 500, 1);
+  await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 1);
   // console.log(JSON.stringify(result))
 
   // await peeranha.updateUser(await getBytes32FromData(testAccount));

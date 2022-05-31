@@ -32,8 +32,6 @@ library AchievementLib {
   ) 
     internal 
   {
-    require(maxCount > 0, "invalid_max_count");
-
     AchievementLib.AchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[++achievementsContainer.achievementsCount];
     achievementConfig.maxCount = maxCount;
     achievementConfig.lowerBound = lowerBound;

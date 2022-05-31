@@ -21,6 +21,7 @@ library UserLib {
   int16 constant POST_QUESTION_ALLOWED = 0;
   int16 constant POST_REPLY_ALLOWED = 0;
   int16 constant POST_COMMENT_ALLOWED = 35;
+  int16 constant POST_OWN_COMMENT_ALLOWED = 0;
 
   int16 constant UPVOTE_POST_ALLOWED = 35;
   int16 constant DOWNVOTE_POST_ALLOWED = 100;
@@ -517,8 +518,12 @@ library UserLib {
       energy = ENERGY_POST_ANSWER;
 
     } else if (action == Action.PublicationComment) {
-      ratingAllowed = POST_COMMENT_ALLOWED;
-      message = "low_rating_own_post_comment";
+      if (actionCaller == dataUser) {
+        ratingAllowed = POST_OWN_COMMENT_ALLOWED;
+      } else {
+        ratingAllowed = POST_COMMENT_ALLOWED;
+      }
+      message = "low_rating_comment";
       energy = ENERGY_POST_COMMENT;
 
     } else if (action == Action.EditItem) {
@@ -530,13 +535,13 @@ library UserLib {
     } else if (action == Action.DeleteItem) {
       require(actionCaller == dataUser, "not_allowed_delete");
       ratingAllowed = 0;
-      message = "low_rating_delete_own"; // delete own item?
+      message = "low_rating_delete"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low rating to upvote";
+      message = "low_rating_upvote";       // TODO unittests
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.UpVoteReply) {
@@ -575,6 +580,7 @@ library UserLib {
 
     } else if (action == Action.UpdateProfile) {
       energy = ENERGY_UPDATE_PROFILE;
+      message = "low_update_profile";   //TODO uniTest
 
     } else if (action == Action.FollowCommunity) {
       ratingAllowed = MINIMUM_RATING;

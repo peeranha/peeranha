@@ -123,7 +123,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 			await expect(peeranhaContent.createPost(1, '0x0000000000000000000000000000000000000000000000000000000000000000', PostTypeEnum.ExpertPost, [1]))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
 		xit("Test create post by not registered user", async function () { // create user createIfDoesNotExist
@@ -159,9 +159,9 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 		});
 			
-	// });
+	});
 
-	// describe('Create reply', function () {
+	describe('Create reply', function () {
 
 		it("Test create reply", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -338,7 +338,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranhaContent.createReply(1, 0, '0x0000000000000000000000000000000000000000000000000000000000000000', false))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
 		xit("Test create reply by not registered user", async function () { // create user createIfDoesNotExist
@@ -478,7 +478,73 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 			
 			await expect(peeranhaContent.createComment(1, 1, '0x0000000000000000000000000000000000000000000000000000000000000000'))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
+		});
+
+		it("Test create comment to post by not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]))
+			.to.be.revertedWith('low_rating_comment');
+		});
+
+		it("Test create comment to own post by not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1])
+			
+			const comment = await peeranhaContent.getComment(1, 0, 1);
+			expect(comment.author).to.equal(signers[1].address);
+			expect(comment.isDeleted).to.equal(false);
+			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test create comment to reply by not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+			await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]))
+			.to.be.revertedWith('low_rating_comment');
+		});
+
+		it("Test create comment to own reply by not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[1]);
+
+			const comment = await peeranhaContent.getComment(1, 1, 1);
+			expect(comment.author).to.equal(signers[1].address);
+			expect(comment.isDeleted).to.equal(false);
+			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 	});
 
@@ -556,7 +622,7 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.editPost(1, '0x0000000000000000000000000000000000000000000000000000000000000000', []))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
 		it("Test edit post, without post", async function () {
@@ -612,7 +678,7 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.editReply(1, 1, '0x0000000000000000000000000000000000000000000000000000000000000000'))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 		
 		it("Test edit reply by not registered user", async function () {
@@ -726,7 +792,7 @@ describe("Test post", function () {
 			await peeranhaContent.createComment(1, 0, hashContainer[1]);
 
 			await expect(peeranhaContent.editComment(1, 0, 1, '0x0000000000000000000000000000000000000000000000000000000000000000'))
-			.to.be.revertedWith('Invalid ipfsHash.');
+			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
 		it("Test edit comment by not registered user", async function () {
