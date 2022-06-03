@@ -16,6 +16,7 @@
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
     "upgrade-user:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
     "post-action-mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
+    "post-error-action-mumbai": "npx hardhat run --network mumbai scripts/post-error-action.js",
     "set-delegate-user:test": "cp env-test.json env.json && npx hardhat run --network mumbai scripts/set-delegate-user.js",
     "set-delegate-user:staging": "cp env-staging.json env.json && npx hardhat run --network mumbai scripts/set-delegate-user.js",
     "init-nfts:test": "cp env-test.json env.json && npx hardhat run --network mumbai scripts/init-nfts.js",
