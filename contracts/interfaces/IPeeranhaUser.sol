@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0;
 import "../libraries/UserLib.sol";
+import "../libraries/RewardLib.sol";
 pragma abicoder v2;
 
 
