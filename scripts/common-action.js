@@ -49,7 +49,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Junior.svg`),
       name: "Don't call me Junior!",
-      description: "",
+      description: "NFT for achieving Junior status among the first",
       attributes: "",
     },
     {

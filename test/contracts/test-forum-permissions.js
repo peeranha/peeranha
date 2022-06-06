@@ -322,7 +322,7 @@ describe("Test permissions", function () {
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranhaContent.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
             .to.be.revertedWith("not_allowed_admin_or_comm_moderator");

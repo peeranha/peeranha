@@ -88,9 +88,18 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
-  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
-  const peeranhaNFT = await PeeranhaNFT.attach(NFT_ADDRESS);
 
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const peeranhaUser = await PeeranhaUser.attach("0x53fd32C7a2729BaABE3Ac930dE617eEB40ff65D5");
+
+  // const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  // const peeranhaNFT = await PeeranhaNFT.attach("0x7de0057aef43004CFF5B2D63a89Ab834a030f9F3");
+  // await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0x543230635B057332CF2335C16185923c3a3B316f", 30000001)
+
+  // const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+  // const peeranhaCommunity = await PeeranhaCommunity.attach("0x811ef13e798c16f55bf095255113aB3f0c9E1A55");
+
+  // console.log(await peeranhaNFT.tokenURI(1));
   // console.log("1")
   // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
   // console.log("2")
@@ -98,11 +107,14 @@ async function main() {
   // console.log("3")
 
   // console.log("Posting action");
-  // await peeranha.createUser(await getBytes32FromData(testAccount));
+  await peeranhaUser.createUser(await getBytes32FromData(testAccount));
+  // await initAchievement(peeranhaUser);
+  
   // console.log(JSON.stringify(result))
 
-  // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 1);
+  // await peeranhaCommunity.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
+  // await peeranhaUser.addUserRating("0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 5000, 1)
+  // await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 1);
   // console.log(JSON.stringify(result))
 
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
@@ -124,8 +136,8 @@ async function main() {
   // await peeranha.voteItem(1, 0, 3, true);
 }
 
-async function initAchievement(peeranha) {
-  for (const { maxCount, lowerBound, type, path } of achievements) {
+async function initAchievement(peeranhaUser) {
+  for (const { maxCount, lowerBound, type, path } of achievements("test")) {
     console.log(
       "Init achievement. Lower bound: " +
         lowerBound +
@@ -133,17 +145,19 @@ async function initAchievement(peeranha) {
         maxCount
     );
     const buffer = Buffer.from(path);
-    console.log(buffer);
 
-    const saveResult = await getIpfsApi().add(buffer);
-    const ipfsImage = await getBytes32FromData(saveResult);
+    const ipfsImage = await getIpfsApi().add(buffer);
     let nft = NFT;
-    nft.image = ipfsImage;
+    nft.image = "ipfs://" + ipfsImage.path;
 
-    await peeranha.configureNewAchievement(
+    console.log(nft);
+    const nftIPFS = "ipfs://" + await saveText(JSON.stringify(nft));
+    console.log(`NFt Ipfs ${nftIPFS}`)
+    
+    await peeranhaUser.configureNewAchievement(
       maxCount,
       lowerBound,
-      await getBytes32FromData(nft),
+      nftIPFS,
       type
     );
   }
