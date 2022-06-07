@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-interface IPeeranhaMainnetToken is IERC20Upgradeable {
+interface IPeeranhaEtherToken is IERC20Upgradeable {
     /**
      * @notice called by predicate contract to mint tokens while withdrawing
      * @dev Should be callable only by MintableERC20Predicate

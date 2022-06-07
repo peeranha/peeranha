@@ -90,7 +90,7 @@ async function getBytes32FromData(data) {
 async function main() {
 
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
-  const peeranhaUser = await PeeranhaUser.attach("0x53fd32C7a2729BaABE3Ac930dE617eEB40ff65D5");
+  const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   // const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   // const peeranhaNFT = await PeeranhaNFT.attach("0x7de0057aef43004CFF5B2D63a89Ab834a030f9F3");

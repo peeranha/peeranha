@@ -7,15 +7,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import "./base/NativeMetaTransaction.sol";
-import "./interfaces/IPeeranhaMainnetNFT.sol";
+import "./interfaces/IPeeranhaEtherNFT.sol";
 
-contract PeeranhaMainnetNFT is
+contract PeeranhaEtherNFT is
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     AccessControlUpgradeable,
     NativeMetaTransaction,
-    IPeeranhaMainnetNFT
+    IPeeranhaEtherNFT
 {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
     
@@ -37,12 +37,12 @@ contract PeeranhaMainnetNFT is
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable, IERC165Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
         return
-            interfaceId == type(IPeeranhaMainnetNFT).interfaceId ||
+            interfaceId == type(IPeeranhaEtherNFT).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
     /**
-     * @dev See {IPeeranhaMainnetNFT-mint}.
+     * @dev See {IPeeranhaEtherNFT-mint}.
      */
     function mint(address user, uint256 tokenId) external override onlyRole(PREDICATE_ROLE) {
         _mint(user, tokenId);
@@ -77,7 +77,7 @@ contract PeeranhaMainnetNFT is
     }
 
     /**
-     * @dev See {IPeeranhaMainnetNFT-mint}.
+     * @dev See {IPeeranhaEtherNFT-mint}.
      * 
      * If you're attempting to bring metadata associated with token
      * from L2 to L1, you must implement this method
@@ -90,7 +90,7 @@ contract PeeranhaMainnetNFT is
 
 
     /**
-     * @dev See {IPeeranhaMainnetNFT-exists}.
+     * @dev See {IPeeranhaEtherNFT-exists}.
      */
     function exists(uint256 tokenId) external view override returns (bool) {
         return _exists(tokenId);
