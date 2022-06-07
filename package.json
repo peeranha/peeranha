@@ -12,7 +12,9 @@
     "prepare:test": "cp env-test.json env.json",
     "prepare:staging": "cp env-staging.json env.json",
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
+    "deploy-mainnet:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network goerli scripts/deployMainnet.js && node scripts/change-env-values.js 0",
     "upgrade-user:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
+    "upgrade-content:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-content.js && node scripts/change-env-values.js 0",
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
     "upgrade-user:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
     "post-action-mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@apollo/client": "^3.5.10",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.4",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@openzeppelin/hardhat-upgrades": "^1.17.0",

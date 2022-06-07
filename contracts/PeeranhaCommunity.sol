@@ -36,7 +36,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public  {
         address msgSender = _msgSender();
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.admin, 0);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.Admin, 0);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
         peeranhaUser.initCommunityAdminPermission(msgSender, communityId);
     }
@@ -52,7 +52,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     function updateCommunity(uint32 communityId, bytes32 ipfsHash) public  {
         address msgSender = _msgSender();
         onlyExistingAndNotFrozenCommunity(communityId);
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.adminOrCommunityAdmin, communityId);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateCommunity(communityId, ipfsHash);
     }
 
@@ -67,7 +67,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     function freezeCommunity(uint32 communityId) public  {
         address msgSender = _msgSender();
         onlyExistingAndNotFrozenCommunity(communityId);
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.adminOrCommunityAdmin, communityId);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.freeze(communityId);
     }
 
@@ -81,7 +81,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function unfreezeCommunity(uint32 communityId) public  {
         address msgSender = _msgSender();
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.adminOrCommunityAdmin, communityId);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.unfreeze(communityId);
     }
 
@@ -96,7 +96,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     function createTag(uint32 communityId, bytes32 ipfsHash) public  { // community admin || global moderator
         onlyExistingAndNotFrozenCommunity(communityId);
         address msgSender = _msgSender();
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.adminOrCommunityAdmin, communityId);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.createTag(communityId, ipfsHash);
     }
 
@@ -111,7 +111,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) public  onlyExistingTag(tagId, communityId) {
         address msgSender = _msgSender();
-        peeranhaUser.checkHasRole(msgSender, UserLib.Permission.adminOrCommunityAdmin, communityId);
+        peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateTag(tagId, communityId, ipfsHash);
     }
 

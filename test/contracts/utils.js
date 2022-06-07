@@ -129,7 +129,7 @@ const createPeerenhaAndTokenContract = async function () {
         peeranhaCommunity: peeranhaCommunity,
         token: token,
         peeranhaNFT: peeranhaNFT,
-        accountDeployed: peeranhaContent.deployTransaction.from
+        accountDeployed: peeranhaContent.deployTransaction.from,
     }
 };
 
@@ -176,8 +176,8 @@ const getUsers = (hashes) => {
     })
 }
 
-const StartEnergy = 300;
-const PeriodTime = 4000
+const StartEnergy = 1000;       // was 300
+const PeriodTime = 5000;
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;
@@ -284,10 +284,9 @@ const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
                                                             // energy
 const energyDownVotePost = 5;
 const energyDownVoteReply = 3;
-const energyDownVoteComment = 2;
+const energyVoteComment = 1;
 const energyUpvotePost = 1;
 const energyUpvoteReply = 1;
-const energyUpvoteComment = 1;
 const energyPublicationPost = 10;
 const energyPublicationReply = 6;
 const energyPublicationComment = 4;
@@ -361,7 +360,7 @@ module.exports = {
     wait, getBalance, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
-    setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyDownVoteComment, energyUpvotePost, energyUpvoteReply, energyUpvoteComment,
+    setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,

@@ -15,6 +15,11 @@ library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
+    int8 constant DIRECTION_DOWNVOTE = -2;
+    int8 constant DIRECTION_CANCEL_DOWNVOTE = -1;
+    int8 constant DIRECTION_UPVOTE = 1;
+    int8 constant DIRECTION_CANCEL_UPVOTE = 2;
+
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
 
@@ -121,16 +126,16 @@ library PostLib  {
         self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
         
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
             communityId,
-            UserLib.Action.publicationPost,
-            UserLib.Permission.NONE,
+            UserLib.Action.PublicationPost,
+            UserLib.ActionRole.NONE,
             true
         );
 
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(tags.length > 0, "At least one tag is required.");
 
         PostContainer storage post = self.posts[++self.postCount];
@@ -162,24 +167,24 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial, "You can not publish replies in tutorial.");
 
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.publicationReply,
+            UserLib.Action.PublicationReply,
             parentReplyId == 0 && isOfficialReply ? 
-                UserLib.Permission.communityModerator :
-                UserLib.Permission.NONE,
+                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.NONE,
             true
         );
 
         /*  
             Check gas one more 
-            isOfficialReply ? UserLib.Action.publicationOfficialReply : UserLib.Action.publicationReply
+            isOfficialReply ? UserLib.Action.publicationOfficialReply : UserLib.Action.PublicationReply
             remove: require((UserLib.hasRole(userContex ...
             20k in gas contract, +20 gas in common reply (-20 in official reply), but Avg gas -20 ?
          */
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(
             parentReplyId == 0 || 
             (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
@@ -240,7 +245,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         Comment storage comment;    ///
         uint8 commentId;            // struct ?
@@ -256,12 +261,12 @@ library PostLib  {
             author = replyContainer.info.author;
         }
 
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             author,
             postContainer.info.communityId,
-            UserLib.Action.publicationComment,
-            UserLib.Permission.NONE,
+            UserLib.Action.PublicationComment,
+            UserLib.ActionRole.NONE,
             true
         );
 
@@ -287,15 +292,15 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
 
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.editItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.EditItem,
+            UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // error for moderator (fix? will add new flag)
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
@@ -321,15 +326,15 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.editItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.EditItem,
+            UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == replyContainer.info.author, "You can not edit this Reply. It is not your.");
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
@@ -355,15 +360,15 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.editItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.EditItem,
+            UserLib.ActionRole.NONE,
             false
         );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid ipfsHash.");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(userAddr == commentContainer.info.author, "You can not edit this comment. It is not your.");
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
@@ -382,24 +387,28 @@ library PostLib  {
         uint256 postId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.deleteItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.DeleteItem,
+            UserLib.ActionRole.NONE,
             false
         );
-    
-        // DownvoteExpertPost = -1;
-        // UpvotedExpertPost = 5;
-        // + 1 upvote and 1 down vote -> postRating = 0 but userRating +4 (need fix?)
+
         uint256 time = CommonLib.getTimestamp();
-        if (postContainer.info.rating > 0 && (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author)) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author,
-                -VoteLib.getUserRatingChange(   postContainer.info.postType, 
-                                                VoteLib.ResourceAction.Upvoted,
-                                                TypeContent.Post) * postContainer.info.rating, postContainer.info.communityId);
+        if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
+            VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
+            (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+
+            int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+            if (changeUserRating > 0) {
+                self.peeranhaUser.updateUserRating(
+                    postContainer.info.author,
+                    -changeUserRating,
+                    postContainer.info.communityId
+                );
+            }
         }
         if (postContainer.info.bestReply != 0) {
             self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
@@ -433,17 +442,17 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             replyContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.deleteItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.DeleteItem,
+            UserLib.ActionRole.NONE,
             false
         );
         ///
         // bug
-        // checkPermission has check "require(actionCaller == dataUser, "not_allowed_delete");"
+        // checkActionRole has check "require(actionCaller == dataUser, "not_allowed_delete");"
         // behind this check is "if actionCaller == moderator -> return"
         // in this step can be only a moderator or reply's owner
         // a reply owner can not delete best reply, but a moderator can
@@ -488,9 +497,6 @@ library PostLib  {
 
         int32 changeReplyAuthorRating;
         if (replyContainer.info.rating >= 0) {
-            changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction( postType,
-                                                                            VoteLib.ResourceAction.Upvoted) * replyContainer.info.rating;
-
             if (replyContainer.info.isFirstReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
@@ -500,6 +506,14 @@ library PostLib  {
             if (isBestReply && postType != PostType.Tutorial) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
+        }
+
+        // change user rating considering reply rating
+        VoteLib.StructRating memory typeRating = getTypesRating(postType);
+        (int32 positive, int32 negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
+        int32 changeUserRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+        if (changeUserRating > 0) {
+            changeReplyAuthorRating += -changeUserRating;
         }
 
         if (changeReplyAuthorRating != 0) {
@@ -526,12 +540,12 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             commentContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.deleteItem,
-            UserLib.Permission.NONE,
+            UserLib.Action.DeleteItem,
+            UserLib.ActionRole.NONE,
             false
         );
 
@@ -557,12 +571,12 @@ library PostLib  {
     ) public {
         // check + energy?
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.Permission.communityModerator,
+            UserLib.ActionRole.CommunityModerator,
             false
         );
 
@@ -604,12 +618,12 @@ library PostLib  {
             updateRatingForBestReply(self, postContainer.info.postType, userAddr, replyContainer.info.author, true, postContainer.info.communityId);
             postContainer.info.bestReply = replyId;
         }
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             postContainer.info.author,
             postContainer.info.communityId,
-            UserLib.Action.bestReply,
-            UserLib.Permission.NONE,
+            UserLib.Action.BestReply,
+            UserLib.ActionRole.NONE,
             false
         );  // unit test (forum)
 
@@ -664,18 +678,18 @@ library PostLib  {
         int8 voteDirection;
         if (commentId != 0) {
             CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
-            require(userAddr != commentContainer.info.author, "You can not vote for own comment.");
-            voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
+            require(userAddr != commentContainer.info.author, "error_vote_comment");
+            voteDirection = voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
 
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-            require(userAddr != replyContainer.info.author, "You can not vote for own reply.");
-            voteReply(self, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
+            require(userAddr != replyContainer.info.author, "error_vote_reply");
+            voteDirection = voteReply(self, replyContainer, postContainer.info.communityId, userAddr, postType, isUpvote);
 
 
         } else {
-            require(userAddr != postContainer.info.author, "You can not vote for own post.");
-            votePost(self, postContainer, userAddr, postType, isUpvote);
+            require(userAddr != postContainer.info.author, "error_vote_post");
+            voteDirection = votePost(self, postContainer, userAddr, postType, isUpvote);
         }
 
         emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
@@ -693,24 +707,34 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public {
+    ) public returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             votedUser,
             postContainer.info.author,
             postContainer.info.communityId,
             isCancel ?
-                UserLib.Action.cancelVote :
+                UserLib.Action.CancelVote :
                 (ratingChange > 0 ?
-                    UserLib.Action.upVotePost :
-                    UserLib.Action.downVotePost
+                    UserLib.Action.UpVotePost :
+                    UserLib.Action.DownVotePost
                 ),
-            UserLib.Permission.NONE,
+            UserLib.ActionRole.NONE,
             false
         ); 
 
         vote(self, postContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Post, postContainer.info.communityId);
         postContainer.info.rating += ratingChange;
+        
+        return isCancel ?
+            (ratingChange < 0 ?
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
+            ) :
+            (ratingChange > 0 ?
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
+            );
     }
  
     // @notice Vote for reply
@@ -726,23 +750,21 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public {
+    ) public returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             votedUser,
             replyContainer.info.author,
             communityId,
             isCancel ?
-                UserLib.Action.cancelVote :
+                UserLib.Action.CancelVote :
                 (ratingChange > 0 ?
-                    UserLib.Action.upVoteReply :
-                    UserLib.Action.downVoteReply
+                    UserLib.Action.UpVoteReply :
+                    UserLib.Action.DownVoteReply
                 ),
-            UserLib.Permission.NONE,
+            UserLib.ActionRole.NONE,
             false
         ); 
-
-        if (postType == PostType.Tutorial) return;
 
         vote(self, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply, communityId);
         int32 oldRating = replyContainer.info.rating;
@@ -764,6 +786,16 @@ library PostLib  {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
             }
         }
+
+        return isCancel ?
+            (ratingChange < 0 ?
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
+            ) :
+            (ratingChange > 0 ?
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
+            );
     }
 
     // @notice Vote for comment
@@ -777,20 +809,30 @@ library PostLib  {
         uint32 communityId,
         address votedUser,
         bool isUpvote
-    ) private {
+    ) private returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, commentContainer.historyVotes, isUpvote, commentContainer.votedUsers);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             votedUser,
             commentContainer.info.author,
             communityId,
             isCancel ? 
-                UserLib.Action.cancelVote :
-                UserLib.Action.voteComment,
-            UserLib.Permission.NONE,
+                UserLib.Action.CancelVote :
+                UserLib.Action.VoteComment,
+            UserLib.ActionRole.NONE,
             false
         );
 
         commentContainer.info.rating += ratingChange;
+
+        return isCancel ?
+            (ratingChange < 0 ?
+                DIRECTION_CANCEL_DOWNVOTE :
+                DIRECTION_DOWNVOTE 
+            ) :
+            (ratingChange > 0 ?
+                DIRECTION_UPVOTE :
+                DIRECTION_CANCEL_UPVOTE
+            );
     }
 
     // @notice Сount users' rating after voting per a reply or post
@@ -854,12 +896,12 @@ library PostLib  {
         PostType newPostType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaUser.checkPermission(
+        self.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.Permission.adminOrCommunityModerator,       // will chech
+            UserLib.ActionRole.AdminOrCommunityModerator,       // will chech
             false
         );
         require(newPostType != postContainer.info.postType, "This post type is already set.");
@@ -918,8 +960,10 @@ library PostLib  {
             return VoteLib.getExpertRating();
         else if (postType == PostType.CommonPost)
             return VoteLib.getCommonRating();
+        else if (postType == PostType.Tutorial)
+            return VoteLib.getTutorialRating();
         
-        revert("At this release you can not publish tutorial.");
+        revert("invalid_post_type");
     }
 
     /// @notice Return post
@@ -1068,5 +1112,22 @@ library PostLib  {
         }
 
         return statusHistory;
+    }
+
+    /// @notice Get count upvotes and downvotes in item
+    /// @param historyVotes history votes
+    /// @param votedUsers Array voted users
+    function getHistoryInformations(
+        mapping(address => int256) storage historyVotes,
+        address[] storage votedUsers
+    ) private view returns (int32, int32) {
+        int32 positive;
+        int32 negative;
+        uint256 countVotedUsers = votedUsers.length;
+        for (uint256 i; i < countVotedUsers; i++) {
+            if(historyVotes[votedUsers[i]] == 1) positive++;
+            else if(historyVotes[votedUsers[i]] == -1) negative++;
+        }
+        return (positive, negative);
     }
 }

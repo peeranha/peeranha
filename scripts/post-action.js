@@ -3,7 +3,8 @@ const { create } = require("ipfs-http-client");
 const bs58 = require("bs58");
 const {
   IPFS_API_URL,
-  PEERANHA_ADDRESS,
+  USER_ADDRESS,
+  NFT_ADDRESS,
   TOKEN_ADDRESS,
   POSTLIB_ADDRESS,
   COMMUNITYLIB_ADDRESS,
@@ -87,26 +88,21 @@ async function getBytes32FromData(data) {
 }
 
 async function main() {
-  const Peeranha = await ethers.getContractFactory("Peeranha", {
-    libraries: {
-      PostLib: POSTLIB_ADDRESS,
-      CommunityLib: COMMUNITYLIB_ADDRESS
-    }
-  });
-  const peeranha = await Peeranha.attach(PEERANHA_ADDRESS);
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const peeranhaNFT = await PeeranhaNFT.attach(NFT_ADDRESS);
 
-  console.log("1")
-  peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
-  console.log("2")
-  peeranha.giveCommunityModeratorPermission("0xc4ed6fc2e633430b4b982a8b3baa6fc8c62a037e", 1)
-  console.log("3")
+  // console.log("1")
+  // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
+  // console.log("2")
+  // peeranha.giveCommunityModeratorPermission("0xc4ed6fc2e633430b4b982a8b3baa6fc8c62a037e", 1)
+  // console.log("3")
 
   // console.log("Posting action");
   // await peeranha.createUser(await getBytes32FromData(testAccount));
   // console.log(JSON.stringify(result))
 
   // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  // await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
+  await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 1);
   // console.log(JSON.stringify(result))
 
   // await peeranha.updateUser(await getBytes32FromData(testAccount));
