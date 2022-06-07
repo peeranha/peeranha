@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./VoteLib.sol";
 import "./UserLib.sol";
+import "./CommonLib.sol";
 import "./AchievementLib.sol";
 import "../interfaces/IPeeranhaUser.sol";
 import "../interfaces/IPeeranhaCommunity.sol";
