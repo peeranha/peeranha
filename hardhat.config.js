@@ -1,10 +1,11 @@
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
+require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
 
-const { INFURA_API_KEY, ADMIN_PRIVATE_KEY } = require('./secrets.json');
+const { INFURA_API_KEY, ADMIN_PRIVATE_KEY, MUMBAI_API_KEY, GOERLI_API_KEY } = require('./secrets.json');
 
 
 /**
@@ -32,6 +33,12 @@ module.exports = {
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 8000000000
+    }
+  },
+  etherscan: {
+    apiKey: {
+      polygonMumbai: MUMBAI_API_KEY,
+      goerli: GOERLI_API_KEY
     }
   }
 };

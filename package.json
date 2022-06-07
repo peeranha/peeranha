@@ -22,7 +22,9 @@
     "set-delegate-user:staging": "cp env-staging.json env.json && npx hardhat run --network mumbai scripts/set-delegate-user.js",
     "init-nfts:test": "cp env-test.json env.json && npx hardhat run --network mumbai scripts/init-nfts.js",
     "init-nfts:staging": "cp env-staging.json env.json && npx hardhat run --network mumbai scripts/init-nfts.js",
-    "upload-forum-data": "npx hardhat run --network mumbai scripts/upload-forum-data.js"
+    "upload-forum-data": "npx hardhat run --network mumbai scripts/upload-forum-data.js",
+    "verify-mumbai": "npx hardhat verify 0xE61d3E082e416F9a2e3398E97A41ec3F26a6b6A3 --network mumbai",
+    "verify-goerli": "npx hardhat verify 0xE61d3E082e416F9a2e3398E97A41ec3F26a6b6A3 --network goerli"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@apollo/client": "^3.5.10",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.4",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@openzeppelin/hardhat-upgrades": "^1.17.0",
