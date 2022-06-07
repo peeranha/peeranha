@@ -79,7 +79,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       uint16 lastStakePeriod = stakeUserContainer.stakeChangePeriods[stakeUserContainer.stakeChangePeriods.length - 1];
       TokenLib.UserStake storage userStake = stakeUserContainer.userStake[lastStakePeriod];
       stakedToken = userStake.stakedAmount;
-      if (lastStakePeriod == period) { // unitTest
+      if (lastStakePeriod == period) { // TODO: add unitTest
         stakedToken += userStake.changedStake;
       }
     }
@@ -137,6 +137,9 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   function setStake(address user, uint256 stakeTokens) external {
     require(msg.sender == user, "get_reward_security");  // unitTest
     require(stakeTokens <= balanceOf(user), "wrong_stake");
+    // TODO: getPeriod always used with call CommonLib.getTimestamp() for arument. 
+    // Move that call to getPeriod and call without arguments
+
     uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
 
@@ -159,14 +162,16 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       }
 
       uint256 lastUserStakeAmount = stakeUserContainer.userStake[lastStakePeriod].stakedAmount;
-      if (lastUserStakeAmount > stakeTokens) {
-        stakeTotal.totalStakedAmount -= lastUserStakeAmount - stakeTokens;
-        if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
-        stakeUserContainer.userStake[nextPeriod].changedStake = lastUserStakeAmount - stakeTokens;
+      uint256 stakeChange = stakeTokens - lastUserStakeAmount;
+      stakeTotal.totalStakedAmount += stakeChange;
+      
+      require(stakeTokens > 0 || lastUserStakeAmount > 0, "invalid_zero_stake");
+      if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
+      if (lastUserStakeAmount == 0) stakeTotal.stakingUsersCount++;
 
-      } else {
-        stakeTotal.totalStakedAmount += stakeTokens - lastUserStakeAmount;
-        if (lastUserStakeAmount == 0) stakeTotal.stakingUsersCount++;
+      // Why set only here?
+      if (lastUserStakeAmount > stakeTokens) {
+        stakeUserContainer.userStake[nextPeriod].changedStake = lastUserStakeAmount - stakeTokens;
       }
       stakeUserContainer.userStake[nextPeriod].stakedAmount = stakeTokens;
 

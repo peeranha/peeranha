@@ -15,6 +15,7 @@ import "./interfaces/IPeeranhaUser.sol";
 
 
 contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+    // TODO: This is still not used
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
     using AchievementLib for AchievementLib.AchievementsContainer;
@@ -196,7 +197,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function giveAdminPermission(address userAddr) public {
         // revokeRole checks that sender is role admin
-        // TODO uniTest can do all action
+        // TODO: uniTest can do all action
         checkUser(userAddr);
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
@@ -346,6 +347,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
+    
+    // TODO: Why is it commented? Remove this code if not needed.
     /**
      * @dev Get information about user rewards. (Rating to reward and penalty)
      *
@@ -358,6 +361,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
     }*/
 
+    // TODO: Why is it commented? Remove this code if not needed.
     /**
      * @dev Get information abour sum rating to reward all users
      */
@@ -483,7 +487,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Get period length
      *
     */
-    // TODO deelete?
     function getContractInformation() external pure returns (uint256 startPeriodTime, uint256 periodLength) {
         return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
     }
