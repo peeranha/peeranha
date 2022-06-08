@@ -71,4 +71,8 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   function getAchievementsNFTConfig(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {
     return achievementsNFTContainer.achievementsNFTConfigs[achievementId];
   }
+
+  function getVersion() public pure returns (uint256) {
+      return 1;
+  }
 }
