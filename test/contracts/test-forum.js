@@ -1088,6 +1088,26 @@ describe("Test post", function () {
 			expect(reply.isDeleted).to.equal(true);
 		});
 
+		it("Test delete accepted reply by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.giveCommunityAdminPermission(signers[2].address, 1);
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).changeStatusBestReply(1, 1);
+			await peeranhaContent.connect(signers[2]).deleteReply(1, 1);
+
+			const reply = await peeranhaContent.getReply(1, 1);
+			expect(reply.isDeleted).to.equal(true);
+		});
+
 		it("Test delete reply, without post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
