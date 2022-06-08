@@ -15,6 +15,110 @@ const {
 ///
 
 describe("Test permissions", function () {
+    describe("Test admin role", function () {
+		it("Test give admin permission", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+            const hashContainer = getHashContainer();
+            const signers = await ethers.getSigners();
+            const ipfsHashes = getHashesContainer(2);
+            await peeranhaUser.createUser(hashContainer[1]);
+            await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
+            await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+            
+            await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+            
+            await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
+            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+
+            await peeranhaUser.giveAdminPermission(signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
+        });
+
+        it("Test revoke admin permission", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+            const hashContainer = getHashContainer();
+            const signers = await ethers.getSigners();
+            const ipfsHashes = getHashesContainer(2);
+            await peeranhaUser.createUser(hashContainer[1]);
+            await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
+            await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+            
+            await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+            
+            await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
+            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+
+            await peeranhaUser.giveAdminPermission(signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
+            
+            await peeranhaUser.revokeAdminPermission(signers[1].address);
+        });
+    });
+
+    describe("Test call action control", function () {
+        it("Test call updateUserRating", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaContentAddress, accountDeployed} = await createPeerenhaAndTokenContract();
+            const hashContainer = getHashContainer();
+            const signers = await ethers.getSigners();
+            await peeranhaUser.createUser(hashContainer[1]);
+            await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+            await expect(peeranhaUser.updateUserRating(peeranhaUser.deployTransaction.from, 5, 1))
+            .to.be.revertedWith("internal_call_unauthorized");
+            await expect(peeranhaUser.connect(signers[1]).updateUserRating(peeranhaUser.deployTransaction.from, 5, 1))
+            .to.be.revertedWith("internal_call_unauthorized");
+        });
+
+        it("Test call updateUsersRating", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaContentAddress, accountDeployed } = await createPeerenhaAndTokenContract();
+            const hashContainer = getHashContainer();
+            const signers = await ethers.getSigners();
+            await peeranhaUser.createUser(hashContainer[1]);
+            await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+            const usersRating = [{
+                user: signers[1].address,
+                rating: 5
+            }]
+            
+            await expect(peeranhaUser.updateUsersRating(usersRating, 1))
+            .to.be.revertedWith("internal_call_unauthorized");
+            await expect(peeranhaUser.connect(signers[1]).updateUsersRating(usersRating, 1))
+            .to.be.revertedWith("internal_call_unauthorized");
+        });
+
+        it("Test call checkActionRole", async function () {
+            const { peeranhaContent, peeranhaCommunity, peeranhaUser, peeranhaContentAddress, accountDeployed } = await createPeerenhaAndTokenContract();
+            const hashContainer = getHashContainer();
+            const signers = await ethers.getSigners();
+            const ipfsHashes = getHashesContainer(2);
+            await peeranhaUser.createUser(hashContainer[1]);
+            await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+            await expect(peeranhaUser.checkActionRole(signers[1].address, signers[1].address, 1, 1, 1, false))
+            .to.be.revertedWith("internal_call_unauthorized");
+            await expect(peeranhaUser.connect(signers[1]).checkActionRole(signers[1].address, signers[1].address, 1, 1, 1, false))
+            .to.be.revertedWith("internal_call_unauthorized");
+        });
+    });
+
     describe("Common user", function () {
 		it("Test post comment by common user", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -30,15 +134,15 @@ describe("Test permissions", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
             await expect(peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[0]))
-            .to.be.revertedWith('low_rating_own_post_comment');
+            .to.be.revertedWith('low_rating_comment');
 
             await peeranhaUser.addUserRating(signers[1].address, 1, 1);
             await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[0]);
@@ -62,13 +166,13 @@ describe("Test permissions", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low rating to upvote');
+            .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low rating to upvote');
+            .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
 

@@ -15,10 +15,9 @@ import "./interfaces/IPeeranhaUser.sol";
 
 
 contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
-    // TODO: Actually use usings or remove
+    // TODO: This is still not used
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
-    using UserLib for UserLib.User;
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
@@ -71,8 +70,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user and valid period.
      */
     function getUserRewardCommunities(address user, uint16 rewardPeriod) public override view returns(uint32[] memory) {
-        // TODO: add function for that to UserLib and call it from here
-        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
+        return UserLib.getUserRewardCommunities(userContext, user, rewardPeriod);
     }
 
     /**
@@ -83,8 +81,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be a valid period.
      */
     function getPeriodRewardShares(uint16 period) public view override returns(RewardLib.PeriodRewardShares memory) {
-        // TODO: add function for that to UserLib and call it from here
-        return userContext.periodRewardContainer.periodRewardShares[period];
+        return UserLib.getPeriodRewardShares(userContext, period);
     }
 
     /**
@@ -199,8 +196,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveAdminPermission(address userAddr) public {
-        // grantRole checks that sender is role admin
-        // TODO: verify there is unit test that only defaul admin can assign protocol admin
+        // revokeRole checks that sender is role admin
+        // TODO: uniTest can do all action
         checkUser(userAddr);
         grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
@@ -217,7 +214,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      //should do something with AccessControlUpgradeable(revoke only for default admin)
     function revokeAdminPermission(address userAddr) public {
         // revokeRole checks that sender is role admin
-        // TODO: verify there is unit test that only defaul admin can assign protocol admin
         revokeRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
@@ -256,7 +252,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
@@ -274,7 +270,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.Permission.communityAdmin, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.CommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -289,7 +285,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityAdminPermission(address userAddr, uint32 communityId) public {
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.Permission.admin, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -300,15 +296,21 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Sender must be community or global administrator.
      * - Must be an existing community.
-     * - Must be an existing user. 
+     * - Must be an existing user.
      */
     function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) public {
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.Permission.adminOrCommunityAdmin, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Create new achievement.
+     *
+     * Requirements:
+     *
+     * - Only admin can call the action.
+     */
     function configureNewAchievement(
         uint64 maxCount,
         int64 lowerBound,
@@ -317,50 +319,93 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     )   
         external
     {
-        checkHasRole(_msgSender(), UserLib.Permission.admin, 0);
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Get information about achievement.
+     *
+     * Requirements:
+     *
+     * - Must be an existing achievement.
+     */
     function getAchievementConfig(uint64 achievementId) public view returns (AchievementLib.AchievementConfig memory) {
         return userContext.achievementsContainer.achievementsConfigs[achievementId];
     }
 
-    // TODO: Add doc comment
+    /**
+     * @dev Get user reward.
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user.
+     */
     function getRatingToReward(address user, uint16 rewardPeriod, uint32 communityId) public view override returns(int32) {
         RewardLib.PeriodRating memory periodRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-        return CommonLib.toInt32FromUint32(periodRating.ratingToReward) - CommonLib.toInt32FromUint32(periodRating.penalty);
+        return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
-    // only unitTest
-    // TODO: Add comment
-    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
-        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }
-
-    // only unitTest
-    // TODO: Add comment
-    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
-        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
-    }
     
-    // TODO: Add doc comment
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
+    // TODO: Why is it commented? Remove this code if not needed.
+    /**
+     * @dev Get information about user rewards. (Rating to reward and penalty)
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
+        return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
+    }*/
+
+    // TODO: Why is it commented? Remove this code if not needed.
+    /**
+     * @dev Get information abour sum rating to reward all users
+     */
+    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
+        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
+    }*/
+    
+    /**
+     * @dev Change user rating
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing user.
+     * - Contract peeranhaContent must call action
+     */
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
     }
 
-    // TODO: Add doc comment
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
+    /**
+     * @dev Change users rating
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Must be an existing users.
+     * - Only contract peeranhaContent can call the action
+     */
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUsersRating(userContext, usersRating, communityId);
     }
 
-    // TODO: Add doc comment
-    // TODO: Add unit test to makes sure that no one can call this action except our contracts
-    function checkPermission(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.Permission permission, bool createUserIfDoesNotExist) public override {
+    /**
+     * @dev Check the role/energy/rating of the user to perform some action
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Only contract peeranhaContent and peeranhaCommunity can call the action
+     */
+    function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool createUserIfDoesNotExist) public override {
         require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
@@ -370,7 +415,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             return;
         }
                 
-        checkHasRole(actionCaller, permission, communityId);
+        checkHasRole(actionCaller, actionRole, communityId);
         UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
     }
 
@@ -378,28 +423,28 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
 
-    function checkHasRole(address actionCaller, UserLib.Permission permission, uint32 communityId) public override view {
-        if (permission == UserLib.Permission.NONE) {
+    function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
+        if (actionRole == UserLib.ActionRole.NONE) {
             return;
-        } else if (permission == UserLib.Permission.admin) {
+        } else if (actionRole == UserLib.ActionRole.Admin) {
             require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller), 
                 "not_allowed_not_admin");
         
-        } else if (permission == UserLib.Permission.adminOrCommunityModerator) {
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator) {
             require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller) ||
                 (hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
                 "not_allowed_admin_or_comm_moderator");
 
-        } else if (permission == UserLib.Permission.adminOrCommunityAdmin) {
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin) {
             require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller) || 
                 (hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
                 "not_allowed_admin_or_comm_admin");
 
-        } else if (permission == UserLib.Permission.communityAdmin) {
+        } else if (actionRole == UserLib.ActionRole.CommunityAdmin) {
             require((hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
                 "not_allowed_not_comm_admin");
 
-        } else if (permission == UserLib.Permission.communityModerator) {
+        } else if (actionRole == UserLib.ActionRole.CommunityModerator) {
             require((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
                 "not_allowed_not_comm_moderator");
         }
@@ -458,5 +503,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     */
     function getPeriod() external view returns (uint16) {
         return RewardLib.getPeriod(CommonLib.getTimestamp());
+    }
+    
+    function getVersion() public pure returns (uint256) {
+        return 1;
     }
 }

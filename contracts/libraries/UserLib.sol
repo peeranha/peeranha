@@ -21,6 +21,7 @@ library UserLib {
   int16 constant POST_QUESTION_ALLOWED = 0;
   int16 constant POST_REPLY_ALLOWED = 0;
   int16 constant POST_COMMENT_ALLOWED = 35;
+  int16 constant POST_OWN_COMMENT_ALLOWED = 0;
 
   int16 constant UPVOTE_POST_ALLOWED = 35;
   int16 constant DOWNVOTE_POST_ALLOWED = 100;
@@ -112,35 +113,31 @@ library UserLib {
     address delegateUser;
   }
 
-  // TODO: Rename enum memers to begin with capital
   enum Action {
     NONE,
-    publicationPost,
-    publicationReply,
-    publicationComment,
-    editItem,
-    deleteItem,
-    upVotePost,
-    downVotePost,
-    upVoteReply,
-    downVoteReply,
-    voteComment,
-    cancelVote,
-    officialReply,
-    bestReply,
-    updateProfile,
-    followCommunity
+    PublicationPost,
+    PublicationReply,
+    PublicationComment,
+    EditItem,
+    DeleteItem,
+    UpVotePost,
+    DownVotePost,
+    UpVoteReply,
+    DownVoteReply,
+    VoteComment,
+    CancelVote,
+    BestReply,
+    UpdateProfile,
+    FollowCommunity
   }
 
-  // TODO: Rename enum memers to begin with capital and use camel case
-  // TODO: Rename enum to ActionRole
-  enum Permission {
+  enum ActionRole {
     NONE,
-    admin,
-    adminOrCommunityModerator,
-    adminOrCommunityAdmin,
-    communityAdmin,
-    communityModerator
+    Admin,
+    AdminOrCommunityModerator,
+    AdminOrCommunityAdmin,
+    CommunityAdmin,
+    CommunityModerator
   }
 
   event UserCreated(address indexed userAddress);
@@ -196,7 +193,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.updateProfile
+      Action.UpdateProfile
     );
     user.ipfsDoc.hash = ipfsHash;
 
@@ -217,7 +214,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.followCommunity
+      Action.FollowCommunity
     );
 
     bool isAdded;
@@ -249,7 +246,7 @@ library UserLib {
       userAddress,
       userAddress,
       0,
-      Action.followCommunity
+      Action.FollowCommunity
     );
 
     for (uint i; i < user.followedCommunities.length; i++) {
@@ -375,31 +372,31 @@ library UserLib {
       
       if (previousPeriod != currentPeriod - 1) {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = rating + CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+          dataUpdateUserRatingCurrentPeriod.changeRating = rating + CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
         } else {
           dataUpdateUserRatingCurrentPeriod.changeRating = rating;
         }
       } else {
         if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-          dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+          dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
         int32 differentRatingPreviousPeriod; // name
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
-            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
               dataUpdateUserRatingCurrentPeriod.changeRating += rating;
             }
           } else {
-            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty);
+              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
               dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
             } else {
               dataUpdateUserRatingPreviousPeriod.changeRating = rating;
@@ -407,12 +404,12 @@ library UserLib {
           }
         } else if (rating < 0 && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
 
-          differentRatingCurrentPeriod = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) - rating;   // penalty is always positive, we need add rating to penalty
-          if (differentRatingCurrentPeriod > CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward)) {
-            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
+          differentRatingCurrentPeriod = CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.penalty) - rating;   // penalty is always positive, we need add rating to penalty
+          if (differentRatingCurrentPeriod > CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.ratingToReward)) {
+            dataUpdateUserRatingCurrentPeriod.changeRating -= CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.penalty);  // - current ratingToReward
             dataUpdateUserRatingPreviousPeriod.changeRating = rating - dataUpdateUserRatingCurrentPeriod.changeRating;                                       // + previous penalty
-            if (CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) < CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - dataUpdateUserRatingPreviousPeriod.changeRating) {
-              int32 extraPenalty = CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - dataUpdateUserRatingPreviousPeriod.changeRating;
+            if (CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) < CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty) - dataUpdateUserRatingPreviousPeriod.changeRating) {
+              int32 extraPenalty = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - dataUpdateUserRatingPreviousPeriod.changeRating;
               dataUpdateUserRatingPreviousPeriod.changeRating += extraPenalty;  // - extra previous penalty
               dataUpdateUserRatingCurrentPeriod.changeRating -= extraPenalty;   // + extra current penalty
             }
@@ -429,7 +426,7 @@ library UserLib {
         if (dataUpdateUserRatingPreviousPeriod.changeRating > 0) previousPeriodRating.penalty -= CommonLib.toUInt32FromInt32(dataUpdateUserRatingPreviousPeriod.changeRating);
         else previousPeriodRating.penalty += CommonLib.toUInt32FromInt32(-dataUpdateUserRatingPreviousPeriod.changeRating);
 
-        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingPreviousPeriod.penalty) + dataUpdateUserRatingPreviousPeriod.changeRating);
+        dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty), CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty) + dataUpdateUserRatingPreviousPeriod.changeRating);
         if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange > 0) {
           userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
         } else {
@@ -439,7 +436,7 @@ library UserLib {
     }
 
     if (dataUpdateUserRatingCurrentPeriod.changeRating != 0) {
-      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty), CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty) + dataUpdateUserRatingCurrentPeriod.changeRating);
+      dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.penalty), CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.penalty) + dataUpdateUserRatingCurrentPeriod.changeRating);
       if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange > 0) {
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
       } else {
@@ -448,7 +445,7 @@ library UserLib {
 
       int32 changeRating;
       if (dataUpdateUserRatingCurrentPeriod.changeRating > 0) {
-        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.penalty);
+        changeRating = dataUpdateUserRatingCurrentPeriod.changeRating - CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.penalty);
         if (changeRating >= 0) {
           currentPeriodRating.penalty = 0;
           currentPeriodRating.ratingToReward += CommonLib.toUInt32FromInt32(changeRating);
@@ -457,7 +454,7 @@ library UserLib {
         }
 
       } else if (dataUpdateUserRatingCurrentPeriod.changeRating < 0) {
-        changeRating = CommonLib.toInt32FromUint32(dataUpdateUserRatingCurrentPeriod.ratingToReward) + dataUpdateUserRatingCurrentPeriod.changeRating;
+        changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingCurrentPeriod.ratingToReward) + dataUpdateUserRatingCurrentPeriod.changeRating;
         if (changeRating <= 0) {
           currentPeriodRating.ratingToReward = 0;
           currentPeriodRating.penalty += CommonLib.toUInt32FromInt32(-changeRating);
@@ -474,7 +471,7 @@ library UserLib {
   }
 
   function getRewardShare(UserLib.UserContext storage userContext, address userAddr, uint16 period, int32 rating) private view returns (int32) { // FIX
-    return userContext.peeranhaToken.getBoost(userAddr, period) * rating;
+    return CommonLib.toInt32FromUint256(userContext.peeranhaToken.getBoost(userAddr, period)) * rating;
   }
 
   function getRatingToRewardChange(int32 previosRatingToReward, int32 newRatingToReward) private pure returns (int32) {
@@ -497,97 +494,102 @@ library UserLib {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
     int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
         
-    // TODO: create a separate function that returns energy and min rating for an action
-    int16 ratingAllowed;
-    string memory message;
-    uint8 energy;
+    (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
+    require(userRating >= ratingAllowed, message);
+    reduceEnergy(user, energy);
+
+    return user;
+  }
+
+  function getRatingAndRatingForAction(
+    address actionCaller,
+    address dataUser,
+    Action action
+  ) private pure returns (int16 ratingAllowed, string memory message, uint8 energy) {
     if (action == Action.NONE) {
-      return user;
-    } else if (action == Action.publicationPost) {
+    } else if (action == Action.PublicationPost) {
       ratingAllowed = POST_QUESTION_ALLOWED;
       message = "low_rating_post";
       energy = ENERGY_POST_QUESTION;
-    } else if (action == Action.publicationReply) {
+
+    } else if (action == Action.PublicationReply) {
       ratingAllowed = POST_REPLY_ALLOWED;
       message = "low_rating_reply";
       energy = ENERGY_POST_ANSWER;
 
-    } else if (action == Action.publicationComment) {
-      ratingAllowed = POST_COMMENT_ALLOWED;
-      message = "low_rating_own_post_comment";
+    } else if (action == Action.PublicationComment) {
+      if (actionCaller == dataUser) {
+        ratingAllowed = POST_OWN_COMMENT_ALLOWED;
+      } else {
+        ratingAllowed = POST_COMMENT_ALLOWED;
+      }
+      message = "low_rating_comment";
       energy = ENERGY_POST_COMMENT;
 
-    } else if (action == Action.editItem) {
+    } else if (action == Action.EditItem) {
       require(actionCaller == dataUser, "not_allowed_edit");
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_edit";
       energy = ENERGY_MODIFY_ITEM;
 
-    } else if (action == Action.deleteItem) {
+    } else if (action == Action.DeleteItem) {
       require(actionCaller == dataUser, "not_allowed_delete");
       ratingAllowed = 0;
-      message = "low_rating_delete_own"; // delete own item?
+      message = "low_rating_delete"; // delete own item?
       energy = ENERGY_DELETE_ITEM;
 
-    } else if (action == Action.upVotePost) {
+    } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low rating to upvote";
+      message = "low_rating_upvote";       // TODO unittests
       energy = ENERGY_UPVOTE_QUESTION;
 
-    } else if (action == Action.upVoteReply) {
+    } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
       message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_ANSWER;
 
-    } else if (action == Action.voteComment) {
+    } else if (action == Action.VoteComment) {
       require(actionCaller != dataUser, "not_allowed_vote_comment");
       ratingAllowed = VOTE_COMMENT_ALLOWED;
       message = "low_rating_vote_comment";
       energy = ENERGY_VOTE_COMMENT;
 
-    }
-     else if (action == Action.downVotePost) {
+    } else if (action == Action.DownVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");
       ratingAllowed = DOWNVOTE_POST_ALLOWED;
       message = "low_rating_downvote_post";
       energy = ENERGY_DOWNVOTE_QUESTION;
 
-    } else if (action == Action.downVoteReply) {
+    } else if (action == Action.DownVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = DOWNVOTE_REPLY_ALLOWED;
       message = "low_rating_downvote_reply";
       energy = ENERGY_DOWNVOTE_ANSWER;
 
-    } else if (action == Action.cancelVote) {
+    } else if (action == Action.CancelVote) {
       ratingAllowed = CANCEL_VOTE;
       message = "low_rating_cancel_vote";
       energy = ENERGY_FORUM_VOTE_CANCEL;
 
-    } else if (action == Action.bestReply) {
+    } else if (action == Action.BestReply) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_mark_best";
       energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
-    } else if (action == Action.updateProfile) { //userRating - always 0 (const)
+    } else if (action == Action.UpdateProfile) {
       energy = ENERGY_UPDATE_PROFILE;
+      message = "low_update_profile";   //TODO uniTest
 
-    } 
-    else if (action == Action.followCommunity) {
+    } else if (action == Action.FollowCommunity) {
       ratingAllowed = MINIMUM_RATING;
       message = "low_rating_follow_comm";
       energy = ENERGY_FOLLOW_COMMUNITY;
 
-    } 
-    else {
+    } else {
       revert("not_allowed_action");
     }
-
-    require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, energy);
-
-    return user;
   }
 
   function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
@@ -608,5 +610,13 @@ library UserLib {
 
   function getStatusEnergy() internal pure returns (uint16) {
     return 1000;
+  }
+
+  function getPeriodRewardShares(UserContext storage userContext, uint16 period) internal view returns(RewardLib.PeriodRewardShares memory) {
+    return userContext.periodRewardContainer.periodRewardShares[period];
+  }
+
+  function getUserRewardCommunities(UserContext storage userContext, address user, uint16 rewardPeriod) internal view returns(uint32[] memory) {
+    return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
   }
 }

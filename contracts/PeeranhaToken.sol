@@ -79,7 +79,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       uint16 lastStakePeriod = stakeUserContainer.stakeChangePeriods[stakeUserContainer.stakeChangePeriods.length - 1];
       TokenLib.UserStake storage userStake = stakeUserContainer.userStake[lastStakePeriod];
       stakedToken = userStake.stakedAmount;
-      if (lastStakePeriod == period) { // unitTest
+      if (lastStakePeriod == period) { // TODO: add unitTest
         stakedToken += userStake.changedStake;
       }
     }
@@ -87,11 +87,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     return balanceOf(account) - stakedToken;
   }
 
-
-  ///
-  // TODO: add unit tests
-  // TODO: update comment about ownerMinted
-  ///
   /**
    * @dev Mint token for owner.
    *
@@ -99,7 +94,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
    *
    * - must be a user.
    * - user must has role OWNER_MINTER_ROLE.
-   * - 
+   * - ownerMinted + mintTokens must be less than OWNER_MINT_MAX
   */
   function mint(uint256 mintTokens) external onlyRole(OWNER_MINTER_ROLE) {
     require(ownerMinted + mintTokens <= OWNER_MINT_MAX, "max_owner_mint_exceeded");
@@ -142,6 +137,9 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   function setStake(address user, uint256 stakeTokens) external {
     require(msg.sender == user, "get_reward_security");  // unitTest
     require(stakeTokens <= balanceOf(user), "wrong_stake");
+    // TODO: getPeriod always used with call CommonLib.getTimestamp() for arument. 
+    // Move that call to getPeriod and call without arguments
+
     uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
 
@@ -164,14 +162,16 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       }
 
       uint256 lastUserStakeAmount = stakeUserContainer.userStake[lastStakePeriod].stakedAmount;
-      if (lastUserStakeAmount > stakeTokens) {
-        stakeTotal.totalStakedAmount -= lastUserStakeAmount - stakeTokens;
-        if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
-        stakeUserContainer.userStake[nextPeriod].changedStake = lastUserStakeAmount - stakeTokens;
+      uint256 stakeChange = stakeTokens - lastUserStakeAmount;
+      stakeTotal.totalStakedAmount += stakeChange;
+      
+      require(stakeTokens > 0 || lastUserStakeAmount > 0, "invalid_zero_stake");
+      if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
+      if (lastUserStakeAmount == 0) stakeTotal.stakingUsersCount++;
 
-      } else {
-        stakeTotal.totalStakedAmount += stakeTokens - lastUserStakeAmount;
-        if (lastUserStakeAmount == 0) stakeTotal.stakingUsersCount++;
+      // Why set only here?
+      if (lastUserStakeAmount > stakeTokens) {
+        stakeUserContainer.userStake[nextPeriod].changedStake = lastUserStakeAmount - stakeTokens;
       }
       stakeUserContainer.userStake[nextPeriod].stakedAmount = stakeTokens;
 
@@ -206,19 +206,17 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, address user, uint16 period, uint256 poolToken) private view returns(uint256) {
     int32 ratingToReward;
-    int32 tokenReward;
+    uint32 tokenReward;
     uint32[] memory rewardCommunities = peeranhaUser.getUserRewardCommunities(user, period);
     for (uint32 i; i < rewardCommunities.length; i++) {
       ratingToReward = peeranhaUser.getRatingToReward(user, period, rewardCommunities[i]);
       if (ratingToReward > 0)
-        tokenReward += ratingToReward;
+        tokenReward += CommonLib.toUInt32FromInt32(ratingToReward);
     }
-    // TODO: tokenReward must be of type uint32
-    // TODO: totalRewardShares must be of type uint32
     if (tokenReward <= 0 || periodRewardShares.totalRewardShares <= 0) return 0;
 
-    uint256 userReward = (poolToken * uint256(uint32(tokenReward * getBoost(user, period))));
-    userReward /= uint256(uint32(periodRewardShares.totalRewardShares));
+    uint256 userReward = (poolToken * tokenReward * getBoost(user, period));
+    userReward /= periodRewardShares.totalRewardShares;
     return userReward;
   }
 
@@ -243,7 +241,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     return stakeTotalContainer.stakeChangePeriods;
   }
 
-  function getBoost(address user, uint16 period) public override view returns (int32) {
+  function getBoost(address user, uint16 period) public override view returns (uint256) {
     uint256 averageStake = getAverageStake(period);
     uint256 userStake = getUserStake(user, period);
     uint256 boost;
@@ -254,7 +252,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     } else {
       boost = (userStake * 1000 / averageStake) + 5000;
     }
-    return int32(int256(boost));
+    return boost;
   }
 
   function getUserStake(address user, uint16 findingPeriod) public view returns (uint256) {
@@ -283,6 +281,10 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     else
       return (0, 0);
   }
+
+  function getVersion() public pure returns (uint256) {
+        return 1;
+    }
 
   function findInternal(uint16[] storage periods, uint256 begin, uint256 end, uint16 findingPeriod) private view returns (uint16, bool) { // name
     uint256 len = end - begin;

@@ -41,7 +41,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[++achievementsNFTContainer.achievementsCount];
     require(achievementId == achievementsNFTContainer.achievementsCount, "Wrong achievement Id");
-    require(maxCount > 0, "Max count of achievements must be more than 0");
+    require(maxCount > 0, "invalid_max_count");
     require(maxCount < NFTLib.POOL_NFT, "Max count of achievements must be less than 1 000 000");
 
     achievementNFT.maxCount = maxCount;
@@ -70,5 +70,9 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
 
   function getAchievementsNFTConfig(uint64 achievementId) external view returns (NFTLib.AchievementNFTsConfigs memory) {
     return achievementsNFTContainer.achievementsNFTConfigs[achievementId];
+  }
+
+  function getVersion() public pure returns (uint256) {
+      return 1;
   }
 }
