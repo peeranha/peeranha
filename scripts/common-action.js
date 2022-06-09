@@ -35,7 +35,25 @@ const AchievementsType = { "Rating": 0 }
 const achievements = (env) => {
   return [
     {
-      maxCount: env === "prod" ? 700 : 10,  
+      maxCount: env === "prod" ? 10000 : 14,  
+      lowerBound: env === "prod" ? 10 : 10, 
+      type: AchievementsType.Rating, 
+      path: path.resolve(__dirname, `${PATH}Stranger.svg`),
+      name: "I'm just having a look",
+      description: "NFT for achieving Stranger status among the first",
+      attributes: "",
+    },
+    {
+      maxCount: env === "prod" ? 8000 : 12,  
+      lowerBound: env === "prod" ? 35 : 35, 
+      type: AchievementsType.Rating, 
+      path: path.resolve(__dirname, `${PATH}FoundingMember.svg`),
+      name: "Working my way up",
+      description: "NFT for achieving FoundingMember status among the first",
+      attributes: "",
+    },
+    {
+      maxCount: env === "prod" ? 5000 : 10,  
       lowerBound: env === "prod" ? 100 : 10, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Newbie.svg`),
@@ -44,7 +62,7 @@ const achievements = (env) => {
       attributes: "",
     },
     {
-      maxCount: env === "prod" ? 500 : 5, 
+      maxCount: env === "prod" ? 3000 : 5, 
       lowerBound: env === "prod" ? 500 : 50, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Junior.svg`),
@@ -53,7 +71,7 @@ const achievements = (env) => {
       attributes: "",
     },
     {
-      maxCount: env === "prod" ? 300 : 4, 
+      maxCount: env === "prod" ? 2000 : 4, 
       lowerBound: env === "prod" ? 1000 : 100, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Resident.svg`),
@@ -62,7 +80,7 @@ const achievements = (env) => {
       attributes: "",
     },
     {
-      maxCount: env === "prod" ? 150 : 3, 
+      maxCount: env === "prod" ? 1000 : 3, 
       lowerBound: env === "prod" ? 2500 : 250, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Senior.svg`),
@@ -71,7 +89,7 @@ const achievements = (env) => {
       attributes: "",
     },
     {
-      maxCount: env === "prod" ? 50 : 2, 
+      maxCount: env === "prod" ? 500 : 2, 
       lowerBound: env === "prod" ? 5000 : 500, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Hero.svg`),
@@ -80,7 +98,7 @@ const achievements = (env) => {
       attributes: "",
     },
     {
-      maxCount: env === "prod" ? 10 : 1, 
+      maxCount: env === "prod" ? 100 : 1, 
       lowerBound: env === "prod" ? 10000 : 1000, 
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}suphero.svg`),
