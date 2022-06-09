@@ -3084,7 +3084,7 @@ describe("Test vote", function () {
 			await peeranhaContent.connect(signers[4]).voteItem(1, 0, 0, 0);
 
 			const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-			await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
+			await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 			await peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost);
 			const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);

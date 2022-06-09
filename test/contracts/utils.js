@@ -177,7 +177,7 @@ const getUsers = (hashes) => {
 }
 
 const StartEnergy = 1000;       // was 300
-const PeriodTime = 5000;
+const PeriodTime = 6000;
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
 const coefficientToken = 10;
@@ -321,7 +321,7 @@ const DownvotedCommonPost = -1;
 
 //tutorial 
 const DownvoteTutorial = -1;    //autorAction
-const UpvotedTutorial = 1;
+const UpvotedTutorial = 5;
 const DownvotedTutorial = -1;
 
 const DeleteOwnPost = -1;

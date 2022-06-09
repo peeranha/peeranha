@@ -77,7 +77,7 @@ library VoteLib  {
 
     //tutorial 
     int32 constant DownvoteTutorial = -1;
-    int32 constant UpvotedTutorial = 1;             // 10? !
+    int32 constant UpvotedTutorial = 5;
     int32 constant DownvotedTutorial = -1 ;
 
     int32 constant DeleteOwnPost = -1;
