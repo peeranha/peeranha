@@ -322,7 +322,7 @@ const DownvotedCommonPost = -1;
 //tutorial 
 const DownvoteTutorial = -1;    //autorAction
 const UpvotedTutorial = 5;
-const DownvotedTutorial = -1;
+const DownvotedTutorial = -2;
 
 const DeleteOwnPost = -1;
 

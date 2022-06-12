@@ -68,7 +68,7 @@ library VoteLib  {
     //expert post
     int32 constant DownvoteExpertPost = -1;
     int32 constant UpvotedExpertPost = 5;
-    int32 constant DownvotedExpertPost = -2;        // -1
+    int32 constant DownvotedExpertPost = -2;
 
     //common post 
     int32 constant DownvoteCommonPost = -1;
@@ -78,7 +78,7 @@ library VoteLib  {
     //tutorial 
     int32 constant DownvoteTutorial = -1;
     int32 constant UpvotedTutorial = 5;
-    int32 constant DownvotedTutorial = -1 ;
+    int32 constant DownvotedTutorial = -2;
 
     int32 constant DeleteOwnPost = -1;
     int32 constant ModeratorDeletePost = -2;
