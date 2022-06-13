@@ -218,4 +218,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return posts.getStatusHistory(user, postId, replyId, commentId);
     }
+
+    function getVersion() public pure returns (uint256) {
+        return 1;
+    }
 }

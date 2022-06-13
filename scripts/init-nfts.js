@@ -73,6 +73,7 @@ async function initAchievement(peeranhaUser) {
       image: imgHash,
       attributes: attributes,
     };
+    console.log(`init NFT ${name}`);
     const nftIPFS = "ipfs://" + await saveText(JSON.stringify(nft));
     const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, nftIPFS, type);
     console.log(`Sent transaction ${tx.hash} to init NFT ${name}`);

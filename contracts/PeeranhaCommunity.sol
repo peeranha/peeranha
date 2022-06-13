@@ -182,4 +182,8 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     function checkTags(uint32 communityId, uint8[] memory tags) public  view override {
         CommunityLib.checkTags(communities, communityId, tags);
     }
+
+    function getVersion() public pure returns (uint256) {
+        return 1;
+    }
 }

@@ -282,6 +282,10 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       return (0, 0);
   }
 
+  function getVersion() public pure returns (uint256) {
+        return 1;
+    }
+
   function findInternal(uint16[] storage periods, uint256 begin, uint256 end, uint16 findingPeriod) private view returns (uint16, bool) { // name
     uint256 len = end - begin;
     if (len == 0 ) 

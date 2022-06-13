@@ -14,7 +14,7 @@
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
     "deploy-ether:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network goerli scripts/deployEther.js && node scripts/change-env-values.js 0",
     "upgrade-user:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
-    "upgrade-content:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-content.js && node scripts/change-env-values.js 0",
+    "upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade.js && node scripts/change-env-values.js 0",
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/deploy.js && node scripts/change-env-values.js 0",
     "upgrade-user:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
     "post-action-mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
