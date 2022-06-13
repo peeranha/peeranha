@@ -14,6 +14,7 @@ const prod = [
 	{ field: 'function setEnergy(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function claimReward(', value: `/*`, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 ];
 
 const staging = [
@@ -27,6 +28,7 @@ const staging = [
 	{ field: 'function setEnergy(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function claimReward(', value: `/*`, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 ];
 
 const test = [
@@ -40,6 +42,7 @@ const test = [
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function claimReward(', value: ``, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 ];
 
 const unitTest = [
@@ -53,6 +56,7 @@ const unitTest = [
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function claimReward(', value: ``, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 ];
 
 async function changeFieldValue() {

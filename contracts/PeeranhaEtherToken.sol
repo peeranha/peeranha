@@ -4,14 +4,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-import "./interfaces/IPeeranhaMainnetToken.sol";
+import "./interfaces/IPeeranhaEtherToken.sol";
 import "./base/NativeMetaTransaction.sol";
 
-contract PeeranhaMainnetToken is
+contract PeeranhaEtherToken is
     ERC20Upgradeable,
     AccessControlUpgradeable,
     NativeMetaTransaction,
-    IPeeranhaMainnetToken
+    IPeeranhaEtherToken
 {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
@@ -23,7 +23,7 @@ contract PeeranhaMainnetToken is
     }
 
     /**
-     * @dev See {IPeeranhaMainnetToken-mint}.
+     * @dev See {IPeeranhaEtherToken-mint}.
      */
     function mint(address user, uint256 amount) external override onlyRole(PREDICATE_ROLE) {
         _mint(user, amount);

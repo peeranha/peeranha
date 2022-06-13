@@ -385,14 +385,7 @@ library UserLib {
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
-            differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
-            if (differentRatingPreviousPeriod >= 0) {
-              dataUpdateUserRatingPreviousPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
-              dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
-            } else {
-              dataUpdateUserRatingPreviousPeriod.changeRating = rating;
-              dataUpdateUserRatingCurrentPeriod.changeRating += rating;
-            }
+            dataUpdateUserRatingCurrentPeriod.changeRating += rating;
           } else {
             differentRatingPreviousPeriod = rating - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
             if (differentRatingPreviousPeriod >= 0) {
