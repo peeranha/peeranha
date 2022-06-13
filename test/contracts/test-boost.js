@@ -196,7 +196,7 @@ describe("Test boost", function () {
 			// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 			
 			// expect(balance).to.equal(5 * coefficientToken * fraction);
-		}).retries(2);
+		}).retries(3);
 
 		it("add rating in next periods when add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();

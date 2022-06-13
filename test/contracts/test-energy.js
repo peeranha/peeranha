@@ -913,7 +913,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 0);
 		await expect(peeranhaUser.connect(signers[1]).updateUser(hashContainer[0]))
 			.to.be.revertedWith('low_energy');
-	}).retries(15);
+	}).retries(30);
 
 	it("Test energy. MarkBestReply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();

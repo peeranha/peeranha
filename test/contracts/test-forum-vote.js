@@ -642,7 +642,6 @@ describe("Test vote", function () {
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
 			await peeranhaContent.voteItem(1, 0, 0, 1);
 
-
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userRatingAction = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);	
 			await expect(userRating).to.equal(StartRating + UpvotedTutorial);
@@ -732,8 +731,8 @@ describe("Test vote", function () {
 
 			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			await expect(newUserRating).to.equal(StartRating + DownvotedCommonPost + DeleteOwnPost);
-			await expect(newUserActionRating).to.equal(StartRating + DownvoteCommonPost);
+			await expect(newUserRating).to.equal(StartRating + DownvotedTutorial + DeleteOwnPost);
+			await expect(newUserActionRating).to.equal(StartRating + DownvoteTutorial);
 		});
 	});
 
@@ -3084,7 +3083,7 @@ describe("Test vote", function () {
 			await peeranhaContent.connect(signers[4]).voteItem(1, 0, 0, 0);
 
 			const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-			await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
+			await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 			await peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost);
 			const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
