@@ -40,7 +40,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Stranger.svg`),
       name: "I'm just having a look",
-      description: "NFT for achieving Stranger status among the first",
+      description: "Limited edition NFT for achieving Stranger status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -49,7 +49,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}FoundingMember.svg`),
       name: "Working my way up",
-      description: "NFT for achieving FoundingMember status among the first",
+      description: "Limited edition NFT for achieving 35 reputation on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -58,7 +58,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Newbie.svg`),
       name: "A beginning of a great journey",
-      description: "NFT for achieving Newbie status among the first",
+      description: "Limited edition NFT for achieving Newbie status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -67,7 +67,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Junior.svg`),
       name: "Don't call me Junior!",
-      description: "",
+      description: "Limited edition NFT for achieving Junior status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -76,7 +76,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Resident.svg`),
       name: "Peeranha is my home",
-      description: "NFT for achieving Resident status among the first",
+      description: "Limited edition NFT for achieving Resident status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -85,7 +85,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Senior.svg`),
       name: "I can teach you anything",
-      description: "NFT for achieving Senior status among the first",
+      description: "Limited edition NFT for achieving Senior status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -94,7 +94,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}Hero.svg`),
       name: "This website needs a hero",
-      description: "NFT for achieving Hero status among the first",
+      description: "Limited edition NFT for achieving Hero status on Peeranha protocol among the first.",
       attributes: "",
     },
     {
@@ -103,7 +103,7 @@ const achievements = (env) => {
       type: AchievementsType.Rating, 
       path: path.resolve(__dirname, `${PATH}suphero.svg`),
       name: "A living Legend",
-      description: "NFT for achieving Superhero status among the first",
+      description: "Limited edition NFT for achieving Superhero status on Peeranha protocol among the first.",
       attributes: "",
     },
   ]
