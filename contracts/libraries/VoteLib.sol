@@ -108,7 +108,6 @@ library VoteLib  {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-    int32 constant DeleteOwnComment = -1;
     int32 constant ModeratorDeleteComment = -1;
 
     /// @notice Get value Rating for post action

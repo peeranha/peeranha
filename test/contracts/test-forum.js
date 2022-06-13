@@ -1163,7 +1163,7 @@ describe("Test post", function () {
 
 	describe('Delete comment', function () {
 
-		it("Test delete comment ", async function () {
+		it("Test delete own comment by moderator", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -1176,6 +1176,49 @@ describe("Test post", function () {
 
 			const comment = await peeranhaContent.getComment(1, 0, 1);
 			expect(comment.isDeleted).to.equal(true);
+
+			const userRating = await peeranhaUser.getUserRating(peeranhaContent.deployTransaction.from, 1);
+			await expect(userRating).to.equal(0);
+		});
+
+		it("Test delete own comment", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]);
+			await peeranhaContent.connect(signers[1]).deleteComment(1, 0, 1);
+
+			const comment = await peeranhaContent.getComment(1, 0, 1);
+			expect(comment.isDeleted).to.equal(true);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(userRating).to.equal(0);
+		});
+
+		it("Test delete comment by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]);
+			await peeranhaContent.deleteComment(1, 0, 1);
+
+			const comment = await peeranhaContent.getComment(1, 0, 1);
+			expect(comment.isDeleted).to.equal(true);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(userRating).to.equal(StartRating + ModeratorDeleteComment);
 		});
 
 		it("Test delete comment by not registered user", async function () {
