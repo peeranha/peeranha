@@ -1,6 +1,12 @@
 const { expect } = require("chai");
-const {
-	wait, createPeerenhaAndTokenContract, getHashContainer, getHashesContainer, createTags, PostTypeEnum,
+const { 
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags,
+	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
+    DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
+    ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
+    FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
+    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost,
 } = require('./utils');
 
 ////
@@ -1291,6 +1297,164 @@ describe("Test post", function () {
 
 			await expect(peeranhaContent.deleteComment(1, 0, 1)).to.be.revertedWith('Comment has been deleted.');
 			await expect(peeranhaContent.deleteComment(1, 1, 1)).to.be.revertedWith('Comment has been deleted.');
+		});
+	});
+
+	describe('Best reply', function () {		// TODO перенести тесты с лучшим ответом
+		it("Test delete expert best reply by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+
+			await peeranhaContent.changeStatusBestReply(1, 1);
+			
+			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			await expect(userRating2).to.equal(userRating + AcceptExpertReply);
+			await expect(userActionRating2).to.equal(StartRating + AcceptedExpertReply);
+
+			await peeranhaContent.deleteReply(1, 1);
+
+			const post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(0);
+
+			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(newUserActionRating).to.equal(StartRating + AcceptedExpertReply);
+			await expect(newUserRating).to.equal(StartRating + ModeratorDeleteReply);
+		});
+
+		it("Test delete post after choosing best common reply", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+
+			await peeranhaContent.changeStatusBestReply(1, 1);
+
+			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);	
+			await expect(userRating2).to.equal(userRating + AcceptCommonReply);
+			await expect(userActionRating2 ).to.equal(StartRating + AcceptedCommonReply);
+
+			await peeranhaContent.deleteReply(1, 1);
+
+			const post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(0);
+
+			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(newUserActionRating).to.equal(StartRating + AcceptedCommonReply);
+			await expect(newUserRating).to.equal(StartRating + ModeratorDeleteReply);
+		});
+
+		it("Test choose best reply after delete expert best reply by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2Reply = await peeranhaUser.getUserRating(signers[2].address, 1);
+
+			await peeranhaContent.changeStatusBestReply(1, 1);
+			
+			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			await expect(userRating2).to.equal(userRating + AcceptExpertReply);
+			await expect(userActionRating2).to.equal(StartRating + AcceptedExpertReply);
+
+			await peeranhaContent.deleteReply(1, 1);
+
+			let post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(0);
+
+			const newAuthorPostRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newOldBestReplyRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(newAuthorPostRating).to.equal(StartRating + AcceptedExpertReply);
+			await expect(newOldBestReplyRating).to.equal(StartRating + ModeratorDeleteReply);
+
+			await peeranhaContent.changeStatusBestReply(1, 2);
+			post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(2);
+
+			const newAuthorPostRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newAuthorOldBestReplyRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newAuthorNewBestReplyRating = await peeranhaUser.getUserRating(signers[2].address, 1);
+			await expect(newAuthorPostRating2).to.equal(newAuthorPostRating + AcceptedExpertReply);
+			await expect(newAuthorOldBestReplyRating2).to.equal(newAuthorOldBestReplyRating2);
+			await expect(newAuthorNewBestReplyRating).to.equal(userRating2Reply + AcceptExpertReply);
+		});
+
+		it("Test choose best reply after delete post after choosing best common reply", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(1, 0, hashContainer[1], false);
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2Reply = await peeranhaUser.getUserRating(signers[2].address, 1);
+
+			await peeranhaContent.changeStatusBestReply(1, 1);
+
+			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);	
+			await expect(userRating2).to.equal(userRating + AcceptCommonReply);
+			await expect(userActionRating2 ).to.equal(StartRating + AcceptedCommonReply);
+
+			await peeranhaContent.deleteReply(1, 1);
+
+			let post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(0);
+
+			const newAuthorPostRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newOldBestReplyRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			await expect(newAuthorPostRating).to.equal(StartRating + AcceptedCommonReply);
+			await expect(newOldBestReplyRating).to.equal(StartRating + ModeratorDeleteReply);
+
+			await peeranhaContent.changeStatusBestReply(1, 2);
+			post = await peeranhaContent.getPost(1);
+			expect(post.bestReply).to.equal(2);
+
+			const newAuthorPostRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const newAuthorOldBestReplyRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newAuthorNewBestReplyRating = await peeranhaUser.getUserRating(signers[2].address, 1);
+			await expect(newAuthorPostRating2).to.equal(newAuthorPostRating + AcceptedCommonReply);
+			await expect(newAuthorOldBestReplyRating2).to.equal(newAuthorOldBestReplyRating2);
+			await expect(newAuthorNewBestReplyRating).to.equal(userRating2Reply + AcceptCommonReply);
 		});
 	});
 });

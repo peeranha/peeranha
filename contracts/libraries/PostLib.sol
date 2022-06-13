@@ -479,6 +479,8 @@ library PostLib  {
 
         replyContainer.info.isDeleted = true;
         postContainer.info.deletedReplyCount++;
+        if (postContainer.info.bestReply == replyId)
+            postContainer.info.bestReply = 0;
         emit ReplyDeleted(userAddr, postId, replyId);
     }
 

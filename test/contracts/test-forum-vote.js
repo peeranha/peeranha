@@ -887,7 +887,7 @@ describe("Test vote", function () {
 			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating);
-			await expect(newUserActionRating).to.equal(StartRating + DeleteOwnReply);
+			await expect(newUserActionRating).to.equal(StartRating + DeleteOwnPost);
 		});
 
 		it("Test delete post after choosing best common reply", async function () {
@@ -917,7 +917,7 @@ describe("Test vote", function () {
 			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating);
-			await expect(newUserActionRating).to.equal(StartRating + DeleteOwnReply);
+			await expect(newUserActionRating).to.equal(StartRating + DeleteOwnPost);
 		});
 	});
 	
