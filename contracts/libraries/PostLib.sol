@@ -551,9 +551,7 @@ library PostLib  {
             false
         );
 
-        if (userAddr == commentContainer.info.author)
-            self.peeranhaUser.updateUserRating(commentContainer.info.author, VoteLib.DeleteOwnComment, postContainer.info.communityId);
-        else
+        if (userAddr != commentContainer.info.author)
             self.peeranhaUser.updateUserRating(commentContainer.info.author, VoteLib.ModeratorDeleteComment, postContainer.info.communityId);
 
         commentContainer.info.isDeleted = true;
