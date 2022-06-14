@@ -13,6 +13,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 
 
+
+/*
+NOTE: This is a preliminary draft of a token contract that provides estimated numbers of token rewards to early users.
+      The actual token that will be launched for the protocol might be different.
+*/
 contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20CappedUpgradeable {
   
   uint256 public constant FRACTION = (10 ** 18);
