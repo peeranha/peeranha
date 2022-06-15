@@ -27,6 +27,12 @@ module.exports = {
     apiSecret: DEFENDER_TEAM_API_SECRET_KEY,
   },
   networks: {
+    polygon: {
+      url: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      gas: 2100000,
+      gasPrice: 36000000000
+    },
     mumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [ADMIN_PRIVATE_KEY],
