@@ -13,7 +13,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 10;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
 
     int8 constant DIRECTION_DOWNVOTE = -2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -1;
