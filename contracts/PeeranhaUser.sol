@@ -357,17 +357,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
+    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }*/
+    }
 
     // TODO: Why is it commented? Remove this code if not needed.
     /**
      * @dev Get information abour sum rating to reward all users
      */
-    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
+    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
-    }*/
+    }
     
     /**
      * @dev Change user rating
@@ -471,14 +471,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }*/
+    }
 
     // Used for unit tests
-    /*function setEnergy(address userAddr, uint16 energy) public {
+    function setEnergy(address userAddr, uint16 energy) public {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 
     /**
      * @dev Get informations about contract.

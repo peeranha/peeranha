@@ -13,7 +13,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 10;    //7 days (10)     // name??
 
     int8 constant DIRECTION_DOWNVOTE = -2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -1;
@@ -322,7 +322,8 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 replyId,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -331,7 +332,8 @@ library PostLib  {
             replyContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.EditItem,
-            UserLib.ActionRole.NONE,
+            isOfficialReply ? UserLib.ActionRole.CommunityModerator : 
+                UserLib.ActionRole.NONE,
             false
         );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
@@ -339,7 +341,13 @@ library PostLib  {
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
-        
+
+        if (isOfficialReply) {
+            postContainer.info.officialReply = replyId;
+        } else {
+            postContainer.info.officialReply = 0;
+        }
+
         emit ReplyEdited(userAddr, postId, replyId);
     }
 
@@ -481,6 +489,10 @@ library PostLib  {
         postContainer.info.deletedReplyCount++;
         if (postContainer.info.bestReply == replyId)
             postContainer.info.bestReply = 0;
+
+        if (postContainer.info.officialReply == replyId)
+            postContainer.info.officialReply = 0;
+
         emit ReplyDeleted(userAddr, postId, replyId);
     }
 
@@ -556,38 +568,6 @@ library PostLib  {
 
         commentContainer.info.isDeleted = true;
         emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
-    }
-
-    /// @notice Change status official reply
-    /// @param self The mapping containing all posts
-    /// @param userAddr Who called action
-    /// @param postId Post where will be change reply status
-    /// @param replyId Reply which will change status
-    function changeStatusOfficialReply(
-        PostCollection storage self,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId
-    ) public {
-        // check + energy?
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
-            false
-        );
-
-        getReplyContainerSafe(postContainer, replyId);
-         
-        if (postContainer.info.officialReply == replyId)
-            postContainer.info.officialReply = 0;
-        else
-            postContainer.info.officialReply = replyId;
-        
-        emit StatusOfficialReplyChanged(userAddr, postId, postContainer.info.officialReply);
     }
 
     /// @notice Change status best reply
