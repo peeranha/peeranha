@@ -7,7 +7,7 @@ const prod = [
     { field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 604800, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
 	{ field: 'constant PERIOD_LENGTH', value: 604800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
-    { field: 'constant START_PERIOD_TIME', value: 1648875600, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+    { field: 'constant START_PERIOD_TIME', value: 1655251200, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
@@ -35,7 +35,7 @@ const test = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 3600, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 1 hour
 	{ field: 'constant PERIOD_LENGTH', value: 3600, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 1 hour
-    { field: 'constant START_PERIOD_TIME', value: 1652871650, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+    { field: 'constant START_PERIOD_TIME', value: 1655172100, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 4, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },

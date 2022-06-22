@@ -1,7 +1,6 @@
 node_modules
 cache
 artifacts
-secrets.json
-.openzeppelin
+secrets*.json
 env.json
 .idea
