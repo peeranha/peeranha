@@ -502,7 +502,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * @dev Get current period.
     */
     function getPeriod() external view returns (uint16) {
-        return RewardLib.getPeriod(CommonLib.getTimestamp());
+        return RewardLib.getPeriod();
     }
     
     function getVersion() public pure returns (uint256) {

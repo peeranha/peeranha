@@ -72,7 +72,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
 
   function availableBalanceOf(address account) external view returns(uint256) { // unitTest
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[account];
-    uint16 period = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
+    uint16 period = RewardLib.getPeriod() + 1;
 
     uint256 stakedToken;
     if (stakeUserContainer.stakeChangePeriods.length > 0) {
@@ -112,7 +112,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
    * - must be a period less then now.
   */
   /*function claimReward(uint16 period) external {
-    require(RewardLib.getPeriod(CommonLib.getTimestamp()) > period + 1, "period_not_ended");
+    require(RewardLib.getPeriod() > period + 1, "period_not_ended");
 
     address user = _msgSender();
     
@@ -137,10 +137,8 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   function setStake(address user, uint256 stakeTokens) external {
     require(msg.sender == user, "get_reward_security");  // unitTest
     require(stakeTokens <= balanceOf(user), "wrong_stake");
-    // TODO: getPeriod always used with call CommonLib.getTimestamp() for arument. 
-    // Move that call to getPeriod and call without arguments
 
-    uint16 nextPeriod = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
+    uint16 nextPeriod = RewardLib.getPeriod() + 1;
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[user];
 
     TokenLib.StakeTotal storage stakeTotal = stakeTotalContainer.stakeTotals[nextPeriod];
