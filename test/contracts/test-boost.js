@@ -344,7 +344,7 @@ describe("Test boost", function () {
 			await expect(userStakeTokens).to.equal(parseEther("1"));
 		});
 
-		// it("Test add 3 boost (!! set periodLength 3 sec)", async function () {
+		// it("Test add 3 boost (!! set periodLength 3 sec)", async function () {		// set period time 3 sec and run this
 		// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		// 	const hashContainer = getHashContainer();
 		// 	await peeranhaUser.createUser(hashContainer[1]);
