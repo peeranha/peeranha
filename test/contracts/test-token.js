@@ -14,6 +14,47 @@ const {
 
 describe("Test wallet", function () {
 
+	describe('Split reward', function(){
+
+		it("split reward (2 users)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
+			await peeranhaUser.addUserRating(signers[1].address, 50, 1);
+			await wait(PeriodTime);
+
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
+			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
+			await wait(PeriodTime);
+			
+			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
+			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
+
+
+			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
+			
+			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
+			expect(ratingToReward).to.equal(60);
+
+			await token.claimReward(rewardPeriods[0]);
+			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
+
+			await token.connect(signers[1]).claimReward(rewardPeriods[0]);
+			const balance2 = await getBalance(token, signers[1].address);
+			
+			const userReward = await getUserReward(60, 110);
+			const userReward2 = await getUserReward(50, 110);
+			expect(balance).to.equal(userReward);
+			expect(balance2).to.equal(userReward2);
+		});
+	});
+
 	describe("Test add rating to reward", function () {
 
 		for (const {actions, ratings, result, periodRewards} of setRetingOnePeriod) {
@@ -422,47 +463,6 @@ describe("Test wallet", function () {
 
 			await expect(token.transfer(signers[1].address, parseEther("1.8")))
 			.to.be.revertedWith('balance_error');
-		});
-	});
-
-	describe('Split reward', function(){
-
-		it("split reward (2 users)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
-
-
-			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
-			await peeranhaUser.addUserRating(signers[1].address, 50, 1);
-			await wait(PeriodTime);
-
-			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
-			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
-			await wait(PeriodTime);
-			
-			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
-			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
-
-
-			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-			
-			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
-			expect(ratingToReward).to.equal(60);
-
-			await token.claimReward(rewardPeriods[0]);
-			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
-
-			await token.connect(signers[1]).claimReward(rewardPeriods[0]);
-			const balance2 = await getBalance(token, signers[1].address);
-			
-			const userReward = await getUserReward(60, 110);
-			const userReward2 = await getUserReward(50, 110);
-			expect(balance).to.equal(userReward);
-			expect(balance2).to.equal(userReward2);
 		});
 	});
 
