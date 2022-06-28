@@ -344,7 +344,7 @@ library PostLib  {
 
         if (isOfficialReply) {
             postContainer.info.officialReply = replyId;
-        } else {
+        } else if (postContainer.info.officialReply == replyId) {
             postContainer.info.officialReply = 0;
         }
 
