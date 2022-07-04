@@ -222,4 +222,19 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function getVersion() public pure returns (uint256) {
         return 1;
     }
+
+    // Used for unit tests
+    /*function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) public view returns (address[] memory) {
+        address[] memory votedUsers;
+        PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
+
+        if (commentId != 0)
+            votedUsers = PostLib.getCommentContainerSave(postContainer, replyId, commentId).votedUsers;
+        else if (replyId != 0)
+            votedUsers = PostLib.getReplyContainerSafe(postContainer, replyId).votedUsers;
+        else
+            votedUsers = postContainer.votedUsers;
+
+        return votedUsers;
+    }*/
 }
