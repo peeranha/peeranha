@@ -170,7 +170,7 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.FAQ, 
-            "You can not publish replies in tutorial or.");
+            "You can not publish replies in tutorial or FAQ.");
 
         self.peeranhaUser.checkActionRole(
             userAddr,
@@ -714,8 +714,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public returns (int8) {
-        // require(postContainer.info.postType != PostType.FAQ, "You can not vote to FAQ.");
-
+        require(postContainer.info.postType != PostType.FAQ, "You can not vote to FAQ.");
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -904,7 +903,6 @@ library PostLib  {
         PostType newPostType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        // require(postContainer.info.postType != PostType.FAQ, "You can not edit FAQ post type.");
         
         self.peeranhaUser.checkActionRole(
             userAddr,
