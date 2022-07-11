@@ -105,7 +105,6 @@ library PostLib  {
     event PostDeleted(address indexed user, uint256 indexed postId);
     event ReplyDeleted(address indexed user, uint256 indexed postId, uint16 replyId);
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
-    event StatusOfficialReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
