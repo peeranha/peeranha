@@ -13,6 +13,11 @@ async function wait(ms) {
 }
 
 async function getBalance(contract, user) {
+    const balance = await contract.balanceOf(user);
+	return await getInt(balance);
+}
+
+async function availableBalanceOf(contract, user) {
     const balance = await contract.availableBalanceOf(user);
 	return await getInt(balance);
 }
@@ -396,7 +401,7 @@ const ModeratorDeleteComment = -1;
 
 
 module.exports = { 
-    wait, getBalance, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
+    wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, activeIn1st2nd3rdPeriod, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,
