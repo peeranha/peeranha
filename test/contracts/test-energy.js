@@ -104,7 +104,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false))
 		.to.be.revertedWith('low_energy');
-	}).retries(4);
+	}).retries(10);
 
 	it("Test energy. Publication comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -124,7 +124,7 @@ describe("Test energy", function () {
 		const user = await peeranhaUser.getUserByAddress(signers[1].address);
 
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationComment - energyPublicationComment);		
-	}).retries(3);
+	}).retries(5);
 
 	it("Test energy. Publication comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -141,7 +141,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]))
 		.to.be.revertedWith('low_energy');
-	}).retries(2);
+	}).retries(5);
 
 	it("Test energy. Publication comment to reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -158,7 +158,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[1]))
 		.to.be.revertedWith('low_energy');
-	}).retries(2);
+	}).retries(5);
 
 	it("Test energy. Edit post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -173,7 +173,7 @@ describe("Test energy", function () {
 		const user = await peeranhaUser.getUserByAddress(signers[1].address);
 
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost - energyEditItem);		
-	}).retries(2);
+	}).retries(5);
 
 	it("Test energy. Edit post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -188,7 +188,7 @@ describe("Test energy", function () {
 
 		await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], []))
 			.to.be.revertedWith('low_energy');
-	}).retries(2);
+	}).retries(5);
 
 	it("Test energy. Edit reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -205,7 +205,7 @@ describe("Test energy", function () {
 
 		const user = await peeranhaUser.getUserByAddress(signers[1].address);
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyEditItem);		
-	}).retries(2);
+	}).retries(5);
 
 	it("Test energy. Edit reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -221,7 +221,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[2]))
 			.to.be.revertedWith('low_energy');
-	}).retries(4);
+	}).retries(10);
 
 	it("Test energy. Edit comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();

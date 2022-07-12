@@ -74,22 +74,39 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       ERC20CappedUpgradeable._mint(account, amount);
   }
 
+  function _beforeTokenTransfer(
+    address from,
+    address /*to*/,
+    uint256 amount
+  ) internal override view {
+    require(from == address(0) || getStakedTokens(from) + amount <= balanceOf(from), "balance_error");
+  }
 
-  function availableBalanceOf(address account) external view returns(uint256) { // unitTest
+  function availableBalanceOf(address account) external view returns(uint256) {
+      return balanceOf(account) - getStakedTokens(account);
+  }
+
+  function getStakedTokens (address account) private view returns(uint256) {
     TokenLib.StakeUserContainer storage stakeUserContainer = userPeriodStake.userPeriodStake[account];
-    uint16 period = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
 
     uint256 stakedToken;
-    if (stakeUserContainer.stakeChangePeriods.length > 0) {
-      uint16 lastStakePeriod = stakeUserContainer.stakeChangePeriods[stakeUserContainer.stakeChangePeriods.length - 1];
-      TokenLib.UserStake storage userStake = stakeUserContainer.userStake[lastStakePeriod];
-      stakedToken = userStake.stakedAmount;
-      if (lastStakePeriod == period) { // TODO: add unitTest
-        stakedToken += userStake.changedStake;
+    uint256 stakeLength = stakeUserContainer.stakeChangePeriods.length;
+    if (stakeLength > 0) {
+      uint16 lastStakePeriod = stakeUserContainer.stakeChangePeriods[stakeLength - 1];
+      stakedToken = stakeUserContainer.userStake[lastStakePeriod].stakedAmount;
+      
+      uint16 period = RewardLib.getPeriod(CommonLib.getTimestamp()) + 1;
+      if (stakeLength > 1 && lastStakePeriod == period) {
+        uint16 previousStakePeriod = stakeUserContainer.stakeChangePeriods[stakeLength - 2];
+        uint256 previousStakedToken = stakeUserContainer.userStake[previousStakePeriod].stakedAmount;
+
+        if (previousStakedToken > stakedToken) {
+          stakedToken = previousStakedToken;
+        }
       }
     }
 
-    return balanceOf(account) - stakedToken;
+    return stakedToken;
   }
 
   /**
@@ -140,7 +157,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   }*/
 
   function setStake(address user, uint256 stakeTokens) external {
-    require(msg.sender == user, "get_reward_security");  // unitTest
+    require(msg.sender == user, "get_reward_security");  // TODO: unitTest
     require(stakeTokens <= balanceOf(user), "wrong_stake");
     // TODO: getPeriod always used with call CommonLib.getTimestamp() for arument. 
     // Move that call to getPeriod and call without arguments
@@ -167,17 +184,16 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       }
 
       uint256 lastUserStakeAmount = stakeUserContainer.userStake[lastStakePeriod].stakedAmount;
-      uint256 stakeChange = stakeTokens - lastUserStakeAmount;
-      stakeTotal.totalStakedAmount += stakeChange;
+      if (stakeTokens > lastUserStakeAmount) {
+        stakeTotal.totalStakedAmount += stakeTokens - lastUserStakeAmount;
+      } else {
+        stakeTotal.totalStakedAmount -= lastUserStakeAmount - stakeTokens;
+      }
       
-      require(stakeTokens > 0 || lastUserStakeAmount > 0, "invalid_zero_stake");
+      require(stakeTokens != 0 || lastUserStakeAmount != 0, "invalid_zero_stake");  // TODO: unitest
       if (stakeTokens == 0) stakeTotal.stakingUsersCount--;
       if (lastUserStakeAmount == 0) stakeTotal.stakingUsersCount++;
 
-      // Why set only here?
-      if (lastUserStakeAmount > stakeTokens) {
-        stakeUserContainer.userStake[nextPeriod].changedStake = lastUserStakeAmount - stakeTokens;
-      }
       stakeUserContainer.userStake[nextPeriod].stakedAmount = stakeTokens;
 
     } else {
