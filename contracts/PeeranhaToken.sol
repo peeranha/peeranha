@@ -101,7 +101,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
         uint256 previousStakedToken = stakeUserContainer.userStake[previousStakePeriod].stakedAmount;
 
         if (previousStakedToken > stakedToken) {
-          stakedToken += previousStakedToken - stakedToken;
+          stakedToken = previousStakedToken;
         }
       }
     }
