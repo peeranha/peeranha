@@ -1430,7 +1430,7 @@ describe("Test post", function () {
 			await expect(newUserRating).to.equal(StartRating + ModeratorDeleteReply);
 		});
 
-		it("Test delete post after choosing best common reply", async function () {
+		it("Test delete post after choosing best common reply", async function () { // TODO: post or reply
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();

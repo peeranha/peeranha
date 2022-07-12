@@ -962,22 +962,6 @@ describe("Test vote", function () {
             const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
             await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
 		});
-		
-		it("Test delete post with expert reply after deleteTime", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
-			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
 
 		it("Test delete post with upvotes after deleteTime by post's owner", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -5108,5 +5092,457 @@ describe("Test vote", function () {
 			await expect(peeranhaContent.voteItem(1, 0, 1, 0)).to.be.revertedWith('error_vote_comment');
 		});
 	});
-});
+
+	describe("Test cancel vote and vote later", function () {	// TODO; add comment
+
+		it("Test cancel vote post -> upvote post and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test cancel vote post -> upvote post and delate post (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test cancel vote post -> upvote post and delate post (tutorial)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedTutorial);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test cancel vote post -> downvote post and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 0);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost + DownvotedExpertPost);
+		});
+
+		it("Test cancel vote post -> downvote post and delate post (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 0, 0, 0);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost + DownvotedCommonPost);
+		});
+
+		it("Test cancel vote post -> downvote post and delate post (tutorial)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 0, 0, 0);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedTutorial);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost + DownvotedTutorial);
+		});
+
+		it("Test cancel vote reply -> upvote reply and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test cancel vote reply -> upvote reply and delate post (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test cancel vote reply -> downvote reply and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 0);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost + DownvotedExpertReply);
+		});
+
+		it("Test cancel vote reply -> downvote reply and delate post (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 1, 0, 0);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost + DownvotedCommonReply);
+		});
+
+		it("Test cancel vote reply -> upvote reply and delate reply (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+
+			await peeranhaContent.connect(signers[1]).deleteReply(1, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply);
+		});
+
+		it("Test cancel vote reply -> upvote reply and delate reply (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+
+			await peeranhaContent.connect(signers[1]).deleteReply(1, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply);
+		});
+
+		it("Test cancel vote reply -> downvote reply and delate reply (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedUser).to.eql([signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 1, 0, 0);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 1, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
+
+			await peeranhaContent.connect(signers[1]).deleteReply(1, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + DownvotedExpertReply);
+		});
+
+		it("Test cancel vote reply -> downvote reply and delate reply (common)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.voteItem(1, 1, 0, 1);
+			await peeranhaContent.voteItem(1, 1, 0, 1);		// cancel vote
+			await peeranhaContent.voteItem(1, 1, 0, 0);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
+
+			await peeranhaContent.connect(signers[1]).deleteReply(1, 1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + DownvotedCommonReply);
+		});
+
+		it("Test another user upvotes before cancel vote post -> upvote post and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.addUserRating(signers[2].address, 50, 1);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[2]).voteItem(1, 0, 0, 1);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedUser).to.eql([signers[2].address, signers[0].address]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(cancelVotedUser).to.eql([signers[2].address, "0x0000000000000000000000000000000000000000"]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedAgainUser).to.eql([signers[2].address, "0x0000000000000000000000000000000000000000", signers[0].address]);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+
+		it("Test another user upvotes after cancel vote post -> upvote post and delate post (expert)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
+			await peeranhaUser.addUserRating(signers[2].address, 50, 1);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			await peeranhaContent.connect(signers[2]).voteItem(1, 0, 0, 1);
+			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedUser).to.eql([signers[0].address, signers[2].address]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);		// cancel vote
+			const cancelVotedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(cancelVotedUser).to.eql(["0x0000000000000000000000000000000000000000", signers[2].address]);
+
+			await peeranhaContent.voteItem(1, 0, 0, 1);
+			const votedAgainUser = await peeranhaContent.getVotedUsers(1, 0, 0);
+			await expect(votedAgainUser).to.eql(["0x0000000000000000000000000000000000000000", signers[2].address, signers[0].address]);
+
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2);
+
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			await expect(newUserRating).to.equal(StartRating + DeleteOwnPost);
+		});
+	});
 });
