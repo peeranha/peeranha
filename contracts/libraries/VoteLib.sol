@@ -128,7 +128,7 @@ library VoteLib  {
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedCommonPost;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedCommonPost;
 
-        } else if (PostLib.PostType.Tutorial == postType) { // else -> check gas !
+        } else if (PostLib.PostType.Tutorial == postType) {
             if (ResourceAction.Downvote == resourceAction) return DownvoteTutorial;
             else if (ResourceAction.Upvoted == resourceAction) return UpvotedTutorial;
             else if (ResourceAction.Downvoted == resourceAction) return DownvotedTutorial;
