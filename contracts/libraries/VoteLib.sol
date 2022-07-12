@@ -228,14 +228,12 @@ library VoteLib  {
                 votedUsers.push(actionAddress);
             } else {
                 historyVotes[actionAddress] = 0;
-                //clear votedUsers
                 ratingChange = -1;
                 isCancel = true;
             }
         } else {
             if (history == -1) {
                 historyVotes[actionAddress] = 0;
-                //clear votedUsers
                 ratingChange = 1;
                 isCancel = true;
             } else if (history == 0) {
@@ -247,6 +245,17 @@ library VoteLib  {
                 ratingChange = -2;
             }
         }
+
+        if (isCancel) {
+            uint256 votedUsersLength = votedUsers.length;
+            for (uint256 i; i < votedUsersLength; i++) {
+                if (votedUsers[i] == actionAddress) {
+                    delete votedUsers[i];
+                    break;
+                }
+            }
+        }
+
         return (ratingChange, isCancel);
     }
 }

@@ -323,7 +323,7 @@ const ratingChangesSkipPeriod = [
 const StartRating = 10
 const StartRatingWithoutAction = 0;
 
-const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2}
+const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2, "FAQ": 3}
 
                                                             // energy
 const energyDownVotePost = 5;
