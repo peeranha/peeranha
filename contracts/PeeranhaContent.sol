@@ -83,8 +83,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external override {
-        posts.editReply(_msgSender(), postId, replyId, ipfsHash);
+    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.editReply(_msgSender(), postId, replyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -131,18 +131,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
         posts.deleteComment(_msgSender(), postId, parentReplyId, commentId);
-    }
-
-    // /**
-    //  * @dev Change status official answer.
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - must be a reply.
-    //  * - the user must have right for change status oficial answer.
-    // */ 
-    function changeStatusOfficialReply(uint256 postId, uint16 replyId) external override {
-        posts.changeStatusOfficialReply(_msgSender(), postId, replyId);
     }
 
     /**
