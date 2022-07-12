@@ -13,12 +13,12 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days (10)     // name??
+    uint256 constant DELETE_TIME = 604800;    //7 days
 
-    int8 constant DIRECTION_DOWNVOTE = -2;
-    int8 constant DIRECTION_CANCEL_DOWNVOTE = -1;
+    int8 constant DIRECTION_DOWNVOTE = 2;
+    int8 constant DIRECTION_CANCEL_DOWNVOTE = -2;
     int8 constant DIRECTION_UPVOTE = 1;
-    int8 constant DIRECTION_CANCEL_UPVOTE = 2;
+    int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
@@ -706,13 +706,13 @@ library PostLib  {
         postContainer.info.rating += ratingChange;
         
         return isCancel ?
-            (ratingChange < 0 ?
+            (ratingChange > 0 ?
                 DIRECTION_CANCEL_DOWNVOTE :
-                DIRECTION_DOWNVOTE 
+                DIRECTION_CANCEL_UPVOTE 
             ) :
             (ratingChange > 0 ?
                 DIRECTION_UPVOTE :
-                DIRECTION_CANCEL_UPVOTE
+                DIRECTION_DOWNVOTE
             );
     }
  
@@ -767,13 +767,13 @@ library PostLib  {
         }
 
         return isCancel ?
-            (ratingChange < 0 ?
+            (ratingChange > 0 ?
                 DIRECTION_CANCEL_DOWNVOTE :
-                DIRECTION_DOWNVOTE 
+                DIRECTION_CANCEL_UPVOTE 
             ) :
             (ratingChange > 0 ?
                 DIRECTION_UPVOTE :
-                DIRECTION_CANCEL_UPVOTE
+                DIRECTION_DOWNVOTE
             );
     }
 
@@ -804,13 +804,13 @@ library PostLib  {
         commentContainer.info.rating += ratingChange;
 
         return isCancel ?
-            (ratingChange < 0 ?
+            (ratingChange > 0 ?
                 DIRECTION_CANCEL_DOWNVOTE :
-                DIRECTION_DOWNVOTE 
+                DIRECTION_CANCEL_UPVOTE 
             ) :
             (ratingChange > 0 ?
                 DIRECTION_UPVOTE :
-                DIRECTION_CANCEL_UPVOTE
+                DIRECTION_DOWNVOTE
             );
     }
 
@@ -1104,8 +1104,8 @@ library PostLib  {
         int32 negative;
         uint256 countVotedUsers = votedUsers.length;
         for (uint256 i; i < countVotedUsers; i++) {
-            if(historyVotes[votedUsers[i]] == 1) positive++;
-            else if(historyVotes[votedUsers[i]] == -1) negative++;
+            if (historyVotes[votedUsers[i]] == 1) positive++;
+            else if (historyVotes[votedUsers[i]] == -1) negative++;
         }
         return (positive, negative);
     }
