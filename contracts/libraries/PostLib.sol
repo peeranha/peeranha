@@ -20,8 +20,8 @@ library PostLib  {
     int8 constant DIRECTION_UPVOTE = 1;
     int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
-    enum PostType { ExpertPost, CommonPost, Tutorial }
-    enum TypeContent { Post, Reply, Comment }
+    enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
+    enum TypeContent { Post, Reply, Comment, FAQ }
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -130,20 +130,24 @@ library PostLib  {
             userAddr,
             communityId,
             UserLib.Action.PublicationPost,
+            postType == PostType.FAQ ? 
+            UserLib.ActionRole.CommunityModerator :
             UserLib.ActionRole.NONE,
             true
         );
 
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(tags.length > 0, "At least one tag is required.");
 
         PostContainer storage post = self.posts[++self.postCount];
+        if (postType != PostType.FAQ) {
+            require(tags.length > 0, "At least one tag is required.");
+            post.info.tags = tags;
+        }
         post.info.ipfsDoc.hash = ipfsHash;
         post.info.postType = postType;
         post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
-        post.info.tags = tags;
 
         emit PostCreated(userAddr, communityId, self.postCount);
     }
@@ -164,7 +168,8 @@ library PostLib  {
         bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.postType != PostType.Tutorial, "You can not publish replies in tutorial.");
+        require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.FAQ, 
+            "You can not publish replies in tutorial or FAQ.");
 
         self.peeranhaUser.checkActionRole(
             userAddr,
@@ -244,6 +249,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
+        require(postContainer.info.postType != PostType.FAQ, "You can not publish comments in FAQ.");
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         Comment storage comment;    ///
@@ -687,6 +693,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) public returns (int8) {
+        require(postContainer.info.postType != PostType.FAQ, "You can not vote to FAQ.");
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -875,6 +882,7 @@ library PostLib  {
         PostType newPostType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
+        
         self.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,

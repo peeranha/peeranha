@@ -90,6 +90,22 @@ describe("Test vote", function () {
 			const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 0);
 			await expect(statusHistory._hex).to.equal('0x01');
 		});
+
+		it("Test upVote FAQ post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
+			await expect(peeranhaContent.voteItem(1, 0, 0, 1)).to.be.revertedWith("You can not vote to FAQ.");
+		});
 	});
 
 	describe("Test double upVote post", function () {
@@ -292,6 +308,22 @@ describe("Test vote", function () {
 
          const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 0);
 			await expect(statusHistory._hex).to.equal('-0x01');
+		});
+
+		it("Test downVote FAQ post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
+			await expect(peeranhaContent.voteItem(1, 0, 0, 0)).to.be.revertedWith("You can not vote to FAQ.");
 		});
 	});
 

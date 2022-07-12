@@ -98,6 +98,50 @@ describe("Test post", function () {
 			);
 		});
 
+		it("Test create FAQ post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await Promise.all(
+				hashContainer.map(async (hash, index) => {
+					return await peeranhaContent.connect(signers[0])
+						.createPost(1, hash, PostTypeEnum.FAQ, []);	
+				})
+			);			
+			
+			await Promise.all(
+				hashContainer.map(async (hash, index) => {
+					const post = await peeranhaContent.getPost(index + 1);
+					expect(post.isDeleted).to.equal(false);
+					expect(post.postType).to.equal(PostTypeEnum.FAQ);
+					expect(post.tags.length).to.equal(0);
+					return expect(post.ipfsDoc.hash).to.equal(hash);
+				})
+			);
+
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
+
+			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.FAQ, []))
+				.to.be.revertedWith('not_allowed_not_comm_moderator');
+
+			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.FAQ, []);
+			const post = await peeranhaContent.getPost(4);
+
+			expect(post.isDeleted).to.equal(false);
+			expect(post.postType).to.equal(PostTypeEnum.FAQ);
+			expect(post.tags.length).to.equal(0);
+			expect(post.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
 		it("Test create post without tag", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
@@ -194,7 +238,18 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial.');
+			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or FAQ.');
+		});
+
+		it("Test create reply in FAQ", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
+			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or FAQ.');
 		});
 
 		it("Test create 4 replies (test gas)", async function () {
@@ -392,6 +447,17 @@ describe("Test post", function () {
 			expect(comment.author).to.equal(peeranhaContent.deployTransaction.from);
 			expect(comment.isDeleted).to.equal(false);
 			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test create comment to FAQ", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
+			await expect(peeranhaContent.createComment(1, 0, hashContainer[1])).to.be.revertedWith('You can not publish comments in FAQ.');
 		});
 
 		it("Test create comment to reply", async function () {
