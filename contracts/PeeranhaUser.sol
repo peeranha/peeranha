@@ -470,16 +470,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
     }
 
-    // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }*/
-
-    // Used for unit tests
-    /*function setEnergy(address userAddr, uint16 energy) public {
-        userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
-
     /**
      * @dev Get informations about contract.
      *
@@ -502,10 +492,20 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * @dev Get current period.
     */
     function getPeriod() external view returns (uint16) {
-        return RewardLib.getPeriod(CommonLib.getTimestamp());
+        return RewardLib.getPeriod();
     }
     
     function getVersion() public pure returns (uint256) {
         return 1;
     }
+
+    // Used for unit tests
+    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+    }*/
+
+    // Used for unit tests
+    /*function setEnergy(address userAddr, uint16 energy) public {
+        userContext.users.getUserByAddress(userAddr).energy = energy;
+    }*/
 }

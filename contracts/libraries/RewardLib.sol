@@ -33,9 +33,8 @@ library RewardLib {
   }
 
 
-  /// @notice Get perion
-  /// @param time Unix time. Usual now()
-  function getPeriod(uint32 time) internal pure returns (uint16) {
-    return uint16((time - START_PERIOD_TIME) / PERIOD_LENGTH);
+  /// @notice Get current perion
+  function getPeriod() internal view returns (uint16) {
+    return uint16((CommonLib.getTimestamp() - START_PERIOD_TIME) / PERIOD_LENGTH);
   }
 }

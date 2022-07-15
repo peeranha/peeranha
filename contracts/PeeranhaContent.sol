@@ -83,8 +83,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash) external override {
-        posts.editReply(_msgSender(), postId, replyId, ipfsHash);
+    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.editReply(_msgSender(), postId, replyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -131,18 +131,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
         posts.deleteComment(_msgSender(), postId, parentReplyId, commentId);
-    }
-
-    // /**
-    //  * @dev Change status official answer.
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - must be a reply.
-    //  * - the user must have right for change status oficial answer.
-    // */ 
-    function changeStatusOfficialReply(uint256 postId, uint16 replyId) external override {
-        posts.changeStatusOfficialReply(_msgSender(), postId, replyId);
     }
 
     /**
@@ -222,4 +210,19 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function getVersion() public pure returns (uint256) {
         return 1;
     }
+
+    // Used for unit tests
+    /*function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) public view returns (address[] memory) {
+        address[] memory votedUsers;
+        PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
+
+        if (commentId != 0)
+            votedUsers = PostLib.getCommentContainerSave(postContainer, replyId, commentId).votedUsers;
+        else if (replyId != 0)
+            votedUsers = PostLib.getReplyContainerSafe(postContainer, replyId).votedUsers;
+        else
+            votedUsers = postContainer.votedUsers;
+
+        return votedUsers;
+    }*/
 }

@@ -160,7 +160,7 @@ library UserLib {
     User storage user = self.users[userAddress];
     user.ipfsDoc.hash = ipfsHash;
     user.energy = getStatusEnergy();
-    user.lastUpdatePeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
+    user.lastUpdatePeriod = RewardLib.getPeriod();
 
     self.userList.push(userAddress);
 
@@ -307,7 +307,7 @@ library UserLib {
   }
 
   function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
-    uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
+    uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
     // Initialize user rating in the community if this is the first rating change
@@ -586,7 +586,7 @@ library UserLib {
   }
 
   function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
-    uint16 currentPeriod = RewardLib.getPeriod(CommonLib.getTimestamp());
+    uint16 currentPeriod = RewardLib.getPeriod();
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
     uint16 userEnergy;
