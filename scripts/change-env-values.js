@@ -54,7 +54,7 @@ const unitTest = [
 	{ field: 'constant PERIOD_LENGTH', value: 6, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant START_PERIOD_TIME', value: Math.floor(Date.now() / 1000), path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
-	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 2, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
