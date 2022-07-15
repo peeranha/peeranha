@@ -68,8 +68,8 @@ const createContractToken = async function (peeranhaAddress) {
     return token;
 };
 
-const getUserReward = async function (userRating, periodRating) {
-    return (userRating * coefficientToken * fraction) * poolToken / (periodRating * coefficientToken * fraction);
+const getUserReward = async function (userRating, periodRating, pool) {
+    return ((userRating) * pool / (periodRating)) * fraction;
 }
 
 const createPeerenhaAndTokenContract = async function () {
@@ -185,7 +185,7 @@ const StartEnergy = 1000;       // was 300
 const PeriodTime = 6000;
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
 const deleteTime = 10000;
-const coefficientToken = 10;
+const coefficientToken = 10;        //TODO: delete?
 const periodUserReward = 100;
 const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
