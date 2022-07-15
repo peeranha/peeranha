@@ -21,4 +21,15 @@ library NFTLib {
     mapping(uint64 => AchievementNFTsConfigs) achievementsNFTConfigs;
     uint64 achievementsCount;
   }
+
+  struct AchievementSoulBoundConfigs {
+    uint64 factCount;
+    string achievementURI;
+    AchievementCommonLib.AchievementsType achievementsType;
+  }
+
+  struct AchievementSoulBoundContainer {
+    mapping(uint64 => AchievementSoulBoundConfigs) achievementSoulBoundConfigs;
+    uint64 achievementsCount;
+  }
 }

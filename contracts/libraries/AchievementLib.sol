@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../interfaces/IPeeranhaNFT.sol";
+import "../interfaces/IPeeranhaSoulBound.sol";
 import "./AchievementCommonLib.sol";
 
 
@@ -23,6 +24,19 @@ library AchievementLib {
     IPeeranhaNFT peeranhaNFT;
   }
 
+  struct SoulAchievementConfig {
+    int64 lowerBound;
+    AchievementCommonLib.AchievementsType achievementsType;
+  }
+
+  struct SoulAchievementsContainer {
+    mapping(uint32 => uint64[]) communitiesAchievement; 
+    mapping(uint64 => SoulAchievementConfig) achievementsConfigs;
+    mapping(address => mapping(uint64 => bool)) userAchievementsIssued;
+    uint64 achievementsCount;
+    IPeeranhaSoulBound peeranhaSoulBound;
+  }
+
   function configureNewAchievement(
     AchievementsContainer storage achievementsContainer,
     uint64 maxCount,
@@ -40,7 +54,7 @@ library AchievementLib {
     achievementsContainer.peeranhaNFT.configureNewAchievementNFT(achievementsContainer.achievementsCount, maxCount, achievementURI, achievementsType);
   }
 
-  function updateUserAchievements(
+  function updateUserAchievements (
     AchievementsContainer storage achievementsContainer,
     address user,
     AchievementCommonLib.AchievementsType achievementsType,
@@ -59,6 +73,48 @@ library AchievementLib {
         achievementConfig.factCount++;
         achievementsContainer.userAchievementsIssued[user][i] = true;
         achievementsContainer.peeranhaNFT.mint(user, i);
+      }
+    }
+  }
+
+  function configureNewSoulAchievement (
+    SoulAchievementsContainer storage achievementsContainer,
+    int64 lowerBound,
+    uint32 communityId,
+    string memory achievementURI,
+    AchievementCommonLib.AchievementsType achievementsType
+  ) 
+    internal 
+  {
+    uint64 achievementId = ++achievementsContainer.achievementsCount;
+    achievementsContainer.communitiesAchievement[communityId].push(achievementId);
+    AchievementLib.SoulAchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[achievementId];
+    achievementConfig.lowerBound = lowerBound;
+    achievementConfig.achievementsType = achievementsType;
+
+    achievementsContainer.peeranhaSoulBound.configureNewSoulBoundAchievement(achievementsContainer.achievementsCount, achievementURI, achievementsType);
+  }
+
+  function updateUserSoulAchievements (
+    SoulAchievementsContainer storage achievementsContainer,
+    address user,
+    uint32 communityId,
+    AchievementCommonLib.AchievementsType achievementsType,
+    int64 currentValue
+  )
+    internal
+  {
+    if (achievementsType == AchievementCommonLib.AchievementsType.Rating) {
+      SoulAchievementConfig storage achievementConfig;
+      uint256 communitiesAchievementLength = achievementsContainer.communitiesAchievement[communityId].length;
+      for (uint64 i; i < communitiesAchievementLength; i++) {
+        uint64 achievementId = achievementsContainer.communitiesAchievement[communityId][i];
+        achievementConfig = achievementsContainer.achievementsConfigs[achievementId];
+
+        if (achievementConfig.lowerBound > currentValue) continue;
+        if (achievementsContainer.userAchievementsIssued[user][achievementId]) continue; //already issued
+        achievementsContainer.userAchievementsIssued[user][achievementId] = true;
+        achievementsContainer.peeranhaSoulBound.mint(user, i);
       }
     }
   }
