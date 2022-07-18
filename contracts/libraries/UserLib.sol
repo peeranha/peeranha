@@ -195,7 +195,7 @@ library UserLib {
       0,
       Action.UpdateProfile
     );
-    user.ipfsDoc.hash = ipfsHash;
+    user.ipfsDoc.hash = ipfsHash;   // todo add check
 
     emit UserUpdated(userAddress);
   }

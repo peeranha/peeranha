@@ -488,7 +488,7 @@ describe("Test post", function () {
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
-		it("Test create comment to post by not admin", async function () {
+		it("Test create comment to post by not admin (not own post)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
@@ -520,7 +520,7 @@ describe("Test post", function () {
 			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
-		it("Test create comment to reply by not admin", async function () {
+		it("Test create comment to reply by not admin (not own post and reply)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -533,6 +533,25 @@ describe("Test post", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 			await expect(peeranhaContent.connect(signers[1]).createComment(1, 0, hashContainer[1]))
 			.to.be.revertedWith('low_rating_comment');
+		});
+
+		it("Test create comment to reply by not admin (own post but not own reply)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createComment(1, 1, hashContainer[1]);
+
+			const comment = await peeranhaContent.getComment(1, 1, 1);
+			expect(comment.author).to.equal(signers[1].address);
+			expect(comment.isDeleted).to.equal(false);
+			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
 		it("Test create comment to own reply by not admin", async function () {
