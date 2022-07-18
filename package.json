@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node scripts/change-env-values.js 3 && npx hardhat test && node scripts/change-env-values.js 0",
-    "test-forum-vote": "node scripts/change-env-values.js 0 && npx hardhat test test/contracts/test-forum-vote.js && node scripts/change-env-values.js 0",
+    "test-forum-vote": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-forum-vote.js && node scripts/change-env-values.js 0",
     "compile": "node scripts/change-env-values.js 0 && npx hardhat compile",
     "compile:unit-test": "node scripts/change-env-values.js 3 && npx hardhat compile",
     "size-contracts": "npx hardhat size-contracts",
