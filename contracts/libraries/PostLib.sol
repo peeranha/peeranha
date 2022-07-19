@@ -895,9 +895,18 @@ library PostLib  {
             UserLib.ActionRole.AdminOrCommunityModerator,       // will chech
             false
         );
-        require(newPostType != postContainer.info.postType, "This post type is already set.");
+
+        PostType oldPostType = postContainer.info.postType;
+        require(newPostType != oldPostType, "This post type is already set.");
+        require(
+            oldPostType != PostType.FAQ &&
+            oldPostType != PostType.Tutorial &&
+            newPostType != PostType.FAQ &&
+            newPostType != PostType.Tutorial,
+                "Error_postType"
+        );
         
-        VoteLib.StructRating memory oldTypeRating = getTypesRating(postContainer.info.postType);
+        VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
         int32 positive;
@@ -940,7 +949,7 @@ library PostLib  {
             );
         }
 
-        postContainer.info.postType = newPostType;
+        oldPostType = newPostType;
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
