@@ -90,7 +90,7 @@ async function getBytes32FromData(data) {
 async function main() {
 
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
-  const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+  const peeranhaUser = await PeeranhaUser.attach("0xc39B489c60CF500c5e81901968f31C037aA0B10b");
 
   // const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   // const peeranhaNFT = await PeeranhaNFT.attach("0x7de0057aef43004CFF5B2D63a89Ab834a030f9F3");
@@ -102,12 +102,12 @@ async function main() {
   // console.log(await peeranhaNFT.tokenURI(1));
   // console.log("1")
   // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
-  // console.log("2")
-  // peeranha.giveCommunityModeratorPermission("0xc4ed6fc2e633430b4b982a8b3baa6fc8c62a037e", 1)
-  // console.log("3")
+  console.log("2")
+  await peeranhaUser.giveCommunityModeratorPermission("0xcF472Ad250c7a674ec139506737b98ccC2b12a81", 1)
+  console.log("3")
 
   // console.log("Posting action");
-  await peeranhaUser.createUser(await getBytes32FromData(testAccount));
+  // await peeranhaUser.createUser(await getBytes32FromData(testAccount));
   // await initAchievement(peeranhaUser);
   
   // console.log(JSON.stringify(result))

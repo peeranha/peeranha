@@ -252,9 +252,10 @@ library PostLib  {
         require(postContainer.info.postType != PostType.FAQ, "You can not publish comments in FAQ.");
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
-        Comment storage comment;    ///
-        uint8 commentId;            // struct ?
-        address author;             ///
+        Comment storage comment;
+        uint8 commentId;            // struct? gas
+        address author;
+
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
             comment = postContainer.comments[commentId].info;
@@ -263,7 +264,10 @@ library PostLib  {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
             comment = replyContainer.comments[commentId].info;
-            author = replyContainer.info.author;
+            if (postContainer.info.author == userAddr)
+                author = userAddr;
+            else
+                author = replyContainer.info.author;
         }
 
         self.peeranhaUser.checkActionRole(
@@ -306,7 +310,7 @@ library PostLib  {
             false
         );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // error for moderator (fix? will add new flag)
+        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
@@ -656,7 +660,7 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId,
         bool isUpvote
-    ) public {
+    ) internal {
         PostContainer storage postContainer = getPostContainer(self, postId);
         PostType postType = postContainer.info.postType;
 
@@ -692,7 +696,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public returns (int8) {
+    ) private returns (int8) {
         require(postContainer.info.postType != PostType.FAQ, "You can not vote to FAQ.");
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
@@ -736,7 +740,7 @@ library PostLib  {
         address votedUser,
         PostType postType,
         bool isUpvote
-    ) public returns (int8) {
+    ) private returns (int8) {
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, replyContainer.historyVotes, isUpvote, replyContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -891,9 +895,18 @@ library PostLib  {
             UserLib.ActionRole.AdminOrCommunityModerator,       // will chech
             false
         );
-        require(newPostType != postContainer.info.postType, "This post type is already set.");
+
+        PostType oldPostType = postContainer.info.postType;
+        require(newPostType != oldPostType, "This post type is already set.");
+        require(
+            oldPostType != PostType.FAQ &&
+            oldPostType != PostType.Tutorial &&
+            newPostType != PostType.FAQ &&
+            newPostType != PostType.Tutorial,
+                "Error_postType"
+        );
         
-        VoteLib.StructRating memory oldTypeRating = getTypesRating(postContainer.info.postType);
+        VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
         int32 positive;
@@ -936,7 +949,7 @@ library PostLib  {
             );
         }
 
-        postContainer.info.postType = newPostType;
+        oldPostType = newPostType;
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
