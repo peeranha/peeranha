@@ -24,7 +24,6 @@ describe("Test wallet", function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
 
-
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
 			await peeranhaUser.addUserRating(signers[1].address, 50, 1);
 			await wait(PeriodTime);
@@ -36,9 +35,7 @@ describe("Test wallet", function () {
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
 			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
 
-
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-			
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(60);
 
@@ -48,8 +45,9 @@ describe("Test wallet", function () {
 			await token.connect(signers[1]).claimReward(rewardPeriods[0]);
 			const balance2 = await getBalance(token, signers[1].address);
 			
-			const userReward = await getUserReward(60, 110);
-			const userReward2 = await getUserReward(50, 110);
+			const userReward = await getUserReward(60, 110, 200);
+			const userReward2 = await getUserReward(50, 110, 200);
+
 			expect(balance).to.equal(userReward);
 			expect(balance2).to.equal(userReward2);
 		});
