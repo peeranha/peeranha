@@ -29,7 +29,8 @@
     "init-nfts:prod": "cp env-prod.json env.json && npx hardhat run --network polygon scripts/init-nfts.js",
     "upload-forum-data": "npx hardhat run --network mumbai scripts/upload-forum-data.js",
     "verify-mumbai": "npx hardhat verify 0x71C117c5058eB04619481e006E69F0218Edd06da --network mumbai",
-    "verify-goerli": "npx hardhat verify 0xE61d3E082e416F9a2e3398E97A41ec3F26a6b6A3 --network goerli"
+    "verify-goerli": "npx hardhat verify 0xE61d3E082e416F9a2e3398E97A41ec3F26a6b6A3 --network goerli",
+    "run-script:prod": "npx hardhat run --network polygon"
   },
   "keywords": [],
   "author": "",
