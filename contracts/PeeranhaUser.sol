@@ -226,7 +226,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function initCommunityAdminPermission(address userAddr, uint32 communityId) public override {
+    function initCommunityAdminPermission(address userAddr, uint32 communityId) public override {       // TODO: test new admin + add unittest
         checkUser(userAddr);
         require(_msgSender() == address(userContext.peeranhaCommunity), "unauthorized");
         

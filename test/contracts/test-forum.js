@@ -98,7 +98,7 @@ describe("Test post", function () {
 			);
 		});
 
-		it("Test create FAQ post", async function () {
+		it("Test create Documentation post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
@@ -111,7 +111,7 @@ describe("Test post", function () {
 			await Promise.all(
 				hashContainer.map(async (hash, index) => {
 					return await peeranhaContent.connect(signers[0])
-						.createPost(1, hash, PostTypeEnum.FAQ, []);	
+						.createPost(1, hash, PostTypeEnum.Documentation, []);	
 				})
 			);			
 			
@@ -119,7 +119,7 @@ describe("Test post", function () {
 				hashContainer.map(async (hash, index) => {
 					const post = await peeranhaContent.getPost(index + 1);
 					expect(post.isDeleted).to.equal(false);
-					expect(post.postType).to.equal(PostTypeEnum.FAQ);
+					expect(post.postType).to.equal(PostTypeEnum.Documentation);
 					expect(post.tags.length).to.equal(0);
 					return expect(post.ipfsDoc.hash).to.equal(hash);
 				})
@@ -128,18 +128,32 @@ describe("Test post", function () {
 
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
 
-			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.FAQ, []))
+			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
 				.to.be.revertedWith('not_allowed_not_comm_moderator');
 
 			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.FAQ, []);
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []);
 			const post = await peeranhaContent.getPost(4);
 
 			expect(post.isDeleted).to.equal(false);
-			expect(post.postType).to.equal(PostTypeEnum.FAQ);
+			expect(post.postType).to.equal(PostTypeEnum.Documentation);
 			expect(post.tags.length).to.equal(0);
 			expect(post.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test common user create Documentation post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
+			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
+				.to.be.revertedWith('not_allowed_not_comm_moderator');
 		});
 
 		it("Test create post without tag", async function () {
@@ -238,18 +252,18 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or FAQ.');
+			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or Documentation.');
 		});
 
-		it("Test create reply in FAQ", async function () {
+		it("Test create reply in Documentation", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
-			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or FAQ.');
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
+			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or Documentation.');
 		});
 
 		it("Test create 4 replies (test gas)", async function () {
@@ -449,15 +463,15 @@ describe("Test post", function () {
 			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 
-		it("Test create comment to FAQ", async function () {
+		it("Test create comment to Documentation", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
-			await expect(peeranhaContent.createComment(1, 0, hashContainer[1])).to.be.revertedWith('You can not publish comments in FAQ.');
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
+			await expect(peeranhaContent.createComment(1, 0, hashContainer[1])).to.be.revertedWith('You can not publish comments in Documentation.');
 		});
 
 		it("Test create comment to reply", async function () {
@@ -661,6 +675,21 @@ describe("Test post", function () {
 			expect(post2.ipfsDoc.hash).to.equal(hashContainer[0]);
 			expect(post.tags[0]).to.equal(1);
 			expect(post2.tags[0]).to.equal(2);
+		});
+
+		it("Test edit documentation", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			const post = await peeranhaContent.getPost(1);
+			expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
+
+			await peeranhaContent.editPost(1, hashContainer[2], []);
+			const editedPost = await peeranhaContent.getPost(1);
+			expect(editedPost.ipfsDoc.hash).to.equal(hashContainer[2]);
 		});
 
 		it("Test edit post (wrong tag)", async function () {
@@ -1043,6 +1072,43 @@ describe("Test post", function () {
 
 			const post = await peeranhaContent.getPost(1);
 			expect(post.isDeleted).to.equal(true);
+		});
+
+		it("Test delete own documentation", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
+			await peeranhaContent.deletePost(1);
+
+			const post = await peeranhaContent.getPost(1);
+			expect(post.isDeleted).to.equal(true);
+
+			const userRating = await peeranhaUser.getUserRating(accountDeployed, 1);
+			await expect(userRating).to.equal(StartRatingWithoutAction);
+		});
+
+		it("Test delete documentation by moderator", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
+			await peeranhaContent.connect(signers[1]).deletePost(1);
+
+			const post = await peeranhaContent.getPost(1);
+			expect(post.isDeleted).to.equal(true);
+
+			const userRating = await peeranhaUser.getUserRating(accountDeployed, 1);
+			await expect(userRating).to.equal(StartRatingWithoutAction);
 		});
 
 		it("Test delete post by not registered user", async function () {
@@ -1637,6 +1703,74 @@ describe("Test post", function () {
 			await expect(newAuthorPostRating2).to.equal(newAuthorPostRating + AcceptedCommonReply);
 			await expect(newAuthorOldBestReplyRating2).to.equal(newAuthorOldBestReplyRating2);
 			await expect(newAuthorNewBestReplyRating).to.equal(userRating2Reply + AcceptCommonReply);
+		});
+	});
+
+	describe('Test documentation position', function () {
+		
+		it("Test set documentation position", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+
+			const documentationPosition = await peeranhaContent.getDocumentationPosition(1);
+			expect(documentationPosition.hash).to.equal(hashContainer[0]);
+		});
+
+		it("Test set documentation position for non-existing community", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			
+			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community does not exist');
+		});
+
+		it("Test set documentation position for frozen community ", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.freezeCommunity(1);
+
+			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
+		});
+
+		it("Test edit documentation position", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+			await peeranhaContent.setDocumentationPosition(1, hashContainer[1])
+
+			const documentationPosition = await peeranhaContent.getDocumentationPosition(1);
+			expect(documentationPosition.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test edit documentation position for frozen community ", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+
+			await peeranhaCommunity.freezeCommunity(1);
+			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
 		});
 	});
 });

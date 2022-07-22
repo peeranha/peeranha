@@ -20,8 +20,8 @@ library PostLib  {
     int8 constant DIRECTION_UPVOTE = 1;
     int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
-    enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
-    enum TypeContent { Post, Reply, Comment, FAQ }
+    enum PostType { ExpertPost, CommonPost, Tutorial, Documentation }
+    enum TypeContent { Post, Reply, Comment, Documentation }
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -59,6 +59,10 @@ library PostLib  {
         mapping(uint8 => bytes32) properties;
         mapping(address => int256) historyVotes;
         address[] votedUsers;
+    }
+
+    struct DocumentationPosition {
+        mapping(uint32 => CommonLib.IpfsHash) ipfsDoc;
     }
 
     struct Post {
@@ -108,6 +112,7 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
+    event SetDocumentationPosition(address indexed userAddr, uint32 indexed communityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -130,16 +135,16 @@ library PostLib  {
             userAddr,
             communityId,
             UserLib.Action.PublicationPost,
-            postType == PostType.FAQ ? 
-            UserLib.ActionRole.CommunityModerator :
-            UserLib.ActionRole.NONE,
+            postType == PostType.Documentation ? 
+                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.NONE,
             true
         );
 
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         PostContainer storage post = self.posts[++self.postCount];
-        if (postType != PostType.FAQ) {
+        if (postType != PostType.Documentation) {
             require(tags.length > 0, "At least one tag is required.");
             post.info.tags = tags;
         }
@@ -168,8 +173,8 @@ library PostLib  {
         bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.FAQ, 
-            "You can not publish replies in tutorial or FAQ.");
+        require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.Documentation, 
+            "You can not publish replies in tutorial or Documentation.");
 
         self.peeranhaUser.checkActionRole(
             userAddr,
@@ -249,7 +254,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.postType != PostType.FAQ, "You can not publish comments in FAQ.");
+        require(postContainer.info.postType != PostType.Documentation, "You can not publish comments in Documentation.");
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         Comment storage comment;
@@ -306,11 +311,13 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.EditItem,
-            UserLib.ActionRole.NONE,
+            postContainer.info.postType == PostType.Documentation ? 
+                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.NONE,
             false
         );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
+        require(userAddr == postContainer.info.author || postContainer.info.postType == PostType.Documentation, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
@@ -409,38 +416,42 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.DeleteItem,
-            UserLib.ActionRole.NONE,
+            postContainer.info.postType == PostType.Documentation ? 
+                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.NONE,
             false
         );
 
-        uint256 time = CommonLib.getTimestamp();
-        if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
-            VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
-            (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+        if (postContainer.info.postType != PostType.Documentation) {
+            uint256 time = CommonLib.getTimestamp();
+            if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
+                VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
+                (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
 
-            int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
-            if (changeUserRating > 0) {
-                self.peeranhaUser.updateUserRating(
-                    postContainer.info.author,
-                    -changeUserRating,
-                    postContainer.info.communityId
-                );
+                int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+                if (changeUserRating > 0) {
+                    self.peeranhaUser.updateUserRating(
+                        postContainer.info.author,
+                        -changeUserRating,
+                        postContainer.info.communityId
+                    );
+                }
             }
-        }
-        if (postContainer.info.bestReply != 0) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-        }
+            if (postContainer.info.bestReply != 0) {
+                self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
+            }
 
-        if (time - postContainer.info.postTime < DELETE_TIME) {    
-            for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
-                deductReplyRating(self, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
+            if (time - postContainer.info.postTime < DELETE_TIME) {
+                for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
+                    deductReplyRating(self, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
+                }
             }
+
+            if (userAddr == postContainer.info.author)
+                self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
+            else
+                self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
         }
-        
-        if (userAddr == postContainer.info.author)
-            self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
-        else
-            self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(userAddr, postId);
@@ -697,7 +708,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) private returns (int8) {
-        require(postContainer.info.postType != PostType.FAQ, "You can not vote to FAQ.");
+        require(postContainer.info.postType != PostType.Documentation, "You can not vote to Documentation.");
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -892,16 +903,16 @@ library PostLib  {
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.AdminOrCommunityModerator,       // will chech
+            UserLib.ActionRole.AdminOrCommunityModerator,       // TODO will chech
             false
         );
 
         PostType oldPostType = postContainer.info.postType;
         require(newPostType != oldPostType, "This post type is already set.");
         require(
-            oldPostType != PostType.FAQ &&
+            oldPostType != PostType.Documentation &&
             oldPostType != PostType.Tutorial &&
-            newPostType != PostType.FAQ &&
+            newPostType != PostType.Documentation &&
             newPostType != PostType.Tutorial,
                 "Error_postType"
         );
@@ -949,8 +960,29 @@ library PostLib  {
             );
         }
 
-        oldPostType = newPostType;
+        postContainer.info.postType = newPostType;
         emit ChangePostType(userAddr, postId, newPostType);
+    }
+
+    function setDocumentationPosition(
+        DocumentationPosition storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint32 communityId, 
+        bytes32 ipfsHash
+    ) public {
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        postCollection.peeranhaUser.checkActionRole(
+            userAddr,
+            userAddr,
+            communityId,
+            UserLib.Action.NONE,
+            UserLib.ActionRole.CommunityModerator,
+            false
+        );
+
+        self.ipfsDoc[communityId].hash = ipfsHash;
+        emit SetDocumentationPosition(userAddr, communityId);
     }
 
     function getTypesRating(        //name?

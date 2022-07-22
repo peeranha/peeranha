@@ -13,11 +13,13 @@ import "./interfaces/IPeeranhaCommunity.sol";
 
 contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransaction {
     using PostLib for PostLib.Post;
+    using PostLib for PostLib.DocumentationPosition;
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
 
     PostLib.PostCollection posts;
+    PostLib.DocumentationPosition documentationPosition;
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
@@ -156,8 +158,27 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         posts.voteForumItem(_msgSender(), postId, replyId, commentId, isUpvote);
     }
 
+    /**
+     * @dev Change post type
+     *
+     * Requirements:
+     *
+     * - must be admin or community moderator.
+     * - old and new post type must be Expert or Common type
+    */
     function changePostType(uint256 postId, PostLib.PostType postType) external override {
         posts.changePostType(_msgSender(), postId, postType);
+    }
+
+    /**
+     * @dev Set documentation position
+     *
+     * Requirements:
+     *
+     * - must be a community moderator.
+    */ 
+    function setDocumentationPosition(uint32 communityId, bytes32 ipfsHash) external override {
+        documentationPosition.setDocumentationPosition(posts, _msgSender(), communityId, ipfsHash);
     }
 
     // check need for prod?
@@ -205,6 +226,17 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return posts.getStatusHistory(user, postId, replyId, commentId);
+    }
+
+    /**
+     * @dev Get a documentation position.
+     *
+     * Requirements:
+     *
+     * - must be a documentation position.
+    */
+    function getDocumentationPosition(uint32 communityId) external view returns (CommonLib.IpfsHash memory) {
+        return documentationPosition.ipfsDoc[communityId];
     }
 
     function getVersion() public pure returns (uint256) {

@@ -103,8 +103,12 @@ async function main() {
   // console.log("1")
   // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
   console.log("2")
-  await peeranhaUser.giveCommunityModeratorPermission("0xcF472Ad250c7a674ec139506737b98ccC2b12a81", 1)
-  console.log("3")
+  const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
 
   // console.log("Posting action");
   // await peeranhaUser.createUser(await getBytes32FromData(testAccount));
