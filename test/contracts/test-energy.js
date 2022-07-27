@@ -201,7 +201,7 @@ describe("Test energy", function () {
 		await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 		await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
-		await peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[2])
+		await peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[2], false)
 
 		const user = await peeranhaUser.getUserByAddress(signers[1].address);
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyEditItem);		
@@ -219,7 +219,7 @@ describe("Test energy", function () {
 		await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 		
 		await peeranhaUser.setEnergy(signers[1].address, 1);
-		await expect(peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[2]))
+		await expect(peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[2], false))
 			.to.be.revertedWith('low_energy');
 	}).retries(10);
 
@@ -1094,7 +1094,7 @@ describe("Test energy", function () {
 		await peeranhaContent.editPost(2, hashContainer[2], []);
 		user = await peeranhaUser.getUserByAddress(signers[0].address);
 		await expect(user.energy).to.equal(StartEnergy);
-		await peeranhaContent.editReply(2, 1, hashContainer[2]);
+		await peeranhaContent.editReply(2, 1, hashContainer[2], false);
 		user = await peeranhaUser.getUserByAddress(signers[0].address);
 		await expect(user.energy).to.equal(StartEnergy);
 		await peeranhaContent.editComment(2, 0, 1, hashContainer[2]);
