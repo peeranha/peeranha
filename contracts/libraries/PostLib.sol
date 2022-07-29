@@ -949,7 +949,7 @@ library PostLib  {
             );
         }
 
-        oldPostType = newPostType;
+        postContainer.info.postType = newPostType;
         emit ChangePostType(userAddr, postId, newPostType);
     }
 

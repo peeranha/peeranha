@@ -270,7 +270,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.CommunityAdmin, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
