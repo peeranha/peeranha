@@ -532,7 +532,7 @@ library UserLib {
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.UpVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");
+      require(actionCaller != dataUser, "not_allowed_vote_post");   // toDO unittest post/reply/comment upvote+downvote
       ratingAllowed = UPVOTE_POST_ALLOWED;
       message = "low_rating_upvote";       // TODO unittests
       energy = ENERGY_UPVOTE_QUESTION;

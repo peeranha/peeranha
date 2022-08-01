@@ -921,25 +921,25 @@ library PostLib  {
 
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-            if (!((replyContainer.info.isQuickReply || replyContainer.info.isFirstReply) && replyContainer.info.rating < 0)) {
-                positive = 0;
-                negative = 0;
-                for (uint32 i; i < replyContainer.votedUsers.length; i++) {
-                    if(replyContainer.historyVotes[replyContainer.votedUsers[i]] == 1) positive++;
-                    else if (replyContainer.historyVotes[replyContainer.votedUsers[i]] == -1) negative++;
-                }
+            positive = 0;
+            negative = 0;
+            for (uint32 i; i < replyContainer.votedUsers.length; i++) {
+                if(replyContainer.historyVotes[replyContainer.votedUsers[i]] == 1) positive++;
+                else if (replyContainer.historyVotes[replyContainer.votedUsers[i]] == -1) negative++;
+            }
 
-                changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                        (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+            changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+
+            if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
                     changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
                 }
                 if (replyContainer.info.isQuickReply) {
                     changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
-
-                self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
             }
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
         }
 
         if (postContainer.info.bestReply != 0) {
@@ -951,7 +951,7 @@ library PostLib  {
             );
         }
 
-        oldPostType = newPostType;
+        postContainer.info.postType = newPostType;
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
