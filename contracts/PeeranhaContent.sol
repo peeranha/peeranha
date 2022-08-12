@@ -16,8 +16,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
+    using PostLib for PostLib.ItemTranslation;
 
     PostLib.PostCollection posts;
+    PostLib.ItemTranslation translations;
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
@@ -160,6 +162,44 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         posts.changePostType(_msgSender(), postId, postType);
     }
 
+    /**
+     * @dev Create Translation
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be admin ot community moderator role.
+    */ 
+    function createTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language, bytes32 ipfsHash) external override {
+        translations.createTranslation(posts, postId, replyId, commentId, language, _msgSender(), ipfsHash);
+    }
+    
+    /**
+     * @dev Edit Translation
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be a Translation.
+     * - must be admin ot community moderator role.
+    */ 
+    function editTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language, bytes32 ipfsHash) external override {
+        translations.editTranslation(posts, postId, replyId, commentId, language, _msgSender(), ipfsHash);
+    }
+    
+    /**
+     * @dev Edit Translation
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be a Translation.
+     * - must be admin ot community moderator role.
+    */
+    function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language) external override {
+        translations.deleteTranslation(posts, postId, replyId, commentId, language, _msgSender());
+    }
+
     // check need for prod?
     /**
      * @dev Get a post by index.
@@ -205,6 +245,17 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getStatusHistory(address user, uint256 postId, uint16 replyId, uint8 commentId) external view returns (int256) {
         return posts.getStatusHistory(user, postId, replyId, commentId);
+    }
+
+    /**
+     * @dev Get translation.
+     *
+     * Requirements:
+     *
+     * - must be a translation.
+    */
+    function getTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language) external view returns (PostLib.Translation memory) {
+        return translations.getTranslation(postId, replyId, commentId, language);
     }
 
     function getVersion() public pure returns (uint256) {

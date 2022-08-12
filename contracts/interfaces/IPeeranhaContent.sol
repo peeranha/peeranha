@@ -17,4 +17,7 @@ interface IPeeranhaContent {
     function changeStatusBestReply(uint256 postId, uint16 replyId) external;
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external;
     function changePostType(uint256 postId, PostLib.PostType postType) external;
+    function createTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language, bytes32 ipfsHash) external;
+    function editTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language, bytes32 ipfsHash) external;
+    function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Languages language) external;
 }
