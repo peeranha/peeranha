@@ -51,7 +51,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags
     */
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external override {
-        posts.editPost(_msgSender(), postId, ipfsHash, tags);
+        posts.editPost(documentationPosition, _msgSender(), postId, ipfsHash, tags);
     }
 
     /**

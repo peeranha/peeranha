@@ -298,6 +298,7 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with post information
     function editPost(
         PostCollection storage self,
+        DocumentationPosition storage documentationPosition,
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
@@ -321,6 +322,7 @@ library PostLib  {
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
+            documentationPosition.ipfsDoc[postContainer.info.communityId].hash = ipfsHash;
         if (tags.length > 0)
             postContainer.info.tags = tags;
 
