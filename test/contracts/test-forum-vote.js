@@ -2706,7 +2706,7 @@ describe("Test vote", function () {
 
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).deletePost(1);
-			await expect(peeranhaContent.voteItem(1, 0, 0, 1)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 0, 0, 1)).to.be.revertedWith('Post_deleted.');
 		});
 
 		it("Test downvote post after delete post", async function () {
@@ -2720,7 +2720,7 @@ describe("Test vote", function () {
 
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).deletePost(1);
-			await expect(peeranhaContent.voteItem(1, 0, 0, 0)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 0, 0, 0)).to.be.revertedWith('Post_deleted.');
 		});
 
 		it("Test upvote reply after delete post", async function () {
@@ -2735,7 +2735,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deletePost(1);
-			await expect(peeranhaContent.voteItem(1, 1, 0, 1)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 1, 0, 1)).to.be.revertedWith('Post_deleted.');
 		});
 
 		it("Test downvote reply after delete post", async function () {
@@ -2750,7 +2750,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deletePost(1);
-			await expect(peeranhaContent.voteItem(1, 1, 0, 0)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 1, 0, 0)).to.be.revertedWith('Post_deleted.');
 		});
 
 		it("Test choose reply as the best after delete post", async function () {
@@ -2765,7 +2765,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deletePost(1);
-			await expect(peeranhaContent.changeStatusBestReply(1, 1)).to.be.revertedWith('Post has been deleted.');
+			await expect(peeranhaContent.changeStatusBestReply(1, 1)).to.be.revertedWith('Post_deleted.');
 		});
 	});
 
@@ -2783,7 +2783,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deleteReply(1, 1);
-			await expect(peeranhaContent.voteItem(1, 1, 0, 1)).to.be.revertedWith('Reply has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 1, 0, 1)).to.be.revertedWith('Reply_deleted.');
 		});
 
 		it("Test downvote reply after delete reply", async function () {
@@ -2798,7 +2798,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deleteReply(1, 1);
-			await expect(peeranhaContent.voteItem(1, 1, 0, 0)).to.be.revertedWith('Reply has been deleted.');
+			await expect(peeranhaContent.voteItem(1, 1, 0, 0)).to.be.revertedWith('Reply_deleted.');
 		});
 
 		it("Test choose reply as the best after delete reply", async function () {
@@ -2813,7 +2813,7 @@ describe("Test vote", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], false);
 			await peeranhaContent.deleteReply(1, 1);
-			await expect(peeranhaContent.changeStatusBestReply(1, 1)).to.be.revertedWith('Reply has been deleted.');
+			await expect(peeranhaContent.changeStatusBestReply(1, 1)).to.be.revertedWith('Reply_deleted.');
 		});
 	});
 

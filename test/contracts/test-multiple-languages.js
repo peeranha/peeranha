@@ -77,7 +77,7 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslation(1, 0, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 0, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for post, post was deleted", async function () {
@@ -86,7 +86,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 				await peeranhaContent.deletePost(1);
 
-				await expect(peeranhaContent.createTranslation(1, 0, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 0, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for post, community was frozen", async function () {
@@ -144,7 +144,7 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for reply without reply", async function () {
@@ -152,7 +152,7 @@ describe("Test translations", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply_not_exist.');
 			});
 
 			it("Test create translation for reply, post was deleted", async function () {
@@ -162,7 +162,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 				await peeranhaContent.deletePost(1);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for reply, reply was deleted", async function () {
@@ -172,7 +172,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 				await peeranhaContent.deleteReply(1, 1);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 1, 0, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply_deleted.');
 			});
 
 			it("Test create translation for reply, community was frozen", async function () {
@@ -273,7 +273,7 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for comment to reply without reply", async function () {
@@ -281,7 +281,7 @@ describe("Test translations", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Reply_not_exist.');
 			});
 
 			it("Test create translation for comment to post without comment", async function () {
@@ -289,7 +289,7 @@ describe("Test translations", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment_not_exist.');
 			});
 
 			it("Test create translation for comment to reply without comment", async function () {
@@ -298,7 +298,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 				await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment does not exist.');
+				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment_not_exist.');
 			});
 
 			it("Test create translation for comment to post, post was deleted", async function () {
@@ -308,7 +308,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(1, 0, hashContainer[1]);
 				await peeranhaContent.deletePost(1);
 
-				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for comment to reply, post was deleted", async function () {
@@ -319,7 +319,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(1, 1, hashContainer[1]);
 				await peeranhaContent.deletePost(1);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for comment to post, comment was deleted", async function () {
@@ -329,7 +329,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(1, 0, hashContainer[1]);
 				await peeranhaContent.deleteComment(1, 0, 1);
 
-				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 0, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment_deleted.');
 			});
 
 			it("Test create translation for comment to post, comment was deleted", async function () {
@@ -340,7 +340,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(1, 1, hashContainer[1]);
 				await peeranhaContent.deleteComment(1, 1, 1);
 
-				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment has been deleted.');
+				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Comment_deleted.');
 			});
 
 			it("Test create translation for comment to post, community was frozen", async function () {

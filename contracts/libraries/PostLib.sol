@@ -22,7 +22,7 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
     enum TypeContent { Post, Reply, Comment, FAQ }
-    enum Languages { English, Chinese }
+    enum Language { English, Chinese }
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -97,8 +97,8 @@ library PostLib  {
         IPeeranhaUser peeranhaUser; 
     }
 
-    struct ItemTranslation {
-        mapping(bytes32 => TranslationContainer) itemTranslations;
+    struct TranslationCollection {
+        mapping(bytes32 => TranslationContainer) translations;
     }
 
     struct Translation {
@@ -126,9 +126,9 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Languages language);
-    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Languages language);
-    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Languages language);
+    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -397,7 +397,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
+        CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, parentReplyId, commentId);
         self.peeranhaUser.checkActionRole(
             userAddr,
             commentContainer.info.author,
@@ -582,7 +582,7 @@ library PostLib  {
         uint8 commentId
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        CommentContainer storage commentContainer = getCommentContainerSave(postContainer, parentReplyId, commentId);
+        CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, parentReplyId, commentId);
         self.peeranhaUser.checkActionRole(
             userAddr,
             commentContainer.info.author,
@@ -686,7 +686,7 @@ library PostLib  {
 
         int8 voteDirection;
         if (commentId != 0) {
-            CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
+            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
             require(userAddr != commentContainer.info.author, "error_vote_comment");
             voteDirection = voteComment(self, commentContainer, postContainer.info.communityId, userAddr, isUpvote);
 
@@ -974,18 +974,18 @@ library PostLib  {
     }
 
     function initTranslation(
-        ItemTranslation storage self,
+        TranslationCollection storage self,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language,
+        Language language,
         address userAddr,
         bytes32 ipfsHash
     ) private {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
-        TranslationContainer storage translationContainer = self.itemTranslations[item];
+        TranslationContainer storage translationContainer = self.translations[item];
         translationContainer.info.ipfsDoc.hash = ipfsHash;
         translationContainer.info.author = userAddr;
         translationContainer.info.postTime = CommonLib.getTimestamp();
@@ -993,7 +993,7 @@ library PostLib  {
         emit TranslationCreated(userAddr, postId, replyId, commentId, language);
     }
 
-    function checkTranslationData(
+    function validateTranslationParams(
         PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
@@ -1005,7 +1005,7 @@ library PostLib  {
         if (replyId != 0)
             getReplyContainerSafe(postContainer, replyId);
         if (commentId != 0)
-            getCommentContainerSave(postContainer, replyId, commentId);
+            getCommentContainerSafe(postContainer, replyId, commentId);
 
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
@@ -1018,31 +1018,31 @@ library PostLib  {
     }
     
     function createTranslation(
-        ItemTranslation storage self,
+        TranslationCollection storage self,
         PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language,
+        Language language,
         address userAddr,
         bytes32 ipfsHash
     ) internal {
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         initTranslation( self, postId, replyId, commentId, language, userAddr, ipfsHash);
     }
 
     function createTranslations(
-        ItemTranslation storage self,
+        TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages[] memory languages,
+        Language[] memory languages,
         address userAddr,
         bytes32[] memory ipfsHashs
     ) internal {
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
@@ -1051,40 +1051,40 @@ library PostLib  {
     }
     
     function editTranslation(
-        ItemTranslation storage itemTranslation,
+        TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language,
+        Language language,
         address userAddr,
         bytes32 ipfsHash
     ) internal {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
         
-        TranslationContainer storage translationContainer = getTranslationSave(itemTranslation, postId, replyId, commentId, language);
+        TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, language);
         translationContainer.info.ipfsDoc.hash = ipfsHash;
 
         emit TranslationEdited(userAddr, postId, replyId, commentId, language);
     }
 
     function editTranslations(
-        ItemTranslation storage itemTranslation,
+        TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages[] memory languages,
+        Language[] memory languages,
         address userAddr,
         bytes32[] memory ipfsHashs
     ) internal {
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
             require(!CommonLib.isEmptyIpfs(ipfsHashs[i]), "Invalid_ipfsHash");
-            TranslationContainer storage translationContainer = getTranslationSave(itemTranslation, postId, replyId, commentId, languages[i]);
+            TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, languages[i]);
             translationContainer.info.ipfsDoc.hash = ipfsHashs[i];
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
@@ -1092,35 +1092,35 @@ library PostLib  {
     }
 
     function deleteTranslation(
-        ItemTranslation storage itemTranslation,
+        TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language,
+        Language language,
         address userAddr
     ) internal {
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
         
-        TranslationContainer storage translationContainer = getTranslationSave(itemTranslation, postId, replyId, commentId, language);
+        TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, language);
         translationContainer.info.isDeleted = true;
 
         emit TranslationDeleted(userAddr, postId, replyId, commentId, language);
     }
 
     function deleteTranslations(
-        ItemTranslation storage itemTranslation,
+        TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages[] memory languages,
+        Language[] memory languages,
         address userAddr
     ) internal {
-        checkTranslationData(postCollection, postId, replyId, commentId, userAddr);
+        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         for (uint32 i; i < languages.length; i++) {
-            TranslationContainer storage translationContainer = getTranslationSave(itemTranslation, postId, replyId, commentId, languages[i]);
+            TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, languages[i]);
             translationContainer.info.isDeleted = true;
 
             emit TranslationDeleted(userAddr, postId, replyId, commentId, languages[i]);
@@ -1131,7 +1131,7 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language
+        Language language
     ) private pure returns (bytes32) {
         return bytes32(postId << 192 | uint256(replyId) << 128 | uint256(commentId) << 64 | uint256(language));
     }  
@@ -1146,7 +1146,7 @@ library PostLib  {
         else if (postType == PostType.Tutorial)
             return VoteLib.getTutorialRating();
         
-        revert("invalid_post_type");
+        revert("Invalid_post_type");
     }
 
     /// @notice Return post
@@ -1157,8 +1157,8 @@ library PostLib  {
         uint256 postId
     ) public view returns (PostContainer storage) {
         PostContainer storage post = self.posts[postId];
-        require(!CommonLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post does not exist.");
-        require(!post.info.isDeleted, "Post has been deleted.");
+        require(!CommonLib.isEmptyIpfs(post.info.ipfsDoc.hash), "Post_not_exist.");
+        require(!post.info.isDeleted, "Post_deleted.");
         
         return post;
     }
@@ -1172,7 +1172,7 @@ library PostLib  {
     ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer = postContainer.replies[replyId];
 
-        require(!CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply does not exist.");
+        require(!CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash), "Reply_not_exist.");
         return replyContainer;
     }
 
@@ -1184,7 +1184,7 @@ library PostLib  {
         uint16 replyId
     ) public view returns (ReplyContainer storage) {
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-        require(!replyContainer.info.isDeleted, "Reply has been deleted.");
+        require(!replyContainer.info.isDeleted, "Reply_deleted.");
 
         return replyContainer;
     }
@@ -1206,7 +1206,7 @@ library PostLib  {
             ReplyContainer storage reply = getReplyContainerSafe(postContainer, parentReplyId);
             commentContainer = reply.comments[commentId];
         }
-        require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment does not exist.");
+        require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
 
         return commentContainer;
     }
@@ -1215,14 +1215,14 @@ library PostLib  {
     /// @param postContainer The post where is the comment
     /// @param parentReplyId The parent reply
     /// @param commentId The commentId which need find
-    function getCommentContainerSave(
+    function getCommentContainerSafe(
         PostContainer storage postContainer,
         uint16 parentReplyId,
         uint8 commentId
     ) public view returns (CommentContainer storage) {
         CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
 
-        require(!commentContainer.info.isDeleted, "Comment has been deleted.");
+        require(!commentContainer.info.isDeleted, "Comment_deleted.");
         return commentContainer;
     }
 
@@ -1285,7 +1285,7 @@ library PostLib  {
 
         int256 statusHistory;
         if (commentId != 0) {
-            CommentContainer storage commentContainer = getCommentContainerSave(postContainer, replyId, commentId);
+            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
             statusHistory = commentContainer.historyVotes[userAddr];
         } else if (replyId != 0) {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -1314,29 +1314,29 @@ library PostLib  {
         return (positive, negative);
     }
 
-    function getTranslationSave(
-        ItemTranslation storage self,
+    function getTranslationSafe(
+        TranslationCollection storage self,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language
+        Language language
     ) private view returns (TranslationContainer storage) {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
-        TranslationContainer storage translationContainer = self.itemTranslations[item];
-        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation does not exist.");
-        require(!translationContainer.info.isDeleted, "Translation has been deleted.");
+        TranslationContainer storage translationContainer = self.translations[item];
+        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_not_exist."); // todo: tests
+        require(!translationContainer.info.isDeleted, "Translation_deleted.");                         // todo: tests
         
         return translationContainer;
     }
 
     function getTranslation(
-        ItemTranslation storage self,
+        TranslationCollection storage self,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Languages language
+        Language language
     ) internal view returns (Translation memory) {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
-        return self.itemTranslations[item].info;
+        return self.translations[item].info;
     }
 }
