@@ -113,6 +113,8 @@ library PostLib  {
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
     event SetDocumentationPosition(address indexed userAddr, uint32 indexed communityId);
+    event EditDocumentationPosition(address indexed userAddr, uint256 indexed postId);
+    event DeleteDocumentationPosition(address indexed userAddr, uint256 indexed postId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -986,6 +988,49 @@ library PostLib  {
         self.ipfsDoc[communityId].hash = ipfsHash;
         emit SetDocumentationPosition(userAddr, communityId);
     }
+
+    function editDocumentationPosition(
+        DocumentationPosition storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint256 postId,
+        bytes32 ipfsHash
+    ) public {
+        PostContainer storage postContainer = getPostContainer(postCollection, postId);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
+        postCollection.peeranhaUser.checkActionRole(
+            userAddr,
+            userAddr,
+            postContainer.info.communityId,
+            UserLib.Action.NONE,
+            UserLib.ActionRole.CommunityModerator,
+            false
+        );
+
+        self.ipfsDoc[postContainer.info.communityId].hash = ipfsHash;
+        emit EditDocumentationPosition(userAddr, postContainer.info.communityId);
+    }
+
+    function deleteDocumentationPosition(
+        DocumentationPosition storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint256 postId
+    ) public {
+        PostContainer storage postContainer = getPostContainer(postCollection, postId);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
+        postCollection.peeranhaUser.checkActionRole(
+            userAddr,
+            userAddr,
+            postContainer.info.communityId,
+            UserLib.Action.NONE,
+            UserLib.ActionRole.CommunityModerator,
+            false
+        );
+
+        delete self.ipfsDoc[postContainer.info.communityId];
+        emit DeleteDocumentationPosition(userAddr, postContainer.info.communityId);
+    } 
 
     function getTypesRating(        //name?
         PostType postType

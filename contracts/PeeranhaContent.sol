@@ -181,6 +181,47 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         documentationPosition.setDocumentationPosition(posts, _msgSender(), communityId, ipfsHash);
     }
 
+    /**
+     * @dev create documentation post.
+     *
+     * Requirements:
+     *
+     * - must be a new documentation post.
+     * - must be a community.
+     * - must be tags.
+    */
+    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationIpfsHash, PostLib.PostType postType, uint8[] memory tags) external {
+        posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
+        documentationPosition.setDocumentationPosition(posts, _msgSender(), communityId, documentationIpfsHash);
+    }
+
+    /**
+     * @dev Edit documentation post info.
+     *
+     * Requirements:
+     *
+     * - must be a documentation post.
+     * - must be new info about documentation post
+     * - must be a community.
+     * - must be tags
+    */
+    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationIpfsHash, uint8[] memory tags) external {
+        posts.editPost(documentationPosition, _msgSender(), postId, ipfsHash, tags);
+        documentationPosition.editDocumentationPosition(posts, _msgSender(), postId, documentationIpfsHash);
+    }
+
+    /**
+     * @dev delete documentation post.
+     *
+     * Requirements:
+     *
+     * - must be a documentation post.
+    */
+    function deleteDocumentationPost(uint256 postId) external {
+        posts.deletePost(_msgSender(), postId);
+        documentationPosition.deleteDocumentationPosition(posts, _msgSender(), postId);
+    }
+
     // check need for prod?
     /**
      * @dev Get a post by index.
