@@ -61,7 +61,7 @@ library PostLib  {
         address[] votedUsers;
     }
 
-    struct DocumentationPosition {
+    struct DocumentationTree {
         mapping(uint32 => CommonLib.IpfsHash) ipfsDoc;
     }
 
@@ -112,7 +112,7 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-    event SetDocumentationPosition(address indexed userAddr, uint32 indexed communityId);
+    event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -964,12 +964,12 @@ library PostLib  {
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
-    function setDocumentationPosition(
-        DocumentationPosition storage self,
+    function updateDocumentationTree(
+        DocumentationTree storage self,
         PostCollection storage postCollection,
         address userAddr,
         uint32 communityId, 
-        bytes32 ipfsHash
+        bytes32 documentationTreeIpfsHash
     ) public {
         postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         postCollection.peeranhaUser.checkActionRole(
@@ -981,8 +981,8 @@ library PostLib  {
             false
         );
 
-        self.ipfsDoc[communityId].hash = ipfsHash;
-        emit SetDocumentationPosition(userAddr, communityId);
+        self.ipfsDoc[communityId].hash = documentationTreeIpfsHash;
+        emit SetDocumentationTree(userAddr, communityId);
     }
 
     function getTypesRating(        //name?

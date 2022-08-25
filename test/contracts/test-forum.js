@@ -1097,6 +1097,7 @@ describe("Test post", function () {
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
@@ -1716,10 +1717,10 @@ describe("Test post", function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+			await peeranhaContent.updateDocumentationTree(1, hashContainer[0])
 
-			const documentationPosition = await peeranhaContent.getDocumentationPosition(1);
-			expect(documentationPosition.hash).to.equal(hashContainer[0]);
+			const documentationTree = await peeranhaContent.getDocumentationTree(1);
+			expect(documentationTree.hash).to.equal(hashContainer[0]);
 		});
 
 		it("Test set documentation position for non-existing community", async function () {
@@ -1729,7 +1730,7 @@ describe("Test post", function () {
 			const ipfsHashes = getHashesContainer(2);
 			await peeranhaUser.createUser(hashContainer[1]);
 			
-			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community does not exist');
+			await expect(peeranhaContent.updateDocumentationTree(1, hashContainer[0])).to.be.revertedWith('Community does not exist');
 		});
 
 		it("Test set documentation position for frozen community ", async function () {
@@ -1741,7 +1742,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(1);
 
-			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
+			await expect(peeranhaContent.updateDocumentationTree(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
 		});
 
 		it("Test edit documentation position", async function () {
@@ -1752,11 +1753,11 @@ describe("Test post", function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
-			await peeranhaContent.setDocumentationPosition(1, hashContainer[1])
+			await peeranhaContent.updateDocumentationTree(1, hashContainer[0])
+			await peeranhaContent.updateDocumentationTree(1, hashContainer[1])
 
-			const documentationPosition = await peeranhaContent.getDocumentationPosition(1);
-			expect(documentationPosition.hash).to.equal(hashContainer[1]);
+			const documentationTree = await peeranhaContent.getDocumentationTree(1);
+			expect(documentationTree.hash).to.equal(hashContainer[1]);
 		});
 
 		it("Test edit documentation position for frozen community ", async function () {
@@ -1767,10 +1768,10 @@ describe("Test post", function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+			await peeranhaContent.updateDocumentationTree(1, hashContainer[0])
 
 			await peeranhaCommunity.freezeCommunity(1);
-			await expect(peeranhaContent.setDocumentationPosition(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
+			await expect(peeranhaContent.updateDocumentationTree(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
 		});
 	});
 });
