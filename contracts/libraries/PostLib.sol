@@ -136,7 +136,7 @@ library PostLib  {
             communityId,
             UserLib.Action.PublicationPost,
             postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             true
         );
@@ -312,7 +312,7 @@ library PostLib  {
             postContainer.info.communityId,
             UserLib.Action.EditItem,
             postContainer.info.postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
@@ -417,7 +417,7 @@ library PostLib  {
             postContainer.info.communityId,
             UserLib.Action.DeleteItem,
             postContainer.info.postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
@@ -977,7 +977,7 @@ library PostLib  {
             userAddr,
             communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
+            UserLib.ActionRole.CommunityAdmin,
             false
         );
 
