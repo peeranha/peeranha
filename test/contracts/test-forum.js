@@ -129,7 +129,7 @@ describe("Test post", function () {
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
 
 			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-				.to.be.revertedWith('not_allowed_not_comm_moderator');
+				.to.be.revertedWith('not_allowed_not_comm_admin');
 
 			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 
@@ -153,7 +153,7 @@ describe("Test post", function () {
 
 			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
 			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-				.to.be.revertedWith('not_allowed_not_comm_moderator');
+				.to.be.revertedWith('not_allowed_not_comm_admin');
 		});
 
 		it("Test create post without tag", async function () {

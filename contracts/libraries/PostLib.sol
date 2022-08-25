@@ -489,7 +489,6 @@ library PostLib  {
         ///
         require(postContainer.info.bestReply != replyId || userAddr != replyContainer.info.author, "You can not delete the best reply.");
 
-
         uint256 time = CommonLib.getTimestamp();
         if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
             deductReplyRating(
