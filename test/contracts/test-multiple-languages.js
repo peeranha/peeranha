@@ -33,7 +33,7 @@ describe("Test translations", function () {
 		hashContainer = getHashContainer();
 	});
 
-	describe("Test translations for post", function () {
+	describe("Test translation for post", function () {
 
 		describe('Test create/edit/delete translation for post', function () {
 
@@ -364,5 +364,67 @@ describe("Test translations", function () {
 				await expect(peeranhaContent.createTranslation(1, 1, 1, LenguagesEnum.English, ipfsHashes[1])).to.be.revertedWith('Community is frozen');
 			});
 		});
+	});
+
+	describe("Test array translations for post", function () {		// todo: Error_array/delete edit only one lenguage/ create + create for one post 
+		it("Test create 1 translation post", async function () {
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English], [ipfsHashes[1]])
+			
+			const translation = await peeranhaContent.getTranslation(1, 0, 0, LenguagesEnum.English)
+			expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[1]);
+			expect(translation.isDeleted).to.equal(false);
+		});
+
+		it("Test create 2 translations for post", async function () {
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
+			
+			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
+			translationList.map((translation, index) => {
+				console.log()
+				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
+				expect(translation.isDeleted).to.equal(false);
+			})
+		});
+
+		it("Test edit 2 translations for post", async function () {
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
+			await peeranhaContent.editTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[3], ipfsHashes[4]])
+			
+			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
+			translationList.map((translation, index) => {
+				console.log()
+				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 3]);
+				expect(translation.isDeleted).to.equal(false);
+			})
+		});
+
+		it("Test delete 2 translations for post", async function () {
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
+			await peeranhaContent.deleteTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese])
+			
+			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
+			translationList.map((translation, index) => {
+				console.log()
+				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
+				expect(translation.isDeleted).to.equal(true);
+			})
+		});
+
 	});
 });

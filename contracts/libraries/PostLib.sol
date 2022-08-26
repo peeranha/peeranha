@@ -22,7 +22,8 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
     enum TypeContent { Post, Reply, Comment, FAQ }
-    enum Language { English, Chinese }
+    enum Language { English, Chinese, Length }
+    uint256 constant LANGUADE_LENGTH = 5;
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -1012,7 +1013,7 @@ library PostLib  {
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
+            UserLib.ActionRole.CommunityAdmin,      // todo: add test
             false
         );
     }
@@ -1020,11 +1021,11 @@ library PostLib  {
     function createTranslation(
         TranslationCollection storage self,
         PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
         Language language,
-        address userAddr,
         bytes32 ipfsHash
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
@@ -1035,11 +1036,11 @@ library PostLib  {
     function createTranslations(
         TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
         Language[] memory languages,
-        address userAddr,
         bytes32[] memory ipfsHashs
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
@@ -1053,11 +1054,11 @@ library PostLib  {
     function editTranslation(
         TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
         Language language,
-        address userAddr,
         bytes32 ipfsHash
     ) internal {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
@@ -1072,11 +1073,11 @@ library PostLib  {
     function editTranslations(
         TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
         Language[] memory languages,
-        address userAddr,
         bytes32[] memory ipfsHashs
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
@@ -1094,11 +1095,11 @@ library PostLib  {
     function deleteTranslation(
         TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Language language,
-        address userAddr
+        Language language
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
         
@@ -1111,11 +1112,11 @@ library PostLib  {
     function deleteTranslations(
         TranslationCollection storage translationCollection,
         PostLib.PostCollection storage postCollection,
+        address userAddr,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
-        Language[] memory languages,
-        address userAddr
+        Language[] memory languages
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
@@ -1338,5 +1339,20 @@ library PostLib  {
     ) internal view returns (Translation memory) {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
         return self.translations[item].info;
+    }
+
+    function getTranslations(
+        TranslationCollection storage self,
+        uint256 postId,
+        uint16 replyId,
+        uint8 commentId
+    ) internal view returns (Translation[] memory) {
+        Translation[] memory translation = new Translation[](uint256(Language.Length));
+
+        for (uint256 i; i < uint(Language.Length); i++) {
+            bytes32 item = getTranslationItemHash(postId, replyId, commentId, Language(uint(i)));
+            translation[i] = self.translations[item].info;
+        }
+        return translation;
     }
 }

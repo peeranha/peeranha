@@ -163,7 +163,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     /**
-     * @dev Create Translation
+     * @dev Create translation 
      *
      * Requirements:
      *
@@ -171,7 +171,19 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be admin ot community moderator role.
     */ 
     function createTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external override {
-        translations.createTranslation(posts, postId, replyId, commentId, language, _msgSender(), ipfsHash);
+        translations.createTranslation(posts, _msgSender(), postId, replyId, commentId, language, ipfsHash);
+    }
+
+    /**
+     * @dev Create several Translations for post/reply/comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be admin ot community moderator role.
+    */ 
+    function createTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        translations.createTranslations(posts, _msgSender(), postId, replyId, commentId, languages, ipfsHashs);
     }
     
     /**
@@ -184,11 +196,24 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be admin ot community moderator role.
     */ 
     function editTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external override {
-        translations.editTranslation(posts, postId, replyId, commentId, language, _msgSender(), ipfsHash);
+        translations.editTranslation(posts, _msgSender(), postId, replyId, commentId, language, ipfsHash);
+    }
+
+    /**
+     * @dev Edit several Translations for post/reply/comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be a Translations.
+     * - must be admin ot community moderator role.
+    */ 
+    function editTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        translations.editTranslations(posts, _msgSender(), postId, replyId, commentId, languages, ipfsHashs);
     }
     
     /**
-     * @dev Edit Translation
+     * @dev Delete Translation
      *
      * Requirements:
      *
@@ -197,7 +222,20 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be admin ot community moderator role.
     */
     function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language) external override {
-        translations.deleteTranslation(posts, postId, replyId, commentId, language, _msgSender());
+        translations.deleteTranslation(posts, _msgSender(), postId, replyId, commentId, language);
+    }
+
+    /**
+     * @dev Delete several Translations for post/reply/comment
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment.
+     * - must be a Translation.
+     * - must be admin ot community moderator role.
+    */
+    function deleteTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
+        translations.deleteTranslations(posts, _msgSender(), postId, replyId, commentId, languages);
     }
 
     // check need for prod?
@@ -256,6 +294,17 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language) external view returns (PostLib.Translation memory) {
         return translations.getTranslation(postId, replyId, commentId, language);
+    }
+
+    /**
+     * @dev Get several Translations for post/reply/comment.
+     *
+     * Requirements:
+     *
+     * - must be a translation.
+    */
+    function getTranslations(uint256 postId, uint16 replyId, uint8 commentId) external view returns (PostLib.Translation[] memory) {
+        return translations.getTranslations(postId, replyId, commentId);
     }
 
     function getVersion() public pure returns (uint256) {
