@@ -388,23 +388,26 @@ describe("Test translations", function () {
 			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
 			
 			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
-			console.log(translationList)
-			translationList.map((translation, index) => {
-				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
-				expect(translation.isDeleted).to.equal(false);
-			})
+			expect(translationList[0].ipfsDoc.hash).to.equal(ipfsHashes[1]);
+			expect(translationList[0].isDeleted).to.equal(false);
+
+			expect(translationList[1].ipfsDoc.hash).to.equal(ipfsHashes[2]);
+			expect(translationList[1].isDeleted).to.equal(false);
+
+			expect(translationList[2].ipfsDoc.hash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
+			expect(translationList[2].isDeleted).to.equal(false);
 		});
 
 		it("Test create all translations for post", async function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createTranslations(1, 0, 0, getTranslationValues(), getHashTranslation())
+			const hashTranslation = getHashTranslation();
+			await peeranhaContent.createTranslations(1, 0, 0, getTranslationValues(), hashTranslation)
 			
-			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
+			const translationList = await peeranhaContent.getTranslations(1, 0, 0);
 			translationList.map((translation, index) => {
-				console.log()
-				expect(translation.ipfsDoc.hash).to.equal(getHashTranslation()[index]);
+				expect(translation.ipfsDoc.hash).to.equal(hashTranslation[index]);
 				expect(translation.isDeleted).to.equal(false);
 			})
 		});
@@ -418,11 +421,15 @@ describe("Test translations", function () {
 			await peeranhaContent.editTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[3], ipfsHashes[4]])
 			
 			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
-			translationList.map((translation, index) => {
-				console.log()
-				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 3]);
-				expect(translation.isDeleted).to.equal(false);
-			})
+			
+			expect(translationList[0].ipfsDoc.hash).to.equal(ipfsHashes[3]);
+			expect(translationList[0].isDeleted).to.equal(false);
+
+			expect(translationList[1].ipfsDoc.hash).to.equal(ipfsHashes[4]);
+			expect(translationList[1].isDeleted).to.equal(false);
+
+			expect(translationList[2].ipfsDoc.hash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
+			expect(translationList[2].isDeleted).to.equal(false);
 		});
 
 		it("Test delete 2 translations for post", async function () {
@@ -434,11 +441,10 @@ describe("Test translations", function () {
 			await peeranhaContent.deleteTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese])
 			
 			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
-			translationList.map((translation, index) => {
-				console.log()
-				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
-				expect(translation.isDeleted).to.equal(true);
-			})
+
+			expect(translationList[0].isDeleted).to.equal(true);
+			expect(translationList[1].isDeleted).to.equal(true);
+			expect(translationList[2].isDeleted).to.equal(false);
 		});
 	});
 });
