@@ -1,7 +1,7 @@
 const { disableExperimentalFragmentVariables } = require("@apollo/client");
 const { expect } = require("chai");
 const { 
-	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags,
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashTranslation, getTranslationValues, getHashesContainer, createTags,
 	PostTypeEnum, LenguagesEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
@@ -366,7 +366,8 @@ describe("Test translations", function () {
 		});
 	});
 
-	describe("Test array translations for post", function () {		// todo: Error_array/delete edit only one lenguage/ create + create for one post 
+	describe("Test array translations for post", function () {		// todo: Error_array/delete edit only one lenguage/ create + create for one post
+
 		it("Test create 1 translation post", async function () {
 			await peeranhaUser.createUser(hashContainer[1]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
@@ -387,9 +388,23 @@ describe("Test translations", function () {
 			await peeranhaContent.createTranslations(1, 0, 0, [LenguagesEnum.English, LenguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
 			
 			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
+			console.log(translationList)
+			translationList.map((translation, index) => {
+				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
+				expect(translation.isDeleted).to.equal(false);
+			})
+		});
+
+		it("Test create all translations for post", async function () {
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createTranslations(1, 0, 0, getTranslationValues(), getHashTranslation())
+			
+			const translationList = await peeranhaContent.getTranslations(1, 0, 0)
 			translationList.map((translation, index) => {
 				console.log()
-				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[index + 1]);
+				expect(translation.ipfsDoc.hash).to.equal(getHashTranslation()[index]);
 				expect(translation.isDeleted).to.equal(false);
 			})
 		});
@@ -425,6 +440,5 @@ describe("Test translations", function () {
 				expect(translation.isDeleted).to.equal(true);
 			})
 		});
-
 	});
 });

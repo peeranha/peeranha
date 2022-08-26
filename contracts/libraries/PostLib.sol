@@ -22,7 +22,7 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
     enum TypeContent { Post, Reply, Comment, FAQ }
-    enum Language { English, Chinese, Length }
+    enum Language { English, Chinese, Spanish, Vietnamese, Length }
     uint256 constant LANGUADE_LENGTH = 5;
 
     struct Comment {
@@ -983,7 +983,7 @@ library PostLib  {
         address userAddr,
         bytes32 ipfsHash
     ) private {
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");      // todo test
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
         TranslationContainer storage translationContainer = self.translations[item];
