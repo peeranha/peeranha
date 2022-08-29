@@ -33,6 +33,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * Requirements:
      *
      * - Must be a new community.
+     * - Sender must be a admin.
      */
     function createCommunity(bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public  {
         address msgSender = _msgSender();
@@ -47,7 +48,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * Requirements:
      *
      * - Must be an existing community.  
-     * - Sender must be community moderator.
+     * - Sender must be admin or community admin.
      */
     function updateCommunity(uint32 communityId, bytes32 ipfsHash) public  {
         address msgSender = _msgSender();
@@ -62,9 +63,9 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * Requirements:
      *
      * - Must be an existing community.  
-     * - Sender must be community moderator.
+     * - Sender must be admin or community admin.
      */
-    function freezeCommunity(uint32 communityId) public  {
+    function freezeCommunity(uint32 communityId) public  {      // todo: unitests
         address msgSender = _msgSender();
         onlyExistingAndNotFrozenCommunity(communityId);
         peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
@@ -77,7 +78,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * Requirements:
      *
      * - Must be an existing community.  
-     * - Sender must be community moderator.
+     * - Sender must be admin and community moderator.
      */
     function unfreezeCommunity(uint32 communityId) public  {
         address msgSender = _msgSender();
@@ -92,6 +93,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      *
      * - Must be a new tag.
      * - Must be an existing community. 
+     * - Must be admin and community admin
      */
     function createTag(uint32 communityId, bytes32 ipfsHash) public  { // community admin || global moderator
         onlyExistingAndNotFrozenCommunity(communityId);
@@ -107,7 +109,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      *
      * - Must be an existing commuity. 
      * - Must be an existing tag.  
-     * - Sender must be community moderator.
+     * - Sender must be admin or community admin.
      */
     function updateTag(uint32 communityId, uint8 tagId, bytes32 ipfsHash) public  onlyExistingTag(tagId, communityId) {
         address msgSender = _msgSender();

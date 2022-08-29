@@ -91,7 +91,7 @@ describe("Test vote", function () {
 			await expect(statusHistory._hex).to.equal('0x01');
 		});
 
-		it("Test upVote FAQ post", async function () {
+		it("Test upVote Documentation post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -103,8 +103,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 
 
-			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
-			await expect(peeranhaContent.voteItem(1, 0, 0, 1)).to.be.revertedWith("You can not vote to FAQ.");
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
+			await expect(peeranhaContent.voteItem(1, 0, 0, 1)).to.be.revertedWith("You can not vote to Documentation.");
 		});
 	});
 
@@ -310,7 +310,7 @@ describe("Test vote", function () {
 			await expect(statusHistory._hex).to.equal('-0x01');
 		});
 
-		it("Test downVote FAQ post", async function () {
+		it("Test downVote Documentation post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -322,8 +322,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
 
 
-			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.FAQ, []);
-			await expect(peeranhaContent.voteItem(1, 0, 0, 0)).to.be.revertedWith("You can not vote to FAQ.");
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
+			await expect(peeranhaContent.voteItem(1, 0, 0, 0)).to.be.revertedWith("You can not vote to Documentation.");
 		});
 	});
 
@@ -2852,7 +2852,7 @@ describe("Test vote", function () {
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Tutorial)).to.be.revertedWith('Error_postType');
 			});
 
-			it("Test change post type expert -> FAQ", async function () {
+			it("Test change post type expert -> Documentation", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
 				const hashContainer = getHashContainer();
@@ -2863,7 +2863,7 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await expect(peeranhaContent.changePostType(1, PostTypeEnum.FAQ)).to.be.revertedWith('Error_postType');
+				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Documentation)).to.be.revertedWith('Error_postType');
 			});
 
 			it("Test change post type common -> expert", async function () {
@@ -2925,7 +2925,7 @@ describe("Test vote", function () {
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost)).to.be.revertedWith('Error_postType');
 			});
 
-			it("Test change post type tutoral -> FAQ", async function () {
+			it("Test change post type tutoral -> Documentation", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
 				const hashContainer = getHashContainer();
@@ -2936,10 +2936,10 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-				await expect(peeranhaContent.changePostType(1, PostTypeEnum.FAQ)).to.be.revertedWith('Error_postType');
+				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Documentation)).to.be.revertedWith('Error_postType');
 			});
 
-			it("Test change post type FAQ -> common ", async function () {
+			it("Test change post type Documentation -> common ", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
 				const hashContainer = getHashContainer();
@@ -2948,11 +2948,11 @@ describe("Test vote", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, [1]);
+				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.CommonPost)).to.be.revertedWith('Error_postType');
 			});
 
-			it("Test change post type FAQ -> expert", async function () {
+			it("Test change post type Documentation -> expert", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
 				const hashContainer = getHashContainer();
@@ -2961,11 +2961,11 @@ describe("Test vote", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, [1]);
+				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost)).to.be.revertedWith('Error_postType');
 			});
 
-			it("Test change post type FAQ -> tutoral", async function () {
+			it("Test change post type Documentation -> tutoral", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
 				const hashContainer = getHashContainer();
@@ -2974,7 +2974,7 @@ describe("Test vote", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, [1]);
+				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Tutorial)).to.be.revertedWith('Error_postType');
 			});
 		});
@@ -3528,7 +3528,7 @@ describe("Test vote", function () {
 				.to.be.revertedWith('This post type is already set.');
 			});
 
-			it("Change the same type post (FAQ)", async function () {
+			it("Change the same type post (Documentation)", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
@@ -3536,9 +3536,9 @@ describe("Test vote", function () {
 				await peeranhaUser.createUser(hashContainer[1]);
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.FAQ, [1]);
+				await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
 				
-				await expect(peeranhaContent.changePostType(1, PostTypeEnum.FAQ))
+				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Documentation))
 				.to.be.revertedWith('This post type is already set.');
 			});
 		});

@@ -26,23 +26,23 @@ describe("Test wallet", function () {
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
 			await peeranhaUser.addUserRating(signers[1].address, 50, 1);
-			await wait(PeriodTime);
-
-			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
-			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
-			await wait(PeriodTime);
+			await wait(PeriodTime * 2);
 			
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
 			await peeranhaUser.addUserRating(signers[1].address, 1, 1);
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
+			const rewardPeriods2User = await peeranhaUser.getActiveUserPeriods(signers[1].address)
+
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
+			const ratingToReward2User = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods2User[0], 1);
 			expect(ratingToReward).to.equal(60);
+			expect(ratingToReward2User).to.equal(50);
 
 			await token.claimReward(rewardPeriods[0]);
 			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
-			await token.connect(signers[1]).claimReward(rewardPeriods[0]);
+			await token.connect(signers[1]).claimReward(rewardPeriods2User[0]);
 			const balance2 = await getBalance(token, signers[1].address);
 			
 			const userReward = await getUserReward(60, 110, 200);

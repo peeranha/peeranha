@@ -17,4 +17,5 @@ interface IPeeranhaContent {
     function changeStatusBestReply(uint256 postId, uint16 replyId) external;
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external;
     function changePostType(uint256 postId, PostLib.PostType postType) external;
+    function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external;
 }
