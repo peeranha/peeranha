@@ -338,8 +338,12 @@ const ratingChangesSkipPeriod = [
 const StartRating = 10
 const StartRatingWithoutAction = 0;
 
+<<<<<<< HEAD
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2, "FAQ": 3 }
 const LenguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
+=======
+const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2, "Documentation": 3}
+>>>>>>> develop
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -384,9 +388,8 @@ const DownvoteTutorial = -1;    //autorAction
 const UpvotedTutorial = 5;
 const DownvotedTutorial = -2;
 
-const DeleteOwnPost = -1;
-
-const ModeratorDeletePost = -2;
+const DeleteOwnPost = -1;           //todo: test reting + remove "Test delete own documentation"
+const ModeratorDeletePost = -2;     //todo: test reting
     
 //////////////////////////////////////
     

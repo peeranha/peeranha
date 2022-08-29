@@ -17,10 +17,14 @@ interface IPeeranhaContent {
     function changeStatusBestReply(uint256 postId, uint16 replyId) external;
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external;
     function changePostType(uint256 postId, PostLib.PostType postType) external;
+<<<<<<< HEAD
     function createTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external;
     function createTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external;
     function editTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external;
     function editTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external;
     function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language) external;
     function deleteTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external;
+=======
+    function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external;
+>>>>>>> develop
 }
