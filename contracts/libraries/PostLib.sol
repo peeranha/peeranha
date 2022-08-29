@@ -939,14 +939,16 @@ library PostLib  {
             }
 
             changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                    (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
-            if (replyContainer.info.isFirstReply) {
-                changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
-            }
-            if (replyContainer.info.isQuickReply) {
-                changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
-            }
+                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+                }
+                if (replyContainer.info.isQuickReply) {
+                    changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+                }
+            }
             self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
         }
 
