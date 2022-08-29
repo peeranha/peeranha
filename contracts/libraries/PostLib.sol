@@ -986,6 +986,12 @@ library PostLib  {
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
+    // @notice update documentation ipfs tree
+    /// @param self The mapping containing all documentationTrees
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author documentation
+    /// @param communityId Community where the documentation will be update
+    /// @param documentationTreeIpfsHash IPFS hash of document with documentation in tree
     function updateDocumentationTree(
         DocumentationTree storage self,
         PostCollection storage postCollection,
@@ -1007,6 +1013,14 @@ library PostLib  {
         emit SetDocumentationTree(userAddr, communityId);
     }
 
+    /// @notice Save translation for post, reply or comment
+    /// @param self The mapping containing all translations
+    /// @param postId Post where will be init translation
+    /// @param replyId Reply which will be init translation
+    /// @param commentId Comment which will be init translation
+    /// @param language The translation language
+    /// @param userAddr Who called action
+    /// @param ipfsHash IPFS hash of document with translation information
     function initTranslation(
         TranslationCollection storage self,
         uint256 postId,
@@ -1027,6 +1041,12 @@ library PostLib  {
         emit TranslationCreated(userAddr, postId, replyId, commentId, language);
     }
 
+    /// @notice Validate translation params (is exist post/reply/comment and chech permission)
+    /// @param postCollection The mapping containing all posts
+    /// @param postId Post which is checked for existence
+    /// @param replyId Reply which is checked for existence
+    /// @param commentId Comment which is checked for existence
+    /// @param userAddr Who called action. User must have community admin/community moderator or admin role
     function validateTranslationParams(
         PostCollection storage postCollection,
         uint256 postId,
@@ -1051,6 +1071,15 @@ library PostLib  {
         );
     }
     
+    /// @notice Сreate translation
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be post
+    /// @param replyId The reply where the translation will be post
+    /// @param commentId The reply where the translation will be post
+    /// @param language The translation language
+    /// @param ipfsHash IPFS hash of document with translation information
     function createTranslation(
         TranslationCollection storage self,
         PostCollection storage postCollection,
@@ -1066,6 +1095,15 @@ library PostLib  {
         initTranslation( self, postId, replyId, commentId, language, userAddr, ipfsHash);
     }
 
+    /// @notice Create several translations
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be post
+    /// @param replyId The reply where the translation will be post
+    /// @param commentId The reply where the translation will be post
+    /// @param languages The array of translations
+    /// @param ipfsHashs The array IPFS hashs of document with translation information
     function createTranslations(
         TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
@@ -1083,9 +1121,18 @@ library PostLib  {
             initTranslation( self, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
     }
-    
+
+    /// @notice Edit translation
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be edit
+    /// @param replyId The reply where the translation will be edit
+    /// @param commentId The reply where the translation will be edit
+    /// @param language The translation language
+    /// @param ipfsHash IPFS hash of document with translation information
     function editTranslation(
-        TranslationCollection storage translationCollection,
+        TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
@@ -1097,14 +1144,23 @@ library PostLib  {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
         
-        TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, language);
+        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
         translationContainer.info.ipfsDoc.hash = ipfsHash;
 
         emit TranslationEdited(userAddr, postId, replyId, commentId, language);
     }
 
+    /// @notice Edit several translations
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be edit
+    /// @param replyId The reply where the translation will be edit
+    /// @param commentId The reply where the translation will be edit
+    /// @param languages The array of translations
+    /// @param ipfsHashs The array IPFS hashs of document with translation information
     function editTranslations(
-        TranslationCollection storage translationCollection,
+        TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
@@ -1118,15 +1174,23 @@ library PostLib  {
         require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
             require(!CommonLib.isEmptyIpfs(ipfsHashs[i]), "Invalid_ipfsHash");
-            TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, languages[i]);
+            TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, languages[i]);
             translationContainer.info.ipfsDoc.hash = ipfsHashs[i];
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
         } 
     }
 
+    /// @notice Delete translation
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be delete
+    /// @param replyId The reply where the translation will be delete
+    /// @param commentId The reply where the translation will be delete
+    /// @param language The translation language
     function deleteTranslation(
-        TranslationCollection storage translationCollection,
+        TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
@@ -1136,14 +1200,22 @@ library PostLib  {
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
         
-        TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, language);
+        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
         translationContainer.info.isDeleted = true;
 
         emit TranslationDeleted(userAddr, postId, replyId, commentId, language);
     }
 
+    /// @notice Delete several translations
+    /// @param self The mapping containing all translation
+    /// @param postCollection The mapping containing all posts
+    /// @param userAddr Author of the translation
+    /// @param postId The post where the translation will be delete
+    /// @param replyId The reply where the translation will be delete
+    /// @param commentId The reply where the translation will be delete
+    /// @param languages The array of translations
     function deleteTranslations(
-        TranslationCollection storage translationCollection,
+        TranslationCollection storage self,
         PostLib.PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
@@ -1154,13 +1226,18 @@ library PostLib  {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         for (uint32 i; i < languages.length; i++) {
-            TranslationContainer storage translationContainer = getTranslationSafe(translationCollection, postId, replyId, commentId, languages[i]);
+            TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, languages[i]);
             translationContainer.info.isDeleted = true;
 
             emit TranslationDeleted(userAddr, postId, replyId, commentId, languages[i]);
         } 
     }
 
+    /// @notice Return translation hash
+    /// @param postId The post Id
+    /// @param replyId The reply Id
+    /// @param commentId The reply Id
+    /// @param language The lenguage
     function getTranslationItemHash(
         uint256 postId,
         uint16 replyId,
@@ -1348,6 +1425,12 @@ library PostLib  {
         return (positive, negative);
     }
 
+    /// @notice Return translation, the translation is checked on delete one
+    /// @param self The mapping containing all translations
+    /// @param postId The post where need to get translation
+    /// @param replyId The reply where need to get translation
+    /// @param commentId The comment where need to get translation
+    /// @param language The translation which need find
     function getTranslationSafe(
         TranslationCollection storage self,
         uint256 postId,
@@ -1363,6 +1446,12 @@ library PostLib  {
         return translationContainer;
     }
 
+    /// @notice Return translation
+    /// @param self The mapping containing all translations
+    /// @param postId The post where need to get translation
+    /// @param replyId The reply where need to get translation
+    /// @param commentId The comment where need to get translation
+    /// @param language The translation which need find
     function getTranslation(
         TranslationCollection storage self,
         uint256 postId,
@@ -1374,6 +1463,11 @@ library PostLib  {
         return self.translations[item].info;
     }
 
+    /// @notice Return all translations for post/reply/comment
+    /// @param self The mapping containing all translations
+    /// @param postId The post where need to get translation
+    /// @param replyId The reply where need to get translation
+    /// @param commentId The comment where need to get translation
     function getTranslations(
         TranslationCollection storage self,
         uint256 postId,

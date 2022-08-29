@@ -169,7 +169,7 @@ const getHashTranslation = () => {
 const getTranslationValues = () => {
     const hashTranslation = Object.values(LenguagesEnum).filter((v) => !isNaN(Number(v)));
     return hashTranslation;
-};mmit -n 
+};
 
 
 
