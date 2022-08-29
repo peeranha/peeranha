@@ -23,7 +23,6 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
     enum TypeContent { Post, Reply, Comment, FAQ }
     enum Language { English, Chinese, Spanish, Vietnamese, Length }
-    uint256 constant LANGUADE_LENGTH = 5;
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -104,8 +103,8 @@ library PostLib  {
 
     struct Translation {
         CommonLib.IpfsHash ipfsDoc;
-        uint32 postTime;
         address author;
+        uint32 postTime;
         int32 rating;
         bool isDeleted;
     }
