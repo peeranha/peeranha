@@ -20,11 +20,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     using PostLib for PostLib.TranslationCollection;
 
     PostLib.PostCollection posts;
-<<<<<<< HEAD
     PostLib.TranslationCollection translations;
-=======
     PostLib.DocumentationTree documentationTree;
->>>>>>> develop
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
@@ -176,7 +173,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     /**
-<<<<<<< HEAD
      * @dev Create translation 
      *
      * Requirements:
@@ -250,7 +246,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
         translations.deleteTranslations(posts, _msgSender(), postId, replyId, commentId, languages);
-=======
+    }
+
+    /**
      * @dev Set documentation position
      *
      * Requirements:
@@ -259,7 +257,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */ 
     function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
         documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
->>>>>>> develop
     }
 
     // check need for prod?
@@ -310,7 +307,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     /**
-<<<<<<< HEAD
      * @dev Get translation.
      *
      * Requirements:
@@ -330,7 +326,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getTranslations(uint256 postId, uint16 replyId, uint8 commentId) external view returns (PostLib.Translation[] memory) {
         return translations.getTranslations(postId, replyId, commentId);
-=======
+    }
+
+    /**
      * @dev Get a documentation position.
      *
      * Requirements:
@@ -339,7 +337,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getDocumentationTree(uint32 communityId) external view returns (CommonLib.IpfsHash memory) {
         return documentationTree.ipfsDoc[communityId];
->>>>>>> develop
     }
 
     function getVersion() public pure returns (uint256) {

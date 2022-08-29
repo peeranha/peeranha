@@ -20,14 +20,9 @@ library PostLib  {
     int8 constant DIRECTION_UPVOTE = 1;
     int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
-<<<<<<< HEAD
-    enum PostType { ExpertPost, CommonPost, Tutorial, FAQ }
-    enum TypeContent { Post, Reply, Comment, FAQ }
-    enum Language { English, Chinese, Spanish, Vietnamese, Length }
-=======
     enum PostType { ExpertPost, CommonPost, Tutorial, Documentation }
     enum TypeContent { Post, Reply, Comment, Documentation }
->>>>>>> develop
+    enum Language { English, Chinese, Spanish, Vietnamese, Length }
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -135,13 +130,10 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-<<<<<<< HEAD
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
-=======
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
->>>>>>> develop
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -994,7 +986,27 @@ library PostLib  {
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
-<<<<<<< HEAD
+    function updateDocumentationTree(
+        DocumentationTree storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint32 communityId, 
+        bytes32 documentationTreeIpfsHash
+    ) public {
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        postCollection.peeranhaUser.checkActionRole(
+            userAddr,
+            userAddr,
+            communityId,
+            UserLib.Action.NONE,
+            UserLib.ActionRole.CommunityAdmin,
+            false
+        );
+
+        self.ipfsDoc[communityId].hash = documentationTreeIpfsHash;
+        emit SetDocumentationTree(userAddr, communityId);
+    }
+
     function initTranslation(
         TranslationCollection storage self,
         uint256 postId,
@@ -1158,29 +1170,6 @@ library PostLib  {
         return bytes32(postId << 192 | uint256(replyId) << 128 | uint256(commentId) << 64 | uint256(language));
     }  
 
-=======
-    function updateDocumentationTree(
-        DocumentationTree storage self,
-        PostCollection storage postCollection,
-        address userAddr,
-        uint32 communityId, 
-        bytes32 documentationTreeIpfsHash
-    ) public {
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
-        postCollection.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityAdmin,
-            false
-        );
-
-        self.ipfsDoc[communityId].hash = documentationTreeIpfsHash;
-        emit SetDocumentationTree(userAddr, communityId);
-    }
-
->>>>>>> develop
     function getTypesRating(        //name?
         PostType postType
     ) private pure returns (VoteLib.StructRating memory) {

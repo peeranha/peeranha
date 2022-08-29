@@ -169,7 +169,7 @@ const getHashTranslation = () => {
 const getTranslationValues = () => {
     const hashTranslation = Object.values(LenguagesEnum).filter((v) => !isNaN(Number(v)));
     return hashTranslation;
-};
+};mmit -n 
 
 
 
@@ -338,12 +338,8 @@ const ratingChangesSkipPeriod = [
 const StartRating = 10
 const StartRatingWithoutAction = 0;
 
-<<<<<<< HEAD
-const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2, "FAQ": 3 }
+const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2, "Documentation": 3 }
 const LenguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
-=======
-const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2, "Documentation": 3}
->>>>>>> develop
 
                                                             // energy
 const energyDownVotePost = 5;
