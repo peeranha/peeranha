@@ -12,88 +12,102 @@ describe("Test community permissions", function() {
         // const countOfUsers = 3;
         const communitiesIds = getIdsContainer(countOfCommunities);
 
-        let user = signers[1];
-        const userAddress = user.address;
         await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
-        await peeranhaUser.connect(user).createUser(hashContainer[0]);
+        await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranhaUser.createUser(hashContainer[1]);
 
         await createCommunities(peeranhaCommunity, countOfCommunities, communitiesIds);
         await peeranhaContent.createPost(1, hashContainer[1], PostTypeEnum.Documentation, []);
         await peeranhaContent.createPost(1, hashContainer[1], PostTypeEnum.Documentation, []);  // for delete post with Moderator permission
-		await peeranhaContent.setDocumentationPosition(1, hashContainer[0])
+		await peeranhaContent.updateDocumentationTree(1, hashContainer[0])
 
         // Give Moderator permission for non-existing user or community
-        await expect(peeranhaUser.giveCommunityModeratorPermission(userAddress, 4))
+        await expect(peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 4))
         .to.be.revertedWith("Community does not exist");
         await expect(peeranhaUser.giveCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
         .to.be.revertedWith("user_not_found");
-        await expect(peeranhaUser.revokeCommunityModeratorPermission(userAddress, 4))
+        await expect(peeranhaUser.revokeCommunityModeratorPermission(signers[1].address, 4))
         .to.be.revertedWith("Community does not exist");
         // await expect(peeranhaUser.revokeCommunityModeratorPermission(signers[4].address, communitiesIds[0]))
         // .to.be.revertedWith("user_not_found");
 
         // User makes actions without Moderator permission
-        await expect(peeranhaCommunity.connect(user).createCommunity(hashContainer[0], createTags(5)))
+        await expect(peeranhaCommunity.connect(signers[1]).createCommunity(hashContainer[0], createTags(5)))
             .to.be.revertedWith("not_allowed_not_admin");
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
             .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 		await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+			.to.be.revertedWith('not_allowed_not_comm_admin');
         await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], []))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+			.to.be.revertedWith('not_allowed_not_comm_admin');
         await expect(peeranhaContent.connect(signers[1]).deletePost(1))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
-        await expect(peeranhaContent.connect(signers[1]).setDocumentationPosition(1, hashContainer[1]))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+			.to.be.revertedWith('not_allowed_not_comm_admin');
+        await expect(peeranhaContent.connect(signers[1]).updateDocumentationTree(1, hashContainer[1]))
+			.to.be.revertedWith('not_allowed_not_comm_admin');
 
 
         // User makes actions with Moderator permission
-        await peeranhaUser.giveCommunityModeratorPermission(userAddress, communitiesIds[0]);
-        await expect(peeranhaCommunity.connect(user).createCommunity(hashContainer[0], createTags(5)))
+        await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, communitiesIds[0]);
+        await expect(peeranhaCommunity.connect(signers[1]).createCommunity(hashContainer[0], createTags(5)))
             .to.be.revertedWith("not_allowed_not_admin");
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await expect(peeranhaCommunity.connect(user).freezeCommunity(communitiesIds[0]))
+        await expect(peeranhaCommunity.connect(signers[1]).freezeCommunity(communitiesIds[0]))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await expect(peeranhaCommunity.connect(user).unfreezeCommunity(communitiesIds[0]))
+        await expect(peeranhaCommunity.connect(signers[1]).unfreezeCommunity(communitiesIds[0]))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await peeranhaContent.connect(user).createPost(1, hashContainer[1], PostTypeEnum.Documentation, [])
-        await peeranhaContent.connect(user).editPost(1, hashContainer[2], []);
-        await peeranhaContent.connect(user).deletePost(3);
-        await peeranhaContent.connect(user).setDocumentationPosition(1, hashContainer[1]);
 
-        // User with Moderator permission gives Moderator permission
-        await expect(peeranhaUser.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
-        .to.be.revertedWith('not_allowed_not_comm_admin');
-        await peeranhaUser.giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
-        await expect(peeranhaUser.connect(user).revokeCommunityModeratorPermission(userAddress, communitiesIds[0]))
-        .to.be.revertedWith('not_allowed_admin_or_comm_admin');
+        //post actions
+        await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await peeranhaContent.connect(signers[1]).changePostType(3, PostTypeEnum.CommonPost);
+        await peeranhaContent.connect(signers[1]).createReply(3, 0, hashContainer[1], true);    // official Reply
+        await peeranhaContent.connect(signers[1]).editReply(3, 1, hashContainer[1], true)       // official Reply
+        //change status best reply
+        await peeranhaContent.connect(signers[2]).createReply(3, 0, hashContainer[1], false);
+        await expect(peeranhaContent.connect(signers[1]).changeStatusBestReply(3, 1))
+            .to.be.revertedWith('Only owner by post can change statust best reply');
+
+        // User with Moderator permission gives permission
+        await expect(peeranhaUser.connect(signers[1]).giveCommunityAdminPermission(signers[2].address, communitiesIds[0]))
+            .to.be.revertedWith('not_allowed_admin_or_comm_admin');
+        await expect(peeranhaUser.connect(signers[1]).revokeCommunityAdminPermission(signers[2].address, communitiesIds[0]))
+            .to.be.revertedWith('not_allowed_admin_or_comm_admin');
+        await expect(peeranhaUser.connect(signers[1]).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
+            .to.be.revertedWith('not_allowed_admin_or_comm_admin');
+        await expect(peeranhaUser.connect(signers[1]).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
+            .to.be.revertedWith('not_allowed_admin_or_comm_admin');
+        await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
         // Revoke Moderator permission
-        await peeranhaUser.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
-        await expect(peeranhaCommunity.connect(user).createCommunity(hashContainer[0], createTags(5)))
+        await peeranhaUser.revokeCommunityModeratorPermission(signers[1].address, communitiesIds[0]);
+        await expect(peeranhaCommunity.connect(signers[1]).createCommunity(hashContainer[0], createTags(5)))
             .to.be.revertedWith("not_allowed_not_admin");
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+			.to.be.revertedWith('not_allowed_not_comm_admin');
         await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], []))
-            .to.be.revertedWith('not_allowed_not_comm_moderator');
+            .to.be.revertedWith('not_allowed_not_comm_admin');
         await expect(peeranhaContent.connect(signers[1]).editPost(2, hashContainer[2], []))
-            .to.be.revertedWith('not_allowed_not_comm_moderator');      // own Documentation
+            .to.be.revertedWith('not_allowed_not_comm_admin');      // own Documentation
         await expect(peeranhaContent.connect(signers[1]).deletePost(1))
-            .to.be.revertedWith('not_allowed_not_comm_moderator');
+            .to.be.revertedWith('not_allowed_not_comm_admin');
         await expect(peeranhaContent.connect(signers[1]).deletePost(2))
-            .to.be.revertedWith('not_allowed_not_comm_moderator');      // own Documentation
-        await expect(peeranhaContent.connect(signers[1]).setDocumentationPosition(1, hashContainer[1]))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+            .to.be.revertedWith('not_allowed_not_comm_admin');      // own Documentation
+        await expect(peeranhaContent.connect(signers[1]).updateDocumentationTree(1, hashContainer[1]))
+			.to.be.revertedWith('not_allowed_not_comm_admin');
+        await expect(peeranhaContent.connect(signers[1]).editReply(3, 1, hashContainer[1], true))   // official Reply
+            .to.be.revertedWith("not_allowed_not_comm_moderator");
+        await peeranhaContent.connect(signers[1]).editReply(3, 1, hashContainer[1], false)           // common Reply
 
         // User makes actions with community admin permission
-        await peeranhaUser.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()));
-        await expect(peeranhaCommunity.connect(user).freezeCommunity(communitiesIds[0]));
-        await expect(peeranhaCommunity.connect(user).unfreezeCommunity(communitiesIds[0]));
+        await peeranhaUser.giveCommunityAdminPermission(signers[1].address, communitiesIds[0]);
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()));
+        await expect(peeranhaCommunity.connect(signers[1]).freezeCommunity(communitiesIds[0]));
+        await expect(peeranhaCommunity.connect(signers[1]).unfreezeCommunity(communitiesIds[0]));
     });
 
     it("Test community administrator", async function() {
@@ -104,79 +118,111 @@ describe("Test community permissions", function() {
         const communitiesIds = getIdsContainer(countOfCommunities);
 		const hashContainer = getHashContainer();
 
-        let user = signers[1];
-        const userAddress = user.address;
-		await peeranhaUser.connect(user).createUser(hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 		await peeranhaUser.connect(signers[2]).createUser(hashContainer[0]);
 		await peeranhaUser.createUser(hashContainer[1]);
         await createCommunities(peeranhaCommunity, countOfCommunities, communitiesIds);
 
         // Give Admin permission for non-existing user or community
-        await expect(peeranhaUser.giveCommunityAdminPermission(userAddress, 4))
-        .to.be.revertedWith("Community does not exist");
+        await expect(peeranhaUser.giveCommunityAdminPermission((signers[1].address), 4))
+            .to.be.revertedWith("Community does not exist");
         await expect(peeranhaUser.giveCommunityAdminPermission(signers[4].address, communitiesIds[0]))
-        .to.be.revertedWith("user_not_found");
-        await expect(peeranhaUser.revokeCommunityAdminPermission(userAddress, 4))
-        .to.be.revertedWith("Community does not exist");
+            .to.be.revertedWith("user_not_found");
+        // await expect(peeranhaUser.revokeCommunityAdminPermission((signers[1].address), 4))
+        //     .to.be.revertedWith("Community does not exist");
         // await expect(peeranhaUser.revokeCommunityAdminPermission(signers[4].address, communitiesIds[0]))
-        // .to.be.revertedWith("user_not_found");
+        //     .to.be.revertedWith("user_not_found");
 
         // User makes actions without Admin permission
-        await expect(peeranhaUser.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
-        .to.be.revertedWith("not_allowed_not_comm_admin");
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaUser.connect(signers[1]).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        await peeranhaUser.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
+        await peeranhaUser.giveCommunityAdminPermission((signers[1].address), communitiesIds[0]);
+        await peeranhaUser.revokeCommunityModeratorPermission((signers[1].address), communitiesIds[0]);
         
         // User makes actions with Admin permission
-        await peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash());
-        await peeranhaCommunity.connect(user).freezeCommunity(communitiesIds[0]);
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("Community is frozen");
-        await peeranhaCommunity.connect(user).unfreezeCommunity(communitiesIds[0]);
-        await peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash());
+        await peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash());
+        await peeranhaCommunity.connect(signers[1]).freezeCommunity(communitiesIds[0]);
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
+            .to.be.revertedWith("Community is frozen");
+        await peeranhaCommunity.connect(signers[1]).unfreezeCommunity(communitiesIds[0]);
+        await peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash());
+        await peeranhaContent.connect(signers[1]).createPost(communitiesIds[0], hashContainer[1], PostTypeEnum.Documentation, []);
+        await peeranhaContent.connect(signers[1]).createPost(communitiesIds[0], hashContainer[1], PostTypeEnum.Documentation, []);    // for delete own documentation without community admin permission
+        await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], []);
+        await peeranhaContent.connect(signers[1]).deletePost(1);
+        await peeranhaContent.connect(signers[1]).updateDocumentationTree(1, hashContainer[1]);
+        
+        // Post actions
+        await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+		await expect(peeranhaContent.connect(signers[1]).changePostType(3, PostTypeEnum.CommonPost))
+            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+        await expect(peeranhaContent.connect(signers[1]).createReply(3, 0, hashContainer[1], true))     // official Reply
+            .to.be.revertedWith("not_allowed_not_comm_moderator");
+        await peeranhaContent.connect(signers[1]).createReply(3, 0, hashContainer[1], false);           // common reply
+		await expect(peeranhaContent.connect(signers[1]).editReply(3, 1, hashContainer[1], true))       // official Reply
+            .to.be.revertedWith("not_allowed_not_comm_moderator");
+        // change status Best Reply
+        await peeranhaContent.connect(signers[2]).createReply(3, 0, hashContainer[1], false);
+        await expect(peeranhaContent.connect(signers[1]).changeStatusBestReply(3, 1))
+            .to.be.revertedWith('Only owner by post can change statust best reply');
 
         // User with Admin permission makes actions for other community
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[1], getHash()))
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[1], getHash()))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await expect(peeranhaCommunity.connect(user).freezeCommunity(communitiesIds[1]))
+        await expect(peeranhaCommunity.connect(signers[1]).freezeCommunity(communitiesIds[1]))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await expect(peeranhaCommunity.connect(user).unfreezeCommunity(communitiesIds[1]))
+        await expect(peeranhaCommunity.connect(signers[1]).unfreezeCommunity(communitiesIds[1]))
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createPost(communitiesIds[1], hashContainer[1], PostTypeEnum.Documentation, []))
+        .to.be.revertedWith("not_allowed_not_comm_admin");
+        await peeranhaContent.createPost(communitiesIds[1], hashContainer[1], PostTypeEnum.Documentation, []);
+        await expect(peeranhaContent.connect(signers[1]).editPost(4, hashContainer[2], []))
+        .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).deletePost(4))
+        .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).updateDocumentationTree(communitiesIds[1], hashContainer[1]))
+        .to.be.revertedWith("not_allowed_not_comm_admin");
 
         //User with Admin permission gives Moderator permission
-        await peeranhaUser.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        await peeranhaUser.connect(signers[1]).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranhaCommunity.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaCommunity.connect(signers[2]).freezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaCommunity.connect(signers[2]).unfreezeCommunity(communitiesIds[0]))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        await peeranhaUser.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        await peeranhaUser.connect(signers[1]).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         await expect(peeranhaCommunity.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        // User with Admin permission gives Admin permission for other user
-        await expect(peeranhaUser.connect(user).giveCommunityAdminPermission(signers[2].address, communitiesIds[0]))
-        .to.be.revertedWith("not_allowed_not_admin");
+        // User with Community Admin permission gives/revoke Admin permission for other user
+        await peeranhaUser.connect(signers[1]).giveCommunityAdminPermission(signers[2].address, communitiesIds[0]);
+        await peeranhaUser.connect(signers[1]).revokeCommunityAdminPermission(signers[2].address, communitiesIds[0]);
+        // User with Community Admin permission gives/revoke Admin permission for himself
+        await expect(peeranhaUser.connect(signers[1]).revokeCommunityAdminPermission(signers[1].address, communitiesIds[0]))
+            .to.be.revertedWith("self_revoke");
 
-        //User with Admin permission gives Admin permission for other community
-        await expect(peeranhaUser.connect(user).giveCommunityAdminPermission(userAddress, communitiesIds[1]))
-        .to.be.revertedWith("not_allowed_not_admin");
-        await expect(peeranhaUser.connect(user).giveCommunityAdminPermission(signers[2].address, communitiesIds[1]))
-        .to.be.revertedWith("not_allowed_not_admin");
+        //User with Community Admin permission gives Admin permission for other community
+        await expect(peeranhaUser.connect(signers[1]).giveCommunityAdminPermission((signers[1].address), communitiesIds[1]))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaUser.connect(signers[1]).giveCommunityAdminPermission(signers[2].address, communitiesIds[1]))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
-        //Revoke Admin permission
-        await peeranhaUser.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
+        //Revoke Community Admin permission
+        await peeranhaUser.revokeCommunityModeratorPermission((signers[1].address), communitiesIds[0]);
         await peeranhaUser.revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
-        await peeranhaUser.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
+        await peeranhaUser.revokeCommunityAdminPermission((signers[1].address), communitiesIds[0]);
         await peeranhaUser.revokeCommunityAdminPermission(signers[2].address, communitiesIds[0]);
-        await expect(peeranhaCommunity.connect(user).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaCommunity.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
-        .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+            .to.be.revertedWith("not_allowed_admin_or_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).deletePost(2))
+        .to.be.revertedWith("not_allowed_not_comm_admin");     // delete own documentation without community admin permission
     });
 
     // Send admin invite functionality must be created before
@@ -190,41 +236,39 @@ describe("Test community permissions", function() {
         // await ceateUsers(peeranha, signers, countOfUsers);
         await peeranhaUser.createUser(hashContainer[0]);
 
-        let user = signers[1];
-        const userAddress = user.address;
-		await peeranha.connect(user).createUser(hashContainer[1]);
+		await peeranha.connect(signers[1]).createUser(hashContainer[1]);
         
 
-        await expect (peeranha.connect(user).createCommunity(getHash(), createTags(5)))
+        await expect (peeranha.connect(signers[1]).createCommunity(getHash(), createTags(5)))
         .to.revertedWith('Peeranha: must have admin role');
 
         peeranhaCommunity.createCommunity(getHash(), createTags(5));
-        await expect (peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        await expect (peeranha.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
         .to.revertedWith('not_allowed_admin_or_comm_moderator');
-        await expect (peeranha.connect(user).freezeCommunity(communitiesIds[0]))
+        await expect (peeranha.connect(signers[1]).freezeCommunity(communitiesIds[0]))
         .to.revertedWith('Peeranha: must have admin role');
-        await expect (peeranha.connect(user).unfreezeCommunity(communitiesIds[0]))
+        await expect (peeranha.connect(signers[1]).unfreezeCommunity(communitiesIds[0]))
         .to.revertedWith('Peeranha: must have admin role');
 
-        await peeranhaUser.giveCommunityAdminPermission(userAddress, communitiesIds[0]);
+        await peeranhaUser.giveCommunityAdminPermission((signers[1].address), communitiesIds[0]);
 
         const communityCount = await peeranha.getCommunitiesCount();
-        await peeranha.connect(user).createCommunity(getHash(), createTags(5));
+        await peeranha.connect(signers[1]).createCommunity(getHash(), createTags(5));
         await expect(peeranha.getCommunitiesCount()).to.be.greaterThan(communityCount);
 
-        await peeranha.connect(user).updateCommunity(communitiesIds[1], getHash());
+        await peeranha.connect(signers[1]).updateCommunity(communitiesIds[1], getHash());
 
-        // await peeranha.connect(user).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        // await peeranha.connect(signers[1]).giveCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         // // console.log(await peeranha.getUserPermissions(signers[2].address))
         // // await peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash());
-        // await peeranha.connect(user).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
+        // await peeranha.connect(signers[1]).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]);
         // // await expect(peeranha.connect(signers[2]).updateCommunity(communitiesIds[0], getHash()))
         // // .to.be.revertedWith("not_allowed_not_comm_admin");
 
-        // peeranha.revokeCommunityModeratorPermission(userAddress, communitiesIds[0]);
-        // peeranha.revokeCommunityAdminPermission(userAddress, communitiesIds[0]);
+        // peeranha.revokeCommunityModeratorPermission((signers[1].address), communitiesIds[0]);
+        // peeranha.revokeCommunityAdminPermission((signers[1].address), communitiesIds[0]);
 
-        // await expect(peeranha.connect(user).updateCommunity(communitiesIds[0], getHash()))
+        // await expect(peeranha.connect(signers[1]).updateCommunity(communitiesIds[0], getHash()))
         // .to.be.revertedWith("not_allowed_not_comm_admin");
     });
 

@@ -61,7 +61,7 @@ library PostLib  {
         address[] votedUsers;
     }
 
-    struct DocumentationPosition {
+    struct DocumentationTree {
         mapping(uint32 => CommonLib.IpfsHash) ipfsDoc;
     }
 
@@ -112,9 +112,9 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-    event SetDocumentationPosition(address indexed userAddr, uint32 indexed communityId);
-    event EditDocumentationPosition(address indexed userAddr, uint256 indexed postId);
-    event DeleteDocumentationPosition(address indexed userAddr, uint256 indexed postId);
+    event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    event EditDocumentationTree(address indexed userAddr, uint256 indexed postId);
+    event DeleteDocumentationTree(address indexed userAddr, uint256 indexed postId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -138,7 +138,7 @@ library PostLib  {
             communityId,
             UserLib.Action.PublicationPost,
             postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             true
         );
@@ -300,7 +300,6 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with post information
     function editPost(
         PostCollection storage self,
-        DocumentationPosition storage documentationPosition,
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
@@ -315,7 +314,7 @@ library PostLib  {
             postContainer.info.communityId,
             UserLib.Action.EditItem,
             postContainer.info.postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
@@ -324,7 +323,6 @@ library PostLib  {
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
-            documentationPosition.ipfsDoc[postContainer.info.communityId].hash = ipfsHash;
         if (tags.length > 0)
             postContainer.info.tags = tags;
 
@@ -421,7 +419,7 @@ library PostLib  {
             postContainer.info.communityId,
             UserLib.Action.DeleteItem,
             postContainer.info.postType == PostType.Documentation ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
@@ -492,7 +490,6 @@ library PostLib  {
         // bug if reply's owner is moderator any way error
         ///
         require(postContainer.info.bestReply != replyId || userAddr != replyContainer.info.author, "You can not delete the best reply.");
-
 
         uint256 time = CommonLib.getTimestamp();
         if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
@@ -944,14 +941,16 @@ library PostLib  {
             }
 
             changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                    (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
-            if (replyContainer.info.isFirstReply) {
-                changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
-            }
-            if (replyContainer.info.isQuickReply) {
-                changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
-            }
+                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+                }
+                if (replyContainer.info.isQuickReply) {
+                    changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+                }
+            }
             self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
         }
 
@@ -968,12 +967,12 @@ library PostLib  {
         emit ChangePostType(userAddr, postId, newPostType);
     }
 
-    function setDocumentationPosition(
-        DocumentationPosition storage self,
+    function updateDocumentationTree(
+        DocumentationTree storage self,
         PostCollection storage postCollection,
         address userAddr,
         uint32 communityId, 
-        bytes32 ipfsHash
+        bytes32 documentationTreeIpfsHash
     ) public {
         postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         postCollection.peeranhaUser.checkActionRole(
@@ -981,16 +980,16 @@ library PostLib  {
             userAddr,
             communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
+            UserLib.ActionRole.CommunityAdmin,
             false
         );
 
-        self.ipfsDoc[communityId].hash = ipfsHash;
-        emit SetDocumentationPosition(userAddr, communityId);
+        self.ipfsDoc[communityId].hash = documentationTreeIpfsHash;
+        emit SetDocumentationTree(userAddr, communityId);
     }
 
-    function editDocumentationPosition(
-        DocumentationPosition storage self,
+    function editDocumentationTree(
+        DocumentationTree storage self,
         PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
@@ -1008,11 +1007,11 @@ library PostLib  {
         );
 
         self.ipfsDoc[postContainer.info.communityId].hash = ipfsHash;
-        emit EditDocumentationPosition(userAddr, postContainer.info.communityId);
+        emit EditDocumentationTree(userAddr, postContainer.info.communityId);
     }
 
-    function deleteDocumentationPosition(
-        DocumentationPosition storage self,
+    function deleteDocumentationTree(
+        DocumentationTree storage self,
         PostCollection storage postCollection,
         address userAddr,
         uint256 postId
@@ -1029,8 +1028,8 @@ library PostLib  {
         );
 
         delete self.ipfsDoc[postContainer.info.communityId];
-        emit DeleteDocumentationPosition(userAddr, postContainer.info.communityId);
-    } 
+        emit DeleteDocumentationTree(userAddr, postContainer.info.communityId);
+    }
 
     function getTypesRating(        //name?
         PostType postType

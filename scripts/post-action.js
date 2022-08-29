@@ -143,7 +143,7 @@ async function contentFunctions() {
   // const txObj = await peeranhaContent.editPost(8, await getBytes32FromData(testPost), []);
   // const txObj = await peeranhaContent.createReply(3, 0, await getBytes32FromData(testReply), true);
   // const txObj = await peeranhaContent.editReply(3, 2, await getBytes32FromData(testReply), true);
-  const txObj = await peeranhaContent.setDocumentationPosition(1, await getBytes32FromData(testDocumentating));
+  const txObj = await peeranhaContent.updateDocumentationTree(1, await getBytes32FromData(testDocumentating));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);

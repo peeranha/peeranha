@@ -13,13 +13,13 @@ import "./interfaces/IPeeranhaCommunity.sol";
 
 contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransaction {
     using PostLib for PostLib.Post;
-    using PostLib for PostLib.DocumentationPosition;
+    using PostLib for PostLib.DocumentationTree;
     using PostLib for PostLib.Reply;
     using PostLib for PostLib.Comment;
     using PostLib for PostLib.PostCollection;
 
     PostLib.PostCollection posts;
-    PostLib.DocumentationPosition documentationPosition;
+    PostLib.DocumentationTree documentationTree;
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
@@ -51,7 +51,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags
     */
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external override {
-        posts.editPost(documentationPosition, _msgSender(), postId, ipfsHash, tags);
+        posts.editPost(_msgSender(), postId, ipfsHash, tags);
     }
 
     /**
@@ -177,8 +177,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a community moderator.
     */ 
-    function setDocumentationPosition(uint32 communityId, bytes32 ipfsHash) external override {
-        documentationPosition.setDocumentationPosition(posts, _msgSender(), communityId, ipfsHash);
+    function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
+        documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
     }
 
     /**
@@ -190,9 +190,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags.
     */
-    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationIpfsHash, PostLib.PostType postType, uint8[] memory tags) external {
+    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external {
         posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
-        documentationPosition.setDocumentationPosition(posts, _msgSender(), communityId, documentationIpfsHash);
+        documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
     }
 
     /**
@@ -205,9 +205,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags
     */
-    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationIpfsHash, uint8[] memory tags) external {
-        posts.editPost(documentationPosition, _msgSender(), postId, ipfsHash, tags);
-        documentationPosition.editDocumentationPosition(posts, _msgSender(), postId, documentationIpfsHash);
+    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external {
+        posts.editPost(documentationTree, _msgSender(), postId, ipfsHash, tags);
+        documentationTree.editDocumentationTree(posts, _msgSender(), postId, documentationTreeIpfsHash);
     }
 
     /**
@@ -219,8 +219,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteDocumentationPost(uint256 postId) external {
         posts.deletePost(_msgSender(), postId);
-        documentationPosition.deleteDocumentationPosition(posts, _msgSender(), postId);
+        documentationTree.deleteDocumentationTree(posts, _msgSender(), postId);
     }
+
 
     // check need for prod?
     /**
@@ -276,8 +277,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a documentation position.
     */
-    function getDocumentationPosition(uint32 communityId) external view returns (CommonLib.IpfsHash memory) {
-        return documentationPosition.ipfsDoc[communityId];
+    function getDocumentationTree(uint32 communityId) external view returns (CommonLib.IpfsHash memory) {
+        return documentationTree.ipfsDoc[communityId];
     }
 
     function getVersion() public pure returns (uint256) {
