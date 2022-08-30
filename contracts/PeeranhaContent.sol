@@ -190,7 +190,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags.
     */
-    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external {
+    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
         posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
         documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
     }
@@ -205,7 +205,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags
     */
-    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external {
+    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external override {
         posts.editPost(_msgSender(), postId, ipfsHash, tags);
         documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
     }
@@ -217,7 +217,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a documentation post.
     */
-    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external {
+    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external override {
+        posts.deletePost(_msgSender(), postId);
         documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
     }
 
