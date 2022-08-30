@@ -206,8 +206,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags
     */
     function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external {
-        posts.editPost(documentationTree, _msgSender(), postId, ipfsHash, tags);
-        documentationTree.editDocumentationTree(posts, _msgSender(), postId, documentationTreeIpfsHash);
+        posts.editPost(_msgSender(), postId, ipfsHash, tags);
+        documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
     }
 
     /**
@@ -217,9 +217,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a documentation post.
     */
-    function deleteDocumentationPost(uint256 postId) external {
-        posts.deletePost(_msgSender(), postId);
-        documentationTree.deleteDocumentationTree(posts, _msgSender(), postId);
+    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external {
+        documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
     }
 
 

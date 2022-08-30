@@ -113,8 +113,6 @@ library PostLib  {
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
-    event EditDocumentationTree(address indexed userAddr, uint256 indexed postId);
-    event DeleteDocumentationTree(address indexed userAddr, uint256 indexed postId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -988,47 +986,15 @@ library PostLib  {
         emit SetDocumentationTree(userAddr, communityId);
     }
 
-    function editDocumentationTree(
+    function updateDocumentationTreeByPost(
         DocumentationTree storage self,
         PostCollection storage postCollection,
         address userAddr,
         uint256 postId,
-        bytes32 ipfsHash
+        bytes32 documentationTreeIpfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(postCollection, postId);
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
-        postCollection.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
-            false
-        );
-
-        self.ipfsDoc[postContainer.info.communityId].hash = ipfsHash;
-        emit EditDocumentationTree(userAddr, postContainer.info.communityId);
-    }
-
-    function deleteDocumentationTree(
-        DocumentationTree storage self,
-        PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId
-    ) public {
-        PostContainer storage postContainer = getPostContainer(postCollection, postId);
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
-        postCollection.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityModerator,
-            false
-        );
-
-        delete self.ipfsDoc[postContainer.info.communityId];
-        emit DeleteDocumentationTree(userAddr, postContainer.info.communityId);
+        updateDocumentationTree(self, postCollection, userAddr, postContainer.info.communityId, documentationTreeIpfsHash);
     }
 
     function getTypesRating(        //name?

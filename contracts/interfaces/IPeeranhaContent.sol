@@ -20,5 +20,5 @@ interface IPeeranhaContent {
     function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external;
     function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external;
     function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external;
-    function deleteDocumentationPost(uint256 postId) external;
+    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external;
 }
