@@ -23,7 +23,8 @@ library PostLib  {
     // TODO: remove FAQ value before prod deployment and refresh of test environment.
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ, Documentation }
     enum TypeContent { Post, Reply, Comment, FAQ }
-    enum Language { English, Chinese, Spanish, Vietnamese, Length }
+    enum Language { English, Chinese, Spanish, Vietnamese }
+    uint256 constant LANGUADE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -1475,9 +1476,9 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId
     ) internal view returns (Translation[] memory) {
-        Translation[] memory translation = new Translation[](uint256(Language.Length));
+        Translation[] memory translation = new Translation[](uint256(LANGUADE_LENGTH));
 
-        for (uint256 i; i < uint(Language.Length); i++) {
+        for (uint256 i; i < uint(LANGUADE_LENGTH); i++) {
             bytes32 item = getTranslationItemHash(postId, replyId, commentId, Language(uint(i)));
             translation[i] = self.translations[item].info;
         }
