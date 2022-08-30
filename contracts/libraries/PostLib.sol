@@ -20,8 +20,9 @@ library PostLib  {
     int8 constant DIRECTION_UPVOTE = 1;
     int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
-    enum PostType { ExpertPost, CommonPost, Tutorial, Documentation }
-    enum TypeContent { Post, Reply, Comment, Documentation }
+    // TODO: remove FAQ value before prod deployment and refresh of test environment.
+    enum PostType { ExpertPost, CommonPost, Tutorial, FAQ, Documentation }
+    enum TypeContent { Post, Reply, Comment, FAQ }
     enum Language { English, Chinese, Spanish, Vietnamese, Length }
 
     struct Comment {
