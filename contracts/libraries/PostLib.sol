@@ -987,6 +987,17 @@ library PostLib  {
         emit SetDocumentationTree(userAddr, communityId);
     }
 
+    function updateDocumentationTreeByPost(
+        DocumentationTree storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint256 postId,
+        bytes32 documentationTreeIpfsHash
+    ) public {
+        PostContainer storage postContainer = getPostContainer(postCollection, postId);
+        updateDocumentationTree(self, postCollection, userAddr, postContainer.info.communityId, documentationTreeIpfsHash);
+    }
+
     function getTypesRating(        //name?
         PostType postType
     ) private pure returns (VoteLib.StructRating memory) {
