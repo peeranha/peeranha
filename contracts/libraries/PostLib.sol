@@ -20,9 +20,8 @@ library PostLib  {
     int8 constant DIRECTION_UPVOTE = 1;
     int8 constant DIRECTION_CANCEL_UPVOTE = -1;
 
-    // TODO: remove FAQ value before prod deployment and refresh of test environment.
-    enum PostType { ExpertPost, CommonPost, Tutorial, FAQ, Documentation }
-    enum TypeContent { Post, Reply, Comment, FAQ }
+    enum PostType { ExpertPost, CommonPost, Tutorial, Documentation }
+    enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
