@@ -24,7 +24,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial, FAQ, Documentation }
     enum TypeContent { Post, Reply, Comment, FAQ }
     enum Language { English, Chinese, Spanish, Vietnamese }
-    uint256 constant LANGUADE_LENGTH = 4;       // Update after add new language
+    uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -1476,9 +1476,9 @@ library PostLib  {
         uint16 replyId,
         uint8 commentId
     ) internal view returns (Translation[] memory) {
-        Translation[] memory translation = new Translation[](uint256(LANGUADE_LENGTH));
+        Translation[] memory translation = new Translation[](uint256(LANGUAGE_LENGTH));
 
-        for (uint256 i; i < uint(LANGUADE_LENGTH); i++) {
+        for (uint256 i; i < uint(LANGUAGE_LENGTH); i++) {
             bytes32 item = getTranslationItemHash(postId, replyId, commentId, Language(uint(i)));
             translation[i] = self.translations[item].info;
         }
