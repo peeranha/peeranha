@@ -259,6 +259,48 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
     }
 
+    /**
+     * @dev create documentation post.
+     *
+     * Requirements:
+     *
+     * - must be a new documentation post.
+     * - must be a community.
+     * - must be tags.
+    */
+    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
+        posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
+        documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
+    }
+
+    /**
+     * @dev Edit documentation post info.
+     *
+     * Requirements:
+     *
+     * - must be a documentation post.
+     * - must be new info about documentation post
+     * - must be a community.
+     * - must be tags
+    */
+    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external override {
+        posts.editPost(_msgSender(), postId, ipfsHash, tags);
+        documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
+    }
+
+    /**
+     * @dev delete documentation post.
+     *
+     * Requirements:
+     *
+     * - must be a documentation post.
+    */
+    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external override {
+        posts.deletePost(_msgSender(), postId);
+        documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
+    }
+
+
     // check need for prod?
     /**
      * @dev Get a post by index.

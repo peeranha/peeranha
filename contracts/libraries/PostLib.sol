@@ -1249,6 +1249,17 @@ library PostLib  {
         return bytes32(postId << 192 | uint256(replyId) << 128 | uint256(commentId) << 64 | uint256(language));
     }  
 
+    function updateDocumentationTreeByPost(
+        DocumentationTree storage self,
+        PostCollection storage postCollection,
+        address userAddr,
+        uint256 postId,
+        bytes32 documentationTreeIpfsHash
+    ) public {
+        PostContainer storage postContainer = getPostContainer(postCollection, postId);
+        updateDocumentationTree(self, postCollection, userAddr, postContainer.info.communityId, documentationTreeIpfsHash);
+    }
+
     function getTypesRating(        //name?
         PostType postType
     ) private pure returns (VoteLib.StructRating memory) {

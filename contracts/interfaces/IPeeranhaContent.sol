@@ -24,4 +24,7 @@ interface IPeeranhaContent {
     function editTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external;
     function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language) external;
     function deleteTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external;
+    function createDocumentationPost(uint32 communityId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, PostLib.PostType postType, uint8[] memory tags) external;
+    function editDocumentationPost(uint256 postId, bytes32 ipfsHash, bytes32 documentationTreeIpfsHash, uint8[] memory tags) external;
+    function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external;
 }
