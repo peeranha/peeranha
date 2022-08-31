@@ -20,8 +20,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     using PostLib for PostLib.TranslationCollection;
 
     PostLib.PostCollection posts;
-    PostLib.TranslationCollection translations;
     PostLib.DocumentationTree documentationTree;
+    PostLib.TranslationCollection translations;
 
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
