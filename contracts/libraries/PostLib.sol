@@ -204,7 +204,7 @@ library PostLib  {
             postContainer.info.communityId,
             UserLib.Action.PublicationReply,
             parentReplyId == 0 && isOfficialReply ? 
-                UserLib.ActionRole.CommunityModerator :
+                UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             true
         );
@@ -370,7 +370,7 @@ library PostLib  {
             replyContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.EditItem,
-            isOfficialReply ? UserLib.ActionRole.CommunityModerator : 
+            isOfficialReply ? UserLib.ActionRole.CommunityAdmin : 
                 UserLib.ActionRole.NONE,
             false
         );
