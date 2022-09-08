@@ -158,7 +158,7 @@ library PostLib  {
             userAddr,
             communityId,
             UserLib.Action.PublicationPost,
-            postType == PostType.Documentation ? 
+            postType == PostType.FAQ ? 
                 UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             true
@@ -167,7 +167,7 @@ library PostLib  {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         PostContainer storage post = self.posts[++self.postCount];
-        if (postType != PostType.Documentation) {
+        if (postType != PostType.FAQ) {
             require(tags.length > 0, "At least one tag is required.");
             post.info.tags = tags;
         }
@@ -196,7 +196,7 @@ library PostLib  {
         bool isOfficialReply
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.Documentation, 
+        require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.FAQ, 
             "You can not publish replies in tutorial or Documentation.");
 
         self.peeranhaUser.checkActionRole(
@@ -277,7 +277,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.postType != PostType.Documentation, "You can not publish comments in Documentation.");
+        require(postContainer.info.postType != PostType.FAQ, "You can not publish comments in Documentation.");
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
         Comment storage comment;
@@ -334,13 +334,13 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.EditItem,
-            postContainer.info.postType == PostType.Documentation ? 
+            postContainer.info.postType == PostType.FAQ ? 
                 UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author || postContainer.info.postType == PostType.Documentation, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
+        require(userAddr == postContainer.info.author || postContainer.info.postType == PostType.FAQ, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
 
         if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
             postContainer.info.ipfsDoc.hash = ipfsHash;
@@ -439,13 +439,13 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.DeleteItem,
-            postContainer.info.postType == PostType.Documentation ? 
+            postContainer.info.postType == PostType.FAQ ? 
                 UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             false
         );
 
-        if (postContainer.info.postType != PostType.Documentation) {
+        if (postContainer.info.postType != PostType.FAQ) {
             uint256 time = CommonLib.getTimestamp();
             if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
                 VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
@@ -730,7 +730,7 @@ library PostLib  {
         PostType postType,
         bool isUpvote
     ) private returns (int8) {
-        require(postContainer.info.postType != PostType.Documentation, "You can not vote to Documentation.");
+        require(postContainer.info.postType != PostType.FAQ, "You can not vote to Documentation.");
         (int32 ratingChange, bool isCancel) = VoteLib.getForumItemRatingChange(votedUser, postContainer.historyVotes, isUpvote, postContainer.votedUsers);
         self.peeranhaUser.checkActionRole(
             votedUser,
@@ -932,9 +932,9 @@ library PostLib  {
         PostType oldPostType = postContainer.info.postType;
         require(newPostType != oldPostType, "This post type is already set.");
         require(
-            oldPostType != PostType.Documentation &&
+            oldPostType != PostType.FAQ &&
             oldPostType != PostType.Tutorial &&
-            newPostType != PostType.Documentation &&
+            newPostType != PostType.FAQ &&
             newPostType != PostType.Tutorial,
                 "Error_postType"
         );
