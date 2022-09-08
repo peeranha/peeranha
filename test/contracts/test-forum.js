@@ -441,7 +441,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			
 			await expect(peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[0], true))
-			.to.be.revertedWith('not_allowed_not_comm_moderator');
+			.to.be.revertedWith('not_allowed_not_comm_admin');
 		});
 	});
 
