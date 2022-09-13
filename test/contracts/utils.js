@@ -158,6 +158,21 @@ const getHashContainer = () => {
     ];
 };
 
+const getHashTranslation = () => {
+    let hashTranslation = [];
+    for (let translation in LenguagesEnum) {
+        hashTranslation.push(getHash());
+    }
+    return hashTranslation;
+};
+
+const getTranslationValues = () => {
+    const hashTranslation = Object.values(LenguagesEnum).filter((v) => !isNaN(Number(v)));
+    return hashTranslation;
+};
+
+
+
 const hashContainer = getHashContainer();
 
 const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
@@ -323,7 +338,8 @@ const ratingChangesSkipPeriod = [
 const StartRating = 10
 const StartRatingWithoutAction = 0;
 
-const PostTypeEnum = {"ExpertPost":0, "CommonPost":1, "Tutorial":2, "Documentation": 3}
+const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2, "Documentation": 3 }
+const LenguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -401,8 +417,8 @@ const ModeratorDeleteComment = -1;
 
 module.exports = { 
     wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
-    getIdsContainer, getHashesContainer, createTags, getHashContainer, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
-    periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, fraction, poolToken,
+    getIdsContainer, getHashesContainer, createTags, getHashContainer, getHashTranslation, getTranslationValues, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
+    periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, LenguagesEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, activeIn1st2nd3rdPeriod, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,

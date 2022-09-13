@@ -135,7 +135,7 @@ library VoteLib  {
 
         }
         
-        revert("invalid_post_type");
+        revert("Invalid_post_type");
     }
 
     /// @notice Get value Rating for rating action

@@ -425,6 +425,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
+        // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
         if (actionRole == UserLib.ActionRole.NONE) {
             return;
         } else if (actionRole == UserLib.ActionRole.Admin) {
