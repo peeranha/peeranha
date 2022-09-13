@@ -296,8 +296,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a documentation post.
     */
     function deleteDocumentationPost(uint256 postId, bytes32 documentationTreeIpfsHash) external override {
-        posts.deletePost(_msgSender(), postId);
         documentationTree.updateDocumentationTreeByPost(posts, _msgSender(), postId, documentationTreeIpfsHash);
+        posts.deletePost(_msgSender(), postId);
     }
 
 
