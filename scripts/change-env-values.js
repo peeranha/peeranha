@@ -21,7 +21,7 @@ const staging = [
     { field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 604800, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 2 hour
 	{ field: 'constant PERIOD_LENGTH', value: 604800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 2 hour
-    { field: 'constant START_PERIOD_TIME', value: 1652918300, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+    { field: 'constant START_PERIOD_TIME', value: 1664336800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
