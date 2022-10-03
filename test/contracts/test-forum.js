@@ -98,64 +98,6 @@ describe("Test post", function () {
 			);
 		});
 
-		it("Test create Documentation post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const ipfsHashes = getHashesContainer(2);
-			const hashContainer = getHashContainer();
-
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await Promise.all(
-				hashContainer.map(async (hash, index) => {
-					return await peeranhaContent.connect(signers[0])
-						.createPost(1, hash, PostTypeEnum.Documentation, []);	
-				})
-			);			
-			
-			await Promise.all(
-				hashContainer.map(async (hash, index) => {
-					const post = await peeranhaContent.getPost(index + 1);
-					expect(post.isDeleted).to.equal(false);
-					expect(post.postType).to.equal(PostTypeEnum.Documentation);
-					expect(post.tags.length).to.equal(0);
-					return expect(post.ipfsDoc.hash).to.equal(hash);
-				})
-			);
-
-
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
-
-			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-				.to.be.revertedWith('not_allowed_not_comm_admin');
-
-			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-
-			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []);
-			const post = await peeranhaContent.getPost(4);
-
-			expect(post.isDeleted).to.equal(false);
-			expect(post.postType).to.equal(PostTypeEnum.Documentation);
-			expect(post.tags.length).to.equal(0);
-			expect(post.ipfsDoc.hash).to.equal(hashContainer[1]);
-		});
-
-		it("Test common user create Documentation post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const ipfsHashes = getHashesContainer(2);
-			const hashContainer = getHashContainer();
-
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[2]);
-			await expect(peeranhaContent.connect(signers[1]).createPost(1, hashContainer[1], PostTypeEnum.Documentation, []))
-				.to.be.revertedWith('not_allowed_not_comm_admin');
-		});
-
 		it("Test create post without tag", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
@@ -252,18 +194,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or Documentation.');
-		});
-
-		it("Test create reply in Documentation", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
-			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial or Documentation.');
+			await expect(peeranhaContent.createReply(1, 0, hashContainer[1], false)).to.be.revertedWith('You can not publish replies in tutorial.');
 		});
 
 		it("Test create 4 replies (test gas)", async function () {
@@ -461,17 +392,6 @@ describe("Test post", function () {
 			expect(comment.author).to.equal(peeranhaContent.deployTransaction.from);
 			expect(comment.isDeleted).to.equal(false);
 			expect(comment.ipfsDoc.hash).to.equal(hashContainer[1]);
-		});
-
-		it("Test create comment to Documentation", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, []);
-			await expect(peeranhaContent.createComment(1, 0, hashContainer[1])).to.be.revertedWith('You can not publish comments in Documentation.');
 		});
 
 		it("Test create comment to reply", async function () {
@@ -1072,44 +992,6 @@ describe("Test post", function () {
 
 			const post = await peeranhaContent.getPost(1);
 			expect(post.isDeleted).to.equal(true);
-		});
-
-		it("Test delete own documentation", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
-			await peeranhaContent.deletePost(1);
-
-			const post = await peeranhaContent.getPost(1);
-			expect(post.isDeleted).to.equal(true);
-
-			const userRating = await peeranhaUser.getUserRating(accountDeployed, 1);
-			await expect(userRating).to.equal(StartRatingWithoutAction);
-		});
-
-		it("Test delete documentation by moderator", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
-			await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.Documentation, [1]);
-			await peeranhaContent.connect(signers[1]).deletePost(1);
-
-			const post = await peeranhaContent.getPost(1);
-			expect(post.isDeleted).to.equal(true);
-
-			const userRating = await peeranhaUser.getUserRating(accountDeployed, 1);
-			await expect(userRating).to.equal(StartRatingWithoutAction);
 		});
 
 		it("Test delete post by not registered user", async function () {
@@ -1774,63 +1656,5 @@ describe("Test post", function () {
 			await expect(peeranhaContent.updateDocumentationTree(1, hashContainer[0])).to.be.revertedWith('Community is frozen');
 		});
 
-		it("Test create documentation post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createDocumentationPost(1, hashContainer[0], hashContainer[1], PostTypeEnum.Documentation, [1]);
-
-			let post = await peeranhaContent.getPost(1);
-
-			expect(post.isDeleted).to.equal(false);
-			expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
-			expect(post.postType).to.equal(PostTypeEnum.Documentation);
-
-			const documentationTree = await peeranhaContent.getDocumentationTree(1);
-			expect(documentationTree.hash).to.equal(hashContainer[1]);
-		});
-
-		it("Test edit documentation post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createDocumentationPost(1, hashContainer[0], hashContainer[1], PostTypeEnum.Documentation, [1]);
-
-			await peeranhaContent.editDocumentationPost(1, hashContainer[1], hashContainer[0], [1]);
-
-			let post = await peeranhaContent.getPost(1);
-
-			expect(post.isDeleted).to.equal(false);
-			expect(post.ipfsDoc.hash).to.equal(hashContainer[1]);
-			expect(post.postType).to.equal(PostTypeEnum.Documentation);
-
-			const documentationTree = await peeranhaContent.getDocumentationTree(1);
-			expect(documentationTree.hash).to.equal(hashContainer[0]);
-		});
-
-		it("Test delete documentation post", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
-			await peeranhaContent.createDocumentationPost(1, hashContainer[0], hashContainer[1], PostTypeEnum.Documentation, [1]);
-
-			await peeranhaContent.deleteDocumentationPost(1, hashContainer[0]);
-
-			let post = await peeranhaContent.getPost(1);
-
-			expect(post.isDeleted).to.equal(true);
-
-			const documentationTree = await peeranhaContent.getDocumentationTree(1);
-			expect(documentationTree.hash).to.equal(hashContainer[0]);
-		});
 	});
 });
