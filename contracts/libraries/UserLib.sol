@@ -317,10 +317,10 @@ library UserLib {
     }
 
     uint256 pastPeriodsCount = userCommunityRating.rewardPeriods.length;
-    RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
     
     // If this is the first user rating change in any community
     if (pastPeriodsCount == 0 || userCommunityRating.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
+      RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
       periodRewardShares.activeUsersInPeriod.push(userAddr);
       userCommunityRating.rewardPeriods.push(currentPeriod);
     } else {  // rewrite
@@ -381,7 +381,7 @@ library UserLib {
           dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
-        int32 differentRatingPreviousPeriod; // name
+        int32 differentRatingPreviousPeriod; // name    // move to if()?
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
