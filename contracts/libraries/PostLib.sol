@@ -23,6 +23,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
+    enum ReplyProperties { MessengerSender }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -258,6 +259,30 @@ library PostLib  {
         replyContainer.info.postTime = timestamp;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
+    }
+
+    /// @notice Post reply
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the reply
+    /// @param postId The post where the reply will be post
+    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createReplyByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint256 postId,
+        bytes32 ipfsHash,
+        CommonLib.MessengerType messengerType,
+        bytes32 handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
+
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = postContainer.replies[postContainer.info.replyCount];
+
+        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | handle;
     }
 
     /// @notice Post comment

@@ -25,6 +25,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
+    bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
+
     UserLib.UserContext userContext;
 
     function initialize() public initializer {
@@ -216,6 +218,37 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         // revokeRole checks that sender is role admin
         revokeRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
+
+    /**
+     * @dev Give bot permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be a bot.
+     * 
+     */
+    function giveBotPermission(address userAddr) public {
+        // revokeRole checks that sender is role admin
+        // TODO: uniTest can do all action
+        // require(hasRole(PROTOCOL_ADMIN_ROLE, _msgSender()), 'not_admin_not_allowed');
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
+        grantRole(BOT_ROLE, userAddr);
+    }
+
+    /**
+     * @dev Revoke admin permission.
+     *
+     * Requirements:
+     *
+     * - Sender must be a bot.
+     * 
+     */
+    function revokeBotPermission(address userAddr) public {
+        // require(hasRole(PROTOCOL_ADMIN_ROLE, _msgSender()), 'not_admin_not_allowed');
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
+        revokeRole(BOT_ROLE, userAddr);
+    }
+
 
     /**
      * @dev Init community administrator permission.
@@ -431,6 +464,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         } else if (actionRole == UserLib.ActionRole.Admin) {
             require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller), 
                 "not_allowed_not_admin");
+        
+        } else if (actionRole == UserLib.ActionRole.Bot) {
+            require(hasRole(BOT_ROLE, actionCaller), 
+                "not_allowed_not_bot");
         
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator) {
             require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller) ||

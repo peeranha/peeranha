@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/PostLib.sol";
+import "./libraries/CommonLib.sol";
 import "./base/NativeMetaTransaction.sol";
 
 import "./interfaces/IPeeranhaContent.sol";
@@ -100,6 +101,19 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteReply(uint256 postId, uint16 replyId) external override {
         posts.deleteReply(_msgSender(), postId, replyId);
+    }
+
+    /**
+     * @dev Create new reply by bot.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be a new reply. 
+     * - must be a bot.
+    */
+    function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createReplyByBot(_msgSender(), postId, ipfsHash, messengerType, CommonLib.stringToBytes32(handle));
     }
 
     /**
