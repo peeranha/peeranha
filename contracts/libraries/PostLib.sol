@@ -1385,6 +1385,21 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
+    /// @notice Return reply property for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId The post where is the reply
+    /// @param replyId The reply which need find
+    /// @param propertyId The property which need find
+    function getReplyProperty(
+        PostCollection storage self, 
+        uint256 postId, 
+        uint16 replyId,
+        uint8 propertyId
+    ) public view returns (bytes32) {
+        PostContainer storage postContainer = self.posts[postId];
+        return getReplyContainer(postContainer, replyId).properties[propertyId];
+    }
+
     /// @notice Return comment for unit tests
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply

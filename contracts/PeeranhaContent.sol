@@ -287,6 +287,18 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
 
     // check need for prod?
     /**
+     * @dev Get a reply property by index.
+     *
+     * Requirements:
+     *
+     * - must be a property.
+    */
+    function getReplyProperty(uint256 postId, uint16 replyId, uint8 propertyId) external view returns (bytes32) {
+        return posts.getReplyProperty(postId, replyId, propertyId);
+    }
+
+    // check need for prod?
+    /**
      * @dev Get a reply by index.
      *
      * Requirements:
