@@ -2789,6 +2789,37 @@ describe("Test vote", function () {
 
 		describe('Change post type', function () {
 
+			it("Test change post type, post does not exist", async function () {
+				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+				const signers = await ethers.getSigners();
+				const hashContainer = getHashContainer();
+				const ipfsHashes = getHashesContainer(2);
+
+				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+				await peeranhaUser.createUser(hashContainer[1]);
+				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+				await expect(peeranhaContent.changePostType(1, PostTypeEnum.CommonPost))
+					.to.be.revertedWith('Post_not_exist.');
+			});
+
+			it("Test change post type, post has been deleted", async function () {
+				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+				const signers = await ethers.getSigners();
+				const hashContainer = getHashContainer();
+				const ipfsHashes = getHashesContainer(2);
+
+				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+				await peeranhaUser.createUser(hashContainer[1]);
+				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.deletePost(1);
+				
+				await expect(peeranhaContent.changePostType(1, PostTypeEnum.CommonPost))
+					.to.be.revertedWith('Post_deleted.');
+			});
+
 			it("Test change post type expert -> common", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();

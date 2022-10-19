@@ -410,6 +410,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
         if (createUserIfDoesNotExist) {
             UserLib.createIfDoesNotExist(userContext.users, actionCaller);
+        } else {
+            checkUser(actionCaller);        // need?
         }
 
         if (hasModeratorRole(actionCaller, communityId)) {
@@ -418,6 +420,18 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
                 
         checkHasRole(actionCaller, actionRole, communityId);
         UserLib.checkRatingAndEnergy(userContext, actionCaller, dataUser, communityId, action);
+    }
+
+    /**
+     * @dev Check the role/energy/rating of the user to perform some action
+     *
+     * Requirements:
+     *
+     * - Must be an existing community.
+     * - Only contract peeranhaContent and peeranhaCommunity can call the action
+     */
+    function isProtocolAdmin(address userAddr) public override view returns (bool) {
+        return hasRole(PROTOCOL_ADMIN_ROLE, userAddr);
     }
 
     function getActiveUserPeriods(address userAddr) public view returns (uint16[] memory) {

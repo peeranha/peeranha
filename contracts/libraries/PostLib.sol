@@ -14,6 +14,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days
+    uint32 constant DEFAULT_COMMUNITY = 5;
 
     int8 constant DIRECTION_DOWNVOTE = 2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -2;
@@ -131,6 +132,7 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
+    event ChangeCommunityId(address indexed user, uint256 indexed postId);
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
@@ -141,6 +143,8 @@ library PostLib  {
     /// @param userAddr Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param postType Type of post
+    /// @param tags Tags in post (min 1 tag)
     function createPost(
         PostCollection storage self,
         address userAddr,
@@ -320,10 +324,21 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
-        uint8[] memory tags
+        uint8[] memory tags,
+        uint32 communityId, 
+        PostType postType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+
+        if (postContainer.info.communityId != communityId) {
+            self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+            postContainer.info.communityId = communityId;
+        }
+        if (postContainer.info.postType != postType) {
+            postTypeChangeCalculation(self, postContainer, postType);
+            postContainer.info.postType = postType;
+        }
 
         self.peeranhaUser.checkActionRole(
             userAddr,
@@ -901,6 +916,11 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
+    // @notice Action change type of post. Post type can be ExpertPost, CommonPost or Tutorial
+    /// @param self The mapping containing all posts
+    /// @param userAddr Action's author
+    /// @param postId Post id where will be change post type
+    /// @param newPostType New post type
     function changePostType(
         PostCollection storage self,
         address userAddr,
@@ -918,8 +938,23 @@ library PostLib  {
             false
         );
 
+        postTypeChangeCalculation(self, postContainer, newPostType);
+
+        postContainer.info.postType = newPostType;
+        emit ChangePostType(userAddr, postId, newPostType);
+    }
+
+    // @notice Recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newPostType New post type
+    function postTypeChangeCalculation(
+        PostCollection storage self,
+        PostContainer storage postContainer,
+        PostType newPostType
+    ) private {
+        require(postContainer.info.postType != newPostType, "This post type is already set.");
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != oldPostType, "This post type is already set.");
         require(
             oldPostType != PostType.Tutorial &&
             newPostType != PostType.Tutorial,
@@ -970,9 +1005,38 @@ library PostLib  {
                 postContainer.info.communityId
             );
         }
+    }
 
-        postContainer.info.postType = newPostType;
-        emit ChangePostType(userAddr, postId, newPostType);
+    // @notice Action change type of post. Post type can be ExpertPost, CommonPost or Tutorial
+    /// @param self The mapping containing all posts
+    /// @param userAddr Action's author
+    /// @param postId Post id where will be change community id
+    /// @param communityId New community id
+    function changeCommunityId(
+        PostCollection storage self,
+        address userAddr,
+        uint256 postId,
+        uint32 communityId
+    ) public {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        require(postContainer.info.communityId != communityId, "This communityId is already set.");
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+
+        if (communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
+            revert("Error_change_communityId");
+        } else {
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                userAddr,
+                postContainer.info.communityId,
+                UserLib.Action.NONE,
+                UserLib.ActionRole.AdminOrCommunityModerator,
+                false
+            );
+        }
+
+        postContainer.info.communityId = communityId;
+        emit ChangeCommunityId(userAddr, postId);
     }
 
     // @notice update documentation ipfs tree
