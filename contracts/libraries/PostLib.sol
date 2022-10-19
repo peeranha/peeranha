@@ -274,15 +274,15 @@ library PostLib  {
         uint256 postId,
         bytes32 ipfsHash,
         CommonLib.MessengerType messengerType,
-        bytes32 handle
+        string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
         createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
 
         PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = postContainer.replies[postContainer.info.replyCount];
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
 
-        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | handle;
+        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
     }
 
     /// @notice Post comment

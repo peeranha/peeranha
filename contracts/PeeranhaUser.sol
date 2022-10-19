@@ -228,15 +228,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * 
      */
     function giveBotPermission(address userAddr) public {
-        // revokeRole checks that sender is role admin
-        // TODO: uniTest can do all action
-        // require(hasRole(PROTOCOL_ADMIN_ROLE, _msgSender()), 'not_admin_not_allowed');
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         grantRole(BOT_ROLE, userAddr);
     }
 
     /**
-     * @dev Revoke admin permission.
+     * @dev Revoke bot permission.
      *
      * Requirements:
      *
@@ -244,7 +241,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * 
      */
     function revokeBotPermission(address userAddr) public {
-        // require(hasRole(PROTOCOL_ADMIN_ROLE, _msgSender()), 'not_admin_not_allowed');
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         revokeRole(BOT_ROLE, userAddr);
     }

@@ -113,7 +113,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a bot.
     */
     function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external override {
-        posts.createReplyByBot(_msgSender(), postId, ipfsHash, messengerType, CommonLib.stringToBytes32(handle));
+        posts.createReplyByBot(_msgSender(), postId, ipfsHash, messengerType, handle);
     }
 
     /**
