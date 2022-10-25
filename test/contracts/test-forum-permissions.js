@@ -4,7 +4,7 @@ const {
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
-    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
+    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, PROTOCOL_ADMIN_ROLE, BOT_ROLE,
 } = require('./utils');
 
 ///
@@ -15,6 +15,25 @@ const {
 ///
 
 describe("Test permissions", function () {
+    describe("Test set role admin", function () {
+        it("Test grant role with set role admin", async function() {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+            await peeranhaUser.setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
+			
+			await expect(peeranhaUser.connect(signers[1]).grantRole(BOT_ROLE, signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
+
+            await expect(peeranhaUser.grantRole(BOT_ROLE, signers[1].address))
+            .not.to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
+        });
+    });
+
     describe("Test admin role", function () {
 		it("Test give admin permission", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -26,19 +45,19 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
-            await peeranhaUser.giveAdminPermission(signers[1].address);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
         });
 
@@ -52,22 +71,22 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
-            await peeranhaUser.giveAdminPermission(signers[1].address);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
             
-            await peeranhaUser.revokeAdminPermission(signers[1].address);
+            await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
         });
     });
 

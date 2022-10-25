@@ -65,6 +65,19 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Set the admin of role
+     *
+     * Requirements:
+     *
+     * - Must be an existing role.
+     * - Must be no PROTOCOL_ADMIN_ROLE
+     */
+    function setRoleAdmin(bytes32 role, bytes32 adminRole) public onlyRole(PROTOCOL_ADMIN_ROLE) {
+        // require(role != PROTOCOL_ADMIN_ROLE, "Role can't be PROTOCOL_ADMIN_ROLE");
+        _setRoleAdmin(role, adminRole);
+    }
+
+    /**
      * @dev List of communities where user has rewards in a given period.
      *
      * Requirements:
@@ -187,62 +200,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function checkUser(address addr) public view {
         require(userContext.users.isExists(addr), "user_not_found");
-    }
-
-    /**
-     * @dev Give admin permission.
-     *
-     * Requirements:
-     *
-     * - Sender must global administrator.
-     * - Must be an existing user. 
-     */
-    function giveAdminPermission(address userAddr) public {
-        // revokeRole checks that sender is role admin
-        // TODO: uniTest can do all action
-        checkUser(userAddr);
-        grantRole(PROTOCOL_ADMIN_ROLE, userAddr);
-    }
-
-    /**
-     * @dev Revoke admin permission.
-     *
-     * Requirements:
-     *
-     * - Sender must global administrator.
-     * - Must be an existing user. 
-     */
-
-     //should do something with AccessControlUpgradeable(revoke only for default admin)
-    function revokeAdminPermission(address userAddr) public {
-        // revokeRole checks that sender is role admin
-        revokeRole(PROTOCOL_ADMIN_ROLE, userAddr);
-    }
-
-    /**
-     * @dev Give bot permission.
-     *
-     * Requirements:
-     *
-     * - Sender must be a bot.
-     * 
-     */
-    function giveBotPermission(address userAddr) public {
-        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        grantRole(BOT_ROLE, userAddr);
-    }
-
-    /**
-     * @dev Revoke bot permission.
-     *
-     * Requirements:
-     *
-     * - Sender must be a bot.
-     * 
-     */
-    function revokeBotPermission(address userAddr) public {
-        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        revokeRole(BOT_ROLE, userAddr);
     }
 
 
@@ -455,34 +412,31 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
+        string memory message;
+        bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, actionCaller);
+        bool isCommunityAdmin = hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller);
+        bool isCommunityModerator = hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller);
+
         if (actionRole == UserLib.ActionRole.NONE) {
             return;
-        } else if (actionRole == UserLib.ActionRole.Admin) {
-            require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller), 
-                "not_allowed_not_admin");
-        
-        } else if (actionRole == UserLib.ActionRole.Bot) {
-            require(hasRole(BOT_ROLE, actionCaller), 
-                "not_allowed_not_bot");
-        
-        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator) {
-            require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller) ||
-                (hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-                "not_allowed_admin_or_comm_moderator");
-
-        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin) {
-            require(hasRole(PROTOCOL_ADMIN_ROLE, actionCaller) || 
-                (hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-                "not_allowed_admin_or_comm_admin");
-
-        } else if (actionRole == UserLib.ActionRole.CommunityAdmin) {
-            require((hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller)), 
-                "not_allowed_not_comm_admin");
-
-        } else if (actionRole == UserLib.ActionRole.CommunityModerator) {
-            require((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller)), 
-                "not_allowed_not_comm_moderator");
+        } else if (actionRole == UserLib.ActionRole.Admin && !isAdmin) {
+            message = "not_allowed_not_admin";
+        } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
+            message = "not_allowed_not_bot";
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
+            !(isAdmin || (isCommunityModerator))) {
+            message = "not_allowed_admin_or_comm_moderator";
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || (isCommunityAdmin))) {
+            message = "not_allowed_admin_or_comm_admin";
+        } else if (actionRole == UserLib.ActionRole.CommunityAdmin && !isCommunityAdmin) {
+            message = "not_allowed_not_comm_admin";
+        } else if (actionRole == UserLib.ActionRole.CommunityModerator && !isCommunityModerator) {
+            message = "not_allowed_not_comm_moderator";
+        } else {
+            return;
         }
+
+        require(false, message);
     }
     
     function hasModeratorRole(

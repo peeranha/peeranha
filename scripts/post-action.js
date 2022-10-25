@@ -15,6 +15,7 @@ const {
 const { testAccount, NFT, achievements, testCommunity } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
+const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 
@@ -111,7 +112,7 @@ async function userFunctions() {
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   // const txObj = await peeranhaUser.createUser(await getBytes32FromData(testAccount));
-  const txObj = await peeranhaUser.giveAdminPermission("0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);

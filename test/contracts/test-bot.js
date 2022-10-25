@@ -7,7 +7,7 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, PROTOCOL_ADMIN_ROLE, BOT_ROLE,
 } = require('./utils');
 
 describe("Test bot", function () {
@@ -21,12 +21,12 @@ describe("Test bot", function () {
 
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.giveAdminPermission(signers[0].address)
-			await peeranhaUser.giveBotPermission(signers[1].address)
+			
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
 
@@ -41,8 +41,7 @@ describe("Test bot", function () {
 
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.giveAdminPermission(signers[0].address)
-			await peeranhaUser.giveBotPermission(signers[1].address)
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -50,7 +49,7 @@ describe("Test bot", function () {
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
 
-			await peeranhaUser.revokeBotPermission(signers[1].address)
+			await peeranhaUser.revokeRole(BOT_ROLE, signers[1].address);
 
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.to.be.revertedWith('not_allowed_not_bot');
@@ -66,7 +65,7 @@ describe("Test bot", function () {
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(hashContainer[1]);
 
-			await peeranhaUser.giveBotPermission(signers[1].address);
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -90,7 +89,7 @@ describe("Test bot", function () {
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(hashContainer[1]);
 
-			await peeranhaUser.giveBotPermission(signers[1].address);
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
