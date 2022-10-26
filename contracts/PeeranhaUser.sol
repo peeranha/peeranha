@@ -70,10 +70,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * Requirements:
      *
      * - Must be an existing role.
-     * - Must be no PROTOCOL_ADMIN_ROLE
      */
     function setRoleAdmin(bytes32 role, bytes32 adminRole) public onlyRole(PROTOCOL_ADMIN_ROLE) {
-        // require(role != PROTOCOL_ADMIN_ROLE, "Role can't be PROTOCOL_ADMIN_ROLE");
         _setRoleAdmin(role, adminRole);
     }
 
