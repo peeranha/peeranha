@@ -6,6 +6,9 @@ pragma abicoder v2;
 
 
 interface IPeeranhaUser {
+    function approveDispatch(address user) external;
+    function disapproveDispatch(address user) external;
+    function isDispatchApproval(address user) external view returns(bool);
     function createUser(bytes32 ipfsHash) external;
     function updateUser(bytes32 ipfsHash) external;
     function followCommunity(uint32 communityId) external;
