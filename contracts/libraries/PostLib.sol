@@ -955,11 +955,7 @@ library PostLib  {
     ) private {
         require(postContainer.info.postType != newPostType, "This post type is already set.");
         PostType oldPostType = postContainer.info.postType;
-        require(
-            oldPostType != PostType.Tutorial &&
-            newPostType != PostType.Tutorial,
-                "Error_postType"
-        );
+        require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);

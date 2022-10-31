@@ -102,8 +102,8 @@ const testDocumentating = {
 
 
 async function main() {
-  await contentFunctions();
-  // await userFunctions();
+  // await contentFunctions();
+  await userFunctions();
 }
 
 async function userFunctions() {
@@ -111,8 +111,10 @@ async function userFunctions() {
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   // const txObj = await peeranhaUser.createUser(await getBytes32FromData(testAccount));
-  const txObj = await peeranhaUser.giveAdminPermission("0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
+  const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
 
+  console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
   await txObj.wait();

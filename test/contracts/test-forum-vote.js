@@ -2848,6 +2848,25 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.changePostType(1, PostTypeEnum.Tutorial);
+
+				const post = await peeranhaContent.getPost(1);
+				await expect(post.postType).to.equal(PostTypeEnum.Tutorial);
+			});
+
+			it("Test change post type expert -> tutorial (the post has reply)", async function () {
+				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+				const signers = await ethers.getSigners();
+				const hashContainer = getHashContainer();
+				const ipfsHashes = getHashesContainer(2);
+
+				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+				await peeranhaUser.createUser(hashContainer[1]);
+				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Tutorial)).to.be.revertedWith('Error_postType');
 			});
 
@@ -2879,9 +2898,28 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+				await peeranhaContent.changePostType(1, PostTypeEnum.Tutorial);
+
+				const post = await peeranhaContent.getPost(1);
+				await expect(post.postType).to.equal(PostTypeEnum.Tutorial);
+			});
+
+			it("Test change post type expert -> tutorial (the post has reply)", async function () {
+				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+				const signers = await ethers.getSigners();
+				const hashContainer = getHashContainer();
+				const ipfsHashes = getHashesContainer(2);
+
+				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+				await peeranhaUser.createUser(hashContainer[1]);
+				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+				await peeranhaContent.createReply(1, 0, hashContainer[1], false);
+
 				await expect(peeranhaContent.changePostType(1, PostTypeEnum.Tutorial)).to.be.revertedWith('Error_postType');
 			});
-			
+
 			it("Test change post type tutoral -> common", async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 				const signers = await ethers.getSigners();
@@ -2893,7 +2931,10 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-				await expect(peeranhaContent.changePostType(1, PostTypeEnum.CommonPost)).to.be.revertedWith('Error_postType');
+				await peeranhaContent.changePostType(1, PostTypeEnum.CommonPost);
+
+				const post = await peeranhaContent.getPost(1);
+				await expect(post.postType).to.equal(PostTypeEnum.CommonPost);
 			});
 
 			it("Test change post type tutoral -> expert", async function () {
@@ -2907,7 +2948,10 @@ describe("Test vote", function () {
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
-				await expect(peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost)).to.be.revertedWith('Error_postType');
+				await peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost);
+
+				const post = await peeranhaContent.getPost(1);
+				await expect(post.postType).to.equal(PostTypeEnum.ExpertPost);
 			});
 		});
 
