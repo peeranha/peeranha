@@ -8,6 +8,14 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 /// @dev
 library CommonLib {
   uint16 constant QUICK_REPLY_TIME_SECONDS = 900; // 6
+  address public constant BOT_ADDRESS = 0x0000000000000000000000000000000000000001;
+
+  enum MessengerType {
+      Unknown,
+      Telegram,
+      Discord,
+      Slack
+  }
 
   struct IpfsHash {
       bytes32 hash;
@@ -55,5 +63,16 @@ library CommonLib {
       bytes32 hash
   ) internal pure returns(bool) {
       return hash == bytes32(0x0);
+  }
+
+  function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+    bytes memory tempEmptyStringTest = bytes(source);
+    if (tempEmptyStringTest.length == 0) {
+        return 0x0;
+    }
+
+    assembly {
+        result := mload(add(source, 32))
+    }
   }
 }

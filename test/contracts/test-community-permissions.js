@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
-const { PostTypeEnum, createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
+const { PostTypeEnum, createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, PROTOCOL_ADMIN_ROLE } = require('./utils');
 
 describe("Test community permissions", function() {
     it("Test community moderator", async function() {
@@ -67,9 +67,9 @@ describe("Test community permissions", function() {
             .to.be.revertedWith('not_allowed_admin_or_comm_admin');
         await expect(peeranhaUser.connect(signers[1]).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
             .to.be.revertedWith('not_allowed_admin_or_comm_admin');
-        await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+        await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
-        await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+        await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
         // Revoke Moderator permission
