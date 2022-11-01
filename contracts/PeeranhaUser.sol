@@ -25,8 +25,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
-    mapping(address => bool) dispatcherApprovals;
-
     UserLib.UserContext userContext;
 
     function initialize() public initializer {
@@ -62,42 +60,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         userContext.peeranhaContent = IPeeranhaContent(contentContractAddress);
         userContext.peeranhaToken = IPeeranhaToken(tokenContractAddress);
         userContext.achievementsContainer.peeranhaNFT = IPeeranhaNFT(nftContractAddress);
-    }
-
-    /**
-     * @dev Approve dispatch transactions for user with address.
-     *
-     * Requirements:
-     *
-     * - Must be an existing user.
-     */
-    function approveDispatch(address user) public override {
-        checkUser(user);
-        dispatcherApprovals[user] = true;
-    }
-
-    /**
-     * @dev Disapprove dispatch transactions for user with address.
-     *
-     * Requirements:
-     *
-     * - Must be an existing user.
-     */
-    function disapproveDispatch(address user) public override {
-        checkUser(user);
-        dispatcherApprovals[user] = false;
-    }
-
-    /**
-     * @dev Disapprove dispatch transactions for user with address.
-     *
-     * Requirements:
-     *
-     * - Must be an existing user.
-     */
-    function isDispatchApproval(address user) public override view returns(bool) {
-        checkUser(user);
-        return dispatcherApprovals[user];
     }
 
     /**
