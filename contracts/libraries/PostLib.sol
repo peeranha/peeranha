@@ -131,8 +131,7 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-    event ChangeCommunityId(address indexed user, uint256 indexed postId);
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);   // dont delete (for indexing)
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
@@ -319,6 +318,9 @@ library PostLib  {
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param tags New tags in post (empty array if tags dont change)
+    /// @param communityId New community Id (current community id if dont change)
+    /// @param postType New post type (current community Id if dont change)
     function editPost(
         PostCollection storage self,
         address userAddr,
@@ -329,7 +331,32 @@ library PostLib  {
         PostType postType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+        if(userAddr == postContainer.info.author) {
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                postContainer.info.author,
+                postContainer.info.communityId,
+                UserLib.Action.EditItem,
+                UserLib.ActionRole.NONE,
+                false
+            );
+            require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+            if(postContainer.info.ipfsDoc.hash != ipfsHash)
+                postContainer.info.ipfsDoc.hash = ipfsHash;
+
+        } else {
+            if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
+                revert("Error_change_communityId");
+            } 
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                userAddr,
+                postContainer.info.communityId,
+                UserLib.Action.NONE,
+                UserLib.ActionRole.AdminOrCommunityModerator,
+                false
+            );
+        }
 
         if (postContainer.info.communityId != communityId) {
             self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
@@ -339,22 +366,10 @@ library PostLib  {
             postTypeChangeCalculation(self, postContainer, postType);
             postContainer.info.postType = postType;
         }
-
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            postContainer.info.author,
-            postContainer.info.communityId,
-            UserLib.Action.EditItem,
-            UserLib.ActionRole.NONE,
-            false
-        );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
-
-        if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
-            postContainer.info.ipfsDoc.hash = ipfsHash;
         if (tags.length > 0)
             postContainer.info.tags = tags;
+
+        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
 
         emit PostEdited(userAddr, postId);
     }
@@ -916,34 +931,6 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
-    // @notice Action change type of post. Post type can be ExpertPost, CommonPost or Tutorial
-    /// @param self The mapping containing all posts
-    /// @param userAddr Action's author
-    /// @param postId Post id where will be change post type
-    /// @param newPostType New post type
-    function changePostType(
-        PostCollection storage self,
-        address userAddr,
-        uint256 postId,
-        PostType newPostType
-    ) public {
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.AdminOrCommunityModerator,       // TODO will chech
-            false
-        );
-
-        postTypeChangeCalculation(self, postContainer, newPostType);
-
-        postContainer.info.postType = newPostType;
-        emit ChangePostType(userAddr, postId, newPostType);
-    }
-
     // @notice Recalculation rating for all users who were active in the post
     /// @param self The mapping containing all posts
     /// @param postContainer Post where changing post type
@@ -953,7 +940,6 @@ library PostLib  {
         PostContainer storage postContainer,
         PostType newPostType
     ) private {
-        require(postContainer.info.postType != newPostType, "This post type is already set.");
         PostType oldPostType = postContainer.info.postType;
         require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
         
@@ -1001,38 +987,6 @@ library PostLib  {
                 postContainer.info.communityId
             );
         }
-    }
-
-    // @notice Action change type of post. Post type can be ExpertPost, CommonPost or Tutorial
-    /// @param self The mapping containing all posts
-    /// @param userAddr Action's author
-    /// @param postId Post id where will be change community id
-    /// @param communityId New community id
-    function changeCommunityId(
-        PostCollection storage self,
-        address userAddr,
-        uint256 postId,
-        uint32 communityId
-    ) public {
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        require(postContainer.info.communityId != communityId, "This communityId is already set.");
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
-
-        if (communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
-            revert("Error_change_communityId");
-        } else {
-            self.peeranhaUser.checkActionRole(
-                userAddr,
-                userAddr,
-                postContainer.info.communityId,
-                UserLib.Action.NONE,
-                UserLib.ActionRole.AdminOrCommunityModerator,
-                false
-            );
-        }
-
-        postContainer.info.communityId = communityId;
-        emit ChangeCommunityId(userAddr, postId);
     }
 
     // @notice update documentation ipfs tree

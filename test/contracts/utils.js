@@ -337,7 +337,7 @@ const ratingChangesSkipPeriod = [
 
 const StartRating = 10
 const StartRatingWithoutAction = 0;
-const DefaulCommunityId = 3;
+const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
 const LenguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
@@ -427,5 +427,5 @@ module.exports = {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-    DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaulCommunityId
+    DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId
 };
