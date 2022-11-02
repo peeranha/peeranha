@@ -133,6 +133,7 @@ library UserLib {
 
   enum ActionRole {
     NONE,
+    Bot,
     Admin,
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,

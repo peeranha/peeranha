@@ -1,6 +1,7 @@
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const { parseEther }  = require("ethers/lib/utils");
 const crypto = require("crypto");
+const { ethers } = require("hardhat");
 
 ///
 // to do
@@ -415,6 +416,8 @@ const ModeratorDeleteReply = -2;
 ////////////////////////////////////////
 const ModeratorDeleteComment = -1;
 
+const PROTOCOL_ADMIN_ROLE = ethers.utils.id("PROTOCOL_ADMIN_ROLE");
+const BOT_ROLE = ethers.utils.id("BOT_ROLE");
 
 module.exports = { 
     wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
@@ -427,5 +430,6 @@ module.exports = {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-    DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId
+    DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE
 };

@@ -3,10 +3,12 @@ pragma solidity >=0.5.0;
 pragma abicoder v2;
 
 import "../libraries/PostLib.sol";
+import "../libraries/CommonLib.sol";
 
 interface IPeeranhaContent {
     function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external;
     function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external;
+    function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external;
     function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external;
     function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType) external;
     function editReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external;

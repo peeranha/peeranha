@@ -24,6 +24,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
+    enum ReplyProperties { MessengerSender }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -261,6 +262,30 @@ library PostLib  {
         replyContainer.info.postTime = timestamp;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
+    }
+
+    /// @notice Post reply
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the reply
+    /// @param postId The post where the reply will be post
+    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createReplyByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint256 postId,
+        bytes32 ipfsHash,
+        CommonLib.MessengerType messengerType,
+        string memory handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
+
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
+
+        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
     }
 
     /// @notice Post comment
@@ -1372,6 +1397,21 @@ library PostLib  {
     ) public view returns (Reply memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getReplyContainer(postContainer, replyId).info;
+    }
+
+    /// @notice Return reply property for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId The post where is the reply
+    /// @param replyId The reply which need find
+    /// @param propertyId The property which need find
+    function getReplyProperty(
+        PostCollection storage self, 
+        uint256 postId, 
+        uint16 replyId,
+        uint8 propertyId
+    ) public view returns (bytes32) {
+        PostContainer storage postContainer = self.posts[postId];
+        return getReplyContainer(postContainer, replyId).properties[propertyId];
     }
 
     /// @notice Return comment for unit tests

@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { wait, getInt, getAddressContract, createPeerenhaAndTokenContract, hashContainer, createTags, getHashesContainer } = require('./utils');
+const { wait, getInt, getAddressContract, createPeerenhaAndTokenContract, hashContainer, createTags, getHashesContainer, PROTOCOL_ADMIN_ROLE } = require('./utils');
 const bs58 = require('bs58');
 
 const AchievementsType = { "Rating":0 }
@@ -87,7 +87,7 @@ describe("Test NFT", function () {
 
 		await peeranhaUser.createUser(hashContainer[0]);
 		await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
-		await peeranhaUser.giveAdminPermission(signers[1].address);
+		await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
 
 		const tokensCount = await peeranhaNFT.balanceOf(peeranhaUser.deployTransaction.from);
 		await expect(await getInt(tokensCount)).to.equal(0);
