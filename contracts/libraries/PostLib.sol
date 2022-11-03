@@ -14,6 +14,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days
+    uint32 constant DEFAULT_COMMUNITY = 5;
 
     int8 constant DIRECTION_DOWNVOTE = 2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -2;
@@ -23,6 +24,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
+    enum ReplyProperties { MessengerSender }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -130,7 +132,7 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);   // dont delete (for indexing)
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
@@ -141,6 +143,8 @@ library PostLib  {
     /// @param userAddr Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param postType Type of post
+    /// @param tags Tags in post (min 1 tag)
     function createPost(
         PostCollection storage self,
         address userAddr,
@@ -260,6 +264,30 @@ library PostLib  {
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
 
+    /// @notice Post reply
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the reply
+    /// @param postId The post where the reply will be post
+    /// @param ipfsHash IPFS hash of document with reply information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createReplyByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint256 postId,
+        bytes32 ipfsHash,
+        CommonLib.MessengerType messengerType,
+        string memory handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
+
+        PostContainer storage postContainer = getPostContainer(self, postId);
+        ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
+
+        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+    }
+
     /// @notice Post comment
     /// @param self The mapping containing all posts
     /// @param userAddr Author of the comment
@@ -315,31 +343,58 @@ library PostLib  {
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param tags New tags in post (empty array if tags dont change)
+    /// @param communityId New community Id (current community id if dont change)
+    /// @param postType New post type (current community Id if dont change)
     function editPost(
         PostCollection storage self,
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
-        uint8[] memory tags
+        uint8[] memory tags,
+        uint32 communityId, 
+        PostType postType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+        if(userAddr == postContainer.info.author) {
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                postContainer.info.author,
+                postContainer.info.communityId,
+                UserLib.Action.EditItem,
+                UserLib.ActionRole.NONE,
+                false
+            );
+            require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+            if(postContainer.info.ipfsDoc.hash != ipfsHash)
+                postContainer.info.ipfsDoc.hash = ipfsHash;
 
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            postContainer.info.author,
-            postContainer.info.communityId,
-            UserLib.Action.EditItem,
-            UserLib.ActionRole.NONE,
-            false
-        );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
+        } else {
+            if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
+                revert("Error_change_communityId");
+            } 
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                userAddr,
+                postContainer.info.communityId,
+                UserLib.Action.NONE,
+                UserLib.ActionRole.AdminOrCommunityModerator,
+                false
+            );
+        }
 
-        if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
-            postContainer.info.ipfsDoc.hash = ipfsHash;
+        if (postContainer.info.communityId != communityId) {
+            self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+            postContainer.info.communityId = communityId;
+        }
+        if (postContainer.info.postType != postType) {
+            postTypeChangeCalculation(self, postContainer, postType);
+            postContainer.info.postType = postType;
+        }
         if (tags.length > 0)
             postContainer.info.tags = tags;
+
+        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
 
         emit PostEdited(userAddr, postId);
     }
@@ -901,30 +956,17 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
-    function changePostType(
+    // @notice Recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newPostType New post type
+    function postTypeChangeCalculation(
         PostCollection storage self,
-        address userAddr,
-        uint256 postId,
+        PostContainer storage postContainer,
         PostType newPostType
-    ) public {
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.AdminOrCommunityModerator,       // TODO will chech
-            false
-        );
-
+    ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != oldPostType, "This post type is already set.");
-        require(
-            oldPostType != PostType.Tutorial &&
-            newPostType != PostType.Tutorial,
-                "Error_postType"
-        );
+        require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
@@ -970,9 +1012,6 @@ library PostLib  {
                 postContainer.info.communityId
             );
         }
-
-        postContainer.info.postType = newPostType;
-        emit ChangePostType(userAddr, postId, newPostType);
     }
 
     // @notice update documentation ipfs tree
@@ -1358,6 +1397,21 @@ library PostLib  {
     ) public view returns (Reply memory) {
         PostContainer storage postContainer = self.posts[postId];
         return getReplyContainer(postContainer, replyId).info;
+    }
+
+    /// @notice Return reply property for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId The post where is the reply
+    /// @param replyId The reply which need find
+    /// @param propertyId The property which need find
+    function getReplyProperty(
+        PostCollection storage self, 
+        uint256 postId, 
+        uint16 replyId,
+        uint8 propertyId
+    ) public view returns (bytes32) {
+        PostContainer storage postContainer = self.posts[postId];
+        return getReplyContainer(postContainer, replyId).properties[propertyId];
     }
 
     /// @notice Return comment for unit tests

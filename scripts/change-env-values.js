@@ -10,10 +10,14 @@ const prod = [
     { field: 'constant START_PERIOD_TIME', value: 1655251200, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant DEFAULT_COMMUNITY', value: 5, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getContractInformation(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getActiveUsersInPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function claimReward(', value: `/*`, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 	{ field: 'function getVotedUsers(', value: `/*`, path: `../contracts/PeeranhaContent.sol`, isFunction: true },
 ];
@@ -25,10 +29,14 @@ const staging = [
     { field: 'constant START_PERIOD_TIME', value: 1664336800, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 1000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant DEFAULT_COMMUNITY', value: 5, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+    { field: 'function getContractInformation(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getActiveUsersInPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function claimReward(', value: `/*`, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 	{ field: 'function getVotedUsers(', value: `/*`, path: `../contracts/PeeranhaContent.sol`, isFunction: true },
 ];
@@ -37,17 +45,23 @@ const test = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 900, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 3600, path: `../contracts/libraries/PostLib.sol`, isFunction: false },     // 1 hour
 	{ field: 'constant PERIOD_LENGTH', value: 3600, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },  // 1 hour
-    { field: 'constant START_PERIOD_TIME', value: 1655172100, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
+    { field: 'constant START_PERIOD_TIME', value: 1666375400, path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 400, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 4, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant DEFAULT_COMMUNITY', value: 6, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+    { field: 'function getContractInformation(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getActiveUsersInPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function claimReward(', value: ``, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 	{ field: 'function getVotedUsers(', value: `/*`, path: `../contracts/PeeranhaContent.sol`, isFunction: true },
 ];
 
+
+// getVersion
 const unitTest = [
 	{ field: 'constant QUICK_REPLY_TIME_SECONDS', value: 6, path: `../contracts/libraries/CommonLib.sol`, isFunction: false },
 	{ field: 'constant DELETE_TIME', value: 10, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
@@ -55,10 +69,14 @@ const unitTest = [
 	{ field: 'constant START_PERIOD_TIME', value: Math.floor(Date.now() / 1000), path: `../contracts/libraries/RewardLib.sol`, isFunction: false },
 	{ field: 'constant MAX_REWARD_PER_PERIOD', value: 100000, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 2, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
+	{ field: 'constant DEFAULT_COMMUNITY', value: 3, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodReward(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+    { field: 'function getContractInformation(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getActiveUsersInPeriod(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getPeriod(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function claimReward(', value: ``, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 	{ field: 'function getVotedUsers(', value: ``, path: `../contracts/PeeranhaContent.sol`, isFunction: true },
 ];

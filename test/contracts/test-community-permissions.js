@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
-const { PostTypeEnum, createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
+const { PostTypeEnum, createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, DefaultCommunityId, PROTOCOL_ADMIN_ROLE } = require('./utils');
 
 describe("Test community permissions", function() {
     it("Test community moderator", async function() {
@@ -50,7 +50,13 @@ describe("Test community permissions", function() {
 
         //post actions
         await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranhaContent.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost);
+        await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);    // edit Post Type exprt -> common
+        await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 2, PostTypeEnum.CommonPost)).
+            to.be.revertedWith("Error_change_communityId");
+        await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost);
+        await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).
+            to.be.revertedWith("Error_change_communityId");
+        await peeranhaContent.editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);
         await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], true);    // official Reply
         await peeranhaContent.connect(signers[1]).editReply(1, 1, hashContainer[1], true)       // official Reply
         //change status best reply
@@ -67,9 +73,9 @@ describe("Test community permissions", function() {
             .to.be.revertedWith('not_allowed_admin_or_comm_admin');
         await expect(peeranhaUser.connect(signers[1]).revokeCommunityModeratorPermission(signers[2].address, communitiesIds[0]))
             .to.be.revertedWith('not_allowed_admin_or_comm_admin');
-        await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+        await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
-        await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+        await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
         // Revoke Moderator permission
@@ -139,8 +145,12 @@ describe("Test community permissions", function() {
         await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await expect(peeranhaContent.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+        await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).    // edit Post Type exprt -> common
+            to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+        await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost)).
+            to.be.revertedWith("Error_change_communityId");
+        await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost)).
+            to.be.revertedWith("not_allowed_admin_or_comm_moderator");
         await peeranhaContent.connect(signers[1]).createReply(1, 0, hashContainer[1], true);    // official Reply
         await peeranhaContent.connect(signers[1]).createReply(2, 0, hashContainer[1], false);           // common reply
         await peeranhaContent.connect(signers[1]).editReply(2, 1, hashContainer[1], true);      // official Reply
@@ -248,6 +258,7 @@ describe("Test community permissions", function() {
         // .to.be.revertedWith("not_allowed_not_comm_admin");
     });
 
+	// in utils error "ReferenceError: expect is not defined"
     const createCommunities = async (peeranhaCommunity, countOfCommunities, communitiesIds) => {
         const ipfsHashes = getHashesContainer(countOfCommunities);
         await Promise.all(communitiesIds.map(async(id) => {

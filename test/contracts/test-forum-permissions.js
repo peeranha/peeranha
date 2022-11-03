@@ -4,7 +4,7 @@ const {
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
-    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
+    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, DefaultCommunityId, PROTOCOL_ADMIN_ROLE, BOT_ROLE,
 } = require('./utils');
 
 ///
@@ -15,6 +15,25 @@ const {
 ///
 
 describe("Test permissions", function () {
+    describe("Test set role admin", function () {
+        it("Test grant role with set role admin", async function() {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(hashContainer[1]);
+
+            await peeranhaUser.setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
+			
+			await expect(peeranhaUser.connect(signers[1]).grantRole(BOT_ROLE, signers[2].address))
+            .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
+
+            await expect(peeranhaUser.grantRole(BOT_ROLE, signers[1].address))
+            .not.to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
+        });
+    });
+
     describe("Test admin role", function () {
 		it("Test give admin permission", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -26,19 +45,19 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
-            await peeranhaUser.giveAdminPermission(signers[1].address);
-            await expect(peeranhaUser.connect(signers[1]).giveAdminPermission(signers[2].address))
+            await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).grantRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
         });
 
@@ -52,22 +71,22 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(hashContainer[2]);
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityModeratorPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
             
             await peeranhaUser.giveCommunityAdminPermission(signers[1].address, 1);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
 
-            await peeranhaUser.giveAdminPermission(signers[1].address);
-            await expect(peeranhaUser.connect(signers[1]).revokeAdminPermission(signers[2].address))
+            await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
+            await expect(peeranhaUser.connect(signers[1]).revokeRole(PROTOCOL_ADMIN_ROLE, signers[2].address))
             .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"); 
             
-            await peeranhaUser.revokeAdminPermission(signers[1].address);
+            await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
         });
     });
 
@@ -303,15 +322,49 @@ describe("Test permissions", function () {
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await expect(peeranhaContent.connect(signers[2]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).
+                to.be.revertedWith("user_not_found");
+        })
+
+        it("Test change post type by not author the post", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
 
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-			await expect(peeranhaContent.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+            await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).
+                to.be.revertedWith("not_allowed_admin_or_comm_moderator");
         })
 
-        it("Test change post type by common user", async function () {
+        it("Test change post type by common user (not author of the post)", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await expect(peeranhaContent.connect(signers[2]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).
+                to.be.revertedWith("not_allowed_admin_or_comm_moderator");   
+        })
+
+        it("Test change post type by common user (author of the post)", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -324,8 +377,96 @@ describe("Test permissions", function () {
 
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-			await expect(peeranhaContent.connect(signers[1]).changePostType(1, PostTypeEnum.CommonPost))
-            .to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+            await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);
+
+            const post = await peeranhaContent.getPost(1);
+            expect(post.postType).to.equal(PostTypeEnum.CommonPost);
+        })
+
+        it("Test change community Id by not registered user", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await expect(peeranhaContent.connect(signers[2]).editPost(1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost)).
+                to.be.revertedWith("Error_change_communityId"); // user_not_found?
+        })
+
+        it("Test change community Id by not author the post", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost)).
+                to.be.revertedWith("Error_change_communityId");
+        })
+
+        it("Test change community Id by common user", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+            await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost);
+
+            const post = await peeranhaContent.getPost(1);
+            expect(post.communityId).to.equal(2);
+        })
+
+        it("Test change community Id to default community by not author the post", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost)).
+                to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+        })
+
+        it("Test change community Id to default community by common user", async function () {
+            const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+
+            await peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost);
+
+            const post = await peeranhaContent.getPost(1);
+            expect(post.communityId).to.equal(DefaultCommunityId);
         })
     });
 

@@ -33,7 +33,8 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			const rewardPeriods2User = await peeranhaUser.getActiveUserPeriods(signers[1].address)
-
+			expect(rewardPeriods[0]).to.equal(rewardPeriods2User[0]);
+			
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 			const ratingToReward2User = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods2User[0], 1);
 			expect(ratingToReward).to.equal(60);
@@ -50,7 +51,7 @@ describe("Test wallet", function () {
 
 			expect(balance).to.equal(userReward);
 			expect(balance2).to.equal(userReward2);
-		});
+		}).retries(3);
 	});
 
 	describe("Test add rating to reward", function () {

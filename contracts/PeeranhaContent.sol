@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/PostLib.sol";
+import "./libraries/CommonLib.sol";
 import "./base/NativeMetaTransaction.sol";
 
 import "./interfaces/IPeeranhaContent.sol";
@@ -51,9 +52,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be new info about post
      * - must be a community.
      * - must be tags
+     * - if not author of the post must be protocol admin or community moderator
     */
-    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external override {
-        posts.editPost(_msgSender(), postId, ipfsHash, tags);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType) external override {
+        posts.editPost(_msgSender(), postId, ipfsHash, tags, communityId, postType);
     }
 
     /**
@@ -100,6 +102,19 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function deleteReply(uint256 postId, uint16 replyId) external override {
         posts.deleteReply(_msgSender(), postId, replyId);
+    }
+
+    /**
+     * @dev Create new reply by bot.
+     *
+     * Requirements:
+     *
+     * - must be a post.
+     * - must be a new reply. 
+     * - must be a bot.
+    */
+    function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createReplyByBot(_msgSender(), postId, ipfsHash, messengerType, handle);
     }
 
     /**
@@ -158,18 +173,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
         posts.voteForumItem(_msgSender(), postId, replyId, commentId, isUpvote);
-    }
-
-    /**
-     * @dev Change post type
-     *
-     * Requirements:
-     *
-     * - must be admin or community moderator.
-     * - old and new post type must be Expert or Common type
-    */
-    function changePostType(uint256 postId, PostLib.PostType postType) external override {
-        posts.changePostType(_msgSender(), postId, postType);
     }
 
     /**
@@ -281,6 +284,18 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getReply(uint256 postId, uint16 replyId) external view returns (PostLib.Reply memory) {
         return posts.getReply(postId, replyId);
+    }
+
+    // check need for prod?
+    /**
+     * @dev Get a reply property by index.
+     *
+     * Requirements:
+     *
+     * - must be a property.
+    */
+    function getReplyProperty(uint256 postId, uint16 replyId, uint8 propertyId) external view returns (bytes32) {
+        return posts.getReplyProperty(postId, replyId, propertyId);
     }
 
     // check need for prod?
