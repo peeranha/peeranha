@@ -241,7 +241,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
-        _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
     /**
