@@ -516,16 +516,6 @@ library PostLib  {
             UserLib.ActionRole.NONE,
             false
         );
-        ///
-        // bug
-        // checkActionRole has check "require(actionCaller == dataUser, "not_allowed_delete");"
-        // behind this check is "if actionCaller == moderator -> return"
-        // in this step can be only a moderator or reply's owner
-        // a reply owner can not delete best reply, but a moderator can
-        // next require check that reply's owner can not delete best reply
-        // bug if reply's owner is moderator any way error
-        ///
-        require(postContainer.info.bestReply != replyId || userAddr != replyContainer.info.author, "You can not delete the best reply.");
 
         uint256 time = CommonLib.getTimestamp();
         if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {

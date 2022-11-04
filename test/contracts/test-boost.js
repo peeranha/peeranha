@@ -527,7 +527,7 @@ describe("Test boost", function () {
 			// await token.claimReward(rewardPeriods[1]);
 			// const balance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			// expect(balance).to.equal(5 * 6 * coefficientToken * fraction);
-		});
+		}).retries(3);
 
 		it("add 0 rating in next periods when add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -555,6 +555,6 @@ describe("Test boost", function () {
 
 			await expect(token.claimReward(rewardPeriods[0]))
 			.to.be.revertedWith('no_reward');
-		});
+		}).retries(3);
 	})
 });
