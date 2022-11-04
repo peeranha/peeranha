@@ -216,8 +216,7 @@ library PostLib  {
          */
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(
-            parentReplyId == 0 || 
-            (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
+            parentReplyId == 0, 
             "User is forbidden to reply on reply for Expert and Common type of posts"
         ); // unit tests (reply on reply)
 
