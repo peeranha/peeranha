@@ -20,6 +20,7 @@
     "upgrade-user:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
     "upgrade:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade.js && node scripts/change-env-values.js 0",
     "upgrade-user:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/upgrade-user.js && node scripts/change-env-values.js 0",
+    "upgrade:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 0 && npx hardhat run --network polygon scripts/upgrade.js",
     "propose-upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/propose-upgrade.js && node scripts/change-env-values.js 0",
     "transfer-ownership:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/transfer-ownership.js && node scripts/change-env-values.js 0",
     "post-action-mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
