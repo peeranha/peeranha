@@ -869,7 +869,7 @@ library PostLib  {
     /// @param isUpvote Upvote or downvote
     /// @param ratingChanged The value shows how the rating of a post or reply has changed.
     /// @param typeContent Type content post, reply or comment
-    function vote (
+    function vote(
         PostCollection storage self,
         address author,
         address votedUser,
@@ -943,24 +943,14 @@ library PostLib  {
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
-        int32 positive;
-        int32 negative;
-        for (uint32 i; i < postContainer.votedUsers.length; i++) {
-            if(postContainer.historyVotes[postContainer.votedUsers[i]] == 1) positive++;
-            else if(postContainer.historyVotes[postContainer.votedUsers[i]] == -1) negative++;
-        }
+        (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
         int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
         self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-            positive = 0;
-            negative = 0;
-            for (uint32 i; i < replyContainer.votedUsers.length; i++) {
-                if(replyContainer.historyVotes[replyContainer.votedUsers[i]] == 1) positive++;
-                else if (replyContainer.historyVotes[replyContainer.votedUsers[i]] == -1) negative++;
-            }
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
             changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
                                 (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
