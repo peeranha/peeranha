@@ -1,7 +1,31 @@
 const { ethers, upgrades } = require("hardhat");
-const { COMMUNITY_ADDRESS, CONTENT_ADDRESS, NFT_ADDRESS, TOKEN_ADDRESS, USER_ADDRESS } = require('../env.json');
+const { POSTLIB_ADDRESS, COMMUNITY_ADDRESS, CONTENT_ADDRESS, NFT_ADDRESS, TOKEN_ADDRESS, USER_ADDRESS } = require('../env.json');
 
 async function main() {
+  /*const PeeranhaUserExisting = await ethers.getContractFactory("PeeranhaUser");
+  console.log("Pulling proxy info for PeeranhaUser...");
+  await upgrades.forceImport(USER_ADDRESS, PeeranhaUserExisting, {timeout: 0});
+
+  const PeeranhaCommunityExisting = await ethers.getContractFactory("PeeranhaCommunity");
+  console.log("Pulling proxy info for PeeranhaCommunity...");
+  await upgrades.forceImport(COMMUNITY_ADDRESS, PeeranhaCommunityExisting, {timeout: 0});
+
+  const PeeranhaContentExisting = await ethers.getContractFactory("PeeranhaContent", {
+    libraries: {
+      PostLib: POSTLIB_ADDRESS
+    }
+  });
+  console.log("Pulling proxy info for PeeranhaContent...");
+  await upgrades.forceImport(CONTENT_ADDRESS, PeeranhaContentExisting, {unsafeAllowLinkedLibraries: true, timeout: 0});
+
+  const PeeranhaNFTExisting = await ethers.getContractFactory("PeeranhaNFT");
+  console.log("Pulling proxy info for PeeranhaNFT...");
+  await upgrades.forceImport(NFT_ADDRESS, PeeranhaNFTExisting, {timeout: 0});
+
+  const PeeranhaTokenExisting = await ethers.getContractFactory("PeeranhaToken");
+  console.log("Pulling proxy info for PeeranhaToken...");
+  await upgrades.forceImport(TOKEN_ADDRESS, PeeranhaTokenExisting, {timeout: 0});*/
+
   const PostLib = await ethers.getContractFactory("PostLib");
   console.log("Deploying PostLib...");
   const postLib = await PostLib.deploy();
@@ -27,7 +51,7 @@ async function main() {
   const peeranhaContent = await upgrades.upgradeProxy(CONTENT_ADDRESS, PeeranhaContent, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("PeeranhaContent upgraded at:", peeranhaContent.address);
   
-  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  /*const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   console.log("Upgrading PeeranhaNFT...");
   const peeranhaNFT = await upgrades.upgradeProxy(NFT_ADDRESS, PeeranhaNFT, {timeout: 0});
   console.log("Peeranha NFT upgraded at:", peeranhaNFT.address);
@@ -35,7 +59,7 @@ async function main() {
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
   console.log("Upgrading PeeranhaToken...");
   const peeranhaToken = await upgrades.upgradeProxy(TOKEN_ADDRESS, PeeranhaToken, {timeout: 0});
-  console.log("Peeranha token upgraded at:", peeranhaToken.address);
+  console.log("Peeranha token upgraded at:", peeranhaToken.address);*/
 }
 
 main()
