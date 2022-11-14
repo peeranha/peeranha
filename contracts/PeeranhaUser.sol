@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 
 import "./libraries/UserLib.sol";
@@ -26,6 +27,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
+    bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
 
@@ -45,6 +47,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
         // TODO: Uncomment this when contract size will be smaller or for redeploy
         // _setRoleAdmin(PROTOCOL_ADMIN_ROLE, BOT_ROLE);
+        // _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE);
     }
 
     // This is to support Native meta transactions
@@ -57,6 +60,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         returns (address sender)
     {
         return NativeMetaTransaction._msgSender();
+    }
+
+    function dispatcherCheck(address user, address sender) public view override {
+        if (user != sender) {
+            checkHasRole(sender, UserLib.ActionRole.Dispatcher, 0);
+        }
     }
 
     function setContractAddresses(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -106,8 +115,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be a new user.
      */
-    function createUser(bytes32 ipfsHash) public override {
-        UserLib.create(userContext.users, _msgSender(), ipfsHash);
+    function createUser(address user, bytes32 ipfsHash) public override {
+        dispatcherCheck(user, _msgSender());
+        UserLib.create(userContext.users, user, ipfsHash);
     }
 
     /**
@@ -117,10 +127,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user.  
      */
-    function updateUser(bytes32 ipfsHash) public override {
-        address userAddress = _msgSender();
-        UserLib.createIfDoesNotExist(userContext.users, userAddress);
-        UserLib.update(userContext, userAddress, ipfsHash);
+    function updateUser(address user, bytes32 ipfsHash) public override {
+        dispatcherCheck(user, _msgSender());
+        UserLib.createIfDoesNotExist(userContext.users, user);
+        UserLib.update(userContext, user, ipfsHash);
     }
 
     /**
@@ -130,11 +140,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an community.  
      */
-    function followCommunity(uint32 communityId) public override {
+    function followCommunity(address user, uint32 communityId) public override {
+        dispatcherCheck(user, _msgSender());
         onlyExistingAndNotFrozenCommunity(communityId);
-        address userAddress = _msgSender();
-        UserLib.createIfDoesNotExist(userContext.users, userAddress);
-        UserLib.followCommunity(userContext, userAddress, communityId);
+        UserLib.createIfDoesNotExist(userContext.users, user);
+        UserLib.followCommunity(userContext, user, communityId);
     }
 
     /**
@@ -144,8 +154,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(uint32 communityId) public override {
-        UserLib.unfollowCommunity(userContext, _msgSender(), communityId);
+    function unfollowCommunity(address user, uint32 communityId) public override {
+        dispatcherCheck(user, _msgSender());
+        UserLib.unfollowCommunity(userContext, user, communityId);
     }
 
     /**
@@ -235,10 +246,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
+    function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) public override {
+        dispatcherCheck(user, _msgSender());
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
@@ -253,7 +265,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
+    function giveCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user, _msgSender());
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
@@ -269,7 +282,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function revokeCommunityAdminPermission(address userAddr, uint32 communityId) public {
+    function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user, _msgSender());
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         require(userAddr != _msgSender(), "self_revoke");
@@ -285,7 +299,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user.
      */
-    function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) public {
+    function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user, _msgSender());
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
@@ -437,6 +452,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             message = "not_allowed_not_admin";
         } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
             message = "not_allowed_not_bot";
+        } else if (actionRole == UserLib.ActionRole.Dispatcher && !hasRole(DISPATCHER_ROLE, actionCaller)) {
+            message = "not_allowed_not_dispatcher";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
             message = "not_allowed_admin_or_comm_moderator";

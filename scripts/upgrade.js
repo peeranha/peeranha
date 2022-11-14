@@ -7,9 +7,19 @@ async function main() {
   const postLib = await PostLib.deploy();
   console.log("PostLib deployed to:", postLib.address);
 
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const UserLib = await ethers.getContractFactory("UserLib");
+  console.log("Deploying UserLib...");
+  const userLib = await UserLib.deploy();
+  console.log("UserLib deployed to:", userLib.address);
+
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+    libraries: {
+      UserLib: userLib.address
+    }
+  });
+  
   console.log("Upgrading PeeranhaUser...");
-  const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {timeout: 0});
+  const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0}); // TODO: Ask Sergey
   console.log("Peeranha User upgraded at:", peeranhaUser.address);
 
   const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");

@@ -6,89 +6,42 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DISPATCHER_ROLE,
 } = require('./utils');
 
 
 describe("Test dispatcher", function () {
 	
-	describe("Test get dispatch approval", function () {
-		it("Test get dispatch with non-existent user", async function() {
+	describe("Test dispatcher role", function () {
+		it("Test transaction with dispatcher", async function() {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			
-			await expect(peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.to.be.revertedWith('user_not_found');
-		});
-		it("Test get dispatch when dispatch was not set", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-	
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-	
-			expect(peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.not.to.be.revertedWith('user_not_found').but.false;
-		});
-	});
-	
-	describe("Test approve dispatch", function() {
-		it("Test approve dispatch with non-existent user", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
+			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[2].address);
 
-			await expect(peeranhaUser.connect(signers[1]).approveDispatch(signers[1].address))
-			.to.be.revertedWith('user_not_found');
-		});
+			console.log(signers[2].address);
+			console.log(DISPATCHER_ROLE);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-		it("Test approve dispatch with existing user", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-	
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+			await expect(peeranhaContent.connect(signers[2]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]))
+			.not.to.be.revertedWith('not_allowed_not_dispatcher');
+			await expect(peeranhaContent.connect(signers[2]).createReply(signers[1].address, 1, 0, hashContainer[1], false))
+			.not.to.be.revertedWith('not_allowed_not_dispatcher');
+			await expect(peeranhaContent.connect(signers[2]).createComment(signers[1].address, 1, 1, hashContainer[1]))
+			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
-			expect(await peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.to.be.false;
-
-			await expect(peeranhaUser.connect(signers[1]).approveDispatch(signers[1].address))
-			.not.to.be.revertedWith('user_not_found');
-
-			expect(await peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.to.be.true;
-		});
-	});
-
-	describe("Test disapprove dispatch", function() {
-		it("Test disapprove dispatch with non-existent user", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-
-			await expect(peeranhaUser.connect(signers[1]).disapproveDispatch(signers[1].address))
-			.to.be.revertedWith('user_not_found');
-		});
-
-		it("Test disapprove dispatch with existing user", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-	
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-
-			await expect(peeranhaUser.connect(signers[1]).approveDispatch(signers[1].address))
-			.not.to.be.revertedWith('user_not_found');
-
-			expect(await peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.to.be.true;
-
-			await expect(peeranhaUser.connect(signers[1]).disapproveDispatch(signers[1].address))
-			.not.to.be.revertedWith('user_not_found');
-
-			expect(await peeranhaUser.connect(signers[1]).isDispatchApproval(signers[1].address))
-			.to.be.false;
+			const post = await peeranhaContent.getPost(1);
+			const reply = await peeranhaContent.getReply(1, 1);
+			
+			expect(post.author).to.equal(signers[1].address);
+			expect(post.replyCount).to.equal(1);
+			expect(reply.author).to.equal(signers[1].address);
+			expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 	});
 });

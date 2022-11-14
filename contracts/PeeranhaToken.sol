@@ -133,10 +133,10 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
    * - must be a reward in this period.
    * - must be a period less then now.
   */
-  /*function claimReward(uint16 period) external {
+  /*function claimReward(address user, uint16 period) external { // TODO: Add field user
     require(RewardLib.getPeriod() > period + 1, "period_not_ended");
 
-    address user = _msgSender();
+    peeranhaUser.dispatcherCheck(user, _msgSender());
     
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
@@ -156,8 +156,9 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     _mint(user, userReward);
   }*/
 
-  function setStake(address user, uint256 stakeTokens) external {
-    require(msg.sender == user, "get_reward_security");  // TODO: unitTest
+  function setStake(address user, uint256 stakeTokens) external { // TODO: Add field user
+    // require(msg.sender == user, "get_reward_security");  // TODO: unitTest
+    peeranhaUser.dispatcherCheck(user, _msgSender());
     require(stakeTokens <= balanceOf(user), "wrong_stake");
 
     uint16 nextPeriod = RewardLib.getPeriod() + 1;

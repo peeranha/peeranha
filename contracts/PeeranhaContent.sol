@@ -39,8 +39,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags.
     */
-    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
-        posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
+    function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.createPost(user, communityId, ipfsHash, postType, tags);
     }
 
     /**
@@ -54,8 +55,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags
      * - if not author of the post must be protocol admin or community moderator
     */
-    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType) external override {
-        posts.editPost(_msgSender(), postId, ipfsHash, tags, communityId, postType);
+    function editPost(address user, uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.editPost(user, postId, ipfsHash, tags, communityId, postType);
     }
 
     /**
@@ -65,8 +67,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a post.
     */
-    function deletePost(uint256 postId) external override {
-        posts.deletePost(_msgSender(), postId);
+    function deletePost(address user, uint256 postId) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.deletePost(user, postId);
     }
 
     /**
@@ -77,8 +80,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        posts.createReply(_msgSender(), postId, parentReplyId, ipfsHash, isOfficialReply);
+    function createReply(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -89,8 +93,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        posts.editReply(_msgSender(), postId, replyId, ipfsHash, isOfficialReply);
+    function editReply(address user, uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.editReply(user, postId, replyId, ipfsHash, isOfficialReply);
     }
 
     /**
@@ -100,8 +105,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a reply.
     */
-    function deleteReply(uint256 postId, uint16 replyId) external override {
-        posts.deleteReply(_msgSender(), postId, replyId);
+    function deleteReply(address user, uint256 postId, uint16 replyId) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.deleteReply(user, postId, replyId);
     }
 
     /**
@@ -125,8 +131,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
-        posts.createComment(_msgSender(), postId, parentReplyId, ipfsHash);
+    function createComment(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.createComment(user, postId, parentReplyId, ipfsHash);
     }
 
     /**
@@ -137,8 +144,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external override {
-        posts.editComment(_msgSender(), postId, parentReplyId, commentId, ipfsHash);
+    function editComment(address user, uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.editComment(user, postId, parentReplyId, commentId, ipfsHash);
     }
 
     /**
@@ -148,8 +156,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a comment.
     */
-    function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
-        posts.deleteComment(_msgSender(), postId, parentReplyId, commentId);
+    function deleteComment(address user, uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.deleteComment(user, postId, parentReplyId, commentId);
     }
 
     /**
@@ -160,8 +169,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be a role ?
     */ 
-    function changeStatusBestReply(uint256 postId, uint16 replyId) external override {
-        posts.changeStatusBestReply(_msgSender(), postId, replyId);
+    function changeStatusBestReply(address user, uint256 postId, uint16 replyId) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.changeStatusBestReply(user, postId, replyId);
     }
 
     /**
@@ -171,20 +181,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a post/reply/comment.
     */ 
-    function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
-        posts.voteForumItem(_msgSender(), postId, replyId, commentId, isUpvote);
-    }
-
-    /**
-     * @dev Create translation 
-     *
-     * Requirements:
-     *
-     * - must be a post/reply/comment.
-     * - must be admin ot community moderator role.
-    */ 
-    function createTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external override {
-        translations.createTranslation(posts, _msgSender(), postId, replyId, commentId, language, ipfsHash);
+    function voteItem(address user, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        posts.voteForumItem(user, postId, replyId, commentId, isUpvote);
     }
 
     /**
@@ -195,21 +194,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post/reply/comment.
      * - must be admin ot community moderator role.
     */ 
-    function createTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
-        translations.createTranslations(posts, _msgSender(), postId, replyId, commentId, languages, ipfsHashs);
-    }
-    
-    /**
-     * @dev Edit Translation
-     *
-     * Requirements:
-     *
-     * - must be a post/reply/comment.
-     * - must be a Translation.
-     * - must be admin ot community moderator role.
-    */ 
-    function editTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language, bytes32 ipfsHash) external override {
-        translations.editTranslation(posts, _msgSender(), postId, replyId, commentId, language, ipfsHash);
+    function createTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        translations.createTranslations(posts, user, postId, replyId, commentId, languages, ipfsHashs);
     }
 
     /**
@@ -221,21 +208,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a Translations.
      * - must be admin ot community moderator role.
     */ 
-    function editTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
-        translations.editTranslations(posts, _msgSender(), postId, replyId, commentId, languages, ipfsHashs);
-    }
-    
-    /**
-     * @dev Delete Translation
-     *
-     * Requirements:
-     *
-     * - must be a post/reply/comment.
-     * - must be a Translation.
-     * - must be admin ot community moderator role.
-    */
-    function deleteTranslation(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language language) external override {
-        translations.deleteTranslation(posts, _msgSender(), postId, replyId, commentId, language);
+    function editTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        translations.editTranslations(posts,user, postId, replyId, commentId, languages, ipfsHashs);
     }
 
     /**
@@ -247,8 +222,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a Translation.
      * - must be admin ot community moderator role.
     */
-    function deleteTranslations(uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
-        translations.deleteTranslations(posts, _msgSender(), postId, replyId, commentId, languages);
+    function deleteTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        translations.deleteTranslations(posts, user, postId, replyId, commentId, languages);
     }
 
     /**
@@ -258,8 +234,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a community moderator.
     */ 
-    function updateDocumentationTree(uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
-        documentationTree.updateDocumentationTree(posts, _msgSender(), communityId, documentationTreeIpfsHash);
+    function updateDocumentationTree(address user, uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
+        posts.peeranhaUser.dispatcherCheck(user, _msgSender());
+        documentationTree.updateDocumentationTree(posts, user, communityId, documentationTreeIpfsHash);
     }
 
     // check need for prod?

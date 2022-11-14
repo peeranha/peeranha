@@ -1098,30 +1098,6 @@ library PostLib  {
             false
         );
     }
-    
-    /// @notice Сreate translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be post
-    /// @param replyId The reply where the translation will be post
-    /// @param commentId The reply where the translation will be post
-    /// @param language The translation language
-    /// @param ipfsHash IPFS hash of document with translation information
-    function createTranslation(
-        TranslationCollection storage self,
-        PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language,
-        bytes32 ipfsHash
-    ) internal {
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-
-        initTranslation( self, postId, replyId, commentId, language, userAddr, ipfsHash);
-    }
 
     /// @notice Create several translations
     /// @param self The mapping containing all translation
@@ -1148,34 +1124,6 @@ library PostLib  {
         for (uint32 i; i < languages.length; i++) {
             initTranslation( self, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
-    }
-
-    /// @notice Edit translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be edit
-    /// @param replyId The reply where the translation will be edit
-    /// @param commentId The reply where the translation will be edit
-    /// @param language The translation language
-    /// @param ipfsHash IPFS hash of document with translation information
-    function editTranslation(
-        TranslationCollection storage self,
-        PostLib.PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language,
-        bytes32 ipfsHash
-    ) internal {
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-        
-        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
-        translationContainer.info.ipfsDoc.hash = ipfsHash;
-
-        emit TranslationEdited(userAddr, postId, replyId, commentId, language);
     }
 
     /// @notice Edit several translations
@@ -1207,31 +1155,6 @@ library PostLib  {
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
         } 
-    }
-
-    /// @notice Delete translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be delete
-    /// @param replyId The reply where the translation will be delete
-    /// @param commentId The reply where the translation will be delete
-    /// @param language The translation language
-    function deleteTranslation(
-        TranslationCollection storage self,
-        PostLib.PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language
-    ) internal {
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-        
-        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
-        translationContainer.info.isDeleted = true;
-
-        emit TranslationDeleted(userAddr, postId, replyId, commentId, language);
     }
 
     /// @notice Delete several translations

@@ -16,7 +16,9 @@ describe("Test boost", function () {
 		it("Test add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -51,7 +53,9 @@ describe("Test boost", function () {
 		it("Test change boost in the same period (set more) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("1.1"))
@@ -84,7 +88,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("0.1")));
 			balance = await getBalance(token, peeranhaUser.deployTransaction.from);
@@ -94,7 +98,9 @@ describe("Test boost", function () {
 		it("Test change boost in the same period (set less) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("2.1"))
@@ -127,7 +133,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("1.2")));
 			balance = await getBalance(token, peeranhaUser.deployTransaction.from);
@@ -137,7 +143,9 @@ describe("Test boost", function () {
 		it("Test change boost next period (set more) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("1.1"))
@@ -171,7 +179,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("0.1")));
 			balance = await getBalance(token, peeranhaUser.deployTransaction.from);
@@ -181,7 +189,9 @@ describe("Test boost", function () {
 		it("Test change boost next period (set less) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("2.1"))
@@ -215,7 +225,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("1.2")));		// unfreeze
@@ -226,7 +236,9 @@ describe("Test boost", function () {
 		it("Test change boost 2 periods left (set more) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("1.1"))
@@ -260,7 +272,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("0.1")));
 			balance = await getBalance(token, peeranhaUser.deployTransaction.from);
@@ -270,7 +282,9 @@ describe("Test boost", function () {
 		it("Test change boost 2 periods left (set less) + (check unfreeze tokens)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("2.2"))
 
 			await token.setStake(accountDeployed, parseEther("2.1"))
@@ -304,7 +318,7 @@ describe("Test boost", function () {
 			await expect(balance).to.equal(await getInt(parseEther("2.2")));
 
 			await wait(PeriodTime)
-			await peeranhaUser.updateUser(hashContainer[1]);
+			await peeranhaUser.updateUser(signers[0].address, hashContainer[1]);
 			
 			availableBalance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			await expect(availableBalance).to.equal(await getInt(parseEther("1.2")));	// 1.1 unfreeze 
@@ -318,7 +332,9 @@ describe("Test boost", function () {
 		it("Test add boost (get stake in previous period)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -333,7 +349,9 @@ describe("Test boost", function () {
 		it("Test add boost (get stake in next period)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("1.2"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -347,7 +365,8 @@ describe("Test boost", function () {
 		// it("Test add 3 boost (!! set periodLength 3 sec)", async function () {		// set period time 3 sec and run this
 		// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		// 	const hashContainer = getHashContainer();
-		// 	await peeranhaUser.createUser(hashContainer[1]);
+		//  const signers = await ethers.getSigners();
+		// 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		// 	await token.mint(parseEther("3"))
 
 		// 	await token.setStake(accountDeployed, parseEther("1"))
@@ -445,7 +464,8 @@ describe("Test boost", function () {
 		// it("Test chenge the same period", async function () {
 		// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		// 	const hashContainer = getHashContainer();
-		// 	await peeranhaUser.createUser(hashContainer[1]);
+		//  const signers = await ethers.getSigners();
+		// 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		// 	await token.mint(parseEther("1.2"))
 
 		// 	await token.setStake(accountDeployed, parseEther("1"))
@@ -471,7 +491,9 @@ describe("Test boost", function () {
 		it("add rating the same periods when add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -493,7 +515,7 @@ describe("Test boost", function () {
 			// const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			// expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(rewardPeriods[1]);
+			// await token.claimReward(signers[0].address, rewardPeriods[1]);
 			// const balance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			
 			// expect(balance).to.equal(5 * coefficientToken * fraction);
@@ -502,7 +524,9 @@ describe("Test boost", function () {
 		it("add rating in next periods when add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -524,7 +548,7 @@ describe("Test boost", function () {
 			expect(periodRewardShares).to.equal(5 * 6 * periodRewardCoefficient);
 			expect(ratingToReward).to.equal(5);
 
-			// await token.claimReward(rewardPeriods[1]);
+			// await token.claimReward(signers[0].address, rewardPeriods[1]);
 			// const balance = await availableBalanceOf(token, peeranhaUser.deployTransaction.from);
 			// expect(balance).to.equal(5 * 6 * coefficientToken * fraction);
 		});
@@ -532,7 +556,9 @@ describe("Test boost", function () {
 		it("add 0 rating in next periods when add boost", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await token.mint(parseEther("1"))
 
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -553,7 +579,7 @@ describe("Test boost", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
 			expect(ratingToReward).to.equal(0);
 
-			await expect(token.claimReward(rewardPeriods[0]))
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0]))
 			.to.be.revertedWith('no_reward');
 		});
 	})
