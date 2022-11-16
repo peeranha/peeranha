@@ -261,19 +261,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getReply(uint256 postId, uint16 replyId) external view returns (PostLib.Reply memory) {
         return posts.getReply(postId, replyId);
-    }
-
-    // check need for prod?
-    /**
-     * @dev Get a reply property by index.
-     *
-     * Requirements:
-     *
-     * - must be a property.
-    */
-    function getReplyProperty(uint256 postId, uint16 replyId, uint8 propertyId) external view returns (bytes32) {
-        return posts.getReplyProperty(postId, replyId, propertyId);
-    }
+    }    
 
     // check need for prod?
     /**
@@ -285,6 +273,17 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external view returns (PostLib.Comment memory) {
         return posts.getComment(postId, parentReplyId, commentId);
+    }
+
+    /**
+     * @dev Get a property by index.
+     *
+     * Requirements:
+     *
+     * - must be a property.
+    */
+    function getItemProperty(uint8 propertyId, uint256 postId, uint16 replyId, uint8 commentId) external view returns (bytes32) {
+        return posts.getItemProperty(propertyId, postId, replyId, commentId);
     }
 
     /**

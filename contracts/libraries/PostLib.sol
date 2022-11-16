@@ -1322,21 +1322,6 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
-    /// @notice Return reply property for unit tests
-    /// @param self The mapping containing all posts
-    /// @param postId The post where is the reply
-    /// @param replyId The reply which need find
-    /// @param propertyId The property which need find
-    function getReplyProperty(
-        PostCollection storage self, 
-        uint256 postId, 
-        uint16 replyId,
-        uint8 propertyId
-    ) public view returns (bytes32) {
-        PostContainer storage postContainer = self.posts[postId];
-        return getReplyContainer(postContainer, replyId).properties[propertyId];
-    }
-
     /// @notice Return comment for unit tests
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply
@@ -1350,6 +1335,32 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return property for item
+    /// @param self The mapping containing all posts
+    /// @param postId Post where is the reply
+    /// @param replyId The parent reply
+    /// @param commentId The comment which need find
+    function getItemProperty(
+        PostCollection storage self,
+        uint8 propertyId,
+        uint256 postId, 
+        uint16 replyId,
+        uint8 commentId
+    ) public view returns (bytes32) {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+
+        if (commentId != 0) {
+            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
+            return commentContainer.properties[propertyId];
+
+        } else if (replyId != 0) {
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+            return replyContainer.properties[propertyId];
+
+        }
+        return postContainer.properties[propertyId];
     }
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment
