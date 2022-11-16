@@ -269,7 +269,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         dispatcherCheck(user, _msgSender());
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -285,8 +285,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user, _msgSender());
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
-        require(userAddr != _msgSender(), "self_revoke");
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        require(userAddr != user, "self_revoke");
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -302,7 +302,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user, _msgSender());
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 

@@ -859,15 +859,9 @@ describe("Test energy", function () {
 		await peeranhaUser.addUserRating(signers[1].address, 35, 1);
 		await peeranhaContent.connect(signers[1]).createComment(signers[1].address, 1, 0, hashContainer[1]);
 		
-		await wait(TRANSACTION_DELAY);
-
 		await peeranhaContent.connect(signers[1]).createComment(signers[1].address, 1, 1, hashContainer[1]);
 
-		await wait(TRANSACTION_DELAY);
-
 		await peeranhaContent.connect(signers[1]).deleteComment(signers[1].address, 1, 0, 1);
-
-		await wait(TRANSACTION_DELAY);
 
 		await peeranhaContent.connect(signers[1]).deleteComment(signers[1].address, 1, 1, 1);
 
@@ -875,7 +869,7 @@ describe("Test energy", function () {
 
 		const user = await peeranhaUser.getUserByAddress(signers[1].address);
 		expect(user.energy).to.equal(StartEnergy - 2 * (energyPublicationComment + energyDeleteItem));		
-	});
+	}).retries(5);
 
 	it("Test energy. delete comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();

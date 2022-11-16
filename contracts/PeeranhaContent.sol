@@ -210,7 +210,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */ 
     function editTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
         posts.peeranhaUser.dispatcherCheck(user, _msgSender());
-        translations.editTranslations(posts,user, postId, replyId, commentId, languages, ipfsHashs);
+        translations.editTranslations(posts, user, postId, replyId, commentId, languages, ipfsHashs);
     }
 
     /**
