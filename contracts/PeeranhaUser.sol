@@ -45,9 +45,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(PROTOCOL_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
-        // TODO: Uncomment this when contract size will be smaller or for redeploy
-        // _setRoleAdmin(PROTOCOL_ADMIN_ROLE, BOT_ROLE);
-        // _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE);
+        _setRoleAdmin(PROTOCOL_ADMIN_ROLE, BOT_ROLE);
+        _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE);
     }
 
     // This is to support Native meta transactions
