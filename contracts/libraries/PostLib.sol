@@ -23,7 +23,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
-    enum ReplyProperties { MessengerSender }
+    enum ItemProperties { MessengerSender }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -178,6 +178,30 @@ library PostLib  {
         emit PostCreated(userAddr, communityId, self.postCount);
     }
 
+    /// @notice Publication post
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the post
+    /// @param communityId Community where the post will be ask
+    /// @param ipfsHash IPFS hash of document with post information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createPostByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint32 communityId,
+        bytes32 ipfsHash,
+        PostType postType,
+        uint8[] memory tags,
+        CommonLib.MessengerType messengerType,
+        string memory handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags);
+
+        PostContainer storage postContainer = getPostContainer(self, self.postCount);
+        postContainer.properties[uint8(ItemProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+    }
+
     /// @notice Post reply
     /// @param self The mapping containing all posts
     /// @param userAddr Author of the reply
@@ -281,7 +305,7 @@ library PostLib  {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
 
-        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+        replyContainer.properties[uint8(ItemProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
     }
 
     /// @notice Post comment
@@ -1364,19 +1388,30 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
-    /// @notice Return reply property for unit tests
+    /// @notice Return property for item
     /// @param self The mapping containing all posts
-    /// @param postId The post where is the reply
-    /// @param replyId The reply which need find
-    /// @param propertyId The property which need find
-    function getReplyProperty(
-        PostCollection storage self, 
+    /// @param postId Post where is the reply
+    /// @param replyId The parent reply
+    /// @param commentId The comment which need find
+    function getItemProperty(
+        PostCollection storage self,
+        uint8 propertyId,
         uint256 postId, 
         uint16 replyId,
-        uint8 propertyId
+        uint8 commentId
     ) public view returns (bytes32) {
-        PostContainer storage postContainer = self.posts[postId];
-        return getReplyContainer(postContainer, replyId).properties[propertyId];
+        PostContainer storage postContainer = getPostContainer(self, postId);
+
+        if (commentId != 0) {
+            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
+            return commentContainer.properties[propertyId];
+
+        } else if (replyId != 0) {
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+            return replyContainer.properties[propertyId];
+
+        }
+        return postContainer.properties[propertyId];
     }
 
     /// @notice Return comment for unit tests
