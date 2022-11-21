@@ -19,7 +19,7 @@ async function main() {
   });
   
   console.log("Upgrading PeeranhaUser...");
-  const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0}); // TODO: Ask Sergey
+  const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("Peeranha User upgraded at:", peeranhaUser.address);
 
   const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");

@@ -45,8 +45,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(PROTOCOL_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(PROTOCOL_ADMIN_ROLE, BOT_ROLE);
-        _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE);
+        _setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
+        _setRoleAdmin(DISPATCHER_ROLE, PROTOCOL_ADMIN_ROLE);
     }
 
     // This is to support Native meta transactions
@@ -61,10 +61,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return NativeMetaTransaction._msgSender();
     }
 
-    function dispatcherCheck(address user, address sender) public view override {
-        if (user != sender) {
-            checkHasRole(sender, UserLib.ActionRole.Dispatcher, 0);
+    function dispatcherCheck(address user) internal view {
+        if (user != _msgSender()) {
+            onlyDispatcher(_msgSender());
         }
+    }
+
+    function onlyDispatcher(address sender) public view override {
+        checkHasRole(sender, UserLib.ActionRole.Dispatcher, 0);
     }
 
     function setContractAddresses(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -115,7 +119,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be a new user.
      */
     function createUser(address user, bytes32 ipfsHash) public override {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         UserLib.create(userContext.users, user, ipfsHash);
     }
 
@@ -127,7 +131,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user.  
      */
     function updateUser(address user, bytes32 ipfsHash) public override {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         UserLib.createIfDoesNotExist(userContext.users, user);
         UserLib.update(userContext, user, ipfsHash);
     }
@@ -140,7 +144,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an community.  
      */
     function followCommunity(address user, uint32 communityId) public override {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         UserLib.createIfDoesNotExist(userContext.users, user);
         UserLib.followCommunity(userContext, user, communityId);
@@ -154,7 +158,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be follow the community.  
      */
     function unfollowCommunity(address user, uint32 communityId) public override {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         UserLib.unfollowCommunity(userContext, user, communityId);
     }
 
@@ -246,7 +250,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) public override {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
@@ -265,7 +269,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function giveCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
@@ -282,7 +286,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user. 
      */
     function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         require(userAddr != user, "self_revoke");
@@ -299,7 +303,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing user.
      */
     function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
-        dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);

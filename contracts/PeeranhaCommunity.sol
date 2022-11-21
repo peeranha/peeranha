@@ -26,6 +26,12 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         __NativeMetaTransaction_init("PeeranhaCommunity");
     }
 
+    function dispatcherCheck(address user) internal {
+        if (user != _msgSender()) {
+            peeranhaUser.onlyDispatcher(_msgSender());
+        }
+    }
+
 
     /**
      * @dev Create new community.
@@ -36,7 +42,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be a admin.
      */
     function createCommunity(address user, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public  {
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.Admin, 0);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
         peeranhaUser.initCommunityAdminPermission(user, communityId);
@@ -51,7 +57,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be admin or community admin.
      */
     function updateCommunity(address user, uint32 communityId, bytes32 ipfsHash) public  {
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateCommunity(communityId, ipfsHash);
@@ -66,7 +72,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be admin or community admin.
      */
     function freezeCommunity(address user, uint32 communityId) public  {      // todo: unitests
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.freeze(communityId);
@@ -81,7 +87,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be admin and community moderator.
      */
     function unfreezeCommunity(address user, uint32 communityId) public  {
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.unfreeze(communityId);
     }
@@ -96,7 +102,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be admin and community admin
      */
     function createTag(address user, uint32 communityId, bytes32 ipfsHash) public  { // community admin || global moderator
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.createTag(communityId, ipfsHash);
@@ -112,7 +118,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Sender must be admin or community admin.
      */
     function updateTag(address user, uint32 communityId, uint8 tagId, bytes32 ipfsHash) public  onlyExistingTag(tagId, communityId) {
-        peeranhaUser.dispatcherCheck(user, _msgSender());
+        dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateTag(tagId, communityId, ipfsHash);
     }
