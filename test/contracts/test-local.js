@@ -32,7 +32,7 @@ describe("Test local", function () {
 		const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 		await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
-		await peeranhaContent.changePostType(1, PostTypeEnum.ExpertPost);
+		await peeranhaContent.editPost(1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost);
 		const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 		console.log(newRating)
 		

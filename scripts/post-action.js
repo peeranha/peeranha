@@ -99,6 +99,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.revokeCommunityModeratorPermission("0x8E0184b7312339b9CbB6Ad18298512A62E600dCf", 2);
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
 
+  console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
   await txObj.wait();

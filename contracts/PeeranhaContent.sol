@@ -52,9 +52,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be new info about post
      * - must be a community.
      * - must be tags
+     * - if not author of the post must be protocol admin or community moderator
     */
-    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, PostLib.Language language) external override {
-        posts.editPost(_msgSender(), postId, ipfsHash, tags, language);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType, PostLib.Language language) external override {
+        posts.editPost(_msgSender(), postId, ipfsHash, tags, communityId, postType, language);
     }
 
     /**
@@ -172,18 +173,6 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */ 
     function voteItem(uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
         posts.voteForumItem(_msgSender(), postId, replyId, commentId, isUpvote);
-    }
-
-    /**
-     * @dev Change post type
-     *
-     * Requirements:
-     *
-     * - must be admin or community moderator.
-     * - old and new post type must be Expert or Common type
-    */
-    function changePostType(uint256 postId, PostLib.PostType postType) external override {
-        posts.changePostType(_msgSender(), postId, postType);
     }
 
     /**
