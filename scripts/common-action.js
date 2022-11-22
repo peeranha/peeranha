@@ -19,18 +19,70 @@ const NFT = {
 };
 
 const testCommunity = {
-  title: "testCommunity6.new",
-  description: "testCommunity.new",
+  name: "test Community6.new",
+  description: "test Community.new",
+  language: 1,
   website: "www.new",
-  language: "ua.new",
+  translations: [
+    {
+      name: "test Community6 Language2",
+      description: "test Community Language2",
+      language: 2,
+    },
+    {
+      name: "test Community6 Language3",
+      description: "test Community Language3",
+      language: 3,
+    }
+  ]
 };
 
 const testTag = {
-  title: "testTagNew",
-  description: "testNewTag1",
+  name: "test TagNew",
+  description: "test NewTag1",
+  language: 1,
+  translations: [
+    {
+      name: "test TagLanguage2",
+      description: "test Language2 Tag1",
+      language: 2,
+    },
+    {
+      name: "test TagLanguage3",
+      description: "test Language3 Tag1",
+      language: 3,
+    }
+  ]
+};
+
+const testPost = {
+  title: "Test post",
+  content: "Test post description"
+};
+
+const postTranslation = {
+  title: "Test post translation vietnamese edited",
+  content: "Test post description translation vietnamese edited"
+};
+
+const testReply = {
+  content: "Second reply postID 1"
+};
+
+const replyTranslation = {
+  content: "Test reply translation"
+};
+
+const testComment = {
+  content: "Comment to reply"
+};
+
+const commentTranslation = {
+  content: "Test comment translation to reply"
 };
 
 const AchievementsType = { "Rating": 0 }
+const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3 }
 
 const achievements = (env) => {
   return [
@@ -109,4 +161,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, NFT, testAccount, PATH, testCommunity, testTag };
+module.exports = { achievements, Language, NFT, testAccount, PATH, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation };

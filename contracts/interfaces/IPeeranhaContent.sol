@@ -6,13 +6,13 @@ import "../libraries/PostLib.sol";
 import "../libraries/CommonLib.sol";
 
 interface IPeeranhaContent {
-    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external;
-    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external;
+    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external;
+    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external;
     function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external;
-    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external;
-    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external;
-    function editReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external;
-    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external;
+    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external;
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, PostLib.Language language) external;
+    function editReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external;
+    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash, PostLib.Language language) external;
     function deletePost(uint256 postId) external;
     function deleteReply(uint256 postId, uint16 replyId) external;
     function deleteComment(uint256 postId, uint16 parentReplyId, uint8 commentId) external;

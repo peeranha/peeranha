@@ -39,8 +39,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags.
     */
-    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
-        posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags);
+    function createPost(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external override {
+        posts.createPost(_msgSender(), communityId, ipfsHash, postType, tags, language);
     }
 
     /**
@@ -53,8 +53,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags
     */
-    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags) external override {
-        posts.editPost(_msgSender(), postId, ipfsHash, tags);
+    function editPost(uint256 postId, bytes32 ipfsHash, uint8[] memory tags, PostLib.Language language) external override {
+        posts.editPost(_msgSender(), postId, ipfsHash, tags, language);
     }
 
     /**
@@ -76,8 +76,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        posts.createReply(_msgSender(), postId, parentReplyId, ipfsHash, isOfficialReply);
+    function createReply(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
+        posts.createReply(_msgSender(), postId, parentReplyId, ipfsHash, isOfficialReply, language);
     }
 
     /**
@@ -88,8 +88,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply) external override {
-        posts.editReply(_msgSender(), postId, replyId, ipfsHash, isOfficialReply);
+    function editReply(uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
+        posts.editReply(_msgSender(), postId, replyId, ipfsHash, isOfficialReply, language);
     }
 
     /**
@@ -124,8 +124,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash) external override {
-        posts.createComment(_msgSender(), postId, parentReplyId, ipfsHash);
+    function createComment(uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external override {
+        posts.createComment(_msgSender(), postId, parentReplyId, ipfsHash, language);
     }
 
     /**
@@ -136,8 +136,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash) external override {
-        posts.editComment(_msgSender(), postId, parentReplyId, commentId, ipfsHash);
+    function editComment(uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash, PostLib.Language language) external override {
+        posts.editComment(_msgSender(), postId, parentReplyId, commentId, ipfsHash, language);
     }
 
     /**
@@ -297,16 +297,27 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         return posts.getReply(postId, replyId);
     }
 
-    // check need for prod?
     /**
-     * @dev Get a reply property by index.
+     * @dev Get a post/reply/comment property by index.
      *
      * Requirements:
      *
+     * - must be a post/reply/comment
      * - must be a property.
     */
-    function getReplyProperty(uint256 postId, uint16 replyId, uint8 propertyId) external view returns (bytes32) {
-        return posts.getReplyProperty(postId, replyId, propertyId);
+    function getItemProperty(uint8 propertyId, uint256 postId, uint16 replyId, uint8 commentId) external view returns (bytes32) {
+        return posts.getItemProperty(propertyId, postId, replyId, commentId);
+    }
+
+    /**
+     * @dev Get a post/reply/comment language.
+     *
+     * Requirements:
+     *
+     * - must be a post/reply/comment
+    */
+    function getItemLanguage(uint256 postId, uint16 replyId, uint8 commentId) external view returns (uint256) {
+        return uint256(posts.getItemProperty(uint8(PostLib.PostProperties.Language), postId, replyId, commentId));
     }
 
     // check need for prod?

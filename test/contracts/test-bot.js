@@ -97,7 +97,7 @@ describe("Test bot", function () {
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
 
-			const property = await peeranhaContent.getReplyProperty(1, 1, 0);
+			const property = await peeranhaContent.getItemProperty(0, 1, 1, 0);
 			expect(property).to.equal('0x68616e646c650000000000000000000000000000000000000000000000000001');
 		});
 	});

@@ -23,7 +23,9 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
-    enum ReplyProperties { MessengerSender }
+    enum PostProperties { MessengerSender, Language }
+    enum ReplyProperties { MessengerSender, Language }
+    enum CommentProperties { MessengerSender, Language }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -132,9 +134,9 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
-    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
-    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
-    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
+    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
+    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
 
     /// @notice Publication post 
@@ -148,7 +150,8 @@ library PostLib  {
         uint32 communityId, 
         bytes32 ipfsHash,
         PostType postType,
-        uint8[] memory tags
+        uint8[] memory tags,
+        PostLib.Language language
     ) public {
         self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
@@ -163,7 +166,6 @@ library PostLib  {
         );
 
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-
         PostContainer storage post = self.posts[++self.postCount];
 
         require(tags.length > 0, "At least one tag is required.");
@@ -174,6 +176,7 @@ library PostLib  {
         post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
+        post.properties[uint8(PostProperties.Language)] = bytes32(uint256(language));
 
         emit PostCreated(userAddr, communityId, self.postCount);
     }
@@ -191,7 +194,8 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial, 
@@ -256,6 +260,7 @@ library PostLib  {
         replyContainer.info.author = userAddr;
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
+        replyContainer.properties[uint8(ReplyProperties.Language)] = bytes32(uint256(language));
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
@@ -276,7 +281,7 @@ library PostLib  {
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, Language.English);
 
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
@@ -295,23 +300,24 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 parentReplyId,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
-        Comment storage comment;
+        CommentContainer storage commentContainer;
         uint8 commentId;            // struct? gas
         address author;
 
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
-            comment = postContainer.comments[commentId].info;
+            commentContainer = postContainer.comments[commentId];
             author = postContainer.info.author;
         } else {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
-            comment = replyContainer.comments[commentId].info;
+            commentContainer = replyContainer.comments[commentId];
             if (postContainer.info.author == userAddr)
                 author = userAddr;
             else
@@ -327,9 +333,10 @@ library PostLib  {
             true
         );
 
-        comment.author = userAddr;
-        comment.ipfsDoc.hash = ipfsHash;
-        comment.postTime = CommonLib.getTimestamp();
+        commentContainer.info.author = userAddr;
+        commentContainer.info.ipfsDoc.hash = ipfsHash;
+        commentContainer.info.postTime = CommonLib.getTimestamp();
+        commentContainer.properties[uint8(CommentProperties.Language)] = bytes32(uint256(language));
 
         emit CommentCreated(userAddr, postId, parentReplyId, commentId);
     }
@@ -344,7 +351,8 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
-        uint8[] memory tags
+        uint8[] memory tags,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
@@ -364,6 +372,8 @@ library PostLib  {
             postContainer.info.ipfsDoc.hash = ipfsHash;
         if (tags.length > 0)
             postContainer.info.tags = tags;
+        if (postContainer.properties[uint8(PostProperties.Language)] != bytes32(uint256(language)))
+            postContainer.properties[uint8(PostProperties.Language)] = bytes32(uint256(language));
 
         emit PostEdited(userAddr, postId);
     }
@@ -380,7 +390,8 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -398,6 +409,8 @@ library PostLib  {
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
+        if (replyContainer.properties[uint8(ReplyProperties.Language)] != bytes32(uint256(language)))
+            replyContainer.properties[uint8(ReplyProperties.Language)] = bytes32(uint256(language));
 
         if (isOfficialReply) {
             postContainer.info.officialReply = replyId;
@@ -421,7 +434,8 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, parentReplyId, commentId);
@@ -438,6 +452,8 @@ library PostLib  {
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;
+        if (commentContainer.properties[uint8(CommentProperties.Language)] != bytes32(uint256(language)))
+            commentContainer.properties[uint8(CommentProperties.Language)] = bytes32(uint256(language));
         
         emit CommentEdited(userAddr, postId, parentReplyId, commentId);
     }
@@ -1016,6 +1032,7 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with translation information
     function initTranslation(
         TranslationCollection storage self,
+        PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
@@ -1024,6 +1041,7 @@ library PostLib  {
         bytes32 ipfsHash
     ) private {
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");      // todo test
+        require(uint256(getItemProperty(postCollection, uint8(PostProperties.Language), postId, replyId, commentId)) == uint256(language), "Error_its_original_language");  // todo test
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
         TranslationContainer storage translationContainer = self.translations[item];
@@ -1085,7 +1103,7 @@ library PostLib  {
     ) internal {
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
-        initTranslation( self, postId, replyId, commentId, language, userAddr, ipfsHash);
+        initTranslation(self, postCollection, postId, replyId, commentId, language, userAddr, ipfsHash);
     }
 
     /// @notice Create several translations
@@ -1111,7 +1129,7 @@ library PostLib  {
 
         require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
-            initTranslation( self, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
+            initTranslation(self, postCollection, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
     }
 
@@ -1238,7 +1256,7 @@ library PostLib  {
         Language language
     ) private pure returns (bytes32) {
         return bytes32(postId << 192 | uint256(replyId) << 128 | uint256(commentId) << 64 | uint256(language));
-    }  
+    }
 
     function updateDocumentationTreeByPost(
         DocumentationTree storage self,
@@ -1364,21 +1382,6 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
-    /// @notice Return reply property for unit tests
-    /// @param self The mapping containing all posts
-    /// @param postId The post where is the reply
-    /// @param replyId The reply which need find
-    /// @param propertyId The property which need find
-    function getReplyProperty(
-        PostCollection storage self, 
-        uint256 postId, 
-        uint16 replyId,
-        uint8 propertyId
-    ) public view returns (bytes32) {
-        PostContainer storage postContainer = self.posts[postId];
-        return getReplyContainer(postContainer, replyId).properties[propertyId];
-    }
-
     /// @notice Return comment for unit tests
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply
@@ -1392,6 +1395,27 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+    
+    function getItemProperty(
+        PostCollection storage self,
+        uint8 propertyId,
+        uint256 postId,
+        uint16 replyId,
+        uint8 commentId
+    ) public view returns (bytes32) {
+        PostContainer storage postContainer = getPostContainer(self, postId);
+
+        if (commentId != 0) {
+            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
+            return commentContainer.properties[propertyId];
+
+        } else if (replyId != 0) {
+            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
+            return replyContainer.properties[propertyId];
+
+        }
+        return postContainer.properties[propertyId];
     }
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment
