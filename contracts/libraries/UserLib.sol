@@ -594,7 +594,7 @@ library UserLib {
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy();
+      userEnergy = getStatusEnergy();
       user.lastUpdatePeriod = currentPeriod;
     }
 
