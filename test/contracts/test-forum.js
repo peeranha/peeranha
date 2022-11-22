@@ -638,7 +638,22 @@ describe("Test post", function () {
 			expect(post.postType).to.equal(PostTypeEnum.CommonPost);
 		});
 
-		it("Test edit post (ipfs, tags, communityId, postType) by not author (common user) the post", async function () {
+		it("Test edit post (tags, communityId, postType) by not author (common user) the post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[0], [2], 2, PostTypeEnum.CommonPost)).
+				to.be.revertedWith('Error_change_communityId');
+		});
+
+		it("Test edit post (ipfs, tags, communityId, postType) by not author (common user) the post add change ipfs", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -650,10 +665,10 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
-				to.be.revertedWith('Error_change_communityId');
+				to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 
-		it("Test edit post (ipfs, tags, communityId, postType) by not author (admin) the post", async function () {
+		it("Test edit post (tags, communityId, postType) by not author (admin) the post", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
@@ -664,7 +679,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.editPost(1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost);
+			await peeranhaContent.editPost(1, hashContainer[0], [2], 2, PostTypeEnum.CommonPost);
 
 			const post = await peeranhaContent.getPost(1);
 			expect(post.author).to.equal(signers[1].address);
@@ -673,6 +688,21 @@ describe("Test post", function () {
 			expect(post.tags[0]).to.equal(2);
 			expect(post.communityId).to.equal(2);
 			expect(post.postType).to.equal(PostTypeEnum.CommonPost);
+		});
+
+		it("Test edit post (ipfs, tags, communityId, postType) by not author (admin) the post add change ipfs", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranhaContent.editPost(1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
+				to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 
 		it("Test edit documentation", async function () {
@@ -715,7 +745,7 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-				.to.be.revertedWith('user_not_found');
+				.to.be.revertedWith('Not_allowed_edit_not_author'); // user_not_found
 		});
 
 		it("Test edit not own post", async function () {
@@ -729,7 +759,7 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-				.to.be.revertedWith('not_allowed_admin_or_comm_moderator');	// not_allowed_edit
+				.to.be.revertedWith('Not_allowed_edit_not_author');	// not_allowed_edit + not_allowed_admin_or_comm_moderator
 		});
 
 		it("Test edit post with invalid ipfs hash", async function () {
