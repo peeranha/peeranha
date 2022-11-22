@@ -219,8 +219,7 @@ library PostLib  {
          */
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
         require(
-            parentReplyId == 0 || 
-            (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
+            parentReplyId == 0, 
             "User is forbidden to reply on reply for Expert and Common type of posts"
         ); // unit tests (reply on reply)
 
@@ -546,16 +545,6 @@ library PostLib  {
             UserLib.ActionRole.NONE,
             false
         );
-        ///
-        // bug
-        // checkActionRole has check "require(actionCaller == dataUser, "not_allowed_delete");"
-        // behind this check is "if actionCaller == moderator -> return"
-        // in this step can be only a moderator or reply's owner
-        // a reply owner can not delete best reply, but a moderator can
-        // next require check that reply's owner can not delete best reply
-        // bug if reply's owner is moderator any way error
-        ///
-        require(postContainer.info.bestReply != replyId || userAddr != replyContainer.info.author, "You can not delete the best reply.");
 
         uint256 time = CommonLib.getTimestamp();
         if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
@@ -910,7 +899,7 @@ library PostLib  {
     /// @param isUpvote Upvote or downvote
     /// @param ratingChanged The value shows how the rating of a post or reply has changed.
     /// @param typeContent Type content post, reply or comment
-    function vote (
+    function vote(
         PostCollection storage self,
         address author,
         address votedUser,
@@ -971,24 +960,14 @@ library PostLib  {
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
-        int32 positive;
-        int32 negative;
-        for (uint32 i; i < postContainer.votedUsers.length; i++) {
-            if(postContainer.historyVotes[postContainer.votedUsers[i]] == 1) positive++;
-            else if(postContainer.historyVotes[postContainer.votedUsers[i]] == -1) negative++;
-        }
+        (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
         int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
         self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-            positive = 0;
-            negative = 0;
-            for (uint32 i; i < replyContainer.votedUsers.length; i++) {
-                if(replyContainer.historyVotes[replyContainer.votedUsers[i]] == 1) positive++;
-                else if (replyContainer.historyVotes[replyContainer.votedUsers[i]] == -1) negative++;
-            }
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
             changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
                                 (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
