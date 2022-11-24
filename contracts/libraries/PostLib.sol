@@ -137,6 +137,8 @@ library PostLib  {
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    event PostTypeEdited(address indexed user, uint256 indexed postId, PostType oldPostType);
+    event PostCommunityEdited(address indexed user, uint256 indexed postId, uint32 indexed communityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -385,10 +387,12 @@ library PostLib  {
 
         if (postContainer.info.communityId != communityId) {
             self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+            emit PostCommunityEdited(userAddr, postId, postContainer.info.communityId);
             postContainer.info.communityId = communityId;
         }
         if (postContainer.info.postType != postType) {
             postTypeChangeCalculation(self, postContainer, postType);
+            emit PostTypeEdited(userAddr, postId, postContainer.info.postType);
             postContainer.info.postType = postType;
         }
         if (tags.length > 0)
