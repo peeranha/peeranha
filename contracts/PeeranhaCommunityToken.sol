@@ -74,7 +74,8 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
       totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardPerUser);
     }
     totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getBalance());
-
+    
+    communityToken.sumSpentTokens += totalPeriodReward;
     communityToken.periodPool[period] = totalPeriodReward;
   }
 
@@ -105,5 +106,7 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
     } else {
       IERC20Upgradeable(communityToken.contractAddress).transfer(userAddress, userReward);
     }
+
+    communityToken.sumSpentTokens -= userReward;
   }
 }

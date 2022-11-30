@@ -11,7 +11,12 @@ import "./libraries/TokenLib.sol";
 
 contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable {
   // PeeranhaCommunityToken[] public peeranhaCommunityTokenArray;
-  mapping(uint32 => IPeeranhaCommunityToken) peeranhaCommunitiesToken;   // struct?
+
+  struct FactoryData {  // name
+    mapping(uint32 => IPeeranhaCommunityToken) peeranhaCommunitiesToken;
+    uint32[] factoryCommunitiesId;
+  }
+  FactoryData factoryData;
   TokenLib.StatusRewardContainer statusRewardContainer;
   IPeeranhaUser peeranhaUser;
 
@@ -20,18 +25,22 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   }
 
   function createNewCommunityToken(string memory name, string memory symbol, address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, uint32 communityId) external override {
-    require(address(peeranhaCommunitiesToken[communityId]) == address(0), "communityId_already_exist");
-    peeranhaCommunitiesToken[communityId] = new PeeranhaCommunityToken(name, symbol, contractAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this));
-    
+    require(address(factoryData.peeranhaCommunitiesToken[communityId]) == address(0), "communityId_already_exist");
+    factoryData.peeranhaCommunitiesToken[communityId] = new PeeranhaCommunityToken(name, symbol, contractAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this));
+    factoryData.factoryCommunitiesId.push(communityId);
     // PeeranhaCommunityToken peeranhaCommunityToken = new PeeranhaCommunityToken(name, symbol, contractAddress, maxRewardPerPeriod, activeUsersInPeriod, communityId, createTime);
     // peeranhaCommunityTokenArray.push(peeranhaCommunityToken);
   }
 
   function getCommunityToken(uint32 communityId) private view returns(IPeeranhaCommunityToken) {
-    return peeranhaCommunitiesToken[communityId];
+    return factoryData.peeranhaCommunitiesToken[communityId];
   }
 
-  function getReward(uint16 period) external override {
+  function setTotalPeriodRewards(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
+
+  }
+
+  function getRewards(uint16 period) external override {
     address userAddress =  msg.sender; // -> _msgSender(); ?
 
     uint32[] memory rewardCommunities = peeranhaUser.getUserRewardCommunities(userAddress, period);
@@ -42,7 +51,5 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
         peeranhaCommunityToken.payCommunityReward(periodRewardShares, userAddress, period);
       }
     }
-
   }
-
 }
