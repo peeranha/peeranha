@@ -27,6 +27,14 @@ library RewardLib {
     address[] activeUsersInPeriod;
   }
 
+  struct CommunityReward {
+    mapping(uint32 => CommunityPeriofReward) communityPeriofReward; // communityID
+  }
+
+  struct CommunityPeriofReward {
+    mapping(uint16 => PeriodRewardShares) communityPeriodRewardShares; // period
+  }
+
   struct UserPeriodRewards {
     uint32[] rewardCommunities;
     mapping(uint32 => PeriodRating) periodRating;  //communityID

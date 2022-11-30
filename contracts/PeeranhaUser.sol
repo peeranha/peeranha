@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 
 
 import "./libraries/UserLib.sol";
+import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
@@ -21,13 +22,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
-    
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
 
     UserLib.UserContext userContext;
+    RewardLib.CommunityReward communityReward;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -97,6 +97,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function getPeriodRewardShares(uint16 period) public view override returns(RewardLib.PeriodRewardShares memory) {
         return UserLib.getPeriodRewardShares(userContext, period);
+    }
+
+    function getPeriodRewardShares(uint16 period, uint32 communityId) public view override returns(RewardLib.PeriodRewardShares memory) {
+        return UserLib.getPeriodRewardShares(communityReward, period, communityId);
     }
 
     /**

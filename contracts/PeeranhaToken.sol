@@ -8,10 +8,8 @@ import "./base/ChildMintableERC20Upgradeable.sol";
 import "./interfaces/IPeeranhaToken.sol";
 import "./interfaces/IPeeranhaUser.sol";
 
-
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
-
 
 
 /*
@@ -23,8 +21,8 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   uint256 public constant FRACTION = (10 ** 18);
   uint256 public constant MAX_TOTAL_SUPPLY = 100000000 * FRACTION;
   uint256 public constant OWNER_MINT_MAX = 40000000 * FRACTION;
-  uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
-  uint256 public constant MAX_REWARD_PER_USER = 100;
+  uint256 public constant MAX_REWARD_PER_PERIOD = 100000;   // * FRACTION  upgrade test
+  uint256 public constant MAX_REWARD_PER_USER = 100;        // * FRACTION 
   uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
@@ -147,7 +145,6 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     RewardLib.PeriodRewardShares memory periodRewardShares = peeranhaUser.getPeriodRewardShares(period);
     
     uint256 totalPeriodReward = getTotalPeriodReward(periodRewardShares, period);
-
     uint256 userReward = getUserReward(periodRewardShares, user, period, totalPeriodReward);
 
     require(userReward != 0, "no_reward");
@@ -203,6 +200,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     }
   }
 
+  // get pool
   function getTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) private pure returns(uint256) {
     uint256 totalPeriodReward = reduceRewards(MAX_REWARD_PER_PERIOD * FRACTION, period);
     if (periodRewardShares.activeUsersInPeriod.length <= ACTIVE_USERS_IN_PERIOD) {
@@ -232,7 +230,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
       if (ratingToReward > 0)
         tokenReward += CommonLib.toUInt32FromInt32(ratingToReward);
     }
-    if (tokenReward <= 0 || periodRewardShares.totalRewardShares <= 0) return 0;
+    if (tokenReward <= 0 || periodRewardShares.totalRewardShares <= 0) return 0;  // == 0 || == 0  + unitTest?
 
     uint256 userReward = (poolToken * tokenReward * getBoost(user, period));
     userReward /= periodRewardShares.totalRewardShares;
