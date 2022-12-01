@@ -68,6 +68,8 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
 
   // set pool
   function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
+    require(msg.sender == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action"); // -> _msgSender(); ?
+
     uint256 totalPeriodReward = reduceRewards(communityToken.maxRewardPerPeriod * FRACTION, period);
     if (periodRewardShares.activeUsersInPeriod.length <= communityToken.activeUsersInPeriod) {
       uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityToken.maxRewardPerUser * FRACTION;   // min?
