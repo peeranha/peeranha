@@ -39,6 +39,11 @@ async function main() {
 
   await peeranhaUser.setContractAddresses(peeranhaCommunity.address, peeranhaContent.address, peeranhaNFT.address, peeranhaToken.address);
   console.log("Set contract addresses to Peeranha User", peeranhaToken.address);
+
+  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
+  console.log("Deploying PeeranhaCommunityTokenFactory...");
+  const peeranhaCommunityTokenFactory = await upgrades.deployProxy(PeeranhaCommunityTokenFactory, [peeranhaUser.address], {timeout: 0});
+  console.log("Peeranha community token factory deployed to:", peeranhaCommunityTokenFactory.address);
 }
 
 main()
