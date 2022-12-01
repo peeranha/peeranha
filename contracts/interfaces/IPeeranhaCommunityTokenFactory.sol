@@ -8,6 +8,6 @@ pragma abicoder v2;
 
 interface IPeeranhaCommunityTokenFactory {
     function createNewCommunityToken(string memory name, string memory symbol, address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, uint32 communityId) external;
-    function setTotalPeriodRewards(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external;
+    function setTotalPeriodRewards(uint16 period) external;
     function getRewards(uint16 period) external;
 }

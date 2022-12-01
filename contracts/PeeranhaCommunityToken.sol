@@ -51,7 +51,7 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
 
   function getBalance() public view override returns(uint256) {   // public?
     uint256 balance;
-    if (communityToken.contractAddress == address(0)) {
+    if (communityToken.contractAddress == address(0)) {   // native token
       balance = address(this).balance;
     } else {
       balance = IERC20Upgradeable(communityToken.contractAddress).balanceOf(address(this));
@@ -100,6 +100,7 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
   function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, address userAddress, uint16 period) external override {
     uint256 poolToken = getTotalPeriodReward(period);
     uint256 userReward = getUserReward(periodRewardShares, period, poolToken);
+    require(userReward != 0, "no_reward");
 
     if (communityToken.contractAddress == address(0)) {   // native token
       payable(userAddress).transfer(userReward);
