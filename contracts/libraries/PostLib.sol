@@ -369,12 +369,13 @@ library PostLib  {
                 postContainer.info.ipfsDoc.hash = ipfsHash;
 
         } else {
+            require(postContainer.info.ipfsDoc.hash == ipfsHash, "Not_allowed_edit_not_author");
             if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
                 revert("Error_change_communityId");
-            } 
+            }
             self.peeranhaUser.checkActionRole(
                 userAddr,
-                userAddr,
+                postContainer.info.author,
                 postContainer.info.communityId,
                 UserLib.Action.NONE,
                 UserLib.ActionRole.AdminOrCommunityModerator,

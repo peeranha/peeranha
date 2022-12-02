@@ -51,6 +51,8 @@ describe("Test community permissions", function() {
         //post actions
         await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);    // edit Post Type exprt -> common
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost)).    // com moder change ipfs
+            to.be.revertedWith("Not_allowed_edit_not_author");
         await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost)).
             to.be.revertedWith("Error_change_communityId");
         await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost);
@@ -147,6 +149,8 @@ describe("Test community permissions", function() {
         await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
         await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).    // edit Post Type exprt -> common
             to.be.revertedWith("not_allowed_admin_or_comm_moderator");
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost)).    // com moder change ipfs
+            to.be.revertedWith("Not_allowed_edit_not_author");
         await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost)).
             to.be.revertedWith("Error_change_communityId");
         await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost)).
