@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "./interfaces/IPeeranhaCommunityToken.sol";
 import "./interfaces/IPeeranhaCommunityTokenFactory.sol";
 import "./libraries/CommonLib.sol";
+import "./base/ChildMintableERC20Upgradeable.sol";
 
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 
 // transfer: 
 //    payable(userAddress).transfer(amount);
@@ -19,7 +19,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUp
 //    IERC20(tokenAddress).balanceOf(userAddress)
 
 
-contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityToken {
+contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Upgradeable {
   uint256 public constant FRACTION = (10 ** 18);
   
   struct CommunityToken {
@@ -49,6 +49,17 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
     communityToken.peeranhaCommunityTokenFactoryAddress = peeranhaCommunityTokenFactoryAddress;
   }
 
+  // This is to support Native meta transactions
+  // never use msg.sender directly, use _msgSender() instead
+  function _msgSender()
+      internal
+      override(ChildMintableERC20Upgradeable)
+      view
+      returns (address sender)
+  {
+      return ChildMintableERC20Upgradeable._msgSender();
+  } // deleted override(ContextUpgradeable) !!
+
   function getBalance() public view override returns(uint256) {   // public?
     uint256 balance;
     if (communityToken.contractAddress == address(0)) {   // native token
@@ -68,7 +79,7 @@ contract PeeranhaCommunityToken is ERC20CappedUpgradeable, IPeeranhaCommunityTok
 
   // set pool
   function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
-    require(msg.sender == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action"); // -> _msgSender(); ?
+    require(_msgSender() == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action"); // -> _msgSender(); ?
 
     uint256 totalPeriodReward = reduceRewards(communityToken.maxRewardPerPeriod * FRACTION, period);
     if (periodRewardShares.activeUsersInPeriod.length <= communityToken.activeUsersInPeriod) {

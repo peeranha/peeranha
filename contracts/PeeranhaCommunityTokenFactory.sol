@@ -7,9 +7,10 @@ import "./PeeranhaCommunityToken.sol";
 import "./interfaces/IPeeranhaCommunityTokenFactory.sol";
 import "./interfaces/IPeeranhaUser.sol";
 import "./libraries/TokenLib.sol";
+import "./base/ChildMintableERC20Upgradeable.sol";
 
 
-contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable {
+contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, ChildMintableERC20Upgradeable {
   // PeeranhaCommunityToken[] public peeranhaCommunityTokenArray;
 
   struct FactoryData {  // name
@@ -32,6 +33,17 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     // peeranhaCommunityTokenArray.push(peeranhaCommunityToken);
   }
 
+  // This is to support Native meta transactions
+  // never use msg.sender directly, use _msgSender() instead
+  function _msgSender()
+      internal
+      override(ChildMintableERC20Upgradeable)
+      view
+      returns (address sender)
+  {
+      return ChildMintableERC20Upgradeable._msgSender();
+  } // deleted override(ContextUpgradeable)
+
   function getCommunityToken(uint32 communityId) private view returns(IPeeranhaCommunityToken) {
     return factoryData.peeranhaCommunitiesToken[communityId];
   }
@@ -50,7 +62,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   }
 
   function getRewards(uint16 period) external override {
-    address userAddress =  msg.sender; // -> _msgSender(); ?
+    address userAddress = _msgSender();
     require(!factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid, "reward_already_picked_up.");
     factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid = true;
 
