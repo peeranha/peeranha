@@ -371,7 +371,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, userAddr, rating, communityId);
     }
 
     /**
@@ -385,7 +385,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUsersRating(userContext, usersRating, communityId);
+        UserLib.updateUsersRating(userContext, usersRating, communityReward, communityId);
     }
 
     /**

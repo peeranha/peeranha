@@ -296,18 +296,18 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, RewardLib.CommunityReward storage communityReward, uint32 communityId) internal {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
+      updateUserRating(userContext, communityReward, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId) internal {
     if (rating == 0) return;
-    updateRatingBase(userContext, userAddr, rating, communityId);
+    updateRatingBase(userContext, communityReward, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateRatingBase(UserContext storage userContext, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId) internal {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
@@ -344,8 +344,7 @@ library UserLib {
       previousPeriod = currentPeriod;
     }
 
-    updateUserPeriodRating(userContext, userCommunityRating, userAddr, rating, communityId, currentPeriod, previousPeriod);
-
+    updateUserPeriodRating(userContext, userCommunityRating, communityReward, userAddr, rating, communityId, currentPeriod, previousPeriod);
     userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
@@ -353,7 +352,7 @@ library UserLib {
     }
   }
 
-  function updateUserPeriodRating(UserContext storage userContext, CommunityRatingForUser storage userCommunityRating, address userAddr, int32 rating, uint32 communityId, uint16 currentPeriod, uint16 previousPeriod) private {
+  function updateUserPeriodRating(UserContext storage userContext, CommunityRatingForUser storage userCommunityRating, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId, uint16 currentPeriod, uint16 previousPeriod) private {
     RewardLib.PeriodRating storage currentPeriodRating = userCommunityRating.userPeriodRewards[currentPeriod].periodRating[communityId];
     bool isFirstTransactionInPeriod = !currentPeriodRating.isActive;
 
@@ -424,11 +423,11 @@ library UserLib {
         if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange > 0) {
           uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
           userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
-          // communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
+          communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
         } else {
           uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
           userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
-          // communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
+          communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
         }
       }
     }
@@ -438,11 +437,11 @@ library UserLib {
       if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange > 0) {
         uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
-        // communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
+        communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
       } else {
         uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
-        // communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
+        communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
       }
 
       int32 changeRating;
@@ -469,7 +468,7 @@ library UserLib {
     // Activate period rating for community if this is the first change
     if (isFirstTransactionInPeriod) {
       currentPeriodRating.isActive = true;
-      // communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr);
+      communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr);
     }
   }
 
