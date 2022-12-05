@@ -11,8 +11,6 @@ import "./base/ChildMintableERC20Upgradeable.sol";
 
 
 contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, ChildMintableERC20Upgradeable {
-  // PeeranhaCommunityToken[] public peeranhaCommunityTokenArray;
-
   struct FactoryData {  // name
     mapping(uint32 => IPeeranhaCommunityToken) peeranhaCommunitiesToken;
     uint32[] factoryCommunitiesId;
@@ -25,9 +23,9 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     factoryData.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
   }
 
-  function createNewCommunityToken(string memory name, string memory symbol, address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, uint32 communityId) external override {
+  function createNewCommunityToken(address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, uint32 communityId) external override {
     require(address(factoryData.peeranhaCommunitiesToken[communityId]) == address(0), "communityId_already_exist");
-    factoryData.peeranhaCommunitiesToken[communityId] = new PeeranhaCommunityToken(name, symbol, contractAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this));
+    factoryData.peeranhaCommunitiesToken[communityId] = new PeeranhaCommunityToken(contractAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this));
     factoryData.factoryCommunitiesId.push(communityId);
     // PeeranhaCommunityToken peeranhaCommunityToken = new PeeranhaCommunityToken(name, symbol, contractAddress, maxRewardPerPeriod, activeUsersInPeriod, communityId, createTime);
     // peeranhaCommunityTokenArray.push(peeranhaCommunityToken);
@@ -42,12 +40,18 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
       returns (address sender)
   {
       return ChildMintableERC20Upgradeable._msgSender();
-  } // deleted override(ContextUpgradeable)
+  }
 
   function getCommunityToken(uint32 communityId) private view returns(IPeeranhaCommunityToken) {
+    require(address(factoryData.peeranhaCommunitiesToken[communityId]) != address(0), "CommunityId_not_exist");
     return factoryData.peeranhaCommunitiesToken[communityId];
   }
 
+  function updateCommunityRewardSettings(uint32 communityId, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
+    IPeeranhaCommunityToken peeranhaCommunityToken = getCommunityToken(communityId);
+    peeranhaCommunityToken.updateCommunityRewardSettings(maxRewardPerPeriod, activeUsersInPeriod);
+  }
+  
   // set pools
   function setTotalPeriodRewards(uint16 period) external override {
     // check role | address

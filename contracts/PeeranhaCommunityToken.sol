@@ -4,11 +4,9 @@ pragma solidity ^0.8.0;
 import "./interfaces/IPeeranhaCommunityToken.sol";
 import "./interfaces/IPeeranhaCommunityTokenFactory.sol";
 import "./libraries/CommonLib.sol";
-import "./base/ChildMintableERC20Upgradeable.sol";
+import "./base/NativeMetaTransaction.sol";
 
-
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 // transfer: 
 //    payable(userAddress).transfer(amount);
@@ -16,11 +14,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 //
 // balace:
 //    userAddress.balance
-//    IERC20(tokenAddress).balanceOf(userAddress)
+//    IERC20Upgradeable(tokenAddress).balanceOf(userAddress)
 
 
-contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Upgradeable {
-  uint256 public constant FRACTION = (10 ** 18);
+contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransaction {
+  ///
+  // todo: 
+  // get CommunityToken -> (info)
+  // array communities token
+  ///
   
   struct CommunityToken {
     string name;
@@ -29,23 +31,26 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Up
     uint256 maxRewardPerPeriod;
     uint256 activeUsersInPeriod;
     uint256 maxRewardPerUser;
-    uint256 sumAccruedTokens;
+    uint256 sumAccruedTokens;   // need?
     uint256 sumSpentTokens;
     uint256 createTime;
     mapping(uint16 => uint256) periodPool;
-    address peeranhaCommunityTokenFactoryAddress;     // address or interface?
+    address peeranhaCommunityTokenFactoryAddress;
   }
 
   CommunityToken communityToken;
 
-  constructor(string memory name, string memory symbol, address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, address peeranhaCommunityTokenFactoryAddress) {
-    communityToken.name = name;
-    communityToken.symbol = symbol;
-    communityToken.contractAddress = contractAddress;
+  constructor(address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, address peeranhaCommunityTokenFactoryAddress) {
+    if (contractAddress == address(0))
+      communityToken.contractAddress = address(0x0000000000000000000000000000000000001010); // chack Address !
+    else
+      communityToken.contractAddress = contractAddress;
+    communityToken.name = IERC20MetadataUpgradeable(communityToken.contractAddress).name();
+    communityToken.symbol = IERC20MetadataUpgradeable(communityToken.contractAddress).symbol();
     communityToken.maxRewardPerPeriod = maxRewardPerPeriod;
     communityToken.activeUsersInPeriod = activeUsersInPeriod;
     communityToken.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
-    communityToken.createTime = CommonLib.getTimestamp();   // how set?
+    communityToken.createTime = CommonLib.getTimestamp();
     communityToken.peeranhaCommunityTokenFactoryAddress = peeranhaCommunityTokenFactoryAddress;
   }
 
@@ -53,20 +58,22 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Up
   // never use msg.sender directly, use _msgSender() instead
   function _msgSender()
       internal
-      override(ChildMintableERC20Upgradeable)
+      override
       view
       returns (address sender)
   {
-      return ChildMintableERC20Upgradeable._msgSender();
-  } // deleted override(ContextUpgradeable) !!
+    return NativeMetaTransaction._msgSender();
+  }
+
+  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) public override {
+    communityToken.maxRewardPerPeriod = maxRewardPerPeriod;
+    communityToken.activeUsersInPeriod = activeUsersInPeriod;
+    communityToken.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
+  }
 
   function getBalance() public view override returns(uint256) {   // public?
     uint256 balance;
-    if (communityToken.contractAddress == address(0)) {   // native token
-      balance = address(this).balance;
-    } else {
-      balance = IERC20Upgradeable(communityToken.contractAddress).balanceOf(address(this));
-    }
+    balance = IERC20Upgradeable(communityToken.contractAddress).balanceOf(address(this));
 
     require(balance >= communityToken.sumSpentTokens, "error_balance");
     return balance - communityToken.sumSpentTokens;
@@ -79,27 +86,17 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Up
 
   // set pool
   function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
-    require(_msgSender() == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action"); // -> _msgSender(); ?
+    require(_msgSender() == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action");
 
-    uint256 totalPeriodReward = reduceRewards(communityToken.maxRewardPerPeriod * FRACTION, period);
+    uint256 totalPeriodReward = communityToken.maxRewardPerPeriod * IERC20MetadataUpgradeable(communityToken.contractAddress).decimals();
     if (periodRewardShares.activeUsersInPeriod.length <= communityToken.activeUsersInPeriod) {
-      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityToken.maxRewardPerUser * FRACTION;   // min?
+      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityToken.maxRewardPerUser * IERC20MetadataUpgradeable(communityToken.contractAddress).decimals();   // min?
       totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardPerUser);
     }
     totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getBalance());
     
     communityToken.sumSpentTokens += totalPeriodReward;
     communityToken.periodPool[period] = totalPeriodReward;
-  }
-
-  function reduceRewards(uint256 rewardPeriod, uint16 period) private pure returns(uint256) {
-    uint16 countReduce = period / 52;
-
-    for (uint16 i = 0; i < countReduce; i++) {
-      rewardPeriod = (rewardPeriod * 93) / 100;
-    }
-
-    return rewardPeriod;
   }
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 tokenReward, uint256 poolToken) private pure returns(uint256) {
@@ -115,12 +112,7 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, ChildMintableERC20Up
     uint256 userReward = getUserReward(periodRewardShares, period, poolToken);
     require(userReward != 0, "no_reward");
 
-    if (communityToken.contractAddress == address(0)) {   // native token
-      payable(userAddress).transfer(userReward);
-    } else {
-      IERC20Upgradeable(communityToken.contractAddress).transfer(userAddress, userReward);
-    }
-
+    IERC20MetadataUpgradeable(communityToken.contractAddress).transfer(userAddress, userReward);
     communityToken.sumSpentTokens -= userReward;
   }
 }

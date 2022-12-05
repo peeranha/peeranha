@@ -11,4 +11,5 @@ interface IPeeranhaCommunityToken {
     function getBalance() external view returns(uint256);
     function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, address userAddress, uint16 period) external;
     function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external;
+    function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external;
 }

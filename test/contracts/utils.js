@@ -105,6 +105,14 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
+    const PeeranhaTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
+    const peeranhaTokenFactory = await PeeranhaTokenFactory.deploy();
+    await peeranhaTokenFactory.deployed();
+    const peeranhaTokenFactoryAddress = await peeranhaTokenFactory.resolvedAddress.then((value) => {
+        return value;
+    });
+    await peeranhaTokenFactory.initialize(peeranhaUserContractAddress);
+
     const PostLib = await ethers.getContractFactory("PostLib")
     const postLib = await PostLib.deploy();
 
@@ -135,6 +143,7 @@ const createPeerenhaAndTokenContract = async function () {
         peeranhaCommunity: peeranhaCommunity,
         token: token,
         peeranhaNFT: peeranhaNFT,
+        peeranhaTokenFactoryAddress: peeranhaTokenFactoryAddress,
         accountDeployed: peeranhaContent.deployTransaction.from,
     }
 };
