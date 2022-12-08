@@ -185,15 +185,15 @@ describe("Test permissions", function () {
 			await peeranhaContent.createReply(1, 0, hashContainer[1], false);
 
 			await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low_rating_upvote');
-            await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
+            await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
+            .to.be.revertedWith('low_rating_upvote_reply');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1))
-            .to.be.revertedWith('low_rating_upvote');
-            await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
             .to.be.revertedWith('low_rating_upvote_post');
+            await expect(peeranhaContent.connect(signers[1]).voteItem(1, 1, 0, 1))
+            .to.be.revertedWith('low_rating_upvote_reply');
 
             await peeranhaUser.addUserRating(signers[1].address, 1, 1);
             await peeranhaContent.connect(signers[1]).voteItem(1, 0, 0, 1);

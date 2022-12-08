@@ -1766,7 +1766,7 @@ describe("Test post", function () {
 
 	});
 
-	describe('Test change post community id', function () {
+	describe('Test change post community id call editPost by admin + comModer', function () {
 
 		it("Test change post community id, post does not exist", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -1865,7 +1865,7 @@ describe("Test post", function () {
 		});
 	});
 
-	describe('Change community id by edit post', function () {
+	describe('Change post community id call editPost by common author', function () {
 		it("Test change post communy id by editPost, new community does not exist", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
@@ -2205,9 +2205,9 @@ describe("Test post", function () {
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
 
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2235,9 +2235,9 @@ describe("Test post", function () {
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
 
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2264,9 +2264,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2293,9 +2293,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2322,9 +2322,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2352,9 +2352,9 @@ describe("Test post", function () {
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
 
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2385,9 +2385,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2418,9 +2418,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2451,9 +2451,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2484,9 +2484,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2517,9 +2517,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2550,9 +2550,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2692,9 +2692,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2724,9 +2724,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 				
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2759,9 +2759,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2795,9 +2795,9 @@ describe("Test post", function () {
 
 				await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 				await peeranhaUser.createUser(hashContainer[1]);
-				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 				await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -2976,9 +2976,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3002,9 +3002,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
@@ -3032,9 +3032,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3063,9 +3063,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3179,9 +3179,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3206,9 +3206,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3236,9 +3236,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3268,9 +3268,9 @@ describe("Test post", function () {
 
 					await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
 					await peeranhaUser.createUser(hashContainer[1]);
-					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer);
-					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer);
+					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
+					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
 
 					await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
 
@@ -3433,5 +3433,4 @@ describe("Test post", function () {
 			return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
 		}));
 	}
-
 });
