@@ -17,13 +17,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 //    IERC20Upgradeable(tokenAddress).balanceOf(userAddress)
 
 
-contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransaction {
+contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransaction {  
   ///
-  // todo: 
-  // get CommunityToken -> (info)
-  // array communities token
+  // todo
+  // getPool
   ///
-  
   struct CommunityToken {
     string name;
     string symbol;
@@ -31,27 +29,31 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
     uint256 maxRewardPerPeriod;
     uint256 activeUsersInPeriod;
     uint256 maxRewardPerUser;
-    uint256 sumAccruedTokens;   // need?
+    // uint256 sumAccruedTokens;   // need?
     uint256 sumSpentTokens;
     uint256 createTime;
-    mapping(uint16 => uint256) periodPool;
     address peeranhaCommunityTokenFactoryAddress;
   }
 
-  CommunityToken communityToken;
+  struct CommunityTokenContainer {
+    CommunityToken info;
+    mapping(uint16 => uint256) periodPool;
+  }
+
+  CommunityTokenContainer communityTokenContainer;
 
   constructor(address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, address peeranhaCommunityTokenFactoryAddress) {
     if (contractAddress == address(0))
-      communityToken.contractAddress = address(0x0000000000000000000000000000000000001010); // chack Address !
+      communityTokenContainer.info.contractAddress = address(0x0000000000000000000000000000000000001010); // chack Address !
     else
-      communityToken.contractAddress = contractAddress;
-    communityToken.name = IERC20MetadataUpgradeable(communityToken.contractAddress).name();
-    communityToken.symbol = IERC20MetadataUpgradeable(communityToken.contractAddress).symbol();
-    communityToken.maxRewardPerPeriod = maxRewardPerPeriod;
-    communityToken.activeUsersInPeriod = activeUsersInPeriod;
-    communityToken.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
-    communityToken.createTime = CommonLib.getTimestamp();
-    communityToken.peeranhaCommunityTokenFactoryAddress = peeranhaCommunityTokenFactoryAddress;
+      communityTokenContainer.info.contractAddress = contractAddress;
+    communityTokenContainer.info.name = IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).name();
+    communityTokenContainer.info.symbol = IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).symbol();
+    communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
+    communityTokenContainer.info.activeUsersInPeriod = activeUsersInPeriod;
+    communityTokenContainer.info.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
+    communityTokenContainer.info.createTime = CommonLib.getTimestamp();
+    communityTokenContainer.info.peeranhaCommunityTokenFactoryAddress = peeranhaCommunityTokenFactoryAddress;
   }
 
   // This is to support Native meta transactions
@@ -66,37 +68,37 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
   }
 
   function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) public override {
-    communityToken.maxRewardPerPeriod = maxRewardPerPeriod;
-    communityToken.activeUsersInPeriod = activeUsersInPeriod;
-    communityToken.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
+    communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
+    communityTokenContainer.info.activeUsersInPeriod = activeUsersInPeriod;
+    communityTokenContainer.info.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
   }
 
   function getBalance() public view override returns(uint256) {   // public?
     uint256 balance;
-    balance = IERC20Upgradeable(communityToken.contractAddress).balanceOf(address(this));
+    balance = IERC20Upgradeable(communityTokenContainer.info.contractAddress).balanceOf(address(this));
 
-    require(balance >= communityToken.sumSpentTokens, "error_balance");
-    return balance - communityToken.sumSpentTokens;
+    require(balance >= communityTokenContainer.info.sumSpentTokens, "error_balance");
+    return balance - communityTokenContainer.info.sumSpentTokens;
   }
 
   // get pool
   function getTotalPeriodReward(uint16 period) private view returns(uint256) {
-    return communityToken.periodPool[period];
+    return communityTokenContainer.periodPool[period];
   }
 
   // set pool
   function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
-    require(_msgSender() == communityToken.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action");
+    require(_msgSender() == communityTokenContainer.info.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action");
 
-    uint256 totalPeriodReward = communityToken.maxRewardPerPeriod * IERC20MetadataUpgradeable(communityToken.contractAddress).decimals();
-    if (periodRewardShares.activeUsersInPeriod.length <= communityToken.activeUsersInPeriod) {
-      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityToken.maxRewardPerUser * IERC20MetadataUpgradeable(communityToken.contractAddress).decimals();   // min?
+    uint256 totalPeriodReward = communityTokenContainer.info.maxRewardPerPeriod * IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).decimals();
+    if (periodRewardShares.activeUsersInPeriod.length <= communityTokenContainer.info.activeUsersInPeriod) {
+      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityTokenContainer.info.maxRewardPerUser * IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).decimals();   // min?
       totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardPerUser);
     }
     totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getBalance());
     
-    communityToken.sumSpentTokens += totalPeriodReward;
-    communityToken.periodPool[period] = totalPeriodReward;
+    communityTokenContainer.info.sumSpentTokens += totalPeriodReward;
+    communityTokenContainer.periodPool[period] = totalPeriodReward;
   }
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 tokenReward, uint256 poolToken) private pure returns(uint256) {
@@ -112,7 +114,11 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
     uint256 userReward = getUserReward(periodRewardShares, period, poolToken);
     require(userReward != 0, "no_reward");
 
-    IERC20MetadataUpgradeable(communityToken.contractAddress).transfer(userAddress, userReward);
-    communityToken.sumSpentTokens -= userReward;
+    IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).transfer(userAddress, userReward);
+    communityTokenContainer.info.sumSpentTokens -= userReward;
+  }
+
+  function getCommunityToken() external view override returns (CommunityToken memory) {
+    return communityTokenContainer.info;
   }
 }

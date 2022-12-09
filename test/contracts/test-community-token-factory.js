@@ -7,11 +7,15 @@ const {
 
 describe("Test community token factory", function () {
 
-	describe("...............", function () {
+	describe("Community token", function () {
 
-		it("..........", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed, peeranhaTokenFactoryAddress } = await createPeerenhaAndTokenContract();
+		it("Test create community token", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed, peeranhaTokenFactory } = await createPeerenhaAndTokenContract();
 			
+			await peeranhaTokenFactory.createNewCommunityToken(5, token.address, 100, 100);
+			console.log(await peeranhaTokenFactory.getAddressLastCreatedContract(5));
+			console.log(await peeranhaTokenFactory.getCommunityToken(5, await peeranhaTokenFactory.getAddressLastCreatedContract(5)));
+			// console.log(await peeranhaTokenFactory.getCommunityTokenn());
 		})
 	})
 });

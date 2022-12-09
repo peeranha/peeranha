@@ -508,7 +508,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, userAddr, rating, communityId);
     }*/
 
     // Used for unit tests

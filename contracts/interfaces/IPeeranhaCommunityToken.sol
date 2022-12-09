@@ -4,6 +4,7 @@ pragma solidity >=0.5.0;
 // import "../PeeranhaCommunityToken.sol";
 
 import "../libraries/RewardLib.sol";
+import "../PeeranhaCommunityToken.sol";
 
 pragma abicoder v2;
 
@@ -12,4 +13,5 @@ interface IPeeranhaCommunityToken {
     function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, address userAddress, uint16 period) external;
     function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external;
     function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external;
+    function getCommunityToken() external view returns(PeeranhaCommunityToken.CommunityToken memory);
 }
