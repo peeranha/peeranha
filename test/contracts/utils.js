@@ -47,12 +47,15 @@ async function getAddressContract(contract) {
 const createContract = async function () {
     const PostLib = await ethers.getContractFactory("PostLib")
     const CommunityLib = await ethers.getContractFactory("CommunityLib")
+    const UserLib = await ethers.getContractFactory("UserLib")
     const postLib = await PostLib.deploy();
     const communityLib = await CommunityLib.deploy();
+    const userLib = await UserLib.deploy();
     const Peeranha = await ethers.getContractFactory("Peeranha", {
     libraries: {
             PostLib: postLib.address,
             CommunityLib: communityLib.address,
+            UserLib: userLib.address,
     }
     });
     const peeranha = await Peeranha.deploy();
@@ -97,8 +100,16 @@ const createPeerenhaAndTokenContract = async function () {
     const peeranhaTokenContractAddress = await token.resolvedAddress.then((value) => {
         return value;
     });
+
+    const UserLib = await ethers.getContractFactory("UserLib")
+    const userLib = await UserLib.deploy();
     
-    const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+    const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+        libraries: {
+            UserLib: userLib.address,
+        }
+    });
+    
     const peeranhaUser = await PeeranhaUser.deploy();
     await peeranhaUser.deployed();
     const peeranhaUserContractAddress = await peeranhaUser.resolvedAddress.then((value) => {
@@ -167,14 +178,14 @@ const getHashContainer = () => {
 
 const getHashTranslation = () => {
     let hashTranslation = [];
-    for (let translation in LenguagesEnum) {
+    for (let translation in LanguagesEnum) {
         hashTranslation.push(getHash());
     }
     return hashTranslation;
 };
 
 const getTranslationValues = () => {
-    const hashTranslation = Object.values(LenguagesEnum).filter((v) => !isNaN(Number(v)));
+    const hashTranslation = Object.values(LanguagesEnum).filter((v) => !isNaN(Number(v)));
     return hashTranslation;
 };
 
@@ -185,12 +196,12 @@ const hashContainer = getHashContainer();
 const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
 const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
-	await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-	await peeranhaUser.createUser(hashContainer[1]);
+	await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 }
 
 const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer) {
-	await peeranhaUser.connect(signer).createUser(hashContainer[0]);
+	await peeranhaUser.connect(signer).createUser(signer.address, hashContainer[0]);
 	await peeranhaUser.addUserRating(signer.address, rating, 1);
 };
 
@@ -347,7 +358,7 @@ const StartRatingWithoutAction = 0;
 const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
-const LenguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
+const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -424,11 +435,14 @@ const ModeratorDeleteComment = -1;
 
 const PROTOCOL_ADMIN_ROLE = ethers.utils.id("PROTOCOL_ADMIN_ROLE");
 const BOT_ROLE = ethers.utils.id("BOT_ROLE");
+const DISPATCHER_ROLE = ethers.utils.id("DISPATCHER_ROLE");
+
+const TRANSACTION_DELAY = 3000;
 
 module.exports = { 
     wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHashTranslation, getTranslationValues, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
-    periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, LenguagesEnum, fraction, poolToken,
+    periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, LanguagesEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, activeIn1st2nd3rdPeriod, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,
 	energyPublicationPost, energyPublicationReply, energyPublicationComment, energyUpdateProfile, energyEditItem, energyDeleteItem,
 	energyBestReply, energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray,
@@ -437,5 +451,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, BOT_ROLE
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY
 };
