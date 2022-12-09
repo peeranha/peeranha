@@ -18,8 +18,15 @@ describe('Peeranha (proxy)', function () {
     const PostLib = await ethers.getContractFactory("PostLib");
     const postLib = await PostLib.deploy();
 
-    PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
-    peeranhaUser = await upgrades.deployProxy(PeeranhaUser, [], {timeout: 0});
+    const UserLib = await ethers.getContractFactory("UserLib");
+    const userLib = await UserLib.deploy();
+
+    PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+      libraries: {
+        UserLib: userLib.address
+      }
+    });
+    peeranhaUser = await upgrades.deployProxy(PeeranhaUser, [], {unsafeAllowLinkedLibraries: true, timeout: 0});
 
     PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
     peeranhaCommunity = await upgrades.deployProxy(PeeranhaCommunity, [peeranhaUser.address], {timeout: 0});
@@ -57,8 +64,10 @@ describe('Peeranha (proxy)', function () {
   it('check retrieve returns a value previously initialized', async function () {
     const ipfsHashes = getHashesContainer(2);
     const hashContainer = getHashContainer();
-		await peeranhaUser.createUser(hashContainer[1]);
-    await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+    const signers = await ethers.getSigners();
+    
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+    await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
     const newPeeranhaUser = await upgrades.upgradeProxy(peeranhaUser.address, PeeranhaUser, {unsafeAllowLinkedLibraries: true});
     const newPeeranhaCommunity = await upgrades.upgradeProxy(peeranhaCommunity.address, PeeranhaCommunity, {unsafeAllowLinkedLibraries: true});

@@ -135,6 +135,7 @@ library UserLib {
     NONE,
     Bot,
     Admin,
+    Dispatcher,
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
@@ -209,7 +210,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -241,7 +242,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,

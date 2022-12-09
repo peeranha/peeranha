@@ -20,12 +20,12 @@ describe("Test bot", function () {
 			const hashContainer = getHashContainer();
 
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			
 			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
 
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
@@ -40,12 +40,12 @@ describe("Test bot", function () {
 			const hashContainer = getHashContainer();
 
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
 
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
 
@@ -63,13 +63,13 @@ describe("Test bot", function () {
 			const hashContainer = getHashContainer();
 
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
 
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
 
@@ -87,17 +87,17 @@ describe("Test bot", function () {
 			const hashContainer = getHashContainer();
 
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
 
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
 
-			const property = await peeranhaContent.getReplyProperty(1, 1, 0);
+			const property = await peeranhaContent.getItemProperty(0, 1, 1, 0);
 			expect(property).to.equal('0x68616e646c650000000000000000000000000000000000000000000000000001');
 		});
 	});

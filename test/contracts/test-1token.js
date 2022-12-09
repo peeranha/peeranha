@@ -21,8 +21,8 @@ describe("Test wallet", function () {
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
 			await peeranhaUser.addUserRating(signers[1].address, 50, 1);
@@ -41,10 +41,10 @@ describe("Test wallet", function () {
 			expect(ratingToReward2User).to.equal(50);
 			expect(rewardPeriods[0]).to.equal(rewardPeriods2User[0]);
 
-			await token.claimReward(rewardPeriods[0]);
+			await token.claimReward(signers[0].address, rewardPeriods[0]);
 			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
-			await token.connect(signers[1]).claimReward(rewardPeriods2User[0]);
+			await token.connect(signers[1]).claimReward(signers[1].address, rewardPeriods2User[0]);
 			const balance2 = await getBalance(token, signers[1].address);
 			
 			const userReward = await getUserReward(60, 110, 200);
@@ -61,8 +61,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions} rating in 1st period (setRetingOnePeriod)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
+				const signers = await ethers.getSigners();
 		
-				await peeranhaUser.createUser(hashContainer[1]);
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings, 1);
 
@@ -81,7 +82,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 1st period (twiceChengeRatingIn1Period)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
-				await peeranhaUser.createUser(hashContainer[1]);
+				const signers = await ethers.getSigners();
+
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 		 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
@@ -103,7 +106,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period (ratingChanges)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
-				await peeranhaUser.createUser(hashContainer[1]);
+				const signers = await ethers.getSigners();
+
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				
@@ -134,7 +139,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period and ${actions[2]} rating in 3rd period (activeIn1st2nd3rdPeriod)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
-				await peeranhaUser.createUser(hashContainer[1]);
+				const signers = await ethers.getSigners();
+
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				
@@ -175,7 +182,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 2nt period and ${actions[2]} rating in 2nt (twiceChengeRatingIn2NDPeriod)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
-				await peeranhaUser.createUser(hashContainer[1]);
+				const signers = await ethers.getSigners();
+
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				
@@ -207,8 +216,9 @@ describe("Test wallet", function () {
 			it(`Test ${actions[0]} rating in 1st period and ${actions[1]} rating in 3nt period (ratingChangesSkipPeriod)`, async function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
-		
-				await peeranhaUser.createUser(hashContainer[1]);
+				const signers = await ethers.getSigners();
+
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				
@@ -240,8 +250,9 @@ describe("Test wallet", function () {
 		it("Test get reward", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
@@ -254,7 +265,7 @@ describe("Test wallet", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await token.claimReward(rewardPeriods[0]);
+			await token.claimReward(signers[0].address, rewardPeriods[0]);
 			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
 			expect(balance).to.equal(periodUserReward * fraction);
@@ -263,7 +274,9 @@ describe("Test wallet", function () {
 		it("Test get reward for the ongoing period", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
@@ -271,7 +284,7 @@ describe("Test wallet", function () {
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 4, 1);
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[0]), 'Transaction was not reverted')
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0]), 'Transaction was not reverted')
 			.to.be.revertedWith("period_not_ended");
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		}).retries(5);
@@ -279,15 +292,16 @@ describe("Test wallet", function () {
 		it("Test get reward for undefined period", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
 
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(rewardPeriods[0] - 1))
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0] - 1))
 			.to.be.revertedWith('no_reward');
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		});
@@ -295,8 +309,9 @@ describe("Test wallet", function () {
 		it("Test twice pick up 1 reward", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
 
-			await peeranhaUser.createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
@@ -305,8 +320,8 @@ describe("Test wallet", function () {
 			await wait(PeriodTime);
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-			await token.claimReward(rewardPeriods[0]);
-			await expect(token.claimReward(rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
+			await token.claimReward(signers[0].address, rewardPeriods[0]);
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
 		});
 
 		///
@@ -318,7 +333,9 @@ describe("Test wallet", function () {
 		it("mint 5 tokens", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			const ownerMintTokens = parseEther("5");
 			await token.mint(ownerMintTokens)
@@ -332,7 +349,9 @@ describe("Test wallet", function () {
 		it("mint 5 and 2 tokens", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			await token.mint(parseEther("5"))
 			await token.mint(parseEther("2"))
@@ -348,7 +367,9 @@ describe("Test wallet", function () {
 		it("mint max tokens", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			const ownerMintTokens = parseEther("40000000");
 			await token.mint(ownerMintTokens)
@@ -362,7 +383,9 @@ describe("Test wallet", function () {
 		it("mint more than max tokens", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
-			await peeranhaUser.createUser(hashContainer[1]);
+			const signers = await ethers.getSigners();
+			
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 			const ownerMintTokens = parseEther("40000001");
 			await expect(token.mint(ownerMintTokens)).to.be.revertedWith('max_owner_mint_exceeded');
@@ -374,8 +397,8 @@ describe("Test wallet", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await token.mint(parseEther("2.2"))
 			await token.transfer(signers[1].address, parseEther("1.2"))
@@ -391,8 +414,8 @@ describe("Test wallet", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await token.mint(parseEther("2.2"))
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -412,8 +435,8 @@ describe("Test wallet", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await token.mint(parseEther("2.2"))
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -426,8 +449,8 @@ describe("Test wallet", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await token.mint(parseEther("2.2"))
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -451,8 +474,8 @@ describe("Test wallet", function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 			await token.mint(parseEther("2.2"))
 			await token.setStake(accountDeployed, parseEther("1"))
@@ -476,7 +499,7 @@ describe("Test wallet", function () {
 	// 	const hashContainer = getHashContainer();
 	// 	const signers = await ethers.getSigners();
 
-	// 	await peeranhaUser.createUser(hashContainer[1]);
+	// 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 
 	// 	await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 60, 1);
@@ -496,10 +519,10 @@ describe("Test wallet", function () {
 	// 	console.log(await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1))
 
 
-	// 	// await token.claimReward(rewardPeriods[1]);
+	// 	// await token.claimReward(signers[0].address, rewardPeriods[1]);
 	// 	// const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
 
-	// 	// await token.claimReward(rewardPeriods[1]);
+	// 	// await token.claimReward(signers[0].address, rewardPeriods[1]);
 	// 	// const balance2 = await getBalance(token, signers[1].address);
 		
 	// 	// const userReward = await getUserReward(60, 110);
