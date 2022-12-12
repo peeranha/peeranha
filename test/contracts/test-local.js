@@ -6,12 +6,12 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, PeriodTime, setRetingOnePeriod
 } = require('./utils');
 
 
 describe("Test local", function () {
-	
+
 	xit("Test local", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const signers = await ethers.getSigners();
@@ -38,5 +38,4 @@ describe("Test local", function () {
 		
 		await expect(newRating).to.equal(StartRating + DownvotedExpertReply);
 	});
-	
 });

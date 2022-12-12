@@ -136,13 +136,13 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
-    
+
     await peeranhaUser.initialize();
     await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
     await token.initialize("Peeranha", "PEER", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
     await peeranhaNFT.initialize("PeeranhaNFT", "PEERNFT", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
-    
+
     await peeranhaUser.setContractAddresses(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
 
     return {

@@ -9,10 +9,10 @@ import "./interfaces/IPeeranhaCommunity.sol";
 
 import "./PeeranhaCommunityToken.sol";
 import "./libraries/TokenLib.sol";
-import "./base/ChildMintableERC20Upgradeable.sol";
+import "./base/NativeMetaTransaction.sol";
 
 
-contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, ChildMintableERC20Upgradeable {
+contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, NativeMetaTransaction {
   struct FactoryData {  // name
     mapping(uint32 => IPeeranhaCommunityToken[]) peeranhaCommunitiesToken;
     uint32[] factoryCommunitiesId;
@@ -39,11 +39,11 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   // never use msg.sender directly, use _msgSender() instead
   function _msgSender()
       internal
-      override(ChildMintableERC20Upgradeable)
+      override
       view
       returns (address sender)
   {
-      return ChildMintableERC20Upgradeable._msgSender();
+      return NativeMetaTransaction._msgSender();
   }
 
   function getContractCommunityToken(uint32 communityId, address communityTokenContractAddress) private view returns(IPeeranhaCommunityToken) {
@@ -73,7 +73,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
 
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
-      RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodRewardShares(period, factoryData.factoryCommunitiesId[i]);
+      RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, factoryData.factoryCommunitiesId[i]);
       IPeeranhaCommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(factoryData.factoryCommunitiesId[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
@@ -98,7 +98,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
         IPeeranhaCommunityToken peeranhaCommunityToken = contractsCommunityToken[communityTokenIndex];
         if (address(peeranhaCommunityToken) != address(0)) {
-          RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodRewardShares(period, rewardCommunities[i]);
+          RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, rewardCommunities[i]);
           peeranhaCommunityToken.payCommunityReward(periodRewardShares, userAddress, period);
         }
       }

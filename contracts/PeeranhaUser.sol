@@ -111,7 +111,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return UserLib.getPeriodRewardShares(userContext, period);
     }
 
-    function getPeriodRewardShares(uint16 period, uint32 communityId) public view override returns(RewardLib.PeriodRewardShares memory) {
+    function getPeriodCommunityRewardShares(uint16 period, uint32 communityId) public view override returns(RewardLib.PeriodRewardShares memory) {
         return UserLib.getPeriodRewardShares(communityReward, period, communityId);
     }
 
@@ -356,10 +356,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
-    
-    // TODO: Why is it commented? Remove this code if not needed.
     /**
-     * @dev Get information about user rewards. (Rating to reward and penalty)
+     * @dev Get information about user rewards. (Rating to reward and penalty) Need for unitTests
      *
      * Requirements:
      *
@@ -368,14 +366,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }*/
-
-    // TODO: Why is it commented? Remove this code if not needed.
-    /**
-     * @dev Get information abour sum rating to reward all users
-     */
-    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
-        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }*/
     
     /**

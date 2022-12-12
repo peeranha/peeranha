@@ -440,7 +440,7 @@ library UserLib {
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
         communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
       } else {
-        uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+        uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
         communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
       }
