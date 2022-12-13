@@ -13,6 +13,11 @@ async function wait(ms) {
     await delay(ms);
 }
 
+// const MyContract = await ethers.getContractFactory("MyContract");
+// const contract = await MyContract.attach(
+//   "0x..." // The deployed contract address
+// );
+
 async function getBalance(contract, user) {
     const balance = await contract.balanceOf(user);
 	return await getInt(balance);

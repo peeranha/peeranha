@@ -349,7 +349,7 @@ library UserLib {
     userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
-      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));
+      // AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));
     }
   }
 

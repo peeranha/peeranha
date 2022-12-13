@@ -349,8 +349,8 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(signers[0].address, rewardPeriods[0] - 1))
-			.to.be.revertedWith('no_reward');
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0] - 1)).
+				to.be.revertedWith('no_reward');
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		});
 
@@ -392,6 +392,18 @@ describe("Test wallet", function () {
 			await expect(await getInt(ownerMintTokens)).to.equal(balance);
 			await expect(balance).to.equal(await getOwnerMinted(token));
 			await expect(balance).to.equal(await getTotalSupply(token));
+		});
+
+		it("mint not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+			const ownerMintTokens = parseEther("5");
+			await expect(token.connect(signers[1]).mint(ownerMintTokens)).
+				to.be.revertedWith('AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
 
 		it("mint 5 and 2 tokens", async function () {

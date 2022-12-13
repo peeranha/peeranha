@@ -11,6 +11,13 @@ import "./PeeranhaCommunityToken.sol";
 import "./libraries/TokenLib.sol";
 import "./base/NativeMetaTransaction.sol";
 
+///
+// todo:
+// getReward
+// not_allowed_not_protocal_admin x2
+// reward_already_picked_up.
+// как узнать есть ли реворды
+///
 
 contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, NativeMetaTransaction {
   struct FactoryData {  // name
@@ -28,7 +35,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   }
 
   function createNewCommunityToken(uint32 communityId, address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
-    factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId); // tests
+    factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
     require(factoryData.peeranhaUser.isProtocolAdmin(_msgSender()), "not_allowed_not_protocal_admin");  // tests
 
     factoryData.peeranhaCommunitiesToken[communityId].push(new PeeranhaCommunityToken(contractAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this)));
@@ -85,7 +92,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     }
   }
 
-  function getRewards(uint16 period) external override {
+  function getRewards(uint16 period) external override {    // how check is exist reward?
     address userAddress = _msgSender();
     require(!factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid, "reward_already_picked_up.");
     factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid = true;
@@ -97,9 +104,15 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
         IPeeranhaCommunityToken peeranhaCommunityToken = contractsCommunityToken[communityTokenIndex];
-        if (address(peeranhaCommunityToken) != address(0)) {
+
+        int32 ratingToReward = factoryData.peeranhaUser.getRatingToReward(userAddress, period, rewardCommunities[i]);
+        if (address(peeranhaCommunityToken) != address(0) && ratingToReward > 0) {
           RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, rewardCommunities[i]);
-          peeranhaCommunityToken.payCommunityReward(periodRewardShares, userAddress, period);
+          uint16 per = period;  // ??????
+          (uint256 userReward, address contractAddress) = peeranhaCommunityToken.payCommunityReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward), per);
+          if (userReward > 0) {
+            IERC20MetadataUpgradeable(contractAddress).transfer(userAddress, userReward);
+          }
         }
       }
     }
