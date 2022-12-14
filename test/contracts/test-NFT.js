@@ -15,7 +15,9 @@ describe("Test NFT", function () {
 	it("Add achievement", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
-		await peeranhaUser.createUser(hashContainer[0]);
+		const signers = await ethers.getSigners();
+		
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 
 		await peeranhaUser.configureNewAchievement(111, 15, URIContainer[0], AchievementsType.Rating);
 		const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1)
@@ -35,7 +37,9 @@ describe("Test NFT", function () {
 	it("Add achievement/ Boundary test", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
-		await peeranhaUser.createUser(hashContainer[0]);
+		const signers = await ethers.getSigners();
+
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 
 		await peeranhaUser.configureNewAchievement(1, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranhaUser.configureNewAchievement(999999, 100, URIContainer[1], AchievementsType.Rating);
@@ -54,7 +58,9 @@ describe("Test NFT", function () {
 	it("Add achievement with 0 token pool", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
-		await peeranhaUser.createUser(hashContainer[0]);
+		const signers = await ethers.getSigners();
+
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 	
 		await expect(peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], AchievementsType.Rating))
 		.to.be.revertedWith('invalid_max_count');
@@ -63,7 +69,9 @@ describe("Test NFT", function () {
 	it("Add achievement with exceeded token pool", async function () {		// need?
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
-		await peeranhaUser.createUser(hashContainer[0]);
+		const signers = await ethers.getSigners();
+
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 	
 		await expect(peeranhaUser.configureNewAchievement(1000000, 15, URIContainer[0], AchievementsType.Rating))
 		.to.be.revertedWith('Max count of achievements must be less than 1 000 000');
@@ -72,8 +80,8 @@ describe("Test NFT", function () {
 	it("Add achievement without admin rights", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const signers = await ethers.getSigners();
-		await peeranhaUser.createUser(hashContainer[0]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 		const URIContainer = getURIContainer();
 	
 		await expect(peeranhaUser.connect(signers[1]).configureNewAchievement(100, 15, URIContainer[0], AchievementsType.Rating))
@@ -85,8 +93,8 @@ describe("Test NFT", function () {
 		const signers = await ethers.getSigners();
 		const URIContainer = getURIContainer();
 
-		await peeranhaUser.createUser(hashContainer[0]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 		await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
 
 		const tokensCount = await peeranhaNFT.balanceOf(peeranhaUser.deployTransaction.from);
@@ -99,8 +107,8 @@ describe("Test NFT", function () {
 		const signers = await ethers.getSigners();
 		const URIContainer = getURIContainer();
 
-		await peeranhaUser.createUser(hashContainer[0]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 		const tokensCount = await peeranhaNFT.balanceOf(peeranhaUser.deployTransaction.from);
 		await expect(await getInt(tokensCount)).to.equal(0);
@@ -113,8 +121,8 @@ describe("Test NFT", function () {
 		const signers = await ethers.getSigners();
 		const URIContainer = getURIContainer();
 
-		await peeranhaUser.createUser(hashContainer[0]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 
 		const tokensCount = await peeranhaNFT.balanceOf(peeranhaUser.deployTransaction.from);
 		await expect(await getInt(tokensCount)).to.equal(0);
@@ -126,10 +134,12 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
-		await peeranhaUser.createUser(hashContainer[1]);
+		const signers = await ethers.getSigners();
+
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
 		
 		const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1)
@@ -151,9 +161,10 @@ describe("Test NFT", function () {
 	it("Test add achievement after user achieved its requirements", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
+		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 
@@ -170,9 +181,10 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT (try double)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
+		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[1], AchievementsType.Rating);
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
@@ -189,9 +201,10 @@ describe("Test NFT", function () {
 	it("Test give 1st NFT low rating", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
+		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 1, 1);
@@ -208,9 +221,9 @@ describe("Test NFT", function () {
 		const URIContainer = getURIContainer();
 		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
@@ -242,10 +255,10 @@ describe("Test NFT", function () {
 		const signers = await ethers.getSigners();
 		const URIContainer = getURIContainer();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-		await peeranhaUser.connect(signers[2]).createUser(hashContainer[1]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(2, 15, URIContainer[1], AchievementsType.Rating);
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
@@ -274,9 +287,10 @@ describe("Test NFT", function () {
 	it("Test give NFTs for 2 achievements", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const URIContainer = getURIContainer();
+		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranhaUser.configureNewAchievement(5, 20, URIContainer[1], AchievementsType.Rating);
@@ -316,9 +330,9 @@ describe("Test NFT", function () {
 		const URIContainer = getURIContainer();
 		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
@@ -345,9 +359,9 @@ describe("Test NFT", function () {
 		const URIContainer = getURIContainer();
 		const signers = await ethers.getSigners();
 
-		await peeranhaUser.createUser(hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(hashContainer[0]);
-		await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 		await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], AchievementsType.Rating);
 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 10, 1);
