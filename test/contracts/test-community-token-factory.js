@@ -26,7 +26,7 @@ describe("Test community token factory", function () {
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 
 			await peeranhaTokenFactory.createNewCommunityToken(1, token.address, 100, 20);
-			const communityContract = await peeranhaTokenFactory.getCommunityToken(1, await peeranhaTokenFactory.getAddressLastCreatedContract(1));
+			const communityContract = await peeranhaTokenFactory.getCommunityToken(await peeranhaTokenFactory.getAddressLastCreatedContract(1), 1);
 
 			expect(communityContract).to.have.ownPropertyDescriptor('name');
 			expect(communityContract).to.have.ownPropertyDescriptor('symbol');
@@ -76,7 +76,7 @@ describe("Test community token factory", function () {
 
 			await peeranhaTokenFactory.createNewCommunityToken(1, token.address, 100, 20);
 			await peeranhaTokenFactory.updateCommunityRewardSettings(1, await peeranhaTokenFactory.getAddressLastCreatedContract(1), 20, 2);
-			const communityContract = await peeranhaTokenFactory.getCommunityToken(1, await peeranhaTokenFactory.getAddressLastCreatedContract(1));
+			const communityContract = await peeranhaTokenFactory.getCommunityToken(await peeranhaTokenFactory.getAddressLastCreatedContract(1), 1);
 
 			expect(communityContract.name).to.equal(await token.name());
 			expect(communityContract.symbol).to.equal(await token.symbol());

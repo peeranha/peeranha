@@ -505,6 +505,13 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get active users in period in community.
+    */
+    function getCommunityActiveUsersInPeriod(uint16 period, uint32 communityId) external view returns (address[] memory) {
+        return communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
+    }
+
+    /**
      * @dev Get current period.
     */
     function getPeriod() external view returns (uint16) {

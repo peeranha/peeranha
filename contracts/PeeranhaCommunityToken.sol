@@ -18,11 +18,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 
 
 contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransaction {  
-  ///
-  // ask:
-  // если пулл 0 call setTotalPeriodReward? (забыли вызвать)
-  // как узнать кто пополнил
-  ///
 
   // sumAccruedTokens -> free tokens (added - pool)
   // sumSpentTokens -> active tokens tokens (pools - give reward)
@@ -105,23 +100,29 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
     communityTokenContainer.periodPool[period] = totalPeriodReward;
   }
 
-  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 tokenReward, uint256 poolToken) private pure returns(uint256) {
-    if (tokenReward == 0 || periodRewardShares.totalRewardShares == 0) return 0;
+  function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) public view override returns(uint256) {
+    uint256 poolToken = getTotalPeriodReward(period);
+    uint256 userReward = getUserReward(periodRewardShares, ratingToReward * 1000, poolToken);
 
-    uint256 userReward = (poolToken * tokenReward);
-    userReward /= periodRewardShares.totalRewardShares;
     return userReward;
   }
 
-  function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 tokenReward, uint16 period) external override returns(uint256, address) {
-    uint256 poolToken = getTotalPeriodReward(period);
-    uint256 userReward = getUserReward(periodRewardShares, tokenReward * 1000, poolToken);
+  function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) external override returns(uint256, address) {
+    uint256 userReward = getUserCommunityReward(periodRewardShares, ratingToReward, period);
 
     communityTokenContainer.info.sumSpentTokens -= userReward;
     return (userReward, communityTokenContainer.info.contractAddress);
   }
 
-  function getCommunityToken() external view override returns (CommunityToken memory) {
+  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 poolToken) private pure returns(uint256) {
+    if (ratingToReward == 0 || periodRewardShares.totalRewardShares == 0) return 0;
+
+    uint256 userReward = (poolToken * ratingToReward);
+    userReward /= periodRewardShares.totalRewardShares;
+    return userReward;
+  }
+
+  function getCommunityTokenData() external view override returns (CommunityToken memory) {
     return communityTokenContainer.info;
   }
 }
