@@ -1055,8 +1055,8 @@ library PostLib  {
         address userAddr,
         bytes32 ipfsHash
     ) private {
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");      // todo test
-        require(uint256(getItemProperty(postCollection, uint8(PostProperties.Language), postId, replyId, commentId)) == uint256(language), "Error_its_original_language");  // todo test
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+        require(uint256(getItemProperty(postCollection, uint8(PostProperties.Language), postId, replyId, commentId)) != uint256(language), "Error_its_original_language");
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
         TranslationContainer storage translationContainer = self.translations[item];
@@ -1092,7 +1092,7 @@ library PostLib  {
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityAdmin,      // todo: add test
+            UserLib.ActionRole.CommunityAdmin,
             false
         );
     }
@@ -1333,27 +1333,6 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
-    }
-    
-    function getItemProperty(
-        PostCollection storage self,
-        uint8 propertyId,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId
-    ) public view returns (bytes32) {
-        PostContainer storage postContainer = getPostContainer(self, postId);
-
-        if (commentId != 0) {
-            CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, replyId, commentId);
-            return commentContainer.properties[propertyId];
-
-        } else if (replyId != 0) {
-            ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
-            return replyContainer.properties[propertyId];
-
-        }
-        return postContainer.properties[propertyId];
     }
 
     /// @notice Return property for item

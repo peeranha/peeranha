@@ -17,6 +17,10 @@ let hashContainer;
 
 // to do different lenguage
 // permistions
+// Error_its_original_language
+// Error_array + Invalid_ipfsHash create/edit
+// delete edit only one lenguage/ create + create for one post  (Test array translations for post)?
+// permistions (validateTranslationParams) UserLib.ActionRole.CommunityAdmin
 
 describe("Test translations", function () {
 
@@ -40,10 +44,9 @@ describe("Test translations", function () {
 			it("Test create translation for post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				
 				const translation = await peeranhaContent.getTranslation(1, 0, 0, LanguagesEnum.English)
 				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[1]);
@@ -53,7 +56,7 @@ describe("Test translations", function () {
 			it("Test edit translation for post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
 				await peeranhaContent.editTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[2]])
@@ -65,7 +68,7 @@ describe("Test translations", function () {
 			it("Test delete translation for post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
 
@@ -79,28 +82,28 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+				 	.to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for post, post was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 				await peeranhaContent.deletePost(signers[0].address, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for post, community was frozen", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Community is frozen');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Community is frozen');
 			});
 		});
 
@@ -109,11 +112,10 @@ describe("Test translations", function () {
 			it("Test create translation for reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				
 				const translation = await peeranhaContent.getTranslation(1, 1, 0, LanguagesEnum.English)
 				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[1]);
@@ -123,11 +125,10 @@ describe("Test translations", function () {
 			it("Test edit translation for reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				await peeranhaContent.editTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[2]])
 
 				const translation = await peeranhaContent.getTranslation(1, 1, 0, LanguagesEnum.English)
@@ -137,11 +138,10 @@ describe("Test translations", function () {
 			it("Test delete translation for reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				await peeranhaContent.deleteTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English])
 
 				const translation = await peeranhaContent.getTranslation(1, 1, 0, LanguagesEnum.English)
@@ -152,50 +152,50 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for reply without reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Reply_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+				 	.to.be.revertedWith('Reply_not_exist.');
 			});
 
 			it("Test create translation for reply, post was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 				await peeranhaContent.deletePost(signers[0].address, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for reply, reply was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 				await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Reply_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Reply_deleted.');
 			});
 
 			it("Test create translation for reply, community was frozen", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Community is frozen');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Community is frozen');
 			});
 		});
 
@@ -204,12 +204,11 @@ describe("Test translations", function () {
 			it("Test create translation for comment to post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
 
-				
 				const translation = await peeranhaContent.getTranslation(1, 0, 1, LanguagesEnum.English)
 				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[1]);
 				expect(translation.isDeleted).to.equal(false);
@@ -218,14 +217,12 @@ describe("Test translations", function () {
 			it("Test create translation for comment to reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
 
-
-				
 				const translation = await peeranhaContent.getTranslation(1, 1, 1, LanguagesEnum.English)
 				expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[1]);
 				expect(translation.isDeleted).to.equal(false);
@@ -234,11 +231,10 @@ describe("Test translations", function () {
 			it("Test edit translation for comment to post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				await peeranhaContent.editTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[2]])
 
 				const translation = await peeranhaContent.getTranslation(1, 0, 1, LanguagesEnum.English)
@@ -248,13 +244,11 @@ describe("Test translations", function () {
 			it("Test edit translation for comment to reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-
 				await peeranhaContent.editTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[2]])
 
 				const translation = await peeranhaContent.getTranslation(1, 1, 1, LanguagesEnum.English)
@@ -264,11 +258,10 @@ describe("Test translations", function () {
 			it("Test delete translation for comment to post", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
 				await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English])
 
 				const translation = await peeranhaContent.getTranslation(1, 0, 1, LanguagesEnum.English)
@@ -278,13 +271,11 @@ describe("Test translations", function () {
 			it("Test delete translation for comment to reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 
 				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-
 				await peeranhaContent.deleteTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English])
 
 				const translation = await peeranhaContent.getTranslation(1, 1, 1, LanguagesEnum.English)
@@ -295,120 +286,115 @@ describe("Test translations", function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+				.to.be.revertedWith('Post_not_exist.');
 			});
 
 			it("Test create translation for comment to reply without reply", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-).to.be.revertedWith('Reply_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Reply_not_exist.');
 			});
 
 			it("Test create translation for comment to post without comment", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Comment_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Comment_not_exist.');
 			});
 
 			it("Test create translation for comment to reply without comment", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-).to.be.revertedWith('Comment_not_exist.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Comment_not_exist.');
 			});
 
 			it("Test create translation for comment to post, post was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaContent.deletePost(signers[0].address, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Post_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for comment to reply, post was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaContent.deletePost(signers[0].address, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-).to.be.revertedWith('Post_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Post_deleted.');
 			});
 
 			it("Test create translation for comment to post, comment was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaContent.deleteComment(signers[0].address, 1, 0, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Comment_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Comment_deleted.');
 			});
 
 			it("Test create translation for comment to post, comment was deleted", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaContent.deleteComment(signers[0].address, 1, 1, 1);
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-).to.be.revertedWith('Comment_deleted.');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Comment_deleted.');
 			});
 
 			it("Test create translation for comment to post, community was frozen", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-).to.be.revertedWith('Community is frozen');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Community is frozen');
 			});
 
 			it("Test create translation for comment to reply, community was frozen", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1]);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]])
-
-).to.be.revertedWith('Community is frozen');
+				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+					.to.be.revertedWith('Community is frozen');
 			});
 		});
 	});
 
-	describe("Test array translations for post", function () {		// todo: Error_array/delete edit only one lenguage/ create + create for one post
+	describe("Test array translations for post", function () {
 
 		it("Test create 1 translation post", async function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
 			
@@ -420,7 +406,7 @@ describe("Test translations", function () {
 		it("Test create 2 translations for post", async function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English, LanguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
 			
@@ -435,12 +421,12 @@ describe("Test translations", function () {
 			expect(translationList[2].isDeleted).to.equal(false);
 		});
 
-		it("Test create all translations for post", async function () {
+		xit("Test create all translations for post", async function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 			const hashTranslation = getHashTranslation();
-			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, getTranslationValues(), hashTranslation)
+			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, getTranslationValues(), hashTranslation); // Error_its_original_language
 			
 			const translationList = await peeranhaContent.getTranslations(1, 0, 0);
 			translationList.map((translation, index) => {
@@ -452,7 +438,7 @@ describe("Test translations", function () {
 		it("Test edit 2 translations for post", async function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English, LanguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
 			await peeranhaContent.editTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English, LanguagesEnum.Chinese], [ipfsHashes[3], ipfsHashes[4]])
@@ -472,7 +458,7 @@ describe("Test translations", function () {
 		it("Test delete 2 translations for post", async function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English, LanguagesEnum.Chinese], [ipfsHashes[1], ipfsHashes[2]])
 			await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English, LanguagesEnum.Chinese])

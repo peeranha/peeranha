@@ -15,7 +15,6 @@
     "test-forum-vote": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-forum-vote.js && node scripts/change-env-values.js 0",
     "test-forum": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-forum.js && node scripts/change-env-values.js 0",
     "test-token": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-1token.js && node scripts/change-env-values.js 0",
-    "test-local": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-local.js && node scripts/change-env-values.js 0",
     "test-community-permissions": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-community-permissions.js && node scripts/change-env-values.js 0",
     "test-dispatcher": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-dispatcher.js && node scripts/change-env-values.js 0",
     "compile": "node scripts/change-env-values.js 0 && npx hardhat compile",
