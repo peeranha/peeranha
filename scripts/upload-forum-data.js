@@ -173,7 +173,7 @@ async function main() {
         const createUser = async (wallet, user) => {
           return await peeranha
             .connect(wallet)
-            .createUser(await getBytes32FromData(user));
+            .createUser(wallet.address, await getBytes32FromData(user));
         };
 
         return await runWithRetry(() => createUser(newWallet, user));

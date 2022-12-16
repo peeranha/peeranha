@@ -5,8 +5,11 @@ async function main() {
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
+  const signers = await ethers.getSigners();
+
   //const txObj = await peeranhaUser.giveCommunityModeratorPermission(
   const txObj = await peeranhaUser.giveCommunityAdminPermission(
+    signers[0].address, // sender address
     "", // user address
     0   // community admin
   );
