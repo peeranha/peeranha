@@ -1060,6 +1060,8 @@ library PostLib  {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
         TranslationContainer storage translationContainer = self.translations[item];
+        require(CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_already_exist.");
+
         translationContainer.info.ipfsDoc.hash = ipfsHash;
         translationContainer.info.author = userAddr;
         translationContainer.info.postTime = CommonLib.getTimestamp();
@@ -1116,9 +1118,9 @@ library PostLib  {
         Language[] memory languages,
         bytes32[] memory ipfsHashs
     ) internal {
+        require(languages.length == ipfsHashs.length && languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
-        require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
             initTranslation(self, postCollection, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
@@ -1143,9 +1145,9 @@ library PostLib  {
         Language[] memory languages,
         bytes32[] memory ipfsHashs
     ) internal {
+        require(languages.length == ipfsHashs.length && languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
-        require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
             require(!CommonLib.isEmptyIpfs(ipfsHashs[i]), "Invalid_ipfsHash");
             TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, languages[i]);
@@ -1172,6 +1174,7 @@ library PostLib  {
         uint8 commentId,
         Language[] memory languages
     ) internal {
+        require(languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         for (uint32 i; i < languages.length; i++) {
@@ -1426,8 +1429,8 @@ library PostLib  {
     ) private view returns (TranslationContainer storage) {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
         TranslationContainer storage translationContainer = self.translations[item];
-        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_not_exist."); // todo: tests
-        require(!translationContainer.info.isDeleted, "Translation_deleted.");                         // todo: tests
+        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_not_exist.");
+        require(!translationContainer.info.isDeleted, "Translation_deleted.");
         
         return translationContainer;
     }

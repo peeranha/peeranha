@@ -2,7 +2,7 @@ const { disableExperimentalFragmentVariables } = require("@apollo/client");
 const { expect } = require("chai");
 const { 
 	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer,
-	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
+	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime, EmptyIpfs,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
@@ -137,7 +137,7 @@ describe("Test post", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await expect(peeranhaContent.createPost(signers[0].address, 1, '0x0000000000000000000000000000000000000000000000000000000000000000', PostTypeEnum.ExpertPost, [1]))
+			await expect(peeranhaContent.createPost(signers[0].address, 1, EmptyIpfs, PostTypeEnum.ExpertPost, [1]))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
@@ -374,7 +374,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 
-			await expect( peeranhaContent.createReply(signers[0].address, 1, 0, '0x0000000000000000000000000000000000000000000000000000000000000000', false))
+			await expect( peeranhaContent.createReply(signers[0].address, 1, 0, EmptyIpfs, false))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
@@ -528,7 +528,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
 			
-			await expect(peeranhaContent.createComment(signers[0].address, 1, 1, '0x0000000000000000000000000000000000000000000000000000000000000000'))
+			await expect(peeranhaContent.createComment(signers[0].address, 1, 1, EmptyIpfs))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
@@ -824,7 +824,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranhaContent.editPost(signers[0].address, 1, '0x0000000000000000000000000000000000000000000000000000000000000000', [], 1, PostTypeEnum.ExpertPost))
+			await expect(peeranhaContent.editPost(signers[0].address, 1, EmptyIpfs, [], 1, PostTypeEnum.ExpertPost))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
@@ -917,7 +917,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
 
-			await expect(peeranhaContent.editReply(signers[0].address, 1, 1, '0x0000000000000000000000000000000000000000000000000000000000000000', false))
+			await expect(peeranhaContent.editReply(signers[0].address, 1, 1, EmptyIpfs, false))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 		
@@ -1043,7 +1043,7 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
 
-			await expect(peeranhaContent.editComment(signers[0].address, 1, 0, 1, '0x0000000000000000000000000000000000000000000000000000000000000000'))
+			await expect(peeranhaContent.editComment(signers[0].address, 1, 0, 1, EmptyIpfs))
 			.to.be.revertedWith('Invalid_ipfsHash');
 		});
 
