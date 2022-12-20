@@ -1151,6 +1151,7 @@ library PostLib  {
         for (uint32 i; i < languages.length; i++) {
             require(!CommonLib.isEmptyIpfs(ipfsHashs[i]), "Invalid_ipfsHash");
             TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, languages[i]);
+            translationContainer.info.author = userAddr;
             translationContainer.info.ipfsDoc.hash = ipfsHashs[i];
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
