@@ -4,10 +4,10 @@ const {
 	createTags, parseEther, availableBalanceOf, getInt,
 	LanguagesEnum, fraction, periodUserReward, PeriodTime, PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply,
 	QuickReplyTime, DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
-  ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
-  FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
-  AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DISPATCHER_ROLE,
+  	ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
+  	FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
+  	AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DISPATCHER_ROLE
 } = require('./utils');
 
 
@@ -108,7 +108,7 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 	
 			await expect(peeranhaUser.connect(signers[2]).giveCommunityModeratorPermission(signers[2].address, signers[3].address, 1))
 			.to.be.revertedWith('not_allowed_admin_or_comm_admin');
@@ -138,7 +138,7 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaUser.connect(signers[2]).giveCommunityModeratorPermission(signers[2].address, signers[3].address, 1))
 			.to.be.revertedWith('not_allowed_admin_or_comm_admin');
@@ -195,18 +195,18 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 	
-			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-			.to.be.revertedWith('not_allowed_admin_or_comm_moderator');
+			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English))
+			.to.be.revertedWith('Not_allowed_edit_not_author');
 	
 			await expect(peeranhaUser.connect(signers[3]).revokeCommunityModeratorPermission(signers[0].address, signers[2].address, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaUser.connect(signers[1]).revokeCommunityModeratorPermission(signers[0].address, signers[2].address, 1))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
-			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-			.to.be.revertedWith('not_allowed_admin_or_comm_moderator');
+			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English))
+			.to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 	})
 
@@ -274,10 +274,10 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 	
-			await expect(peeranhaContent.connect(signers[2]).createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]))
+			await expect(peeranhaContent.connect(signers[2]).createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 
-			await expect(peeranhaContent.connect(signers[1]).createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]))
+			await expect(peeranhaContent.connect(signers[1]).createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const post = await peeranhaContent.getPost(1);
@@ -295,12 +295,12 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await expect(peeranhaContent.connect(signers[3]).editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost))
+			await expect(peeranhaContent.connect(signers[3]).editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 
-			await expect(peeranhaContent.connect(signers[1]).editPost(signers[0].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost))
+			await expect(peeranhaContent.connect(signers[1]).editPost(signers[0].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const post = await peeranhaContent.getPost(1);
@@ -318,7 +318,7 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).deletePost(signers[0].address, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
@@ -326,7 +326,7 @@ describe("Test dispatcher", function () {
 			await expect(peeranhaContent.connect(signers[1]).deletePost(signers[0].address, 1))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
-			await expect(peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)).to.be.revertedWith('Post_deleted.');
+			await expect(peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)).to.be.revertedWith('Post_deleted.');
 		});
 
 		it("Create reply with dispatcher", async function() {
@@ -339,11 +339,11 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await expect(peeranhaContent.connect(signers[3]).createReply(signers[0].address, 1, 0, hashContainer[1], false))
+			await expect(peeranhaContent.connect(signers[3]).createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaContent.connect(signers[1]).createReply(signers[0].address, 1, 0, hashContainer[1], false))
+			await expect(peeranhaContent.connect(signers[1]).createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -360,13 +360,13 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
-			await expect(peeranhaContent.connect(signers[3]).editReply(signers[0].address, 1, 1, hashContainer[2], false))
+			await expect(peeranhaContent.connect(signers[3]).editReply(signers[0].address, 1, 1, hashContainer[2], false, LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaContent.connect(signers[1]).editReply(signers[0].address, 1, 1, hashContainer[2], false))
+			await expect(peeranhaContent.connect(signers[1]).editReply(signers[0].address, 1, 1, hashContainer[2], false, LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -385,16 +385,16 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).deleteReply(signers[0].address, 1, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).deleteReply(signers[0].address, 1, 1))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 			
-			await expect(peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1])).to.be.revertedWith('Reply_deleted.');
+			await expect(peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.English)).to.be.revertedWith('Reply_deleted.');
 		});
 
 		it("Create comment with dispatcher", async function() {
@@ -407,11 +407,11 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await expect(peeranhaContent.connect(signers[3]).createComment(signers[0].address, 1, 0, hashContainer[1]))
+			await expect(peeranhaContent.connect(signers[3]).createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaContent.connect(signers[1]).createComment(signers[0].address, 1, 0, hashContainer[1]))
+			await expect(peeranhaContent.connect(signers[1]).createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const comment = await peeranhaContent.getComment(1, 0, 1);
@@ -428,13 +428,13 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 
-			await expect(peeranhaContent.connect(signers[3]).editComment(signers[0].address, 1, 0, 1, hashContainer[2]))
+			await expect(peeranhaContent.connect(signers[3]).editComment(signers[0].address, 1, 0, 1, hashContainer[2], LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaContent.connect(signers[1]).editComment(signers[0].address, 1, 0, 1, hashContainer[2]))
+			await expect(peeranhaContent.connect(signers[1]).editComment(signers[0].address, 1, 0, 1, hashContainer[2], LanguagesEnum.English))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
 			const comment = await peeranhaContent.getComment(1, 0, 1);
@@ -453,16 +453,16 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).deleteComment(signers[0].address, 1, 0, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).deleteComment(signers[0].address, 1, 0, 1))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 			
-			await expect(peeranhaContent.editComment(signers[0].address, 1, 0, 1, hashContainer[2])).to.be.revertedWith('Comment_deleted.');
+			await expect(peeranhaContent.editComment(signers[0].address, 1, 0, 1, hashContainer[2], LanguagesEnum.English)).to.be.revertedWith('Comment_deleted.');
 		});
 
 		it("Change status best reply with dispatcher", async function() {
@@ -476,9 +476,9 @@ describe("Test dispatcher", function () {
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).changeStatusBestReply(signers[0].address, 1, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
@@ -500,7 +500,7 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 	
 			await expect(peeranhaContent.connect(signers[4]).voteItem(signers[0].address, 1, 0, 0, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
@@ -523,12 +523,12 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
 	
 			await expect(peeranhaContent.connect(signers[3]).createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-			.to.be.revertedWith('not_allowed_not_dispatcher');
+				.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-			.not.to.be.revertedWith('not_allowed_not_dispatcher');
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
 			
 			const translation = await peeranhaContent.getTranslation(1, 0, 0, LanguagesEnum.English)
@@ -547,41 +547,37 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
 	
 			await expect(peeranhaContent.connect(signers[3]).editTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[2]]))
-			.to.be.revertedWith('not_allowed_not_dispatcher');
+				.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).editTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[2]]))
-			.not.to.be.revertedWith('not_allowed_not_dispatcher');
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
 			const translation = await peeranhaContent.getTranslation(1, 0, 0, LanguagesEnum.English)
 			expect(translation.ipfsDoc.hash).to.equal(ipfsHashes[2]);
 		});
 
-		it("Edit translation with dispatcher", async function() {
+		it("Delete translation with dispatcher", async function() {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(3);
 			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
+
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 	
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-	
-			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
-	
-			await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English])
-			
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
+			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+
 			await expect(peeranhaContent.connect(signers[3]).deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English]))
-			.to.be.revertedWith('not_allowed_not_dispatcher');
+				.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English]))
-			.not.to.be.revertedWith('not_allowed_not_dispatcher');
-	
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
+
 			const translation = await peeranhaContent.getTranslation(1, 0, 0, LanguagesEnum.English)
 			expect(translation.isDeleted).to.equal(true);
 		});
@@ -623,7 +619,7 @@ describe("Test dispatcher", function () {
 			await expect(peeranhaCommunity.connect(signers[1]).createCommunity(signers[0].address, ipfsHashes[0], createTags(5)))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
-			await expect(peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]))
+			await expect(peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English))
 			.not.to.be.revertedWith('Community does not exist');
 		});
 

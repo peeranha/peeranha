@@ -7,7 +7,7 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, PROTOCOL_ADMIN_ROLE, BOT_ROLE,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, PROTOCOL_ADMIN_ROLE, BOT_ROLE, LanguagesEnum
 } = require('./utils');
 
 describe("Test bot", function () {
@@ -25,7 +25,7 @@ describe("Test bot", function () {
 			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
@@ -45,7 +45,7 @@ describe("Test bot", function () {
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle'))
 			.not.to.be.revertedWith('not_allowed_not_bot');
 
@@ -69,7 +69,7 @@ describe("Test bot", function () {
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
 
@@ -93,7 +93,7 @@ describe("Test bot", function () {
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
 
