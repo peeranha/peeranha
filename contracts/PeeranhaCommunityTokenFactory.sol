@@ -20,7 +20,8 @@ import "./base/NativeMetaTransaction.sol";
 
 contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, NativeMetaTransaction {
   struct FactoryData {  // name
-    mapping(uint32 => IPeeranhaCommunityToken[]) peeranhaCommunitiesToken;
+    mapping(uint32 => IPeeranhaCommunityToken[]) peeranhaCommunitiesToken;  // communityId
+    mapping(uint16 => bool) isSetPool;                                      // period
     uint32[] factoryCommunitiesId;    // todo: uinttest 
     TokenLib.StatusRewardContainer statusRewardContainer;
     IPeeranhaUser peeranhaUser;
@@ -96,6 +97,8 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   function setTotalPeriodRewards(uint16 period) external override {
     require(factoryData.peeranhaUser.isProtocolAdmin(_msgSender()), "not_allowed_not_protocal_admin");  // tests
 
+    require(!factoryData.isSetPool[period], "pools_already_set");    // todo: tests
+    factoryData.isSetPool[period] = true;
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
       RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, factoryData.factoryCommunitiesId[i]);
@@ -114,11 +117,12 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   function getCommunityRewards(uint16 period) external override {    // how check is exist reward?
     address userAddress = _msgSender();
     require(!factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid, "reward_already_picked_up.");
-    require(RewardLib.getPeriod() > period + 1, "period_not_ended");
+    require(factoryData.isSetPool[period], "pool_not_set");    // todo: tests
     factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid = true;
 
     uint32[] memory rewardCommunities = factoryData.peeranhaUser.getUserRewardCommunities(userAddress, period);
     uint256 rewardCommunitiesLength = rewardCommunities.length;
+    bool isExistReward;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
       IPeeranhaCommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(rewardCommunities[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
@@ -132,10 +136,13 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
           (uint256 userReward, address contractAddress) = peeranhaCommunityToken.payCommunityReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward), per);
           if (userReward > 0) {
             IERC20MetadataUpgradeable(contractAddress).transfer(userAddress, userReward);
+            isExistReward = true;
           }
         }
       }
     }
+
+    require(isExistReward, "no_reward");    // todo: tests
     emit GetCommunityReward(userAddress, period);
   }
 
