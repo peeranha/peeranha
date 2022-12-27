@@ -11,6 +11,7 @@ const {
   USERLIB_ADDRESS,
   COMMUNITY_ADDRESS,
   CONTENT_ADDRESS,
+  FACTORY_ADDRESS,
   IPFS_API_URL_THE_GRAPH,
   INFURA_API_KEY,
 } = require("../env.json");
@@ -106,7 +107,10 @@ const testDocumentating = {
 
 async function main() {
   // await contentFunctions();
-  await userFunctions();
+  // await userFunctions();
+  // await tokenFactoryFunctions();
+  // await communityFunctions();
+  await communityTokenFunctions();
 }
 
 async function userFunctions() {
@@ -116,11 +120,12 @@ async function userFunctions() {
 		}
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+  const signers = await ethers.getSigners();
 
-  // const txObj = await peeranhaUser.createUser(await getBytes32FromData(testAccount));
+  const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
-  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -136,6 +141,30 @@ async function communityFunctions() {
   const signers = await ethers.getSigners();
 
   const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
+
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
+}
+
+async function tokenFactoryFunctions() {
+  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
+  const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(FACTORY_ADDRESS);
+
+  const txObj = await peeranhaCommunityTokenFactory.createNewCommunityToken(1, TOKEN_ADDRESS, 200, 5);
+
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
+}
+
+async function communityTokenFunctions() {
+  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityToken");
+  const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(/* community token address */);
+
+  const txObj = await peeranhaCommunityTokenFactory.addBalance(200);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);

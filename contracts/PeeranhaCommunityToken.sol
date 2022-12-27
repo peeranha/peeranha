@@ -21,15 +21,15 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
 
   // sumAccruedTokens -> free tokens (added - pool)
   // sumSpentTokens -> active tokens tokens (pools - give reward)
+  // frezeTokens - not taked pool
   struct CommunityToken {
     string name;
     string symbol;
-    address contractAddress;
+    address tokenAddress;
     uint256 maxRewardPerPeriod;
     uint256 activeUsersInPeriod;
     uint256 maxRewardPerUser;
-    // uint256 sumAccruedTokens;   // need?
-    uint256 sumSpentTokens;
+    uint256 frezeTokens;
     uint256 createTime;
     address peeranhaCommunityTokenFactoryAddress;
   }
@@ -41,13 +41,15 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
 
   CommunityTokenContainer communityTokenContainer;
 
-  constructor(address contractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, address peeranhaCommunityTokenFactoryAddress) {
-    if (contractAddress == address(0))
-      communityTokenContainer.info.contractAddress = address(0x0000000000000000000000000000000000001010); // chack Address !
+  event AddBalance(uint256 indexed amount);   // name
+
+  constructor(address tokenAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod, address peeranhaCommunityTokenFactoryAddress) {
+    if (tokenAddress == address(0))
+      communityTokenContainer.info.tokenAddress = address(0x0000000000000000000000000000000000001010); // chack Address !
     else
-      communityTokenContainer.info.contractAddress = contractAddress;
-    communityTokenContainer.info.name = IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).name();
-    communityTokenContainer.info.symbol = IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).symbol();
+      communityTokenContainer.info.tokenAddress = tokenAddress;
+    communityTokenContainer.info.name = IERC20MetadataUpgradeable(communityTokenContainer.info.tokenAddress).name();
+    communityTokenContainer.info.symbol = IERC20MetadataUpgradeable(communityTokenContainer.info.tokenAddress).symbol();
     communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
     communityTokenContainer.info.activeUsersInPeriod = activeUsersInPeriod;
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
@@ -66,18 +68,24 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
     return NativeMetaTransaction._msgSender();
   }
 
-  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) public override {
+  function addBalance(uint256 amount) external {  // name
+    address owner = _msgSender();
+    IERC20Upgradeable(communityTokenContainer.info.tokenAddress).transferFrom(owner, address(this), amount);
+
+    emit AddBalance(amount);
+  }
+
+  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
     communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
     communityTokenContainer.info.activeUsersInPeriod = activeUsersInPeriod;
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerPeriod / activeUsersInPeriod;
   }
 
   function getBalance() public view override returns(uint256) {   // public?
-    uint256 balance;
-    balance = IERC20Upgradeable(communityTokenContainer.info.contractAddress).balanceOf(communityTokenContainer.info.peeranhaCommunityTokenFactoryAddress);
+    uint256 balance = IERC20Upgradeable(communityTokenContainer.info.tokenAddress).balanceOf(address(this));
+    require(balance >= communityTokenContainer.info.frezeTokens, "error_balance"); // todo: test??
 
-    require(balance >= communityTokenContainer.info.sumSpentTokens, "error_balance"); ////
-    return balance - communityTokenContainer.info.sumSpentTokens;
+    return balance - communityTokenContainer.info.frezeTokens;
   }
 
   // get pool
@@ -89,14 +97,14 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
   function setTotalPeriodReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
     require(_msgSender() == communityTokenContainer.info.peeranhaCommunityTokenFactoryAddress, "only_community_token_factory_can_call_this_action");
 
-    uint256 totalPeriodReward = communityTokenContainer.info.maxRewardPerPeriod * 10 ** IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).decimals();
+    uint256 totalPeriodReward = communityTokenContainer.info.maxRewardPerPeriod * 10 ** IERC20MetadataUpgradeable(communityTokenContainer.info.tokenAddress).decimals();
     if (periodRewardShares.activeUsersInPeriod.length <= communityTokenContainer.info.activeUsersInPeriod) {
-      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityTokenContainer.info.maxRewardPerUser * 10 ** IERC20MetadataUpgradeable(communityTokenContainer.info.contractAddress).decimals();   // min?
+      uint256 maxPeriodRewardPerUser = periodRewardShares.activeUsersInPeriod.length * communityTokenContainer.info.maxRewardPerUser * 10 ** IERC20MetadataUpgradeable(communityTokenContainer.info.tokenAddress).decimals();   // min?
       totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardPerUser);
     }
     totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getBalance());
+    communityTokenContainer.info.frezeTokens += totalPeriodReward;  // todo: tests
     
-    communityTokenContainer.info.sumSpentTokens += totalPeriodReward;
     communityTokenContainer.periodPool[period] = totalPeriodReward;
   }
 
@@ -107,11 +115,13 @@ contract PeeranhaCommunityToken is IPeeranhaCommunityToken, NativeMetaTransactio
     return userReward;
   }
 
-  function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) external override returns(uint256, address) {
+  function payCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, address userAddress, uint32 ratingToReward, uint16 period) external override {
     uint256 userReward = getUserCommunityReward(periodRewardShares, ratingToReward, period);
 
-    communityTokenContainer.info.sumSpentTokens -= userReward;
-    return (userReward, communityTokenContainer.info.contractAddress);
+    if (userReward > 0) {
+      IERC20MetadataUpgradeable(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
+      communityTokenContainer.info.frezeTokens -= userReward;   // todo: tests
+    }
   }
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 poolToken) private pure returns(uint256) {
