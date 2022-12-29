@@ -227,10 +227,12 @@ library PostLib  {
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
 
-          for (uint16 i = 1; i <= countReplies; i++) {
-            replyContainer = getReplyContainer(postContainer, i);
-            require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
-                "Users can not publish 2 replies for expert and common posts.");
+          if (userAddr != CommonLib.BOT_ADDRESS) {
+            for (uint16 i = 1; i <= countReplies; i++) {
+                replyContainer = getReplyContainer(postContainer, i);
+                require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
+                    "Users can not publish 2 replies for expert and common posts.");
+            }
           }
         }
 
