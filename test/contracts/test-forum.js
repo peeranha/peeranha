@@ -707,12 +707,12 @@ describe("Test post", function () {
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
 
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaContent.createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranhaContent.connect(signers[1]).editPost(1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
 				to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 
@@ -744,12 +744,12 @@ describe("Test post", function () {
 			const ipfsHashes = getHashesContainer(2);
 			const signers = await ethers.getSigners();
 
-			await peeranhaUser.createUser(hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(hashContainer[1]);
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaCommunity.createCommunity(ipfsHashes[0], createTags(5));
-			await peeranhaContent.connect(signers[1]).createPost(1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await expect(peeranhaContent.editPost(1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await expect(peeranhaContent.editPost(signers[1].address, 1, hashContainer[1], [2], 2, PostTypeEnum.CommonPost)).
 				to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 
@@ -1272,10 +1272,14 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			const postOld = await peeranhaContent.getPost(1);
+			expect(postOld.deletedReplyCount).to.equal(0);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
 			const reply = await peeranhaContent.getReply(1, 1);
 			expect(reply.isDeleted).to.equal(true);
+			const post = await peeranhaContent.getPost(1);
+			expect(post.deletedReplyCount).to.equal(1);
 		});
 
 		it("Test delete reply by not registered user", async function () {

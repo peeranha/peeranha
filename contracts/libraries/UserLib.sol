@@ -157,6 +157,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
@@ -190,6 +191,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -496,7 +498,7 @@ library UserLib {
     return user;
   }
 
-  function getRatingAndRatingForAction(
+  function getRatingAndRatingForAction( // TODO getRatingAndRatingForAction -> getRatingAndEnergyForAction
     address actionCaller,
     address dataUser,
     Action action
