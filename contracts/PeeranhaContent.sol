@@ -341,7 +341,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     // Used for unit tests
-    function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) public view returns (address[] memory) {
+    /*function getVotedUsers(uint256 postId, uint16 replyId, uint8 commentId) public view returns (address[] memory) {
         address[] memory votedUsers;
         PostLib.PostContainer storage postContainer = PostLib.getPostContainer(posts, postId);
 
@@ -353,5 +353,5 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
             votedUsers = postContainer.votedUsers;
 
         return votedUsers;
-    }
+    }*/
 }
