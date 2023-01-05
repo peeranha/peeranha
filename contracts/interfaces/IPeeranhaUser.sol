@@ -18,6 +18,7 @@ interface IPeeranhaUser {
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) external view;
     function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);
     function getPeriodRewardShares(uint16 period) external view returns(RewardLib.PeriodRewardShares memory);
+    function getPeriodCommunityRewardShares(uint16 period, uint32 communityId) external view returns(RewardLib.PeriodRewardShares memory);
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external view returns(uint32[] memory);
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external;
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) external;

@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 
 import "./libraries/UserLib.sol";
+import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
@@ -22,14 +22,13 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
-    
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    RewardLib.CommunityReward communityReward;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -109,6 +108,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function getPeriodRewardShares(uint16 period) public view override returns(RewardLib.PeriodRewardShares memory) {
         return UserLib.getPeriodRewardShares(userContext, period);
+    }
+
+    function getPeriodCommunityRewardShares(uint16 period, uint32 communityId) public view override returns(RewardLib.PeriodRewardShares memory) {
+        return UserLib.getPeriodRewardShares(communityReward, period, communityId);
     }
 
     /**
@@ -352,10 +355,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
-    
-    // TODO: Why is it commented? Remove this code if not needed.
     /**
-     * @dev Get information about user rewards. (Rating to reward and penalty)
+     * @dev Get information about user rewards. (Rating to reward and penalty) Need for unitTests
      *
      * Requirements:
      *
@@ -364,14 +365,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }*/
-
-    // TODO: Why is it commented? Remove this code if not needed.
-    /**
-     * @dev Get information abour sum rating to reward all users
-     */
-    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
-        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }*/
     
     /**
@@ -385,7 +378,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, userAddr, rating, communityId);
     }
 
     /**
@@ -399,7 +392,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUsersRating(userContext, usersRating, communityId);
+        UserLib.updateUsersRating(userContext, usersRating, communityReward, communityId);
     }
 
     /**
@@ -512,6 +505,13 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get active users in period in community.
+    */
+    function getCommunityActiveUsersInPeriod(uint16 period, uint32 communityId) external view returns (address[] memory) {
+        return communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
+    }
+
+    /**
      * @dev Get current period.
     */
     function getPeriod() external view returns (uint16) {
@@ -524,7 +524,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, userAddr, rating, communityId);
     }*/
 
     // Used for unit tests

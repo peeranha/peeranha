@@ -1,11 +1,10 @@
 const { expect } = require("chai");
 const {
 	wait, getBalance, availableBalanceOf, getInt, createPeerenhaAndTokenContract, getHashContainer, getUserReward, parseEther, getOwnerMinted, getTotalSupply,
-	periodUserReward, PeriodTime, fraction, setRetingOnePeriod, ratingChanges,  activeIn1st2nd3rdPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, ratingChangesSkipPeriod, poolToken,
+	periodUserReward, PeriodTime, fraction, setRetingOnePeriod, ratingChanges,  activeIn1st2nd3rdPeriod, twiceChengeRatingIn1Period, twiceChengeRatingIn2NDPeriod, ratingChangesSkipPeriod, poolToken, periodRewardCoefficient,
 } = require('./utils');
 
 ///
-// to do: active users
 // active in 2 community
 // reduce reward 52 periods?
 // несколько обновлений рейтинга в период!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! twiceChengeRatingIn1Period... (в 1-й период готово)
@@ -37,9 +36,16 @@ describe("Test wallet", function () {
 			
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 			const ratingToReward2User = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods2User[0], 1);
+			const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+			const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+			const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+			
 			expect(ratingToReward).to.equal(60);
 			expect(ratingToReward2User).to.equal(50);
 			expect(rewardPeriods[0]).to.equal(rewardPeriods2User[0]);
+			expect(activeUsers.length).to.equal(2);
+			expect(periodRewardShares.totalRewardShares).to.equal(50 * periodRewardCoefficient + 60 * periodRewardCoefficient);
+			expect(periodRewardCommunityShares.totalRewardShares).to.equal(50 * periodRewardCoefficient + 60 * periodRewardCoefficient);
 
 			await token.claimReward(signers[0].address, rewardPeriods[0]);
 			const balance = await getBalance(token, peeranhaUser.deployTransaction.from);
@@ -62,19 +68,22 @@ describe("Test wallet", function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 				const signers = await ethers.getSigners();
-		
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 		
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings, 1);
-
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 				expect(userPeriodRating.ratingToReward).to.equal(result.ratingToReward);
 				expect(userPeriodRating.penalty).to.equal(result.penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards);
 			}).retries(3);
 		}
 
@@ -85,7 +94,7 @@ describe("Test wallet", function () {
 				const signers = await ethers.getSigners();
 
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		
+
 		 		await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 
@@ -97,8 +106,13 @@ describe("Test wallet", function () {
 				expect(userPeriodRating.ratingToReward).to.equal(result.ratingToReward);
 				expect(userPeriodRating.penalty).to.equal(result.penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards);
 			}).retries(5);
 		}
 
@@ -107,9 +121,8 @@ describe("Test wallet", function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 				const signers = await ethers.getSigners();
-
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		
+
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
 				
 				await wait(PeriodTime);
@@ -127,11 +140,19 @@ describe("Test wallet", function () {
 				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
 				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards[0]);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards[0]);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards[0]);
 				
-				const periodRewardShares2 = await peeranhaUser.getPeriodReward(rewardPeriods[1]);
-				expect(periodRewardShares2).to.equal(periodRewards[1]);
+				const activeUsers2 = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[1]);
+				const periodRewardCommunityShares2 = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[1], 1);
+				const periodRewardShares2 = await peeranhaUser.getPeriodRewardShares(rewardPeriods[1]);
+				expect(activeUsers2.length).to.equal(1);
+				expect(periodRewardCommunityShares2.totalRewardShares).to.equal(periodRewards[1]);
+				expect(periodRewardShares2.totalRewardShares).to.equal(periodRewards[1]);
 			});
 		}
 
@@ -140,11 +161,10 @@ describe("Test wallet", function () {
 				const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
 				const hashContainer = getHashContainer();
 				const signers = await ethers.getSigners();
-
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		
+
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[0], 1);
-				
+
 				await wait(PeriodTime);
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 
@@ -167,14 +187,26 @@ describe("Test wallet", function () {
 				expect(userPeriodRating2.ratingToReward).to.equal(results[2].ratingToReward);
 				expect(userPeriodRating2.penalty).to.equal(results[2].penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards[0]);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards[0]);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards[0]);
 				
-				const periodRewardShares1 = await peeranhaUser.getPeriodReward(rewardPeriods[1]);
-				expect(periodRewardShares1).to.equal(periodRewards[1]);
+				const activeUsers1 = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[1]);
+				const periodRewardCommunityShares1 = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[1], 1);
+				const periodRewardShares1 = await peeranhaUser.getPeriodRewardShares(rewardPeriods[1]);
+				expect(activeUsers1.length).to.equal(1);
+				expect(periodRewardCommunityShares1.totalRewardShares).to.equal(periodRewards[1]);
+				expect(periodRewardShares1.totalRewardShares).to.equal(periodRewards[1]);
 
-				const periodRewardShares2 = await peeranhaUser.getPeriodReward(rewardPeriods[2]);
-				expect(periodRewardShares2).to.equal(periodRewards[2]);
+				const activeUsers2 = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[2]);
+				const periodRewardCommunityShares2 = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[2], 1);
+				const periodRewardShares2 = await peeranhaUser.getPeriodRewardShares(rewardPeriods[2]);
+				expect(activeUsers2.length).to.equal(1);
+				expect(periodRewardCommunityShares2.totalRewardShares).to.equal(periodRewards[2]);
+				expect(periodRewardShares2.totalRewardShares).to.equal(periodRewards[2]);
 			}).retries(2);
 		}
 
@@ -204,11 +236,19 @@ describe("Test wallet", function () {
 				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
 				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards[0]);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards[0]);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards[0]);
 				
-				const periodRewardShares2 = await peeranhaUser.getPeriodReward(rewardPeriods[1]);
-				expect(periodRewardShares2).to.equal(periodRewards[1]);
+				const activeUsers2 = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[1]);
+				const periodRewardCommunityShares2 = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[1], 1);
+				const periodRewardShares2 = await peeranhaUser.getPeriodRewardShares(rewardPeriods[1]);
+				expect(activeUsers2.length).to.equal(1);
+				expect(periodRewardCommunityShares2.totalRewardShares).to.equal(periodRewards[1]);
+				expect(periodRewardShares2.totalRewardShares).to.equal(periodRewards[1]);
 			}).retries(3);
 		}
 
@@ -236,16 +276,24 @@ describe("Test wallet", function () {
 				expect(userPeriodRating1.ratingToReward).to.equal(results[1].ratingToReward);
 				expect(userPeriodRating1.penalty).to.equal(results[1].penalty);
 
-				const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-				expect(periodRewardShares).to.equal(periodRewards[0]);
+				const activeUsers = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[0]);
+				const periodRewardCommunityShares = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[0], 1);
+				const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+				expect(activeUsers.length).to.equal(1);
+				expect(periodRewardCommunityShares.totalRewardShares).to.equal(periodRewards[0]);
+				expect(periodRewardShares.totalRewardShares).to.equal(periodRewards[0]);
 
-				const periodReward2 = await peeranhaUser.getPeriodReward(rewardPeriods[1]);
-				expect(periodReward2).to.equal(periodRewards[1]);
+				const activeUsers2 = await peeranhaUser.getActiveUsersInPeriod(rewardPeriods[1]);
+				const periodRewardCommunityShares2 = await peeranhaUser.getPeriodCommunityRewardShares(rewardPeriods[1], 1);
+				const periodReward2 = await peeranhaUser.getPeriodRewardShares(rewardPeriods[1]);
+				expect(activeUsers2.length).to.equal(1);
+				expect(periodRewardCommunityShares2.totalRewardShares).to.equal(periodRewards[1]);
+				expect(periodReward2.totalRewardShares).to.equal(periodRewards[1]);
 			});
 		}
 	});
 
-	describe('Get reward', function(){
+	describe('Get reward', function() {
 
 		it("Test get reward", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
@@ -301,8 +349,8 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 
-			await expect(token.claimReward(signers[0].address, rewardPeriods[0] - 1))
-			.to.be.revertedWith('no_reward');
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0] - 1)).
+				to.be.revertedWith('no_reward');
 			expect(await getBalance(token, peeranhaUser.deployTransaction.from)).to.eql(0);
 		});
 
@@ -344,6 +392,18 @@ describe("Test wallet", function () {
 			await expect(await getInt(ownerMintTokens)).to.equal(balance);
 			await expect(balance).to.equal(await getOwnerMinted(token));
 			await expect(balance).to.equal(await getTotalSupply(token));
+		});
+
+		it("mint not admin", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+			const ownerMintTokens = parseEther("5");
+			await expect(token.connect(signers[1]).mint(ownerMintTokens)).
+				to.be.revertedWith('AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
 
 		it("mint 5 and 2 tokens", async function () {

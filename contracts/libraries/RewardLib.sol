@@ -18,8 +18,18 @@ library RewardLib {
     bool isActive;
   }
 
+  // period reward for all forum
   struct PeriodRewardContainer {
     mapping(uint16 => PeriodRewardShares) periodRewardShares; // period
+  }
+
+  // period reward for all communities
+  struct CommunityReward {
+    mapping(uint32 => CommunityPeriofReward) communityPeriofReward; // communityID
+  }
+
+  struct CommunityPeriofReward {
+    mapping(uint16 => PeriodRewardShares) communityPeriodRewardShares; // period
   }
 
   struct PeriodRewardShares {

@@ -361,7 +361,7 @@ describe("Test post", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await expect( peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)).to.be.revertedWith('Post_not_exist.');
+			await expect(peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)).to.be.revertedWith('Post_not_exist.');
 		});
 
 		it("Test create reply without ipfs hash", async function () {
