@@ -242,7 +242,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
+                if (getExistReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
@@ -389,10 +389,10 @@ library PostLib  {
         if (postContainer.info.postType != postType) {
             changePostType(self, postContainer, postType);
         }
-        if (tags.length > 0)
+        if (tags.length > 0) {
+            self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
             postContainer.info.tags = tags;
-
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
+        }
 
         emit PostEdited(userAddr, postId);
     }
@@ -592,7 +592,7 @@ library PostLib  {
             if (replyContainer.info.isQuickReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
-            if (isBestReply && postType != PostType.Tutorial) {
+            if (isBestReply && postType != PostType.Tutorial) { // todo: need? postType != PostType.Tutorial
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
         }
@@ -954,7 +954,8 @@ library PostLib  {
         PostType newPostType
     ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
+        require(newPostType != PostType.Tutorial || getExistReplyCount(postContainer) == 0, "Error_postType");
+        
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
@@ -1361,6 +1362,14 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return replies count
+    /// @param postContainer post where get replies count
+    function getExistReplyCount(
+        PostContainer storage postContainer
+    ) private view returns (uint16) {
+        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
     }
 
     /// @notice Return property for item

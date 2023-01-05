@@ -1272,10 +1272,14 @@ describe("Test post", function () {
 
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			const postOld = await peeranhaContent.getPost(1);
+			expect(postOld.deletedReplyCount).to.equal(0);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
 			const reply = await peeranhaContent.getReply(1, 1);
 			expect(reply.isDeleted).to.equal(true);
+			const post = await peeranhaContent.getPost(1);
+			expect(post.deletedReplyCount).to.equal(1);
 		});
 
 		it("Test delete reply by not registered user", async function () {
