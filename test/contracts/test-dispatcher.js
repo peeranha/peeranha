@@ -198,7 +198,7 @@ describe("Test dispatcher", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 	
 			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-			.to.be.revertedWith('not_allowed_admin_or_comm_moderator');
+			.to.be.revertedWith('Not_allowed_edit_not_author');
 	
 			await expect(peeranhaUser.connect(signers[3]).revokeCommunityModeratorPermission(signers[0].address, signers[2].address, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
@@ -206,7 +206,7 @@ describe("Test dispatcher", function () {
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
 			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost))
-			.to.be.revertedWith('not_allowed_admin_or_comm_moderator');
+			.to.be.revertedWith('Not_allowed_edit_not_author');
 		});
 	})
 
