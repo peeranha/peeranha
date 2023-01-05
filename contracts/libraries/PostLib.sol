@@ -391,10 +391,10 @@ library PostLib  {
             postTypeChangeCalculation(self, postContainer, postType);
             postContainer.info.postType = postType;
         }
-        if (tags.length > 0)
+        if (tags.length > 0) {
+            self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
             postContainer.info.tags = tags;
-
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
+        }
 
         emit PostEdited(userAddr, postId);
     }
