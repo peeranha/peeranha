@@ -242,7 +242,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (getExistReplyCount(postContainer) == 1) {
+                if (getActiveReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
@@ -954,7 +954,7 @@ library PostLib  {
         PostType newPostType
     ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != PostType.Tutorial || getExistReplyCount(postContainer) == 0, "Error_postType");
+        require(newPostType != PostType.Tutorial || getActiveReplyCount(postContainer) == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
@@ -1366,7 +1366,7 @@ library PostLib  {
 
     /// @notice Return replies count
     /// @param postContainer post where get replies count
-    function getExistReplyCount(
+    function getActiveReplyCount(
         PostContainer storage postContainer
     ) private view returns (uint16) {
         return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
