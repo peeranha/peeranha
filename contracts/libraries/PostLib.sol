@@ -970,7 +970,7 @@ library PostLib  {
             (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
             int32 changeReplyAuthorRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
@@ -1010,26 +1010,21 @@ library PostLib  {
         uint16 bestReplyId = postContainer.info.bestReply;
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
-            
-            int32 changeReplyAuthorRating;
-            if (replyContainer.info.isDeleted) { 
-                changeReplyAuthorRating += VoteLib.DeleteOwnReply;
-            } else {
-                (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
-                changeReplyAuthorRating += typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            if (replyContainer.info.isDeleted) continue;
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
-                if (replyContainer.info.rating >= 0) {
-                    if (replyContainer.info.isFirstReply) {
-                        changeReplyAuthorRating += typeRating.firstReply;
-                    }
-                    if (replyContainer.info.isQuickReply) {
-                        changeReplyAuthorRating += typeRating.quickReply;
-                    }
+            int32 changeReplyAuthorRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeReplyAuthorRating += typeRating.firstReply;
                 }
-                if (bestReplyId == replyId) {
-                    changeReplyAuthorRating += typeRating.acceptReply;
-                    changePostAuthorRating += typeRating.acceptedReply;
+                if (replyContainer.info.isQuickReply) {
+                    changeReplyAuthorRating += typeRating.quickReply;
                 }
+            }
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating += typeRating.acceptReply;
+                changePostAuthorRating += typeRating.acceptedReply;
             }
 
             self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
