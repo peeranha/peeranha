@@ -89,25 +89,26 @@ async function main() {
   // result = await peeranha.createUser(await getBytes32FromData(testAccount));
   result = await peeranha.addUserRating("0x033aa9c50ec70b0ebf2398827ea62eae764e2f05", 130, 1);
   console.log(`result ${result}`)
+  const signers = await ethers.getSigners();
   //  result = await peeranha.addUserRating("0x3ef542c3bdee02a4cb21aaa6587178a0a813a23d", 4, 1);
   // console.log(JSON.stringify(result))
-  // await peeranha.updateUser(await getBytes32FromData(testAccount));
-  // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  // await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
-  // await peeranha.freezeCommunity(1);
-  // await peeranha.unfreezeCommunity(1);
-  // await peeranha.createTag(1, await getBytes32FromData(testTag));
-  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
-  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
-  // await peeranha.editPost(1, 1, await getBytes32FromData(testPost), [1, 2]);
-  // await peeranha.deletePost(2);
-  // await peeranha.createReply(1, 0, await getBytes32FromData(testReply), false);  //true
-  // await peeranha.editReply(1, 1, await getBytes32FromData(testReply));
-  // await peeranha.deleteReply(1, 1);
-  // await peeranha.createComment(1, 0, await getBytes32FromData(testComment));
-  // await peeranha.editComment(1, 0, 1, await getBytes32FromData(testComment));
-  // await peeranha.deleteComment(1, 0, 1);
-  // await peeranha.voteItem(1, 0, 3, true);
+  // await peeranha.updateUser(signers[0].address, await getBytes32FromData(testAccount));
+  // await peeranha.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
+  // await peeranha.updateCommunity(signers[0].address, 6, await getBytes32FromData(testCommunity));
+  // await peeranha.freezeCommunity(signers[0].address, 1);
+  // await peeranha.unfreezeCommunity(signers[0].address, 1);
+  // await peeranha.createTag(signers[0].address, 1, await getBytes32FromData(testTag));
+  // await peeranha.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
+  // await peeranha.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
+  // await peeranha.editPost(signers[0].address, 1, 1, await getBytes32FromData(testPost), [1, 2]);
+  // await peeranha.deletePost(signers[0].address, 2);
+  // await peeranha.createReply(signers[0].address, 1, 0, await getBytes32FromData(testReply), false);  //true
+  // await peeranha.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply));
+  // await peeranha.deleteReply(signers[0].address, 1, 1);
+  // await peeranha.createComment(signers[0].address, 1, 0, await getBytes32FromData(testComment));
+  // await peeranha.editComment(signers[0].address, 1, 0, 1, await getBytes32FromData(testComment));
+  // await peeranha.deleteComment(signers[0].address, 1, 0, 1);
+  // await peeranha.voteItem(signers[0].address, 1, 0, 3, true);
 }
 
 async function saveFile(file) {
