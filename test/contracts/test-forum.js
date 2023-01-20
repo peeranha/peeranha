@@ -1397,7 +1397,7 @@ describe("Test post", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
 			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
