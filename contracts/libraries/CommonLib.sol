@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 /// @notice
 /// @dev
 library CommonLib {
-  uint16 constant QUICK_REPLY_TIME_SECONDS = 6; // 6
+  uint16 constant QUICK_REPLY_TIME_SECONDS = 900; // 6
   address public constant BOT_ADDRESS = 0x0000000000000000000000000000000000000001;
 
   enum MessengerType {
