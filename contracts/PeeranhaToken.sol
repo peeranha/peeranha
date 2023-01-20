@@ -25,7 +25,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
   uint256 public constant OWNER_MINT_MAX = 40000000 * FRACTION;
   uint256 public constant MAX_REWARD_PER_PERIOD = 100000;
   uint256 public constant MAX_REWARD_PER_USER = 100;
-  uint256 public constant ACTIVE_USERS_IN_PERIOD = 2;
+  uint256 public constant ACTIVE_USERS_IN_PERIOD = 1000;
 
   bytes32 public constant OWNER_MINTER_ROLE = bytes32(keccak256("OWNER_MINTER_ROLE"));
 
@@ -139,7 +139,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
    * - must be a reward in this period.
    * - must be a period less then now.
   */
-  function claimReward(address user, uint16 period) external {
+  /*function claimReward(address user, uint16 period) external {
     require(RewardLib.getPeriod() > period + 1, "period_not_ended");
 
     dispatcherCheck(user);
@@ -160,7 +160,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
 
     emit GetReward(user, period);
     _mint(user, userReward);
-  }
+  }*/
 
   function setStake(address user, uint256 stakeTokens) external {
     // require(msg.sender == user, "get_reward_security");  // TODO: unitTest

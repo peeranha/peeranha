@@ -9,8 +9,8 @@ import "./UserLib.sol";
 /// @notice
 /// @dev
 library RewardLib {
-  uint256 constant PERIOD_LENGTH = 6;          // 7 day = 1 period //
-  uint256 constant START_PERIOD_TIME = 1674231634;  // June 15, 2022 12:00:00 AM GMT
+  uint256 constant PERIOD_LENGTH = 604800;          // 7 day = 1 period //
+  uint256 constant START_PERIOD_TIME = 1655251200;  // June 15, 2022 12:00:00 AM GMT
 
   struct PeriodRating {
     uint32 ratingToReward;

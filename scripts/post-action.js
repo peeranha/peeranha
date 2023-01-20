@@ -99,8 +99,9 @@ async function userFunctions() {
 		}
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+  const signers = await ethers.getSigners();
 
-  const txObj = await peeranhaUser.createUser(await getBytes32FromData(testAccount));
+  const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.giveCommunityAdminPermission("0x8E0184b7312339b9CbB6Ad18298512A62E600dCf", 2);
   // const txObj = await peeranhaUser.revokeCommunityModeratorPermission("0x8E0184b7312339b9CbB6Ad18298512A62E600dCf", 2);
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
