@@ -28,10 +28,10 @@ module.exports = {
   },
   networks: {
     polygon: {
-      url: `https://rpc.ankr.com/polygon`,
+      url: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
-      gasPrice: 36000000000
+      gasPrice: 200000000000
     },
     mumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,

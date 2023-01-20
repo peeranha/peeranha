@@ -135,6 +135,7 @@ library UserLib {
     NONE,
     Bot,
     Admin,
+    Dispatcher,
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
@@ -156,6 +157,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
@@ -189,6 +191,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -209,7 +212,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -241,7 +244,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -318,10 +321,10 @@ library UserLib {
     }
 
     uint256 pastPeriodsCount = userCommunityRating.rewardPeriods.length;
-    RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
     
     // If this is the first user rating change in any community
     if (pastPeriodsCount == 0 || userCommunityRating.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
+      RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
       periodRewardShares.activeUsersInPeriod.push(userAddr);
       userCommunityRating.rewardPeriods.push(currentPeriod);
     } else {  // rewrite
@@ -382,7 +385,7 @@ library UserLib {
           dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
-        int32 differentRatingPreviousPeriod; // name
+        int32 differentRatingPreviousPeriod; // name    // move to if()?
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
@@ -495,7 +498,7 @@ library UserLib {
     return user;
   }
 
-  function getRatingAndRatingForAction(
+  function getRatingAndRatingForAction( // TODO getRatingAndRatingForAction -> getRatingAndEnergyForAction
     address actionCaller,
     address dataUser,
     Action action
@@ -535,13 +538,13 @@ library UserLib {
     } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");   // toDO unittest post/reply/comment upvote+downvote
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low_rating_upvote";       // TODO unittests
+      message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
-      message = "low_rating_upvote_post";
+      message = "low_rating_upvote_reply";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.VoteComment) {

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 
 import "./libraries/UserLib.sol";
@@ -26,6 +27,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
+    bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
 
@@ -43,8 +45,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(PROTOCOL_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
-        // TODO: Uncomment this when contract size will be smaller or for redeploy
-        // _setRoleAdmin(PROTOCOL_ADMIN_ROLE, BOT_ROLE);
+        _setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
+        _setRoleAdmin(DISPATCHER_ROLE, PROTOCOL_ADMIN_ROLE);
     }
 
     // This is to support Native meta transactions
@@ -57,6 +59,16 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         returns (address sender)
     {
         return NativeMetaTransaction._msgSender();
+    }
+
+    function dispatcherCheck(address user) internal view {
+        if (user != _msgSender()) {
+            onlyDispatcher(_msgSender());
+        }
+    }
+
+    function onlyDispatcher(address sender) public view override {
+        checkHasRole(sender, UserLib.ActionRole.Dispatcher, 0);
     }
 
     function setContractAddresses(address communityContractAddress, address contentContractAddress, address nftContractAddress, address tokenContractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -106,8 +118,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be a new user.
      */
-    function createUser(bytes32 ipfsHash) public override {
-        UserLib.create(userContext.users, _msgSender(), ipfsHash);
+    function createUser(address user, bytes32 ipfsHash) public override {
+        dispatcherCheck(user);
+        UserLib.create(userContext.users, user, ipfsHash);
     }
 
     /**
@@ -117,10 +130,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user.  
      */
-    function updateUser(bytes32 ipfsHash) public override {
-        address userAddress = _msgSender();
-        UserLib.createIfDoesNotExist(userContext.users, userAddress);
-        UserLib.update(userContext, userAddress, ipfsHash);
+    function updateUser(address user, bytes32 ipfsHash) public override {
+        dispatcherCheck(user);
+        UserLib.createIfDoesNotExist(userContext.users, user);
+        UserLib.update(userContext, user, ipfsHash);
     }
 
     /**
@@ -130,11 +143,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an community.  
      */
-    function followCommunity(uint32 communityId) public override {
+    function followCommunity(address user, uint32 communityId) public override {
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
-        address userAddress = _msgSender();
-        UserLib.createIfDoesNotExist(userContext.users, userAddress);
-        UserLib.followCommunity(userContext, userAddress, communityId);
+        UserLib.createIfDoesNotExist(userContext.users, user);
+        UserLib.followCommunity(userContext, user, communityId);
     }
 
     /**
@@ -144,8 +157,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be follow the community.  
      */
-    function unfollowCommunity(uint32 communityId) public override {
-        UserLib.unfollowCommunity(userContext, _msgSender(), communityId);
+    function unfollowCommunity(address user, uint32 communityId) public override {
+        dispatcherCheck(user);
+        UserLib.unfollowCommunity(userContext, user, communityId);
     }
 
     /**
@@ -235,10 +249,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityAdminPermission(address userAddr, uint32 communityId) public override {
+    function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) public override {
+        dispatcherCheck(user);
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
@@ -252,10 +267,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function giveCommunityModeratorPermission(address userAddr, uint32 communityId) public {
+    function giveCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user);
         checkUser(userAddr);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -268,10 +284,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    function revokeCommunityAdminPermission(address userAddr, uint32 communityId) public {
+    function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
-        require(userAddr != _msgSender(), "self_revoke");
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        require(userAddr != user, "self_revoke");
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
     }
 
@@ -284,9 +301,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user.
      */
-    function revokeCommunityModeratorPermission(address userAddr, uint32 communityId) public {
+    function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
+        dispatcherCheck(user);
         onlyExistingAndNotFrozenCommunity(communityId);
-        checkHasRole(_msgSender(), UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+        checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
@@ -343,17 +361,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Must be an existing community.
      * - Must be an existing user. 
      */
-    /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
+    function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }*/
+    }
 
     // TODO: Why is it commented? Remove this code if not needed.
     /**
      * @dev Get information abour sum rating to reward all users
      */
-    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
+    function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
         return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
-    }*/
+    }
     
     /**
      * @dev Change user rating
@@ -436,6 +454,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             message = "not_allowed_not_admin";
         } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
             message = "not_allowed_not_bot";
+        } else if (actionRole == UserLib.ActionRole.Dispatcher && !hasRole(DISPATCHER_ROLE, actionCaller)) {
+            message = "not_allowed_not_dispatcher";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
             message = "not_allowed_admin_or_comm_moderator";
@@ -479,35 +499,35 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * - Get period length
      *
     */
-    function getContractInformation() external pure returns (uint256 startPeriodTime, uint256 periodLength) {
+    /*function getContractInformation() external pure returns (uint256 startPeriodTime, uint256 periodLength) {
         return (RewardLib.START_PERIOD_TIME, RewardLib.PERIOD_LENGTH);
-    }
+    }*/
 
     /**
      * @dev Get active users in period.
     */
-    function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
+    /*function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
         return userContext.periodRewardContainer.periodRewardShares[period].activeUsersInPeriod;
-    }
+    }*/
 
     /**
      * @dev Get current period.
     */
-    function getPeriod() external view returns (uint16) {
+    /*function getPeriod() external view returns (uint16) {
         return RewardLib.getPeriod();
-    }
+    }*/
     
     function getVersion() public pure returns (uint256) {
         return 1;
     }
 
     // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         UserLib.updateUserRating(userContext, userAddr, rating, communityId);
-    }*/
+    }
 
     // Used for unit tests
-    /*function setEnergy(address userAddr, uint16 energy) public {
+    function setEnergy(address userAddr, uint16 energy) public {
         userContext.users.getUserByAddress(userAddr).energy = energy;
-    }*/
+    }
 }
