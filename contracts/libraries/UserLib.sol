@@ -157,6 +157,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
@@ -190,6 +191,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -496,7 +498,7 @@ library UserLib {
     return user;
   }
 
-  function getRatingAndRatingForAction(
+  function getRatingAndRatingForAction( // TODO getRatingAndRatingForAction -> getRatingAndEnergyForAction
     address actionCaller,
     address dataUser,
     Action action
@@ -536,13 +538,13 @@ library UserLib {
     } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");   // toDO unittest post/reply/comment upvote+downvote
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low_rating_upvote";       // TODO unittests
+      message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
-      message = "low_rating_upvote_post";
+      message = "low_rating_upvote_reply";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.VoteComment) {

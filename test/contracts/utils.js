@@ -194,9 +194,9 @@ const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 }
 
-const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer) {
+const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer, communityId) {
 	await peeranhaUser.connect(signer).createUser(signer.address, hashContainer[0]);
-	await peeranhaUser.addUserRating(signer.address, rating, 1);
+	await peeranhaUser.addUserRating(signer.address, rating, communityId);
 };
 
 const getUsers = (hashes) => {

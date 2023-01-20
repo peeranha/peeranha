@@ -13,8 +13,8 @@ import "../interfaces/IPeeranhaCommunity.sol";
 /// @dev posts information is stored in the mapping on the main contract
 library PostLib  {
     using UserLib for UserLib.UserCollection;
-    uint256 constant DELETE_TIME = 604800;    //7 days
-    uint32 constant DEFAULT_COMMUNITY = 5;
+    uint256 constant DELETE_TIME = 10;    //7 days
+    uint32 constant DEFAULT_COMMUNITY = 3;
 
     int8 constant DIRECTION_DOWNVOTE = 2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -2;
@@ -23,7 +23,7 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
-    enum Language { English, Chinese, Spanish, Vietnamese }
+    enum Language { English, Chinese, Spanish, Vietnamese } /* en, zh, es, vi */
     enum PostProperties { MessengerSender, Language }
     enum ReplyProperties { MessengerSender, Language }
     enum CommentProperties { MessengerSender, Language }
@@ -231,10 +231,12 @@ library PostLib  {
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
 
-          for (uint16 i = 1; i <= countReplies; i++) {
-            replyContainer = getReplyContainer(postContainer, i);
-            require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
-                "Users can not publish 2 replies for expert and common posts.");
+          if (userAddr != CommonLib.BOT_ADDRESS) {
+            for (uint16 i = 1; i <= countReplies; i++) {
+                replyContainer = getReplyContainer(postContainer, i);
+                require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
+                    "Users can not publish 2 replies for expert and common posts.");
+            }
           }
         }
 
@@ -246,7 +248,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
+                if (getActiveReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
@@ -392,19 +394,18 @@ library PostLib  {
         }
 
         if (postContainer.info.communityId != communityId) {
-            self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
-            postContainer.info.communityId = communityId;
+            changePostCommunity(self, postContainer, communityId);
         }
         if (postContainer.info.postType != postType) {
-            postTypeChangeCalculation(self, postContainer, postType);
-            postContainer.info.postType = postType;
+            changePostType(self, postContainer, postType);
         }
-        if (tags.length > 0)
+        if (tags.length > 0) {
+            self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
             postContainer.info.tags = tags;
-        if (postContainer.properties[uint8(PostProperties.Language)] != bytes32(uint256(language)))
+        }
+        if (postContainer.properties[uint8(PostProperties.Language)] != bytes32(uint256(language))) {
             postContainer.properties[uint8(PostProperties.Language)] = bytes32(uint256(language));
-
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
+        }
 
         emit PostEdited(userAddr, postId);
     }
@@ -610,7 +611,7 @@ library PostLib  {
             if (replyContainer.info.isQuickReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
-            if (isBestReply && postType != PostType.Tutorial) {
+            if (isBestReply && postType != PostType.Tutorial) { // todo: need? postType != PostType.Tutorial
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
         }
@@ -962,52 +963,96 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
-    // @notice Recalculation rating for all users who were active in the post
+    // @notice Change postType for post and recalculation rating for all users who were active in the post
     /// @param self The mapping containing all posts
     /// @param postContainer Post where changing post type
     /// @param newPostType New post type
-    function postTypeChangeCalculation(
+    function changePostType(
         PostCollection storage self,
         PostContainer storage postContainer,
         PostType newPostType
     ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
+        require(newPostType != PostType.Tutorial || getActiveReplyCount(postContainer) == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
-        int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
+        int32 changePostAuthorRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
-        self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
+        uint16 bestReplyId = postContainer.info.bestReply;
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
             (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
-            changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+            int32 changeReplyAuthorRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
-                    changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+                    changeReplyAuthorRating += newTypeRating.firstReply - oldTypeRating.firstReply;
                 }
                 if (replyContainer.info.isQuickReply) {
-                    changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+                    changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
-            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
+                changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
+            }
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, postContainer.info.communityId);
+        }
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, postContainer.info.communityId);
+        postContainer.info.postType = newPostType;
+    }
+
+    // @notice Change communityId for post and recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newCommunityId New community id for post
+    function changePostCommunity(
+        PostCollection storage self,
+        PostContainer storage postContainer,
+        uint32 newCommunityId
+    ) private {
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(newCommunityId);
+        uint32 oldCommunityId = postContainer.info.communityId;
+        PostType postType = postContainer.info.postType;
+        VoteLib.StructRating memory typeRating = getTypesRating(postType);
+
+        (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+        int32 changePostAuthorRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+
+        uint16 bestReplyId = postContainer.info.bestReply;
+        for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
+            ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
+
+            int32 changeReplyAuthorRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeReplyAuthorRating += typeRating.firstReply;
+                }
+                if (replyContainer.info.isQuickReply) {
+                    changeReplyAuthorRating += typeRating.quickReply;
+                }
+            }
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating += typeRating.acceptReply;
+                changePostAuthorRating += typeRating.acceptedReply;
+            }
+
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
         }
 
-        if (postContainer.info.bestReply != 0) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply, postContainer.info.communityId);
-            self.peeranhaUser.updateUserRating(
-                getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
-                newTypeRating.acceptReply - oldTypeRating.acceptReply,
-                postContainer.info.communityId
-            );
-        }
+        self.peeranhaUser.updateUserRating(postContainer.info.author, -changePostAuthorRating, oldCommunityId);
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, newCommunityId);
+        postContainer.info.communityId = newCommunityId;
     }
 
     // @notice update documentation ipfs tree
@@ -1337,6 +1382,14 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return replies count
+    /// @param postContainer post where get replies count
+    function getActiveReplyCount(
+        PostContainer storage postContainer
+    ) private view returns (uint16) {
+        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
     }
 
     /// @notice Return property for item

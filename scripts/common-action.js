@@ -18,21 +18,25 @@ const NFT = {
   attributes: "TestInfo",
 };
 
+/* en, zh, es, vi */
+
 const testCommunity = {
   name: "test Community6.new",
   description: "test Community.new",
-  language: 1,
+  language: "zh",
   website: "www.new",
   translations: [
     {
-      name: "test Community6 Language2",
+      name: "auto translate 1",
       description: "test Community Language2",
-      language: 2,
+      enableAutotranslation: true,
+      language: "es",
     },
     {
-      name: "test Community6 Language3",
-      description: "test Community Language3",
-      language: 3,
+      name: "",
+      description: "",
+      enableAutotranslation: false,
+      language: "vi",
     }
   ]
 };

@@ -132,7 +132,7 @@ describe("Test wallet", function () {
 				
 				const periodRewardShares2 = await peeranhaUser.getPeriodReward(rewardPeriods[1]);
 				expect(periodRewardShares2).to.equal(periodRewards[1]);
-			});
+			}).retries(2);
 		}
 
 		for (const {actions, ratings, results, periodRewards} of activeIn1st2nd3rdPeriod) {

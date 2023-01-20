@@ -187,13 +187,17 @@ describe("Test permissions", function () {
 			await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1))
             .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1))
-            .to.be.revertedWith('low_rating_upvote_post');
+            .to.be.revertedWith('low_rating_upvote_reply');
+            await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1))
+            .to.be.revertedWith('low_rating_upvote_reply');
 
             await peeranhaUser.addUserRating(signers[1].address, 24, 1);
             await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1))
             .to.be.revertedWith('low_rating_upvote');
             await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1))
-            .to.be.revertedWith('low_rating_upvote_post');
+            .to.be.revertedWith('low_rating_upvote_reply');
+            await expect(peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1))
+            .to.be.revertedWith('low_rating_upvote_reply');
 
             await peeranhaUser.addUserRating(signers[1].address, 1, 1);
             await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
