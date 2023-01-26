@@ -113,6 +113,11 @@ library UserLib {
     address delegateUser;
   }
 
+  struct LinkedAccount {
+    bytes32 userId;
+    bool approved;
+  }
+
   enum Action {
     NONE,
     PublicationPost,

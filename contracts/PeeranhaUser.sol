@@ -30,6 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    mapping(address => mapping(CommonLib.MessengerType => UserLib.LinkedAccount)) linkedAccount;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -160,6 +161,41 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function unfollowCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
         UserLib.unfollowCommunity(userContext, user, communityId);
+    }
+
+    /**
+     * @dev Link messenger account to Peeranha.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.  
+     */
+    function linkAccount(address user, CommonLib.MessengerType linkedAccountType, bytes32 userId) public {
+        checkHasRole(_msgSender(), UserLib.ActionRole.Bot, 0);
+        checkUser(user);
+        // linkedAccount[user][linkedAccountType] = UserLib.LinkedAccount(userId, false);
+        UserLib.LinkedAccount storage account = linkedAccount[user][linkedAccountType];
+        account.userId = userId;
+        account.approved = false;
+    }
+
+    /**
+     * @dev Approve linked messenger account to Peeranha.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and existing linkedAccount.  
+     */
+    function approveLinkedAccount(address user, CommonLib.MessengerType linkedAccountType, bool approve) public {
+        dispatcherCheck(user);
+        UserLib.LinkedAccount storage account = linkedAccount[user][linkedAccountType];
+        require(account.userId != bytes32(0x0), "user_not_linked");
+        if (approve) {
+            account.approved = approve;
+        } else {
+            account.userId = bytes32(0x0);
+            account.approved = false;
+        }
     }
 
     /**
