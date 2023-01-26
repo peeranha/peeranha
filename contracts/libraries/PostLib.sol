@@ -188,13 +188,15 @@ library PostLib  {
     /// @param parentReplyId The reply where the reply will be post
     /// @param ipfsHash IPFS hash of document with reply information
     /// @param isOfficialReply Flag is showing "official reply" or not
+    /// @param metadata metadata for bot property
     function createReply(
         PostCollection storage self,
         address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        bytes32 metadata
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial, 
@@ -230,7 +232,10 @@ library PostLib  {
           if (userAddr != CommonLib.BOT_ADDRESS) {
             for (uint16 i = 1; i <= countReplies; i++) {
                 replyContainer = getReplyContainer(postContainer, i);
-                require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
+                require(
+                    userAddr != replyContainer.info.author || 
+                    replyContainer.properties[uint8(ReplyProperties.MessengerSender)] != metadata || 
+                    replyContainer.info.isDeleted,
                     "Users can not publish 2 replies for expert and common posts.");
             }
           }
@@ -261,6 +266,7 @@ library PostLib  {
         replyContainer.info.author = userAddr;
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
+        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = metadata;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
@@ -281,12 +287,7 @@ library PostLib  {
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
-
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
-
-        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle));
     }
 
     /// @notice Post comment
