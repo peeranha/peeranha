@@ -30,7 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
-    mapping(address => mapping(CommonLib.MessengerType => UserLib.LinkedAccount)) linkedAccount;
+    mapping(CommonLib.MessengerType => mapping(bytes32 => UserLib.LinkedAccount)) linkedAccounts;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -170,12 +170,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user.  
      */
-    function linkAccount(address user, CommonLib.MessengerType linkedAccountType, bytes32 userId) public {
+    function linkAccount(address user, CommonLib.MessengerType linkedAccountType, string memory handle) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Bot, 0);
         checkUser(user);
-        // linkedAccount[user][linkedAccountType] = UserLib.LinkedAccount(userId, false);
-        UserLib.LinkedAccount storage account = linkedAccount[user][linkedAccountType];
-        account.userId = userId;
+        // linkedAccounts[user][linkedAccountType] = UserLib.LinkedAccount(userId, false);
+        UserLib.LinkedAccount storage account = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
+        account.wallet = user;
         account.approved = false;
     }
 
@@ -184,18 +184,30 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * Requirements:
      *
-     * - Must be an existing user and existing linkedAccount.  
+     * - Must be an existing user and existing linkedAccounts.  
      */
-    function approveLinkedAccount(address user, CommonLib.MessengerType linkedAccountType, bool approve) public {
+    function approveLinkedAccount(address user, CommonLib.MessengerType linkedAccountType, string memory handle, bool approve) public {
         dispatcherCheck(user);
-        UserLib.LinkedAccount storage account = linkedAccount[user][linkedAccountType];
-        require(account.userId != bytes32(0x0), "user_not_linked");
+        UserLib.LinkedAccount storage account = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
+        require(account.wallet != address(0), "user_not_linked");
         if (approve) {
             account.approved = approve;
         } else {
-            account.userId = bytes32(0x0);
+            account.wallet = address(0);
             account.approved = false;
         }
+    }
+
+    /**
+     * @dev Get wallet for linked account.
+     *
+     */
+    function getLinkedAccountWallet(CommonLib.MessengerType linkedAccountType, string memory handle) public view returns (address) {
+        UserLib.LinkedAccount storage linkedAccount = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
+        if (linkedAccount.wallet == address(0) || !linkedAccount.approved) {
+            return address(0);
+        }
+        return linkedAccount.wallet;
     }
 
     /**

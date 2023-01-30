@@ -114,7 +114,7 @@ library UserLib {
   }
 
   struct LinkedAccount {
-    bytes32 userId;
+    address wallet;
     bool approved;
   }
 

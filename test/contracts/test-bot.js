@@ -132,4 +132,107 @@ describe("Test bot", function () {
 			expect(secondReply.ipfsDoc.hash).to.equal(hashContainer[1]);
 		});
 	});
+	
+	describe("Test linking account", function () {
+		it("Test link account", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+	
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+	
+			await peeranhaUser.connect(signers[1]).linkAccount(signers[2].address, 1, 'handle');
+	
+			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true);
+	
+			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal(signers[2].address);
+		});
+	
+		it("Test link account by not bot", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+	
+			await expect(peeranhaUser.connect(signers[1]).linkAccount(signers[2].address, 1, 'handle'))
+			.to.be.revertedWith('not_allowed_not_bot');
+		});
+	
+		it("Test link account for non-existing user", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+	
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+	
+			await expect(peeranhaUser.connect(signers[1]).linkAccount(signers[2].address, 1, 'handle'))
+			.to.be.revertedWith('user_not_found');
+		});
+	
+		it("Test link account for not linked wallet", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+	
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+	
+			await expect(peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true))
+			.to.be.revertedWith('user_not_linked');
+		});
+	
+		it("Test unlink account", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+	
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+	
+			await peeranhaUser.connect(signers[1]).linkAccount(signers[2].address, 1, 'handle');
+	
+			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true);
+	
+			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal(signers[2].address);
+	
+			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', false);
+	
+			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal('0x0000000000000000000000000000000000000000');
+		});
+	
+		it("Test link account for unlinked wallet", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+	
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+	
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+	
+			await peeranhaUser.connect(signers[1]).linkAccount(signers[2].address, 1, 'handle');
+	
+			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true);
+	
+			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', false);
+	
+			await expect(peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true))
+			.to.be.revertedWith('user_not_linked');
+		});
+	});
 });
