@@ -30,7 +30,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
-    mapping(CommonLib.MessengerType => mapping(bytes32 => UserLib.LinkedAccount)) linkedAccounts;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -170,13 +169,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user.  
      */
-    function linkAccount(address user, CommonLib.MessengerType linkedAccountType, string memory handle) public {
+    function linkAccount(address user, CommonLib.MessengerType messengerType, string memory handle) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Bot, 0);
         checkUser(user);
-        // linkedAccounts[user][linkedAccountType] = UserLib.LinkedAccount(userId, false);
-        UserLib.LinkedAccount storage account = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
-        account.wallet = user;
-        account.approved = false;
+        UserLib.linkAccount(userContext, user, messengerType, handle);
     }
 
     /**
@@ -186,28 +182,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Must be an existing user and existing linkedAccounts.  
      */
-    function approveLinkedAccount(address user, CommonLib.MessengerType linkedAccountType, string memory handle, bool approve) public {
+    function approveLinkedAccount(address user, CommonLib.MessengerType messengerType, string memory handle, bool approve) public {
         dispatcherCheck(user);
-        UserLib.LinkedAccount storage account = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
-        require(account.wallet != address(0), "user_not_linked");
-        if (approve) {
-            account.approved = approve;
-        } else {
-            account.wallet = address(0);
-            account.approved = false;
-        }
+        UserLib.approveLinkedAccount(userContext, messengerType, handle, approve);
     }
 
     /**
      * @dev Get wallet for linked account.
      *
      */
-    function getLinkedAccountWallet(CommonLib.MessengerType linkedAccountType, string memory handle) public view returns (address) {
-        UserLib.LinkedAccount storage linkedAccount = linkedAccounts[linkedAccountType][CommonLib.stringToBytes32(handle)];
-        if (linkedAccount.wallet == address(0) || !linkedAccount.approved) {
-            return address(0);
-        }
-        return linkedAccount.wallet;
+    function getLinkedAccountWallet(CommonLib.MessengerType messengerType, string memory handle) public view returns (address) {
+        return UserLib.getLinkedAccountWallet(userContext, messengerType, handle);
     }
 
     /**

@@ -92,6 +92,7 @@ library UserLib {
     UserLib.UserRatingCollection userRatingCollection;
     RewardLib.PeriodRewardContainer periodRewardContainer;
     AchievementLib.AchievementsContainer achievementsContainer;
+    mapping(CommonLib.MessengerType => mapping(bytes32 => UserLib.LinkedAccount)) linkedAccounts;
     
     IPeeranhaToken peeranhaToken;
     IPeeranhaCommunity peeranhaCommunity;
@@ -114,7 +115,7 @@ library UserLib {
   }
 
   struct LinkedAccount {
-    address wallet;
+    address user;
     bool approved;
   }
 
@@ -267,6 +268,59 @@ library UserLib {
       }
     }
     revert("comm_not_followed");
+  }
+
+  /// @notice Link messenger account to Peeranha
+  /// @param userContext The mapping containing all users
+  /// @param user Address of the user to link
+  /// @param messengerType Type of messenger
+  /// @param handle Username or user id
+  function linkAccount(
+    UserContext storage userContext,
+    address user,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public {
+    UserLib.LinkedAccount storage account = userContext.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    account.user = user;
+    account.approved = false;
+  }
+
+  /// @notice Approve linked messenger account to Peeranha
+  /// @param userContext The mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  /// @param approve Approval flag
+  function approveLinkedAccount(
+    UserContext storage userContext,
+    CommonLib.MessengerType messengerType,
+    string memory handle,
+    bool approve
+  ) public {
+    UserLib.LinkedAccount storage account = userContext.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    require(account.user != address(0), "user_not_linked");
+    if (approve) {
+      account.approved = approve;
+    } else {
+      account.user = address(0);
+      account.approved = false;
+    }
+  }
+
+  /// @notice Get wallet for linked account
+  /// @param userContext The mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  function getLinkedAccountWallet(
+    UserContext storage userContext,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public view returns (address) {
+    UserLib.LinkedAccount storage account = userContext.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    if (account.user == address(0) || !account.approved) {
+      return address(0);
+    }
+    return account.user;
   }
 
   /// @notice Get the number of users
