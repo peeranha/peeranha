@@ -30,6 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    UserLib.LinkedAccountsCollection linkedAccountsCollection;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -172,7 +173,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function linkAccount(address user, CommonLib.MessengerType messengerType, string memory handle) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Bot, 0);
         checkUser(user);
-        UserLib.linkAccount(userContext, user, messengerType, handle);
+        UserLib.linkAccount(linkedAccountsCollection, user, messengerType, handle);
     }
 
     /**
@@ -184,7 +185,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function approveLinkedAccount(address user, CommonLib.MessengerType messengerType, string memory handle, bool approve) public {
         dispatcherCheck(user);
-        UserLib.approveLinkedAccount(userContext, messengerType, handle, approve);
+        UserLib.approveLinkedAccount(linkedAccountsCollection, messengerType, handle, approve);
     }
 
     /**
@@ -192,7 +193,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      */
     function getLinkedAccountWallet(CommonLib.MessengerType messengerType, string memory handle) public view returns (address) {
-        return UserLib.getLinkedAccountWallet(userContext, messengerType, handle);
+        return UserLib.getLinkedAccountWallet(linkedAccountsCollection, messengerType, handle);
     }
 
     /**
