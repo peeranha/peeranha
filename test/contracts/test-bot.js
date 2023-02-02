@@ -149,7 +149,7 @@ describe("Test bot", function () {
 	
 			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true);
 	
-			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal(signers[2].address);
+			expect( await peeranhaUser.getLinkedAccount(1, 'handle') ).to.equal(signers[2].address);
 		});
 	
 		it("Test link account by not bot", async function () {
@@ -207,11 +207,11 @@ describe("Test bot", function () {
 	
 			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', true);
 	
-			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal(signers[2].address);
+			expect( await peeranhaUser.getLinkedAccount(1, 'handle') ).to.equal(signers[2].address);
 	
 			await peeranhaUser.connect(signers[2]).approveLinkedAccount(signers[2].address, 1, 'handle', false);
 	
-			expect( await peeranhaUser.getLinkedAccountWallet(1, 'handle') ).to.equal('0x0000000000000000000000000000000000000000');
+			expect( await peeranhaUser.getLinkedAccount(1, 'handle') ).to.equal('0x0000000000000000000000000000000000000000');
 		});
 	
 		it("Test link account for unlinked wallet", async function () {

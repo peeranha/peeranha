@@ -314,7 +314,7 @@ library UserLib {
   /// @param collection Collection with mapping containing all users
   /// @param messengerType type of messenger
   /// @param handle Username or user id
-  function getLinkedAccountWallet(
+  function getLinkedAccount(
     LinkedAccountsCollection storage collection,
     CommonLib.MessengerType messengerType,
     string memory handle

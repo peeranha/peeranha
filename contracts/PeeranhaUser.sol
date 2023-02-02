@@ -192,8 +192,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * @dev Get wallet for linked account.
      *
      */
-    function getLinkedAccountWallet(CommonLib.MessengerType messengerType, string memory handle) public view returns (address) {
-        return UserLib.getLinkedAccountWallet(linkedAccountsCollection, messengerType, handle);
+    function getLinkedAccount(CommonLib.MessengerType messengerType, string memory handle) public view returns (address) {
+        return UserLib.getLinkedAccount(linkedAccountsCollection, messengerType, handle);
     }
 
     /**
