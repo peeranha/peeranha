@@ -30,6 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    UserLib.LinkedAccountsCollection linkedAccountsCollection;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -160,6 +161,39 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function unfollowCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
         UserLib.unfollowCommunity(userContext, user, communityId);
+    }
+
+    /**
+     * @dev Link messenger account to Peeranha.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user.  
+     */
+    function linkAccount(address user, CommonLib.MessengerType messengerType, string memory handle) public {
+        checkHasRole(_msgSender(), UserLib.ActionRole.Bot, 0);
+        checkUser(user);
+        UserLib.linkAccount(linkedAccountsCollection, user, messengerType, handle);
+    }
+
+    /**
+     * @dev Approve linked messenger account to Peeranha.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and existing linkedAccounts.  
+     */
+    function approveLinkedAccount(address user, CommonLib.MessengerType messengerType, string memory handle, bool approve) public {
+        dispatcherCheck(user);
+        UserLib.approveLinkedAccount(linkedAccountsCollection, messengerType, handle, approve);
+    }
+
+    /**
+     * @dev Get wallet for linked account.
+     *
+     */
+    function getLinkedAccount(CommonLib.MessengerType messengerType, string memory handle) public view returns (address) {
+        return UserLib.getLinkedAccount(linkedAccountsCollection, messengerType, handle);
     }
 
     /**

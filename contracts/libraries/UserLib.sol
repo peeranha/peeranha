@@ -113,6 +113,15 @@ library UserLib {
     address delegateUser;
   }
 
+  struct LinkedAccount {
+    address user;
+    bool approved;
+  }
+
+  struct LinkedAccountsCollection {
+    mapping(CommonLib.MessengerType => mapping(bytes32 => UserLib.LinkedAccount)) linkedAccounts;
+  }
+
   enum Action {
     NONE,
     PublicationPost,
@@ -264,6 +273,59 @@ library UserLib {
     revert("comm_not_followed");
   }
 
+  /// @notice Link messenger account to Peeranha
+  /// @param collection Collection with mapping containing all users
+  /// @param user Address of the user to link
+  /// @param messengerType Type of messenger
+  /// @param handle Username or user id
+  function linkAccount(
+    LinkedAccountsCollection storage collection,
+    address user,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    account.user = user;
+    account.approved = false;
+  }
+
+  /// @notice Approve linked messenger account to Peeranha
+  /// @param collection Collection with mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  /// @param approve Approval flag
+  function approveLinkedAccount(
+    LinkedAccountsCollection storage collection,
+    CommonLib.MessengerType messengerType,
+    string memory handle,
+    bool approve
+  ) public {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    require(account.user != address(0), "user_not_linked");
+    if (approve) {
+      account.approved = approve;
+    } else {
+      account.user = address(0);
+      account.approved = false;
+    }
+  }
+
+  /// @notice Get wallet for linked account
+  /// @param collection Collection with mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  function getLinkedAccount(
+    LinkedAccountsCollection storage collection,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public view returns (address) {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    if (account.user == address(0) || !account.approved) {
+      return address(0);
+    }
+    return account.user;
+  }
+
   /// @notice Get the number of users
   /// @param self The mapping containing all users
   function getUsersCount(UserCollection storage self) internal view returns (uint256 count) {
@@ -299,18 +361,18 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) public {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     if (rating == 0) return;
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
