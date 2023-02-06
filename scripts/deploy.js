@@ -8,9 +8,19 @@ async function main() {
   const postLib = await PostLib.deploy();
   console.log("PostLib deployed to:", postLib.address);
 
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const UserLib = await ethers.getContractFactory("UserLib");
+  console.log("Deploying UserLib...");
+  const userLib = await UserLib.deploy();
+  console.log("UserLib deployed to:", userLib.address);
+
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+    libraries: {
+      UserLib: userLib.address,
+    }
+  });
+  
   console.log("Deploying PeeranhaUser...");
-  const peeranhaUser = await upgrades.deployProxy(PeeranhaUser, [], {timeout: 0});
+  const peeranhaUser = await upgrades.deployProxy(PeeranhaUser, [], {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("Peeranha User deployed to:", peeranhaUser.address);
 
   const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
@@ -23,6 +33,7 @@ async function main() {
       PostLib: postLib.address
     }
   });
+
   console.log("Deploying PeeranhaContent...");
   const peeranhaContent = await upgrades.deployProxy(PeeranhaContent, [peeranhaCommunity.address, peeranhaUser.address], {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("PeeranhaContent deployed to:", peeranhaContent.address);

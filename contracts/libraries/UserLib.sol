@@ -113,6 +113,15 @@ library UserLib {
     address delegateUser;
   }
 
+  struct LinkedAccount {
+    address user;
+    bool approved;
+  }
+
+  struct LinkedAccountsCollection {
+    mapping(CommonLib.MessengerType => mapping(bytes32 => UserLib.LinkedAccount)) linkedAccounts;
+  }
+
   enum Action {
     NONE,
     PublicationPost,
@@ -133,7 +142,9 @@ library UserLib {
 
   enum ActionRole {
     NONE,
+    Bot,
     Admin,
+    Dispatcher,
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
@@ -155,6 +166,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
@@ -188,6 +200,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -195,7 +208,7 @@ library UserLib {
       0,
       Action.UpdateProfile
     );
-    user.ipfsDoc.hash = ipfsHash;
+    user.ipfsDoc.hash = ipfsHash;   // todo add check? gas
 
     emit UserUpdated(userAddress);
   }
@@ -208,7 +221,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -240,7 +253,7 @@ library UserLib {
     UserContext storage userContext,
     address userAddress,
     uint32 communityId
-  ) internal {
+  ) public {
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -258,6 +271,59 @@ library UserLib {
       }
     }
     revert("comm_not_followed");
+  }
+
+  /// @notice Link messenger account to Peeranha
+  /// @param collection Collection with mapping containing all users
+  /// @param user Address of the user to link
+  /// @param messengerType Type of messenger
+  /// @param handle Username or user id
+  function linkAccount(
+    LinkedAccountsCollection storage collection,
+    address user,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    account.user = user;
+    account.approved = false;
+  }
+
+  /// @notice Approve linked messenger account to Peeranha
+  /// @param collection Collection with mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  /// @param approve Approval flag
+  function approveLinkedAccount(
+    LinkedAccountsCollection storage collection,
+    CommonLib.MessengerType messengerType,
+    string memory handle,
+    bool approve
+  ) public {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    require(account.user != address(0), "user_not_linked");
+    if (approve) {
+      account.approved = approve;
+    } else {
+      account.user = address(0);
+      account.approved = false;
+    }
+  }
+
+  /// @notice Get wallet for linked account
+  /// @param collection Collection with mapping containing all users
+  /// @param messengerType type of messenger
+  /// @param handle Username or user id
+  function getLinkedAccount(
+    LinkedAccountsCollection storage collection,
+    CommonLib.MessengerType messengerType,
+    string memory handle
+  ) public view returns (address) {
+    UserLib.LinkedAccount storage account = collection.linkedAccounts[messengerType][CommonLib.stringToBytes32(handle)];
+    if (account.user == address(0) || !account.approved) {
+      return address(0);
+    }
+    return account.user;
   }
 
   /// @notice Get the number of users
@@ -295,18 +361,18 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) public {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     if (rating == 0) return;
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
@@ -317,10 +383,10 @@ library UserLib {
     }
 
     uint256 pastPeriodsCount = userCommunityRating.rewardPeriods.length;
-    RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
     
     // If this is the first user rating change in any community
     if (pastPeriodsCount == 0 || userCommunityRating.rewardPeriods[pastPeriodsCount - 1] != currentPeriod) {
+      RewardLib.PeriodRewardShares storage periodRewardShares = userContext.periodRewardContainer.periodRewardShares[currentPeriod];
       periodRewardShares.activeUsersInPeriod.push(userAddr);
       userCommunityRating.rewardPeriods.push(currentPeriod);
     } else {  // rewrite
@@ -381,7 +447,7 @@ library UserLib {
           dataUpdateUserRatingCurrentPeriod.changeRating = CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.ratingToReward) - CommonLib.toInt32FromUint256(dataUpdateUserRatingPreviousPeriod.penalty);
         }
 
-        int32 differentRatingPreviousPeriod; // name
+        int32 differentRatingPreviousPeriod; // name    // move to if()?
         int32 differentRatingCurrentPeriod;
         if (rating > 0 && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
           if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
@@ -494,7 +560,7 @@ library UserLib {
     return user;
   }
 
-  function getRatingAndRatingForAction(
+  function getRatingAndRatingForAction( // TODO getRatingAndRatingForAction -> getRatingAndEnergyForAction
     address actionCaller,
     address dataUser,
     Action action
@@ -532,15 +598,15 @@ library UserLib {
       energy = ENERGY_DELETE_ITEM;
 
     } else if (action == Action.UpVotePost) {
-      require(actionCaller != dataUser, "not_allowed_vote_post");
+      require(actionCaller != dataUser, "not_allowed_vote_post");   // toDO unittest post/reply/comment upvote+downvote
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low_rating_upvote";       // TODO unittests
+      message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
-      message = "low_rating_upvote_post";
+      message = "low_rating_upvote_reply";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.VoteComment) {
@@ -593,7 +659,7 @@ library UserLib {
     if (periodsHavePassed == 0) {
       userEnergy = user.energy;
     } else {
-      userEnergy = UserLib.getStatusEnergy();
+      userEnergy = getStatusEnergy();
       user.lastUpdatePeriod = currentPeriod;
     }
 

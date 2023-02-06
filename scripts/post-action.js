@@ -2,20 +2,24 @@ const { ethers, network } = require("hardhat");
 const { create } = require("ipfs-http-client");
 const bs58 = require("bs58");
 const {
+  GLOBAL_ADMIN_ADDRESS,
   IPFS_API_URL,
   USER_ADDRESS,
   NFT_ADDRESS,
   TOKEN_ADDRESS,
   POSTLIB_ADDRESS,
-  COMMUNITYLIB_ADDRESS,
+  USERLIB_ADDRESS,
+  COMMUNITY_ADDRESS,
+  CONTENT_ADDRESS,
   IPFS_API_URL_THE_GRAPH,
-  INFURA_API_KEY
+  INFURA_API_KEY,
 } = require("../env.json");
 const { testAccount, NFT, achievements, testCommunity } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
+const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
 
-const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2 };
+const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 
 function getIpfsApi() {
   return create(IPFS_API_URL);
@@ -87,53 +91,85 @@ async function getBytes32FromData(data) {
   return getBytes32FromIpfsHash(ipfsHash);
 }
 
-async function main() {
+const testDocumentating = {
+  id: "5",
+  children: [
+    {id: "6", children: []},
+    {id: "7", children: [
+      {id: "8", children: [
+        {id: "9", children: []}
+      ]}
+    ]}
+  ]
+};
 
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+
+async function main() {
+  // await contentFunctions();
+  await userFunctions();
+}
+
+async function userFunctions() {
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+		libraries: {
+			UserLib: USERLIB_ADDRESS,
+		}
+	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
-  // const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
-  // const peeranhaNFT = await PeeranhaNFT.attach("0x7de0057aef43004CFF5B2D63a89Ab834a030f9F3");
-  // await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0x543230635B057332CF2335C16185923c3a3B316f", 30000001)
+  // const txObj = await peeranhaUser.createUser(await getBytes32FromData(testAccount));
+  // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
+  // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
+  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
 
-  // const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
-  // const peeranhaCommunity = await PeeranhaCommunity.attach("0x811ef13e798c16f55bf095255113aB3f0c9E1A55");
+  console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
+}
 
-  // console.log(await peeranhaNFT.tokenURI(1));
-  // console.log("1")
-  // peeranha.giveCommunityAdminPermission("0x8a9685d3827a740ec9b1efdd0a05ff62039868ad", 1)
-  // console.log("2")
-  // peeranha.giveCommunityModeratorPermission("0xc4ed6fc2e633430b4b982a8b3baa6fc8c62a037e", 1)
-  // console.log("3")
+async function communityFunctions() {
+  const PeeranhaCommunity = await ethers.getContractFactory("PeeranhaCommunity");
+  const peeranhaCommunity = await PeeranhaCommunity.attach(COMMUNITY_ADDRESS);
 
-  // console.log("Posting action");
-  await peeranhaUser.createUser(await getBytes32FromData(testAccount));
-  // await initAchievement(peeranhaUser);
-  
-  // console.log(JSON.stringify(result))
+  const signers = await ethers.getSigners();
 
-  // await peeranhaCommunity.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  // await peeranhaUser.addUserRating("0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 5000, 1)
-  // await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A", 1);
-  // console.log(JSON.stringify(result))
+  const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
 
-  // await peeranha.updateUser(await getBytes32FromData(testAccount));
-  // await peeranha.createCommunity(await getBytes32FromData(testCommunity), await getTags(5));
-  // await peeranha.updateCommunity(6, await getBytes32FromData(testCommunity));
-  // await peeranha.freezeCommunity(1);
-  // await peeranha.unfreezeCommunity(1);
-  // await peeranha.createTag(1, await getBytes32FromData(testTag));
-  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
-  // await peeranha.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [3, 4]);
-  // await peeranha.editPost(1, 1, await getBytes32FromData(testPost), [1, 2]);
-  // await peeranha.deletePost(2);
-  // await peeranha.createReply(1, 0, await getBytes32FromData(testReply), false);  //true
-  // await peeranha.editReply(1, 1, await getBytes32FromData(testReply));
-  // await peeranha.deleteReply(1, 1);
-  // await peeranha.createComment(1, 0, await getBytes32FromData(testComment));
-  // await peeranha.editComment(1, 0, 1, await getBytes32FromData(testComment));
-  // await peeranha.deleteComment(1, 0, 1);
-  // await peeranha.voteItem(1, 0, 3, true);
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
+}
+
+async function contentFunctions() {
+  const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent", {
+		libraries: {
+			PostLib: POSTLIB_ADDRESS,
+		}
+	});
+  const peeranhaContent = await PeeranhaContent.attach(CONTENT_ADDRESS);
+
+  const signers = await ethers.getSigners();
+
+  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.Documentatation, []);
+  // const txObj = await peeranhaContent.editPost(signers[0].address, 8, await getBytes32FromData(testPost), []);
+  // const txObj = await  peeranhaContent.createReply(signers[0].address, 3, 0, await getBytes32FromData(testReply), true);
+  // const txObj = await peeranhaContent.editReply(signers[0].address, 3, 2, await getBytes32FromData(testReply), true);
+  const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
+
+  console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`);
+  await txObj.wait();
+  console.log('Transaction confirmed');
+}
+
+async function nftFunctions() {
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const peeranhaNFT = await PeeranhaNFT.attach(NFT_ADDRESS);
+
+  await peeranhaNFT.transferFrom("0x3EF542C3bdEe02A4CB21aAa6587178A0a813a23D", "0x543230635B057332CF2335C16185923c3a3B316f", 30000001)
 }
 
 async function initAchievement(peeranhaUser) {

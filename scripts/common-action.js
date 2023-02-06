@@ -19,7 +19,7 @@ const NFT = {
 };
 
 const testCommunity = {
-  title: "testCommunity6.new",
+  name: "testCommunity6.new",
   description: "testCommunity.new",
   website: "www.new",
   language: "ua.new",
