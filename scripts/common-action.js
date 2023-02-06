@@ -1,7 +1,6 @@
 const env = require("hardhat");
 const path = require('path');
 const PATH = '../image/';
-const COMPAING_PATH = '../image-compaing/';
 
 const testAccount = {
   displayName: "testAccount",
@@ -110,4 +109,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, manuallyAchievements, mint_user_nft, NFT, testAccount, PATH, COMPAING_PATH, testCommunity, testTag };
+module.exports = { achievements, NFT, testAccount, PATH, testCommunity, testTag };

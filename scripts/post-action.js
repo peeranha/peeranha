@@ -1,5 +1,5 @@
 const { ethers, network } = require("hardhat");
-const { create, globSource } = require("ipfs-http-client");
+const { create } = require("ipfs-http-client");
 const bs58 = require("bs58");
 const {
   GLOBAL_ADMIN_ADDRESS,
@@ -17,7 +17,7 @@ const {
 const { testAccount, NFT, achievements, testCommunity } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE, OWNER_MINTER_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 
