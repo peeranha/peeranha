@@ -48,18 +48,34 @@ library AchievementLib {
   )
     internal
   {
-    if (achievementsType == AchievementCommonLib.AchievementsType.Rating) {
-      AchievementConfig storage achievementConfig;
-      for (uint64 i = 1; i <= achievementsContainer.achievementsCount; i++) { /// optimize ??
-        achievementConfig = achievementsContainer.achievementsConfigs[i];
+    AchievementConfig storage achievementConfig;
+    for (uint64 i = 1; i <= achievementsContainer.achievementsCount; i++) { /// optimize ??
+      achievementConfig = achievementsContainer.achievementsConfigs[i];
+      if (achievementsType != achievementConfig.achievementsType) continue;
 
-        if (achievementConfig.maxCount <= achievementConfig.factCount) continue;    // not exit/max
-        if (achievementConfig.lowerBound > currentValue) continue;
-        if (achievementsContainer.userAchievementsIssued[user][i]) continue; //already issued
-        achievementConfig.factCount++;
-        achievementsContainer.userAchievementsIssued[user][i] = true;
-        achievementsContainer.peeranhaNFT.mint(user, i);
-      }
+      if (achievementConfig.maxCount <= achievementConfig.factCount) continue;    // not exit/max
+      if (achievementConfig.lowerBound > currentValue) continue;
+      if (achievementsContainer.userAchievementsIssued[user][i]) continue; //already issued
+      achievementConfig.factCount++;
+      achievementsContainer.userAchievementsIssued[user][i] = true;
+      achievementsContainer.peeranhaNFT.mint(user, i);
     }
+  }
+
+  function mintNFT(
+    AchievementsContainer storage achievementsContainer,
+    address user,
+    uint64 achievementId
+  )
+    internal
+  {
+    AchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[achievementId];
+    require(achievementConfig.achievementsType == AchievementCommonLib.AchievementsType.Manually, "you_can_not_mint_the_type");
+    require(achievementConfig.maxCount > achievementConfig.factCount, "all_nfts_was_given");
+    require(!achievementsContainer.userAchievementsIssued[user][achievementId], "already issued");
+    
+    achievementConfig.factCount++;
+    achievementsContainer.userAchievementsIssued[user][achievementId] = true;
+    achievementsContainer.peeranhaNFT.mint(user, achievementId);
   }
 }
