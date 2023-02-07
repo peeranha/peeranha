@@ -110,6 +110,7 @@ async function main() {
 }
 
 async function userFunctions() {
+  const signers = await ethers.getSigners();
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
 		libraries: {
 			UserLib: USERLIB_ADDRESS,
