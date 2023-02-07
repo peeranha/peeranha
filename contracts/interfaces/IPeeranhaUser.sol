@@ -6,13 +6,15 @@ pragma abicoder v2;
 
 
 interface IPeeranhaUser {
-    function createUser(bytes32 ipfsHash) external;
-    function updateUser(bytes32 ipfsHash) external;
-    function followCommunity(uint32 communityId) external;
-    function unfollowCommunity(uint32 communityId) external;
+    function onlyDispatcher(address sender) external;
+    function createUser(address user, bytes32 ipfsHash) external;
+    function updateUser(address user, bytes32 ipfsHash) external;
+    function followCommunity(address user, uint32 communityId) external;
+    function unfollowCommunity(address user, uint32 communityId) external;
     function initCommunityAdminPermission(address user, uint32 communityId) external;
-    function giveCommunityAdminPermission(address user, uint32 communityId) external;
+    function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) external;
     function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool isCreate) external;
+    function isProtocolAdmin(address userAddr) external view returns (bool);
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) external view;
     function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);
     function getPeriodRewardShares(uint16 period) external view returns(RewardLib.PeriodRewardShares memory);

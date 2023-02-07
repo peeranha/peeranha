@@ -14,6 +14,7 @@ import "../interfaces/IPeeranhaCommunity.sol";
 library PostLib  {
     using UserLib for UserLib.UserCollection;
     uint256 constant DELETE_TIME = 604800;    //7 days
+    uint32 constant DEFAULT_COMMUNITY = 5;
 
     int8 constant DIRECTION_DOWNVOTE = 2;
     int8 constant DIRECTION_CANCEL_DOWNVOTE = -2;
@@ -131,17 +132,21 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);   // dont delete (for indexing)
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    event PostTypeChanged(address indexed user, uint256 indexed postId, PostType oldPostType);
+    event PostCommunityChanged(address indexed user, uint256 indexed postId, uint32 indexed oldCommunityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
     /// @param userAddr Author of the post
     /// @param communityId Community where the post will be ask
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param postType Type of post
+    /// @param tags Tags in post (min 1 tag)
     function createPost(
         PostCollection storage self,
         address userAddr,
@@ -248,10 +253,12 @@ library PostLib  {
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
           uint16 countReplies = uint16(postContainer.info.replyCount);
 
-          for (uint16 i = 1; i <= countReplies; i++) {
-            replyContainer = getReplyContainer(postContainer, i);
-            require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
-                "Users can not publish 2 replies for expert and common posts.");
+          if (userAddr != CommonLib.BOT_ADDRESS) {
+            for (uint16 i = 1; i <= countReplies; i++) {
+                replyContainer = getReplyContainer(postContainer, i);
+                require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
+                    "Users can not publish 2 replies for expert and common posts.");
+            }
           }
         }
 
@@ -263,7 +270,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
+                if (getActiveReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
@@ -363,31 +370,60 @@ library PostLib  {
     /// @param userAddr Author of the comment
     /// @param postId The post where the comment will be post
     /// @param ipfsHash IPFS hash of document with post information
+    /// @param tags New tags in post (empty array if tags dont change)
+    /// @param communityId New community Id (current community id if dont change)
+    /// @param postType New post type (current community Id if dont change)
     function editPost(
         PostCollection storage self,
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
-        uint8[] memory tags
+        uint8[] memory tags,
+        uint32 communityId, 
+        PostType postType
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
+        if(userAddr == postContainer.info.author) {
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                postContainer.info.author,
+                postContainer.info.communityId,
+                UserLib.Action.EditItem,
+                UserLib.ActionRole.NONE,
+                false
+            );
+            require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+            if(postContainer.info.ipfsDoc.hash != ipfsHash)
+                postContainer.info.ipfsDoc.hash = ipfsHash;
 
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            postContainer.info.author,
-            postContainer.info.communityId,
-            UserLib.Action.EditItem,
-            UserLib.ActionRole.NONE,
-            false
-        );
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        require(userAddr == postContainer.info.author, "You can not edit this post. It is not your.");      // TODO error for moderator (fix? will add new flag) add unit test for post comment reply
+        } else {
+            require(postContainer.info.ipfsDoc.hash == ipfsHash, "Not_allowed_edit_not_author");
+            if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
+                revert("Error_change_communityId");
+            }
+            self.peeranhaUser.checkActionRole(
+                userAddr,
+                postContainer.info.author,
+                postContainer.info.communityId,
+                UserLib.Action.NONE,
+                UserLib.ActionRole.AdminOrCommunityModerator,
+                false
+            );
+        }
 
-        if(!CommonLib.isEmptyIpfs(ipfsHash) && postContainer.info.ipfsDoc.hash != ipfsHash)
-            postContainer.info.ipfsDoc.hash = ipfsHash;
-        if (tags.length > 0)
+
+        if (postContainer.info.communityId != communityId) {
+            emit PostCommunityChanged(userAddr, postId, postContainer.info.communityId);
+            changePostCommunity(self, postContainer, communityId);
+        }
+        if (postContainer.info.postType != postType) {
+            emit PostTypeChanged(userAddr, postId, postContainer.info.postType);
+            changePostType(self, postContainer, postType);
+        }
+        if (tags.length > 0) {
+            self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
             postContainer.info.tags = tags;
+        }
 
         emit PostEdited(userAddr, postId);
     }
@@ -587,7 +623,7 @@ library PostLib  {
             if (replyContainer.info.isQuickReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
-            if (isBestReply && postType != PostType.Tutorial) {
+            if (isBestReply && postType != PostType.Tutorial) { // todo: need? postType != PostType.Tutorial
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
         }
@@ -939,68 +975,96 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
+    // @notice Change postType for post and recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newPostType New post type
     function changePostType(
         PostCollection storage self,
-        address userAddr,
-        uint256 postId,
+        PostContainer storage postContainer,
         PostType newPostType
-    ) public {
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        
-        self.peeranhaUser.checkActionRole(
-            userAddr,
-            userAddr,
-            postContainer.info.communityId,
-            UserLib.Action.NONE,
-            UserLib.ActionRole.AdminOrCommunityModerator,       // TODO will chech
-            false
-        );
-
+    ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != oldPostType, "This post type is already set.");
-        require(
-            oldPostType != PostType.Tutorial &&
-            newPostType != PostType.Tutorial,
-                "Error_postType"
-        );
+        require(newPostType != PostType.Tutorial || getActiveReplyCount(postContainer) == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
-        int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
+        int32 changePostAuthorRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
-        self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
+        uint16 bestReplyId = postContainer.info.bestReply;
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
             (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
-            changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+            int32 changeReplyAuthorRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
-                    changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+                    changeReplyAuthorRating += newTypeRating.firstReply - oldTypeRating.firstReply;
                 }
                 if (replyContainer.info.isQuickReply) {
-                    changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+                    changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
-            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
+                changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
+            }
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, postContainer.info.communityId);
         }
-
-        if (postContainer.info.bestReply != 0) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply, postContainer.info.communityId);
-            self.peeranhaUser.updateUserRating(
-                getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
-                newTypeRating.acceptReply - oldTypeRating.acceptReply,
-                postContainer.info.communityId
-            );
-        }
-
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, postContainer.info.communityId);
         postContainer.info.postType = newPostType;
-        emit ChangePostType(userAddr, postId, newPostType);
+    }
+
+    // @notice Change communityId for post and recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newCommunityId New community id for post
+    function changePostCommunity(
+        PostCollection storage self,
+        PostContainer storage postContainer,
+        uint32 newCommunityId
+    ) private {
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(newCommunityId);
+        uint32 oldCommunityId = postContainer.info.communityId;
+        PostType postType = postContainer.info.postType;
+        VoteLib.StructRating memory typeRating = getTypesRating(postType);
+
+        (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+        int32 changePostAuthorRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+
+        uint16 bestReplyId = postContainer.info.bestReply;
+        for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
+            ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
+
+            int32 changeReplyAuthorRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeReplyAuthorRating += typeRating.firstReply;
+                }
+                if (replyContainer.info.isQuickReply) {
+                    changeReplyAuthorRating += typeRating.quickReply;
+                }
+            }
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating += typeRating.acceptReply;
+                changePostAuthorRating += typeRating.acceptedReply;
+            }
+
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
+        }
+
+        self.peeranhaUser.updateUserRating(postContainer.info.author, -changePostAuthorRating, oldCommunityId);
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, newCommunityId);
+        postContainer.info.communityId = newCommunityId;
     }
 
     // @notice update documentation ipfs tree
@@ -1087,30 +1151,6 @@ library PostLib  {
             false
         );
     }
-    
-    /// @notice Сreate translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be post
-    /// @param replyId The reply where the translation will be post
-    /// @param commentId The reply where the translation will be post
-    /// @param language The translation language
-    /// @param ipfsHash IPFS hash of document with translation information
-    function createTranslation(
-        TranslationCollection storage self,
-        PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language,
-        bytes32 ipfsHash
-    ) internal {
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-
-        initTranslation( self, postId, replyId, commentId, language, userAddr, ipfsHash);
-    }
 
     /// @notice Create several translations
     /// @param self The mapping containing all translation
@@ -1137,34 +1177,6 @@ library PostLib  {
         for (uint32 i; i < languages.length; i++) {
             initTranslation( self, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
-    }
-
-    /// @notice Edit translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be edit
-    /// @param replyId The reply where the translation will be edit
-    /// @param commentId The reply where the translation will be edit
-    /// @param language The translation language
-    /// @param ipfsHash IPFS hash of document with translation information
-    function editTranslation(
-        TranslationCollection storage self,
-        PostLib.PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language,
-        bytes32 ipfsHash
-    ) internal {
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-        
-        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
-        translationContainer.info.ipfsDoc.hash = ipfsHash;
-
-        emit TranslationEdited(userAddr, postId, replyId, commentId, language);
     }
 
     /// @notice Edit several translations
@@ -1196,31 +1208,6 @@ library PostLib  {
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
         } 
-    }
-
-    /// @notice Delete translation
-    /// @param self The mapping containing all translation
-    /// @param postCollection The mapping containing all posts
-    /// @param userAddr Author of the translation
-    /// @param postId The post where the translation will be delete
-    /// @param replyId The reply where the translation will be delete
-    /// @param commentId The reply where the translation will be delete
-    /// @param language The translation language
-    function deleteTranslation(
-        TranslationCollection storage self,
-        PostLib.PostCollection storage postCollection,
-        address userAddr,
-        uint256 postId,
-        uint16 replyId,
-        uint8 commentId,
-        Language language
-    ) internal {
-        validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
-        
-        TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, language);
-        translationContainer.info.isDeleted = true;
-
-        emit TranslationDeleted(userAddr, postId, replyId, commentId, language);
     }
 
     /// @notice Delete several translations
@@ -1427,6 +1414,14 @@ library PostLib  {
     ) public view returns (Comment memory) {
         PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
         return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return replies count
+    /// @param postContainer post where get replies count
+    function getActiveReplyCount(
+        PostContainer storage postContainer
+    ) private view returns (uint16) {
+        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
     }
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment
