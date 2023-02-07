@@ -102,7 +102,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createReply(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply) external override {
         dispatcherCheck(user);
-        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply);
+        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply, bytes32(0x0));
     }
 
     /**
