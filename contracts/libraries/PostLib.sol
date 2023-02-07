@@ -137,6 +137,8 @@ library PostLib  {
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    event PostTypeChanged(address indexed user, uint256 indexed postId, PostType oldPostType);
+    event PostCommunityChanged(address indexed user, uint256 indexed postId, uint32 indexed oldCommunityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -385,10 +387,13 @@ library PostLib  {
             );
         }
 
+
         if (postContainer.info.communityId != communityId) {
+            emit PostCommunityChanged(userAddr, postId, postContainer.info.communityId);
             changePostCommunity(self, postContainer, communityId);
         }
         if (postContainer.info.postType != postType) {
+            emit PostTypeChanged(userAddr, postId, postContainer.info.postType);
             changePostType(self, postContainer, postType);
         }
         if (tags.length > 0) {
