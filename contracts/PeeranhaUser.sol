@@ -334,14 +334,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * - Only protocol admin can call the action.
      */
-    function mintNFT(
+    function mintManualNFT(
         address user,
         uint64 achievementId
     )
         external
     {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        userContext.achievementsContainer.mintNFT(user, achievementId);
+        userContext.achievementsContainer.mintManualNFT(user, achievementId);
     }
 
     /**

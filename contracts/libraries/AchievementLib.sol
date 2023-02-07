@@ -62,7 +62,7 @@ library AchievementLib {
     }
   }
 
-  function mintNFT(
+  function mintManualNFT(
     AchievementsContainer storage achievementsContainer,
     address user,
     uint64 achievementId
@@ -70,7 +70,7 @@ library AchievementLib {
     internal
   {
     AchievementConfig storage achievementConfig = achievementsContainer.achievementsConfigs[achievementId];
-    require(achievementConfig.achievementsType == AchievementCommonLib.AchievementsType.Manually, "you_can_not_mint_the_type");
+    require(achievementConfig.achievementsType == AchievementCommonLib.AchievementsType.Manual, "you_can_not_mint_the_type");
     require(achievementConfig.maxCount > achievementConfig.factCount, "all_nfts_was_given");
     require(!achievementsContainer.userAchievementsIssued[user][achievementId], "already issued");
     

@@ -5,5 +5,5 @@ pragma solidity ^0.8.0;
 /// @notice
 /// @dev
 library AchievementCommonLib {
-  enum AchievementsType { Rating, Manually }
+  enum AchievementsType { Rating, Manual }
 }

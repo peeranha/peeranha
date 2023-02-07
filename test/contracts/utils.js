@@ -353,6 +353,7 @@ const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
 const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
+const AchievementsType = { "Rating":0, "Manual":1 }
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -446,5 +447,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, OWNER_MINTER_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY
+    PROTOCOL_ADMIN_ROLE, OWNER_MINTER_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY, AchievementsType
 };
