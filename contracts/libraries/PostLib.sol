@@ -147,13 +147,15 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with post information
     /// @param postType Type of post
     /// @param tags Tags in post (min 1 tag)
+    /// @param metadata metadata for bot property
     function createPost(
         PostCollection storage self,
         address userAddr,
         uint32 communityId, 
         bytes32 ipfsHash,
         PostType postType,
-        uint8[] memory tags
+        uint8[] memory tags,
+        bytes32 metadata
     ) public {
         self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
@@ -179,6 +181,7 @@ library PostLib  {
         post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
+        post.properties[uint8(ItemProperties.MessengerSender)] = metadata;
 
         emit PostCreated(userAddr, communityId, self.postCount);
     }
@@ -201,10 +204,7 @@ library PostLib  {
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags);
-
-        PostContainer storage postContainer = getPostContainer(self, self.postCount);
-        postContainer.properties[uint8(ItemProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post reply
@@ -311,7 +311,7 @@ library PostLib  {
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle));
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post comment

@@ -47,7 +47,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
         dispatcherCheck(user);
-        posts.createPost(user, communityId, ipfsHash, postType, tags);
+        posts.createPost(user, communityId, ipfsHash, postType, tags, bytes32(0x0));
     }
 
     /**
