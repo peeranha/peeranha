@@ -24,7 +24,7 @@ library PostLib  {
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
     enum Language { English, Chinese, Spanish, Vietnamese }
-    enum ReplyProperties { MessengerSender }
+    enum ItemProperties { MessengerSender }
     uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
 
     struct Comment {
@@ -147,13 +147,15 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with post information
     /// @param postType Type of post
     /// @param tags Tags in post (min 1 tag)
+    /// @param metadata metadata for bot property
     function createPost(
         PostCollection storage self,
         address userAddr,
         uint32 communityId, 
         bytes32 ipfsHash,
         PostType postType,
-        uint8[] memory tags
+        uint8[] memory tags,
+        bytes32 metadata
     ) public {
         self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
@@ -179,8 +181,30 @@ library PostLib  {
         post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
+        post.properties[uint8(ItemProperties.MessengerSender)] = metadata;
 
         emit PostCreated(userAddr, communityId, self.postCount);
+    }
+
+    /// @notice Publication post
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the post
+    /// @param communityId Community where the post will be ask
+    /// @param ipfsHash IPFS hash of document with post information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createPostByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint32 communityId,
+        bytes32 ipfsHash,
+        PostType postType,
+        uint8[] memory tags,
+        CommonLib.MessengerType messengerType,
+        string memory handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post reply
@@ -235,7 +259,7 @@ library PostLib  {
                 replyContainer = getReplyContainer(postContainer, i);
                 require(
                     (userAddr != replyContainer.info.author && userAddr != CommonLib.BOT_ADDRESS) || 
-                    replyContainer.properties[uint8(ReplyProperties.MessengerSender)] != metadata || 
+                    replyContainer.properties[uint8(ItemProperties.MessengerSender)] != metadata || 
                     replyContainer.info.isDeleted,
                     "Users can not publish 2 replies for expert and common posts.");
             }
@@ -266,7 +290,7 @@ library PostLib  {
         replyContainer.info.author = userAddr;
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
-        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = metadata;
+        replyContainer.properties[uint8(ItemProperties.MessengerSender)] = metadata;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
@@ -287,7 +311,7 @@ library PostLib  {
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle));
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post comment
@@ -1350,29 +1374,6 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
-    /// @notice Return comment for unit tests
-    /// @param self The mapping containing all posts
-    /// @param postId Post where is the reply
-    /// @param parentReplyId The parent reply
-    /// @param commentId The comment which need find
-    function getComment(
-        PostCollection storage self, 
-        uint256 postId,
-        uint16 parentReplyId,
-        uint8 commentId
-    ) public view returns (Comment memory) {
-        PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
-        return getCommentContainer(postContainer, parentReplyId, commentId).info;
-    }
-
-    /// @notice Return replies count
-    /// @param postContainer post where get replies count
-    function getActiveReplyCount(
-        PostContainer storage postContainer
-    ) private view returns (uint16) {
-        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
-    }
-
     /// @notice Return property for item
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply
@@ -1397,6 +1398,29 @@ library PostLib  {
 
         }
         return postContainer.properties[propertyId];
+    }
+
+    /// @notice Return comment for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId Post where is the reply
+    /// @param parentReplyId The parent reply
+    /// @param commentId The comment which need find
+    function getComment(
+        PostCollection storage self, 
+        uint256 postId,
+        uint16 parentReplyId,
+        uint8 commentId
+    ) public view returns (Comment memory) {
+        PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
+        return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return replies count
+    /// @param postContainer post where get replies count
+    function getActiveReplyCount(
+        PostContainer storage postContainer
+    ) private view returns (uint16) {
+        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
     }
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment

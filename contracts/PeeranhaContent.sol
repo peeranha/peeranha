@@ -47,7 +47,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags) external override {
         dispatcherCheck(user);
-        posts.createPost(user, communityId, ipfsHash, postType, tags);
+        posts.createPost(user, communityId, ipfsHash, postType, tags, bytes32(0x0));
     }
 
     /**
@@ -76,6 +76,20 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function deletePost(address user, uint256 postId) external override {
         dispatcherCheck(user);
         posts.deletePost(user, postId);
+    }
+
+    /**
+     * @dev Create new post by bot.
+     *
+     * Requirements:
+     *
+     * - must be a new post.
+     * - must be a community.
+     * - must be tags.
+     * - must be a bot.
+    */
+    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, messengerType, handle);
     }
 
     /**
@@ -267,7 +281,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getReply(uint256 postId, uint16 replyId) external view returns (PostLib.Reply memory) {
         return posts.getReply(postId, replyId);
-    }    
+    }
 
     // check need for prod?
     /**
