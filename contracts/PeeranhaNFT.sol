@@ -51,7 +51,6 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
     emit ConfigureNewAchievementNFT(achievementId);
   }
 
-  // unit test: peeranha token call this action
   function mint(
     address user,
     uint64 achievementId
@@ -60,6 +59,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
     onlyRole(OWNER_MINTER_ROLE)
     override
   {
+    require(achievementsNFTContainer.achievementsCount >= achievementId && achievementId != 0, "NFT does not exist");
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
     achievementNFT.factCount++;
     uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;    // uint256?
