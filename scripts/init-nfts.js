@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, USER_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
+const { IPFS_API_URL, USER_ADDRESS, USERLIB_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
 const { achievements, PATH } = require('./common-action');
 var fs = require('fs');
 
@@ -56,7 +56,11 @@ async function main() {
   console.log("Begin initializing NFTs");
   console.log(`Images path: ${PATH}`);
   
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+   	libraries: {
+  		UserLib: USERLIB_ADDRESS,
+  	}
+  });
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
   await initAchievement(peeranhaUser);
 

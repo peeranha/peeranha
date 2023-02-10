@@ -50,6 +50,26 @@ async function main() {
 
   await peeranhaUser.setContractAddresses(peeranhaCommunity.address, peeranhaContent.address, peeranhaNFT.address, peeranhaToken.address);
   console.log("Set contract addresses to Peeranha User", peeranhaToken.address);
+
+  console.log(`Contracts for post action`);
+  console.log(`
+    "USERLIB_ADDRESS": "${userLib.address}",
+    "POSTLIB_ADDRESS": "${postLib.address}",
+    "USER_ADDRESS": "${peeranhaUser.address}",
+    "COMMUNITY_ADDRESS": "${peeranhaCommunity.address}",
+    "CONTENT_ADDRESS": "${peeranhaContent.address}",
+    "TOKEN_ADDRESS": "${peeranhaToken.address}",
+    "NFT_ADDRESS": "${peeranhaNFT.address}",
+  `);
+
+  console.log(`Contracts for The Graph`);
+  console.log(`
+    "userAddress": "${peeranhaUser.address}",
+    "communityAddress": "${peeranhaCommunity.address}",
+    "contentAddress": "${peeranhaContent.address}",
+    "tokenAddress": "${peeranhaToken.address}",
+    "nftAddress": "${peeranhaNFT.address}",
+  `);
 }
 
 main()

@@ -299,18 +299,18 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) internal {
+  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) public {
     for (uint i; i < usersRating.length; i++) {
       updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     if (rating == 0) return;
     updateRatingBase(userContext, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) internal {
+  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
