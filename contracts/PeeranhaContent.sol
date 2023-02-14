@@ -351,7 +351,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     function getVersion() public pure returns (uint256) {
-        return 2;
+        return 3;
     }
 
     // Used for unit tests
