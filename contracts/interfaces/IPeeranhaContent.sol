@@ -7,6 +7,7 @@ import "../libraries/CommonLib.sol";
 
 interface IPeeranhaContent {
     function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external;
+    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, CommonLib.MessengerType messengerType, string memory handle) external;
     function createReply(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external;
     function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external;
     function createComment(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external;

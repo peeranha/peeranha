@@ -22,7 +22,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
-    
+
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
 
@@ -256,7 +256,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
-        _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
 
     /**
@@ -314,7 +313,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      *
      * Requirements:
      *
-     * - Only admin can call the action.
+     * - Only protocol admin can call the action.
      */
     function configureNewAchievement(
         uint64 maxCount,
@@ -326,6 +325,23 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
+    }
+
+    /**
+     * @dev Mint NFT.
+     *
+     * Requirements:
+     *
+     * - Only protocol admin can call the action.
+     */
+    function mintManualNFT(
+        address user,
+        uint64 achievementId
+    )
+        external
+    {
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
+        userContext.achievementsContainer.mintManualNFT(user, achievementId);
     }
 
     /**
@@ -519,7 +535,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
     
     function getVersion() public pure returns (uint256) {
-        return 1;
+        return 3;
     }
 
     // Used for unit tests

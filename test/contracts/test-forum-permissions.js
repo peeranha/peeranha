@@ -1042,7 +1042,7 @@ describe("Test permissions", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
             await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)
 
@@ -1069,7 +1069,7 @@ describe("Test permissions", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)
             await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1097,7 +1097,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
 
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
@@ -1129,7 +1129,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
 
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1162,7 +1162,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
@@ -1194,7 +1194,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
@@ -1227,7 +1227,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1266,7 +1266,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1305,7 +1305,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1344,7 +1344,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1382,7 +1382,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1412,7 +1412,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1443,7 +1443,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1472,7 +1472,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1501,7 +1501,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1530,7 +1530,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[3].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1558,7 +1558,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1588,7 +1588,7 @@ describe("Test permissions", function () {
             await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
             await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
             await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[2].address, 1);
     
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
             await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -1618,7 +1618,7 @@ describe("Test permissions", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-            await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
             await peeranhaUser.addUserRating(signers[2].address, 25, 1);
 
             await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)

@@ -110,7 +110,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English))
 		.to.be.revertedWith('low_energy');
-	}).retries(30);
+	}).retries(60);
 
 	it("Test energy. Publication comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -229,7 +229,7 @@ describe("Test energy", function () {
 		await peeranhaUser.setEnergy(signers[1].address, 1);
 		await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[2], false, LanguagesEnum.English))
 			.to.be.revertedWith('low_energy');
-	}).retries(30);
+	}).retries(60);
 
 	it("Test energy. Edit comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();

@@ -47,7 +47,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external override {
         dispatcherCheck(user);
-        posts.createPost(user, communityId, ipfsHash, postType, tags, language);
+        posts.createPost(user, communityId, ipfsHash, postType, tags, language, bytes32(0x0));
     }
 
     /**
@@ -79,6 +79,20 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     /**
+     * @dev Create new post by bot.
+     *
+     * Requirements:
+     *
+     * - must be a new post.
+     * - must be a community.
+     * - must be tags.
+     * - must be a bot.
+    */
+    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, messengerType, handle);
+    }
+
+    /**
      * @dev Create new reply.
      *
      * Requirements:
@@ -88,7 +102,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createReply(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
         dispatcherCheck(user);
-        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply, language);
+        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply, language, bytes32(0x0));
     }
 
     /**
@@ -267,7 +281,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getReply(uint256 postId, uint16 replyId) external view returns (PostLib.Reply memory) {
         return posts.getReply(postId, replyId);
-    }    
+    }
 
     /**
      * @dev Get a comment by index.
@@ -300,7 +314,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post/reply/comment
     */
     function getItemLanguage(uint256 postId, uint16 replyId, uint8 commentId) external view returns (uint256) {
-        return uint256(posts.getItemProperty(uint8(PostLib.PostProperties.Language), postId, replyId, commentId));
+        return uint256(posts.getItemProperty(uint8(PostLib.ItemProperties.Language), postId, replyId, commentId));
     }
 
     /**
@@ -348,7 +362,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     }
 
     function getVersion() public pure returns (uint256) {
-        return 2;
+        return 3;
     }
 
     // Used for unit tests

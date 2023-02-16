@@ -85,7 +85,7 @@ const commentTranslation = {
   content: "Test comment translation to reply"
 };
 
-const AchievementsType = { "Rating": 0 }
+const AchievementsType = { "Rating": 0, "Manual": 1 }
 const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3 }
 
 const achievements = (env) => {

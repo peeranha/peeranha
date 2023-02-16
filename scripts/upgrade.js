@@ -61,12 +61,12 @@ async function main() {
   const peeranhaContent = await upgrades.upgradeProxy(CONTENT_ADDRESS, PeeranhaContent, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("PeeranhaContent upgraded at:", peeranhaContent.address);
   
-  /*const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
+  const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   console.log("Upgrading PeeranhaNFT...");
   const peeranhaNFT = await upgrades.upgradeProxy(NFT_ADDRESS, PeeranhaNFT, {timeout: 0});
   console.log("Peeranha NFT upgraded at:", peeranhaNFT.address);
 
-  const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
+  /*const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
   console.log("Upgrading PeeranhaToken...");
   const peeranhaToken = await upgrades.upgradeProxy(TOKEN_ADDRESS, PeeranhaToken, {timeout: 0});
   console.log("Peeranha token upgraded at:", peeranhaToken.address);*/
