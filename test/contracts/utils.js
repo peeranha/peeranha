@@ -353,7 +353,7 @@ const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
 const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
-const AchievementsType = { "Rating":0, "Manual":1 }
+const AchievementsType = { "Rating":0, "Manual":1, "SoulRating": 2 }
 
                                                             // energy
 const energyDownVotePost = 5;

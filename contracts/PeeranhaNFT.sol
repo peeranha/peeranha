@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
+import "./libraries/CommonLib.sol";
 import "./libraries/AchievementCommonLib.sol";
 import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
@@ -26,7 +27,24 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ChildMintableERC721Upgradeable) {
+    AchievementCommonLib.AchievementsType nftType = getNftType(amount);
+    if (nftType == AchievementCommonLib.AchievementsType.SoulRating) {
+      require(from == address(0) || to == address(0), "You_can_not_transfer_soul_bound");
+    }
+
     super._beforeTokenTransfer(from, to, amount);
+  }
+
+  function getNftType(
+    uint256 NftId
+  ) 
+    private
+    view
+    returns (AchievementCommonLib.AchievementsType)
+  {
+    uint64 achievementId = uint64((NftId / NFTLib.POOL_NFT) + 1);
+    NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
+    return achievementNFT.achievementsType;
   }
 
   function configureNewAchievementNFT(
@@ -41,7 +59,6 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   {
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[++achievementsNFTContainer.achievementsCount];
     require(achievementId == achievementsNFTContainer.achievementsCount, "Wrong achievement Id");
-    require(maxCount > 0, "invalid_max_count");
     require(maxCount < NFTLib.POOL_NFT, "Max count of achievements must be less than 1 000 000");
 
     achievementNFT.maxCount = maxCount;
@@ -61,8 +78,9 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   {
     require(achievementsNFTContainer.achievementsCount >= achievementId && achievementId != 0, "NFT does not exist");
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
+    require(CommonLib.isNotGivenNFTS(achievementNFT.maxCount, achievementNFT.factCount), "all_nfts_was_given");
     achievementNFT.factCount++;
-    uint64 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;    // uint256?
+    uint256 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
 
     _safeMint(user, tokenId);          // || _mint
     _setTokenURI(tokenId, achievementNFT.achievementURI);
