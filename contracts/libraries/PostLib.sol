@@ -133,9 +133,9 @@ library PostLib  {
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
     event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);     // dont delete (for indexing)
-    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
-    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
-    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 indexed replyId, uint8 commentId, Language language);
+    event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
     event PostTypeChanged(address indexed user, uint256 indexed postId, PostType oldPostType);
     event PostCommunityChanged(address indexed user, uint256 indexed postId, uint32 indexed oldCommunityId);
@@ -171,9 +171,9 @@ library PostLib  {
         );
 
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
-        PostContainer storage post = self.posts[++self.postCount];
-
         require(tags.length > 0, "At least one tag is required.");
+
+        PostContainer storage post = self.posts[++self.postCount];
         post.info.tags = tags;
 
         post.info.ipfsDoc.hash = ipfsHash;
