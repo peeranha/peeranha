@@ -71,7 +71,7 @@ library AchievementLib {
       achievementConfig = achievementsContainer.achievementsConfigs[i];
       
       for (uint j; j < achievementsTypes.length; j++) {
-        if(achievementsTypes[j] == achievementConfig.achievementsType) {  // test
+        if(achievementsTypes[j] == achievementConfig.achievementsType) {
           if (
             achievementsMetadata.metadata[i].communityId != communityId &&
             achievementsMetadata.metadata[i].communityId != 0
