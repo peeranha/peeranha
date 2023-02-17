@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./libraries/NFTLib.sol";
-import "./libraries/CommonLib.sol";
 import "./libraries/AchievementCommonLib.sol";
 import "./base/ChildMintableERC721Upgradeable.sol";
 import "./interfaces/IPeeranhaNFT.sol";
@@ -78,7 +77,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   {
     require(achievementsNFTContainer.achievementsCount >= achievementId && achievementId != 0, "NFT does not exist");
     NFTLib.AchievementNFTsConfigs storage achievementNFT = achievementsNFTContainer.achievementsNFTConfigs[achievementId];
-    require(CommonLib.isNotGivenNFTS(achievementNFT.maxCount, achievementNFT.factCount), "all_nfts_was_given");
+    require(AchievementCommonLib.isAchievementAvailable(achievementNFT.maxCount, achievementNFT.factCount), "all_nfts_was_given");
     achievementNFT.factCount++;
     uint256 tokenId = (achievementId - 1) * NFTLib.POOL_NFT + achievementNFT.factCount;
 

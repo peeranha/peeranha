@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IPeeranhaNFT.sol";
 import "./AchievementCommonLib.sol";
-import "./CommonLib.sol";
 
 
 /// @title AchievementLib
@@ -76,7 +75,7 @@ library AchievementLib {
             achievementsMetadata.metadata[i].communityId != communityId &&
             achievementsMetadata.metadata[i].communityId != 0
           ) continue;
-          if (!CommonLib.isNotGivenNFTS(achievementConfig.maxCount, achievementConfig.factCount)) continue;
+          if (!AchievementCommonLib.isAchievementAvailable(achievementConfig.maxCount, achievementConfig.factCount)) continue;
           if (achievementConfig.lowerBound > currentValue) continue;
           if (achievementsContainer.userAchievementsIssued[user][i]) continue; //already issued
           achievementConfig.factCount++;

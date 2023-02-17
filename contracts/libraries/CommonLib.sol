@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import "./NFTLib.sol";
 
 /// @title CommonLib
 /// @notice
@@ -75,9 +74,5 @@ library CommonLib {
     assembly {
         result := mload(add(source, 32))
     }
-  }
-
-  function isNotGivenNFTS(uint64 maxCount, uint64 factCount) internal pure returns (bool) {   /// name!!!!
-    return maxCount > factCount || (maxCount == 0 && factCount < NFTLib.POOL_NFT);
   }
 }
