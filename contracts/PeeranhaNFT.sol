@@ -26,7 +26,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ChildMintableERC721Upgradeable) {
-    AchievementCommonLib.AchievementsType nftType = getNftType(amount);
+    AchievementCommonLib.AchievementsType nftType = getAchievementTypeForNft(amount);
     if (nftType == AchievementCommonLib.AchievementsType.SoulRating) {
       require(from == address(0) || to == address(0), "You_can_not_transfer_soul_bound");
     }
@@ -34,7 +34,7 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function getNftType(
+  function getAchievementTypeForNft(
     uint256 NftId
   ) 
     private

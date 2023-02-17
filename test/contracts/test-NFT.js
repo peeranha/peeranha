@@ -724,7 +724,7 @@ describe("Test NFT", function () {
 			await peeranhaNFT.transferFrom(accountDeployed, signers[1].address, 1000001);
 		});
 
-		// test getNftType() function ↑↓
+		// test getAchievementTypeForNft() function ↑↓
 
 		it("Test transefer soulRating NFT, rating nft exist (soul bound second)", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
