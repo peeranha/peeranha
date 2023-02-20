@@ -136,23 +136,18 @@ async function contentFunctions() {
 		}
 	});
   const peeranhaContent = await PeeranhaContent.attach(CONTENT_ADDRESS);
-
-  // const txObj = await peeranhaContent.createPost(1, await getBytes32FromData(testPost), PostTypeEnum.ExpertPost, [1], Language.Chinese);
-  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
-  // const txObj = await peeranhaContent.createReply(1, 0, await getBytes32FromData(testReply), true, Language.Spanish);
-  // const txObj = await peeranhaContent.editReply(1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
-  // const txObj = await peeranhaContent.createComment(1, 1, await getBytes32FromData(testComment), Language.Chinese);
-  // const txObj = await peeranhaContent.editComment(1, 0, 1, await getBytes32FromData(testComment), Language.Vietnamese)
-  // const txObj = await peeranhaContent.updateDocumentationTree(1, await getBytes32FromData(testDocumentating));
-  // const txObj = await peeranhaContent.createTranslations(1, 1, 1, [Language.English], [await getBytes32FromData(commentTranslation)]);
-  // const txObj = await peeranhaContent.editTranslations(1, 1, 1, [Language.English], [await getBytes32FromData(commentTranslation)]);
-  // const txObj = await peeranhaContent.deleteTranslations(1, 0, 0, [Language.English]);
- 
   const signers = await ethers.getSigners();
-  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.Documentatation, []);
-  // const txObj = await peeranhaContent.editPost(signers[0].address, 8, await getBytes32FromData(testPost), []);
-  // const txObj = await peeranhaContent.createReply(signers[0].address, 3, 0, await getBytes32FromData(testReply), true);
-  // const txObj = await peeranhaContent.editReply(signers[0].address, 3, 2, await getBytes32FromData(testReply), true);
+
+  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.ExpertPost, [1], Language.Chinese);
+  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
+  // const txObj = await peeranhaContent.createReply(signers[0].address, 2, 0, await getBytes32FromData(testReply), true, Language.Chinese);
+  // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
+  // const txObj = await peeranhaContent.createComment(signers[0].address, 10, 1, await getBytes32FromData(testComment), Language.English);
+  // const txObj = await peeranhaContent.editComment(signers[0].address, 2, 1, 1, await getBytes32FromData(testComment), Language.English)
+  // const txObj = await peeranhaContent.updateDocumentationTree(1, await getBytes32FromData(testDocumentating));
+  // const txObj = await peeranhaContent.createTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
+  // const txObj = await peeranhaContent.editTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
+  // const txObj = await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [Language.English]);
   const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
