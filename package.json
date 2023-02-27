@@ -41,7 +41,7 @@
     "force-import:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
     "propose-upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/propose-upgrade.js && node scripts/change-env-values.js 0",
     "transfer-ownership:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/transfer-ownership.js && node scripts/change-env-values.js 0",
-    "post-action-mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
+    "post-action": "npx hardhat run --network mumbai scripts/post-action.js",
     "query-versions:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/query-versions.js && node scripts/change-env-values.js 0",
     "grant-community-admin:test": "cp env-test.json env.json && npx hardhat run --network mumbai scripts/grant-community-admin.js",
     "grant-community-admin:prod": "cp env-prod.json env.json && npx hardhat run --network polygon scripts/grant-community-admin.js",

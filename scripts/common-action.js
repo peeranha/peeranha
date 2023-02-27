@@ -30,7 +30,7 @@ const testTag = {
   description: "testNewTag1",
 };
 
-const AchievementsType = { "Rating": 0, "Manual": 1 }
+const AchievementsType = { "Rating": 0, "Manual": 1, "SoulRating": 2 }
 
 const achievements = (env) => {
   return [
