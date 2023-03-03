@@ -203,6 +203,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get user rating and status "isActive" in a given community. Status has flag true if user's rating changed 
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and existing community.
+     */
+    function getUserRatingCollection(address addr, uint32 communityId) public view returns (UserLib.UserRating memory) {
+        return userContext.userRatingCollection.getUserRatingCollection(addr, communityId);
+    }
+
+    /**
      * @dev Check user existence.
      */
     function isUserExists(address addr) public view returns (bool) {
