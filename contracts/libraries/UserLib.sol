@@ -288,8 +288,11 @@ library UserLib {
   }
 
   function getUserRating(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (int32) {
-    int32 rating = self.communityRatingForUser[addr].userRating[communityId].rating;
-    return rating;
+    return self.communityRatingForUser[addr].userRating[communityId].rating;
+  }
+
+  function getUserRatingCollection(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (UserRating memory) {
+    return self.communityRatingForUser[addr].userRating[communityId];
   }
 
   /// @notice Check user existence
