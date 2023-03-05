@@ -6,7 +6,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
 
-const { INFURA_API_KEY, ADMIN_PRIVATE_KEY, MUMBAI_API_KEY, GOERLI_API_KEY, DEFENDER_TEAM_API_KEY, DEFENDER_TEAM_API_SECRET_KEY } = require('./secrets.json');
+const { INFURA_API_KEY, ADMIN_PRIVATE_KEY, POLYGON_API_KEY, GOERLI_API_KEY, DEFENDER_TEAM_API_KEY, DEFENDER_TEAM_API_SECRET_KEY } = require('./secrets.json');
 
 
 /**
@@ -48,7 +48,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      polygonMumbai: MUMBAI_API_KEY,
+      polygonMumbai: POLYGON_API_KEY,
+      polygon: POLYGON_API_KEY,
       goerli: GOERLI_API_KEY
     }
   }
