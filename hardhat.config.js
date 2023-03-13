@@ -44,7 +44,22 @@ module.exports = {
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 10000000000
-    }
+    },
+    beresheet: {
+      url: `https://beresheet-evm.jelliedowl.net`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 2022,
+      gas: 2100000,
+      gasPrice: 10000000000
+    },
+    edgeware: {
+      url: `https://edgeware-evm.jelliedowl.net/`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 2021,
+      gas: 2100000,
+      gasPrice: 10000000000
+    },
+
   },
   etherscan: {
     apiKey: {

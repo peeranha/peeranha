@@ -107,6 +107,7 @@ const testDocumentating = {
 async function main() {
   // await contentFunctions();
   await userFunctions();
+  // await communityFunctions();
 }
 
 async function userFunctions() {
@@ -136,7 +137,6 @@ async function communityFunctions() {
   const peeranhaCommunity = await PeeranhaCommunity.attach(COMMUNITY_ADDRESS);
 
   const signers = await ethers.getSigners();
-
   const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -155,11 +155,11 @@ async function contentFunctions() {
 
   const signers = await ethers.getSigners();
 
-  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.Documentatation, []);
+  const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.CommonPost, [1]);
   // const txObj = await peeranhaContent.editPost(signers[0].address, 8, await getBytes32FromData(testPost), []);
   // const txObj = await  peeranhaContent.createReply(signers[0].address, 3, 0, await getBytes32FromData(testReply), true);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 3, 2, await getBytes32FromData(testReply), true);
-  const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
+  // const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
