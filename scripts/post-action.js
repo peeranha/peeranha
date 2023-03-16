@@ -87,8 +87,8 @@ const testDocumentating = {
 
 
 async function main() {
-  await contentFunctions();
-  // await userFunctions();
+  // await contentFunctions();
+  await userFunctions();
   // await communityFunctions();
 }
 
@@ -102,7 +102,7 @@ async function userFunctions() {
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
-  // const txObj = await peeranhaUser.addUserRating("0x30Cc2CA9115E8869F4D69B683Af49b3F7d96925b", 10000, 1);
+  // const txObj = await peeranhaUser.addUserRating("0x31339c62C0A44b875297945edb93D88092b5fa91", 100, 2);
   // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")

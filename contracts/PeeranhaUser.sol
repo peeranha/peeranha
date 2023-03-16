@@ -30,6 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    AchievementLib.AchievementsMetadata achievementsMetadata;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -203,6 +204,17 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get user rating and status "isActive" in a given community. Status has flag true if user's rating changed 
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and existing community.
+     */
+    function getUserRatingCollection(address addr, uint32 communityId) public view returns (UserLib.UserRating memory) {
+        return userContext.userRatingCollection.getUserRatingCollection(addr, communityId);
+    }
+
+    /**
      * @dev Check user existence.
      */
     function isUserExists(address addr) public view returns (bool) {
@@ -319,12 +331,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         uint64 maxCount,
         int64 lowerBound,
         string memory achievementURI,
+        uint32 communityId,
         AchievementCommonLib.AchievementsType achievementsType
     )   
         external
     {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        userContext.achievementsContainer.configureNewAchievement(maxCount, lowerBound, achievementURI, achievementsType);
+        onlyExistingAndNotFrozenCommunity(communityId);
+        userContext.achievementsContainer.configureNewAchievement(achievementsMetadata, maxCount, lowerBound, achievementURI, communityId, achievementsType);
     }
 
     /**
@@ -401,7 +415,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
     }
 
     /**
@@ -415,7 +429,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUsersRating(userContext, usersRating, communityId);
+        UserLib.updateUsersRating(userContext, achievementsMetadata, usersRating, communityId);
     }
 
     /**
@@ -506,6 +520,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     function onlyExistingAndNotFrozenCommunity(uint32 communityId) private {
+        if (communityId == 0) return;
         userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
     }
 
@@ -538,13 +553,23 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return 3;
     }
 
+    /**
+     * @dev Get achievement's community Id.
+     * - Only for soul bound achievements
+    */
+    function getAchievementCommunity(uint64 achievementId) external view returns (uint32) {
+        return achievementsMetadata.metadata[achievementId].communityId;
+    }
+
     // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
-        UserLib.updateUserRating(userContext, userAddr, rating, communityId);
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
+        UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
     }*/
 
     // Used for unit tests
     /*function setEnergy(address userAddr, uint16 energy) public {
+        checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         userContext.users.getUserByAddress(userAddr).energy = energy;
     }*/
 }
