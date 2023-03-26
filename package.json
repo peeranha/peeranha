@@ -38,7 +38,7 @@
     "force-import:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
     "upgrade:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 0 && npx hardhat run --network polygon scripts/upgrade.js",
     "upgrade-content:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-content.js && node scripts/change-env-values.js 0",
-    "force-import:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
+    "force-import:prod": "cp env-prod.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network polygon scripts/force-import.js && node scripts/change-env-values.js 0",
     "propose-upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/propose-upgrade.js && node scripts/change-env-values.js 0",
     "transfer-ownership:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/transfer-ownership.js && node scripts/change-env-values.js 0",
     "post-action": "npx hardhat run --network mumbai scripts/post-action.js",
@@ -50,6 +50,7 @@
     "init-nfts:prod": "cp env-prod.json env.json && npx hardhat run --network polygon scripts/init-nfts.js",
     "upload-forum-data": "npx hardhat run --network mumbai scripts/upload-forum-data.js",
     "verify-mumbai": "npx hardhat verify 0x71C117c5058eB04619481e006E69F0218Edd06da --network mumbai",
+    "verify-polygon": "npx hardhat verify 0x76f56341D3702BD2e536200fAab35d7E59Cc0BF7 --network polygon",
     "verify-goerli": "npx hardhat verify 0xE61d3E082e416F9a2e3398E97A41ec3F26a6b6A3 --network goerli"
   },
   "keywords": [],
