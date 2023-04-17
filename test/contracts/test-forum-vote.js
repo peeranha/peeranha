@@ -6,7 +6,7 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, LanguagesEnum, DefaultCommunityId
 } = require('./utils');
 
 ///
@@ -35,7 +35,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
@@ -57,7 +57,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
@@ -79,7 +79,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
@@ -106,7 +106,7 @@ describe("Test vote", function () {
 			const oldUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 
@@ -131,7 +131,7 @@ describe("Test vote", function () {
 			const oldUserRating = await peeranhaUser.getUserRating(signers[1].address, 1)
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 
@@ -154,7 +154,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
@@ -176,7 +176,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1)).to.be.revertedWith('error_vote_post');
 
 			
@@ -195,7 +195,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1)).to.be.revertedWith('error_vote_post');
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1)
@@ -213,7 +213,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1)).to.be.revertedWith('error_vote_post');
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1)
@@ -235,7 +235,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -259,7 +259,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -283,7 +283,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -310,7 +310,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			
@@ -335,7 +335,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
@@ -360,7 +360,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
@@ -387,7 +387,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0)).to.be.revertedWith('error_vote_post');
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -405,7 +405,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0)).to.be.revertedWith('error_vote_post');
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -423,7 +423,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0)).to.be.revertedWith('error_vote_post');
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -445,7 +445,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
@@ -469,7 +469,7 @@ describe("Test vote", function () {
 			await registerTwoUsers(peeranhaUser, signers, hashContainer);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
@@ -493,7 +493,7 @@ describe("Test vote", function () {
 			await registerTwoUsers(peeranhaUser, signers, hashContainer);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
@@ -517,7 +517,7 @@ describe("Test vote", function () {
 			await registerTwoUsers(peeranhaUser, signers, hashContainer);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
@@ -541,7 +541,7 @@ describe("Test vote", function () {
 			await registerTwoUsers(peeranhaUser, signers, hashContainer);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
@@ -565,7 +565,7 @@ describe("Test vote", function () {
 			await registerTwoUsers(peeranhaUser, signers, hashContainer);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
@@ -593,7 +593,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -619,7 +619,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -645,7 +645,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -672,7 +672,7 @@ describe("Test vote", function () {
 			await peeranhaUser.addUserRating(signers[1].address, 10, 1);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -699,7 +699,7 @@ describe("Test vote", function () {
 			await peeranhaUser.addUserRating(signers[1].address, 10, 1);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -725,7 +725,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -755,8 +755,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -787,8 +787,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 
@@ -819,8 +819,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -848,8 +848,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -876,8 +876,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -906,8 +906,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -938,7 +938,7 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
@@ -959,7 +959,7 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			
 			await wait(deleteTime);	
@@ -979,7 +979,7 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			
 			await wait(deleteTime);	
@@ -1000,8 +1000,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
 
@@ -1025,8 +1025,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);		
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
 
@@ -1051,8 +1051,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 
@@ -1078,8 +1078,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const userActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 
@@ -1104,8 +1104,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 		
@@ -1132,8 +1132,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -1161,7 +1161,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);	
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);	
 			await peeranhaContent.deletePost(signers[0].address, 1);
 
          const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1178,8 +1178,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
          const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1199,9 +1199,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + FirstExpertReply);
@@ -1221,9 +1221,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + FirstCommonReply);
@@ -1243,15 +1243,15 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + DeleteOwnReply);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + FirstExpertReply);
 
@@ -1270,9 +1270,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1282,7 +1282,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(false);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + FirstCommonReply);
 
@@ -1302,15 +1302,15 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
 			const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + DeleteOwnReply);
 
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await expect(newUserRating).to.equal(StartRating + FirstExpertReply);
 
@@ -1330,9 +1330,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await wait(QuickReplyTime);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1342,7 +1342,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(false);
 
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await expect(newUserRating).to.equal(StartRating + FirstCommonReply);
 
@@ -1364,8 +1364,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
@@ -1385,8 +1385,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
@@ -1406,8 +1406,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1417,7 +1417,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(true);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + FirstExpertReply + QuickExpertReply);
 
@@ -1436,8 +1436,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1447,7 +1447,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(true);
 
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(newUserRating).to.equal(StartRating + DeleteOwnReply + FirstCommonReply + QuickCommonReply);
 
@@ -1467,8 +1467,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1478,7 +1478,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(true);
 
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await expect(newUserRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
@@ -1498,8 +1498,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
@@ -1509,7 +1509,7 @@ describe("Test vote", function () {
 			await expect(reply.isFirstReply).to.equal(true);
 			await expect(reply.isQuickReply).to.equal(true);
 
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const newUserRating = await peeranhaUser.getUserRating(signers[2].address, 1);
 			await expect(newUserRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
@@ -1530,8 +1530,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRatingWithoutAction);
@@ -1550,8 +1550,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
             const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating).to.equal(StartRatingWithoutAction);
@@ -1574,8 +1574,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -1597,8 +1597,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -1623,8 +1623,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -1646,8 +1646,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -1673,8 +1673,8 @@ describe("Test vote", function () {
 			await peeranhaUser.addUserRating(signers[1].address, 30, 1);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 
@@ -1698,8 +1698,8 @@ describe("Test vote", function () {
 			await peeranhaUser.addUserRating(signers[1].address, 30, 1);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 
@@ -1725,8 +1725,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
@@ -1749,8 +1749,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 
@@ -1775,8 +1775,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1)).to.be.revertedWith('error_vote_reply');
 
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
@@ -1794,8 +1794,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1)).to.be.revertedWith('error_vote_reply');
 
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
@@ -1816,8 +1816,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0)).to.be.revertedWith('error_vote_reply');
 
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
@@ -1835,8 +1835,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false)
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English)
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0)).to.be.revertedWith('error_vote_reply');
 
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
@@ -1862,9 +1862,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -1890,9 +1890,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const userRating2 = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -1921,9 +1921,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 1);
@@ -1953,9 +1953,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 1);
@@ -1985,9 +1985,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 0);
@@ -2019,9 +2019,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 0);
@@ -2056,9 +2056,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 			await peeranhaContent.connect(signers[2]).deleteReply(signers[2].address, 1, 2);
@@ -2080,9 +2080,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 			await peeranhaContent.connect(signers[2]).deleteReply(signers[2].address, 1, 2);
@@ -2108,9 +2108,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 1);
@@ -2119,7 +2119,7 @@ describe("Test vote", function () {
 			await peeranhaContent.connect(signers[2]).deleteReply(signers[2].address, 1, 2);
 
 			await wait(QuickReplyTime);
-			await  peeranhaContent.connect(signers[3]).createReply(signers[3].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.connect(signers[3]).createReply(signers[3].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 3, 0, 1);
 			await peeranhaContent.connect(signers[3]).deleteReply(signers[3].address, 1, 3);
 
@@ -2142,9 +2142,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 1);
@@ -2172,9 +2172,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 0);
@@ -2199,9 +2199,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.voteItem(signers[0].address, 1, 2, 0, 0);
@@ -2229,8 +2229,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
@@ -2238,7 +2238,7 @@ describe("Test vote", function () {
 			const firstReply = await peeranhaContent.getReply(1, 1);
 			await expect(firstReply.isFirstReply).to.equal(true);
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			const secondReply = await peeranhaContent.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
@@ -2258,8 +2258,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
@@ -2268,7 +2268,7 @@ describe("Test vote", function () {
 			await expect(firstReply.isFirstReply).to.equal(true);
 
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			const secondReply = await peeranhaContent.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
@@ -2287,8 +2287,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
@@ -2296,7 +2296,7 @@ describe("Test vote", function () {
 			const firstReply = await peeranhaContent.getReply(1, 1);
 			await expect(firstReply.isFirstReply).to.equal(true);
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			const secondReply = await peeranhaContent.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
@@ -2315,8 +2315,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
@@ -2325,7 +2325,7 @@ describe("Test vote", function () {
 			await expect(firstReply.isFirstReply).to.equal(true);
 
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			const secondReply = await peeranhaContent.getReply(1, 2);
 			await expect(secondReply.isFirstReply).to.equal(true);
@@ -2348,8 +2348,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await wait(deleteTime);
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
@@ -2369,8 +2369,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await wait(deleteTime);
@@ -2391,8 +2391,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await wait(deleteTime);
 			await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
@@ -2412,8 +2412,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await wait(deleteTime);
@@ -2434,8 +2434,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -2457,8 +2457,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -2480,8 +2480,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -2503,8 +2503,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -2526,8 +2526,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await wait(deleteTime);
@@ -2551,8 +2551,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[1].address, 1);          
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -2573,8 +2573,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
@@ -2597,8 +2597,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2615,8 +2615,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2637,8 +2637,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2657,8 +2657,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2679,8 +2679,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2698,8 +2698,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			
 			const oldUserRating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
@@ -2722,9 +2722,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -2758,9 +2758,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -2796,9 +2796,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -2826,9 +2826,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser2Rating = await peeranhaUser.getUserRating(signers[1].address, 1);
@@ -2859,9 +2859,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser3Rating = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -2889,9 +2889,9 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
-			await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[2], false, LanguagesEnum.English);
 			
 			const oldUser1Rating = await peeranhaUser.getUserRating(signers[0].address, 1);
 			const oldUser3Rating = await peeranhaUser.getUserRating(signers[2].address, 1);
@@ -2921,7 +2921,7 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).deletePost(signers[1].address, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1)).to.be.revertedWith('Post_deleted.');
 		});
@@ -2935,7 +2935,7 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).deletePost(signers[1].address, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0)).to.be.revertedWith('Post_deleted.');
 		});
@@ -2949,8 +2949,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deletePost(signers[0].address, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1)).to.be.revertedWith('Post_deleted.');
 		});
@@ -2964,8 +2964,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deletePost(signers[0].address, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0)).to.be.revertedWith('Post_deleted.');
 		});
@@ -2979,8 +2979,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deletePost(signers[0].address, 1);
 			await expect(peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1)).to.be.revertedWith('Post_deleted.');
 		});
@@ -2997,8 +2997,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1)).to.be.revertedWith('Reply_deleted.');
 		});
@@ -3012,8 +3012,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0)).to.be.revertedWith('Reply_deleted.');
 		});
@@ -3027,8 +3027,8 @@ describe("Test vote", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[2]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.deleteReply(signers[0].address, 1, 1);
 			await expect(peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1)).to.be.revertedWith('Reply_deleted.');
 		});
@@ -3048,7 +3048,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0)
 
@@ -3072,7 +3072,7 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3095,8 +3095,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3120,8 +3120,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 1)
@@ -3144,8 +3144,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3169,8 +3169,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3193,7 +3193,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0)
 
@@ -3217,7 +3217,7 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3240,8 +3240,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3265,8 +3265,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 1)
@@ -3289,8 +3289,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3314,8 +3314,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3338,7 +3338,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0)
 
@@ -3362,7 +3362,7 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3385,8 +3385,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3410,8 +3410,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 1)
@@ -3434,8 +3434,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3459,8 +3459,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3483,7 +3483,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0)
 
@@ -3507,7 +3507,7 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3530,8 +3530,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3555,8 +3555,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 1)
@@ -3579,8 +3579,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0)
 
@@ -3604,8 +3604,8 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3628,7 +3628,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0)
 
@@ -3652,7 +3652,7 @@ describe("Test vote", function () {
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
 			await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[3].address, 1);
 
-			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1)
 			await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 1)
@@ -3676,8 +3676,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 1, 1)).to.be.revertedWith('error_vote_comment');
 		});
 
@@ -3691,8 +3691,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 1, 1)).to.be.revertedWith('error_vote_comment');
 		});
 	});
@@ -3709,8 +3709,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 1, 0)).to.be.revertedWith('error_vote_comment');
 		});
 
@@ -3724,8 +3724,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
 			await expect(peeranhaContent.voteItem(signers[0].address, 1, 0, 1, 0)).to.be.revertedWith('error_vote_comment');
 		});
 	});
@@ -3742,7 +3742,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 
 			const post = await peeranhaContent.getPost(1);
@@ -3765,7 +3765,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0);
 
 			const post = await peeranhaContent.getPost(1);
@@ -3788,8 +3788,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -3812,8 +3812,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0);
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -3838,7 +3838,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 1);
 
 			const post = await peeranhaContent.getPost(1);
@@ -3860,7 +3860,7 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 0, 0, 0);
 
 			const post = await peeranhaContent.getPost(1);
@@ -3882,8 +3882,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 1);
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -3905,8 +3905,8 @@ describe("Test vote", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(signers[1].address, 100, 1);
 			
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).voteItem(signers[1].address, 1, 1, 0, 0);
 
 			const reply = await peeranhaContent.getReply(1, 1);
@@ -3930,7 +3930,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
 			await expect(votedUser).to.eql([signers[0].address]);
@@ -3962,7 +3962,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
@@ -3985,7 +3985,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
@@ -4008,7 +4008,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
 			await expect(votedUser).to.eql([signers[0].address]);
@@ -4039,7 +4039,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
@@ -4062,7 +4062,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
@@ -4085,8 +4085,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
@@ -4118,8 +4118,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -4142,8 +4142,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
 			await expect(votedUser).to.eql([signers[0].address]);
@@ -4174,8 +4174,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
@@ -4198,8 +4198,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
@@ -4231,8 +4231,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -4255,8 +4255,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 1, 0);
 			await expect(votedUser).to.eql([signers[0].address]);
@@ -4287,8 +4287,8 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1]);
-			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);		// cancel vote
 			await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
@@ -4313,7 +4313,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 0, 0, 1);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);
@@ -4347,7 +4347,7 @@ describe("Test vote", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
 			await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 0, 0, 1);
 			const votedUser = await peeranhaContent.getVotedUsers(1, 0, 0);

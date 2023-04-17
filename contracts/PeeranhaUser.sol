@@ -500,7 +500,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             return;
         }
 
-        require(false, message);
+        revert(message);
     }
     
     function hasModeratorRole(

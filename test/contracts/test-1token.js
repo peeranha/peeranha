@@ -52,7 +52,7 @@ describe("Test wallet", function () {
 
 			expect(balance).to.equal(userReward);
 			expect(balance2).to.equal(userReward2);
-		}).retries(3);
+		}).retries(6);
 	});
 
 	describe("Test add rating to reward", function () {

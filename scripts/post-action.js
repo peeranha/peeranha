@@ -14,7 +14,7 @@ const {
   IPFS_API_URL_THE_GRAPH,
   INFURA_API_KEY,
 } = require("../env.json");
-const { testAccount, NFT, achievements, testCommunity } = require("./common-action");
+const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
 const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
@@ -49,24 +49,6 @@ function getBytes32FromIpfsHash(ipfsListing) {
       .toString("hex")
   );
 }
-
-const testTag = {
-  title: "testTagNew",
-  description: "testNewTag1"
-};
-
-const testPost = {
-  title: "Test post",
-  content: "Test post description"
-};
-
-const testReply = {
-  content: "Second reply postID 1"
-};
-
-const testComment = {
-  content: "Edited First comment postID 1"
-};
 
 async function getTags(countTags) {
   let tags = [];
@@ -139,6 +121,7 @@ async function communityFunctions() {
   const signers = await ethers.getSigners();
 
   const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
+  // const txObj = await peeranhaCommunity.updateCommunity(signers[0].address, 3, await getBytes32FromData(testCommunity));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
@@ -153,13 +136,18 @@ async function contentFunctions() {
 		}
 	});
   const peeranhaContent = await PeeranhaContent.attach(CONTENT_ADDRESS);
-
   const signers = await ethers.getSigners();
 
-  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.Documentatation, []);
-  // const txObj = await peeranhaContent.editPost(signers[0].address, 8, await getBytes32FromData(testPost), []);
-  // const txObj = await  peeranhaContent.createReply(signers[0].address, 3, 0, await getBytes32FromData(testReply), true);
-  // const txObj = await peeranhaContent.editReply(signers[0].address, 3, 2, await getBytes32FromData(testReply), true);
+  // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.ExpertPost, [1], Language.Chinese);
+  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
+  // const txObj = await peeranhaContent.createReply(signers[0].address, 2, 0, await getBytes32FromData(testReply), true, Language.Chinese);
+  // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
+  // const txObj = await peeranhaContent.createComment(signers[0].address, 10, 1, await getBytes32FromData(testComment), Language.English);
+  // const txObj = await peeranhaContent.editComment(signers[0].address, 2, 1, 1, await getBytes32FromData(testComment), Language.English)
+  // const txObj = await peeranhaContent.updateDocumentationTree(1, await getBytes32FromData(testDocumentating));
+  // const txObj = await peeranhaContent.createTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
+  // const txObj = await peeranhaContent.editTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
+  // const txObj = await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [Language.English]);
   const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
