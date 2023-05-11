@@ -233,7 +233,7 @@ library PostLib  {
             postContainer.info.author,
             postContainer.info.communityId,
             UserLib.Action.PublicationReply,
-            parentReplyId == 0 && isOfficialReply ? 
+            /*parentReplyId == 0 && */isOfficialReply ?
                 UserLib.ActionRole.CommunityAdmin :
                 UserLib.ActionRole.NONE,
             true
@@ -267,24 +267,21 @@ library PostLib  {
 
         replyContainer = postContainer.replies[++postContainer.info.replyCount];
         uint32 timestamp = CommonLib.getTimestamp();
-        if (parentReplyId == 0) {
-            if (isOfficialReply) {
-                postContainer.info.officialReply = postContainer.info.replyCount;
-            }
+        if (isOfficialReply) {
+            postContainer.info.officialReply = postContainer.info.replyCount;
+        }
 
-            if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (getActiveReplyCount(postContainer) == 1) {
-                    replyContainer.info.isFirstReply = true;
-                    self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
-                }
-                if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
-                    replyContainer.info.isQuickReply = true;
-                    self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
-                }
+        if (postContainer.info.author != userAddr) {
+            int32 changeUserRating;
+            if (getActiveReplyCount(postContainer) == 1) {
+                replyContainer.info.isFirstReply = true;
+                changeUserRating += VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply);
             }
-        } else {
-          getReplyContainerSafe(postContainer, parentReplyId);
-          replyContainer.info.parentReplyId = parentReplyId;  
+            if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
+                replyContainer.info.isQuickReply = true;
+                changeUserRating += VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply);
+            }
+            self.peeranhaUser.updateUserRating(userAddr, changeUserRating, postContainer.info.communityId);
         }
 
         replyContainer.info.author = userAddr;
@@ -383,33 +380,23 @@ library PostLib  {
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         if(userAddr == postContainer.info.author) {
-            self.peeranhaUser.checkActionRole(
-                userAddr,
-                postContainer.info.author,
-                postContainer.info.communityId,
-                UserLib.Action.EditItem,
-                UserLib.ActionRole.NONE,
-                false
-            );
             require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
             if(postContainer.info.ipfsDoc.hash != ipfsHash)
                 postContainer.info.ipfsDoc.hash = ipfsHash;
 
         } else {
             require(postContainer.info.ipfsDoc.hash == ipfsHash, "Not_allowed_edit_not_author");
-            if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr)) {
+            if (communityId != postContainer.info.communityId && communityId != DEFAULT_COMMUNITY && !self.peeranhaUser.isProtocolAdmin(userAddr))
                 revert("Error_change_communityId");
-            }
-            self.peeranhaUser.checkActionRole(
-                userAddr,
-                postContainer.info.author,
-                postContainer.info.communityId,
-                UserLib.Action.NONE,
-                UserLib.ActionRole.AdminOrCommunityModerator,
-                false
-            );
         }
-
+        self.peeranhaUser.checkActionRole(
+            userAddr,
+            postContainer.info.author,
+            postContainer.info.communityId,
+            userAddr == postContainer.info.author ? UserLib.Action.EditItem : UserLib.Action.NONE,
+            userAddr == postContainer.info.author ? UserLib.ActionRole.NONE : UserLib.ActionRole.AdminOrCommunityModerator,
+            false
+        );
 
         if (postContainer.info.communityId != communityId) {
             emit PostCommunityChanged(userAddr, postId, postContainer.info.communityId);
@@ -520,22 +507,19 @@ library PostLib  {
             false
         );
 
+        int32 changeUserRating;
         uint256 time = CommonLib.getTimestamp();
         if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
             VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
             (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
 
-            int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
-            if (changeUserRating > 0) {
-                self.peeranhaUser.updateUserRating(
-                    postContainer.info.author,
-                    -changeUserRating,
-                    postContainer.info.communityId
-                );
+            int32 changeVoteUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+            if (changeVoteUserRating > 0) {
+                changeUserRating -= changeVoteUserRating;
             }
         }
         if (postContainer.info.bestReply != 0) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
+            changeUserRating -= VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply);
         }
 
         if (time - postContainer.info.postTime < DELETE_TIME) {
@@ -544,10 +528,14 @@ library PostLib  {
             }
         }
 
-        if (userAddr == postContainer.info.author)
-            self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
-        else
-            self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
+        changeUserRating += userAddr == postContainer.info.author ? 
+            VoteLib.DeleteOwnPost :
+            VoteLib.ModeratorDeletePost;
+        self.peeranhaUser.updateUserRating(
+            postContainer.info.author,
+            changeUserRating,
+            postContainer.info.communityId
+        );
 
         postContainer.info.isDeleted = true;
         emit PostDeleted(userAddr, postId);
@@ -585,10 +573,13 @@ library PostLib  {
                 postContainer.info.communityId
             );
         }
-        if (userAddr == replyContainer.info.author)
-            self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
-        else
-            self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
+        self.peeranhaUser.updateUserRating(
+            replyContainer.info.author,
+            userAddr == replyContainer.info.author ?
+                VoteLib.DeleteOwnReply :
+                VoteLib.ModeratorDeleteReply,
+            postContainer.info.communityId
+        );
 
         replyContainer.info.isDeleted = true;
         postContainer.info.deletedReplyCount++;
@@ -856,21 +847,27 @@ library PostLib  {
         replyContainer.info.rating += ratingChange;
         int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
+        int32 changeReplyAuthorRating;
         if (replyContainer.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
-                self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
+                changeReplyAuthorRating += VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             } else if (oldRating >= 0 && newRating < 0) {
-                self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
+                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
         }
 
         if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {
-                self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
+                changeReplyAuthorRating += VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             } else if (oldRating >= 0 && newRating < 0) {
-                self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
+                changeReplyAuthorRating -= VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
         }
+        self.peeranhaUser.updateUserRating(
+            replyContainer.info.author, 
+            changeReplyAuthorRating,
+            communityId
+        );
 
         return isCancel ?
             (ratingChange > 0 ?
@@ -1010,7 +1007,7 @@ library PostLib  {
                     changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
-            if (bestReplyId == replyId) {
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
                 changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
             }
@@ -1052,7 +1049,7 @@ library PostLib  {
                     changeReplyAuthorRating += typeRating.quickReply;
                 }
             }
-            if (bestReplyId == replyId) {
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += typeRating.acceptReply;
                 changePostAuthorRating += typeRating.acceptedReply;
             }

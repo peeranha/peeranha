@@ -507,8 +507,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         private view
         returns (bool) 
     {
-        if ((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
-            hasRole(PROTOCOL_ADMIN_ROLE, user))) return true;
+        if (hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
+            hasRole(PROTOCOL_ADMIN_ROLE, user)) {
+            return true;
+        }
         return false;
     }
 
