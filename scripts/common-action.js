@@ -1,6 +1,9 @@
 const env = require("hardhat");
 const path = require('path');
 const PATH = '../image/';
+const execSync = require('child_process').execSync;
+
+const ChainId = { Polygon: 137, PolygomTest: 80001, EdgeEVM: 2021 };
 
 const testAccount = {
   displayName: "testAccount",
@@ -30,7 +33,25 @@ const testTag = {
   description: "testNewTag1",
 };
 
-const AchievementsType = { "Rating": 0, "Manual": 1 }
+const AchievementsType = { "Rating": 0, "Manual": 1, "SoulRating": 2 }
+
+async function getChainName(chainId) {
+  let chainName = ``;
+  if (chainId == ChainId.PolygomTest) {
+    chainName = `mumbai`;
+  } else if (chainId = ChainId.Polygon) {
+    chainName = `polygon`;
+  }
+  return chainName;
+}
+
+async function verifyContract(contractAddress, chainName) {
+  if (contractAddress && chainName) {
+    console.log(`Verify contract: ${contractAddress}`)
+    let output = execSync(`npx hardhat verify ${contractAddress} --network ${chainName}`, { encoding: 'utf-8' });
+    console.log('Verify log:\n', output);
+  }
+}
 
 const achievements = (env) => {
   return [
@@ -109,4 +130,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, NFT, testAccount, PATH, testCommunity, testTag };
+module.exports = { achievements, getChainName, verifyContract, NFT, testAccount, PATH, testCommunity, testTag };

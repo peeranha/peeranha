@@ -79,7 +79,7 @@ async function initAchievement(peeranhaUser) {
     };
     console.log(`init NFT ${name}`);
     const nftIPFS = "ipfs://" + await saveText(JSON.stringify(nft));
-    const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, nftIPFS, type);
+    const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, nftIPFS, 0, type);
     console.log(`Sent transaction ${tx.hash} to init NFT ${name}`);
 
     console.log(`Waiting for confirmation`)
