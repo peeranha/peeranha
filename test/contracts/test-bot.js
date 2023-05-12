@@ -239,10 +239,10 @@ describe("Test bot", function () {
 
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle');
-			await expect( peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle') ).to.be.revertedWith('Users can not publish 2 replies for expert and common posts.');
+			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(1, hashContainer[1], 1, 'handle') ).to.be.revertedWith('Users can not publish 2 replies for expert and common posts.');
 
 			const post = await peeranhaContent.getPost(1);
 			const reply = await peeranhaContent.getReply(1, 1);

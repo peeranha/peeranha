@@ -1025,7 +1025,7 @@ library PostLib  {
                     changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
-            if (bestReplyId == replyId) {
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
                 changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
             }
@@ -1067,7 +1067,7 @@ library PostLib  {
                     changeReplyAuthorRating += typeRating.quickReply;
                 }
             }
-            if (bestReplyId == replyId) {
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += typeRating.acceptReply;
                 changePostAuthorRating += typeRating.acceptedReply;
             }
