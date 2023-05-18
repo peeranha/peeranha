@@ -1165,7 +1165,7 @@ library PostLib  {
             userAddr,
             postContainer.info.communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityAdmin,
+            UserLib.ActionRole.Bot,
             false
         );
     }
