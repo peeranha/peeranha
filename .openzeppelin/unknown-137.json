@@ -12630,6 +12630,1214 @@
           }
         }
       }
+    },
+    "9df3c7df7fe695af134eddfe7f14e8c4ec1a3d27e09bdbe9f6775e9690a567b7": {
+      "address": "0x8Cacba7085EF4cf0A7F61D3C6772D36a1C88b4d5",
+      "txHash": "0x92ce67a676fa6c19f877963ee1e006c70d4b775ad5a47312fd360725ea6cce9f",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "domainSeperator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32",
+            "contract": "EIP712Base",
+            "src": "contracts/base/EIP712Base.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "nonces",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "NativeMetaTransaction",
+            "src": "contracts/base/NativeMetaTransaction.sol:18"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_struct(PostCollection)11923_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:23"
+          },
+          {
+            "label": "documentationTree",
+            "offset": 0,
+            "slot": "57",
+            "type": "t_struct(DocumentationTree)11852_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:24"
+          },
+          {
+            "label": "translations",
+            "offset": 0,
+            "slot": "58",
+            "type": "t_struct(TranslationCollection)11929_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:25"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint8)dyn_storage": {
+            "label": "uint8[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IPeeranhaCommunity)9980": {
+            "label": "contract IPeeranhaCommunity",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaUser)10444": {
+            "label": "contract IPeeranhaUser",
+            "numberOfBytes": "20"
+          },
+          "t_enum(PostType)11760": {
+            "label": "enum PostLib.PostType",
+            "members": [
+              "ExpertPost",
+              "CommonPost",
+              "Tutorial"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_int256": {
+            "label": "int256",
+            "numberOfBytes": "32"
+          },
+          "t_int32": {
+            "label": "int32",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_address,t_int256)": {
+            "label": "mapping(address => int256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(TranslationContainer)11949_storage)": {
+            "label": "mapping(bytes32 => struct PostLib.TranslationContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(ReplyContainer)11846_storage)": {
+            "label": "mapping(uint16 => struct PostLib.ReplyContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(PostContainer)11909_storage)": {
+            "label": "mapping(uint256 => struct PostLib.PostContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint32,t_struct(IpfsHash)10816_storage)": {
+            "label": "mapping(uint32 => struct CommonLib.IpfsHash)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint8,t_bytes32)": {
+            "label": "mapping(uint8 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)": {
+            "label": "mapping(uint8 => struct PostLib.CommentContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Comment)11789_storage": {
+            "label": "struct PostLib.Comment",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 28,
+                "slot": "2"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 29,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(CommentContainer)11804_storage": {
+            "label": "struct PostLib.CommentContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Comment)11789_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(DocumentationTree)11852_storage": {
+            "label": "struct PostLib.DocumentationTree",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_mapping(t_uint32,t_struct(IpfsHash)10816_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(IpfsHash)10816_storage": {
+            "label": "struct CommonLib.IpfsHash",
+            "members": [
+              {
+                "label": "hash",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hash2",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Post)11884_storage": {
+            "label": "struct PostLib.Post",
+            "members": [
+              {
+                "label": "postType",
+                "type": "t_enum(PostType)11760",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 25,
+                "slot": "0"
+              },
+              {
+                "label": "communityId",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "officialReply",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "1"
+              },
+              {
+                "label": "bestReply",
+                "type": "t_uint16",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "commentCount",
+                "type": "t_uint8",
+                "offset": 9,
+                "slot": "1"
+              },
+              {
+                "label": "replyCount",
+                "type": "t_uint16",
+                "offset": 10,
+                "slot": "1"
+              },
+              {
+                "label": "deletedReplyCount",
+                "type": "t_uint16",
+                "offset": 12,
+                "slot": "1"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 14,
+                "slot": "1"
+              },
+              {
+                "label": "tags",
+                "type": "t_array(t_uint8)dyn_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(PostCollection)11923_storage": {
+            "label": "struct PostLib.PostCollection",
+            "members": [
+              {
+                "label": "posts",
+                "type": "t_mapping(t_uint256,t_struct(PostContainer)11909_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "postCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "peeranhaCommunity",
+                "type": "t_contract(IPeeranhaCommunity)9980",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "peeranhaUser",
+                "type": "t_contract(IPeeranhaUser)10444",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(PostContainer)11909_storage": {
+            "label": "struct PostLib.PostContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Post)11884_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "replies",
+                "type": "t_mapping(t_uint16,t_struct(ReplyContainer)11846_storage)",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "comments",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "9"
+              }
+            ],
+            "numberOfBytes": "320"
+          },
+          "t_struct(Reply)11826_storage": {
+            "label": "struct PostLib.Reply",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "parentReplyId",
+                "type": "t_uint16",
+                "offset": 28,
+                "slot": "2"
+              },
+              {
+                "label": "commentCount",
+                "type": "t_uint8",
+                "offset": 30,
+                "slot": "2"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 31,
+                "slot": "2"
+              },
+              {
+                "label": "isFirstReply",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "isQuickReply",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "3"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 2,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(ReplyContainer)11846_storage": {
+            "label": "struct PostLib.ReplyContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Reply)11826_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "comments",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(Translation)11941_storage": {
+            "label": "struct PostLib.Translation",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 28,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(TranslationCollection)11929_storage": {
+            "label": "struct PostLib.TranslationCollection",
+            "members": [
+              {
+                "label": "translations",
+                "type": "t_mapping(t_bytes32,t_struct(TranslationContainer)11949_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TranslationContainer)11949_storage": {
+            "label": "struct PostLib.TranslationContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Translation)11941_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "7167aa2d2e044c8642ae7dbafd4d934e277c5ae2cd194016a08684333cb2e1de": {
+      "address": "0x735c0dBf91a2c0bfd8F227457839C347F7035166",
+      "txHash": "0x223cd4329a46182cd49642a877ab06d3dde5baa721ba89800968de8a9bc1bc86",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "domainSeperator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32",
+            "contract": "EIP712Base",
+            "src": "contracts/base/EIP712Base.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "nonces",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "NativeMetaTransaction",
+            "src": "contracts/base/NativeMetaTransaction.sol:18"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_struct(PostCollection)11923_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:23"
+          },
+          {
+            "label": "documentationTree",
+            "offset": 0,
+            "slot": "57",
+            "type": "t_struct(DocumentationTree)11852_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:24"
+          },
+          {
+            "label": "translations",
+            "offset": 0,
+            "slot": "58",
+            "type": "t_struct(TranslationCollection)11929_storage",
+            "contract": "PeeranhaContent",
+            "src": "contracts/PeeranhaContent.sol:25"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint8)dyn_storage": {
+            "label": "uint8[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IPeeranhaCommunity)9980": {
+            "label": "contract IPeeranhaCommunity",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaUser)10444": {
+            "label": "contract IPeeranhaUser",
+            "numberOfBytes": "20"
+          },
+          "t_enum(PostType)11760": {
+            "label": "enum PostLib.PostType",
+            "members": [
+              "ExpertPost",
+              "CommonPost",
+              "Tutorial"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_int256": {
+            "label": "int256",
+            "numberOfBytes": "32"
+          },
+          "t_int32": {
+            "label": "int32",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_address,t_int256)": {
+            "label": "mapping(address => int256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(TranslationContainer)11949_storage)": {
+            "label": "mapping(bytes32 => struct PostLib.TranslationContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(ReplyContainer)11846_storage)": {
+            "label": "mapping(uint16 => struct PostLib.ReplyContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(PostContainer)11909_storage)": {
+            "label": "mapping(uint256 => struct PostLib.PostContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint32,t_struct(IpfsHash)10816_storage)": {
+            "label": "mapping(uint32 => struct CommonLib.IpfsHash)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint8,t_bytes32)": {
+            "label": "mapping(uint8 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)": {
+            "label": "mapping(uint8 => struct PostLib.CommentContainer)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Comment)11789_storage": {
+            "label": "struct PostLib.Comment",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 28,
+                "slot": "2"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 29,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(CommentContainer)11804_storage": {
+            "label": "struct PostLib.CommentContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Comment)11789_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(DocumentationTree)11852_storage": {
+            "label": "struct PostLib.DocumentationTree",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_mapping(t_uint32,t_struct(IpfsHash)10816_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(IpfsHash)10816_storage": {
+            "label": "struct CommonLib.IpfsHash",
+            "members": [
+              {
+                "label": "hash",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hash2",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Post)11884_storage": {
+            "label": "struct PostLib.Post",
+            "members": [
+              {
+                "label": "postType",
+                "type": "t_enum(PostType)11760",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 25,
+                "slot": "0"
+              },
+              {
+                "label": "communityId",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "officialReply",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "1"
+              },
+              {
+                "label": "bestReply",
+                "type": "t_uint16",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "commentCount",
+                "type": "t_uint8",
+                "offset": 9,
+                "slot": "1"
+              },
+              {
+                "label": "replyCount",
+                "type": "t_uint16",
+                "offset": 10,
+                "slot": "1"
+              },
+              {
+                "label": "deletedReplyCount",
+                "type": "t_uint16",
+                "offset": 12,
+                "slot": "1"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 14,
+                "slot": "1"
+              },
+              {
+                "label": "tags",
+                "type": "t_array(t_uint8)dyn_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(PostCollection)11923_storage": {
+            "label": "struct PostLib.PostCollection",
+            "members": [
+              {
+                "label": "posts",
+                "type": "t_mapping(t_uint256,t_struct(PostContainer)11909_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "postCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "peeranhaCommunity",
+                "type": "t_contract(IPeeranhaCommunity)9980",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "peeranhaUser",
+                "type": "t_contract(IPeeranhaUser)10444",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(PostContainer)11909_storage": {
+            "label": "struct PostLib.PostContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Post)11884_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "replies",
+                "type": "t_mapping(t_uint16,t_struct(ReplyContainer)11846_storage)",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "comments",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "9"
+              }
+            ],
+            "numberOfBytes": "320"
+          },
+          "t_struct(Reply)11826_storage": {
+            "label": "struct PostLib.Reply",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "parentReplyId",
+                "type": "t_uint16",
+                "offset": 28,
+                "slot": "2"
+              },
+              {
+                "label": "commentCount",
+                "type": "t_uint8",
+                "offset": 30,
+                "slot": "2"
+              },
+              {
+                "label": "propertyCount",
+                "type": "t_uint8",
+                "offset": 31,
+                "slot": "2"
+              },
+              {
+                "label": "isFirstReply",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "isQuickReply",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "3"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 2,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(ReplyContainer)11846_storage": {
+            "label": "struct PostLib.ReplyContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Reply)11826_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "comments",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)11804_storage)",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "historyVotes",
+                "type": "t_mapping(t_address,t_int256)",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "votedUsers",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(Translation)11941_storage": {
+            "label": "struct PostLib.Translation",
+            "members": [
+              {
+                "label": "ipfsDoc",
+                "type": "t_struct(IpfsHash)10816_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "postTime",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "rating",
+                "type": "t_int32",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "isDeleted",
+                "type": "t_bool",
+                "offset": 28,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(TranslationCollection)11929_storage": {
+            "label": "struct PostLib.TranslationCollection",
+            "members": [
+              {
+                "label": "translations",
+                "type": "t_mapping(t_bytes32,t_struct(TranslationContainer)11949_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TranslationContainer)11949_storage": {
+            "label": "struct PostLib.TranslationContainer",
+            "members": [
+              {
+                "label": "info",
+                "type": "t_struct(Translation)11941_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "properties",
+                "type": "t_mapping(t_uint8,t_bytes32)",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
     }
   }
 }
