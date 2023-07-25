@@ -201,11 +201,12 @@ library PostLib  {
         bytes32 ipfsHash,
         PostType postType,
         uint8[] memory tags,
+        PostLib.Language language,
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, Language.English, CommonLib.composeMessengerSenderProperty(messengerType, handle));
+        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post reply
@@ -310,11 +311,12 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
+        PostLib.Language language,
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, Language.English, CommonLib.composeMessengerSenderProperty(messengerType, handle));
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post comment

@@ -88,8 +88,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags.
      * - must be a bot.
     */
-    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, CommonLib.MessengerType messengerType, string memory handle) external override {
-        posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, messengerType, handle);
+    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, language, messengerType, handle);
     }
 
     /**
@@ -139,8 +139,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a new reply. 
      * - must be a bot.
     */
-    function createReplyByBot(uint256 postId, bytes32 ipfsHash, CommonLib.MessengerType messengerType, string memory handle) external override {
-        posts.createReplyByBot(_msgSender(), postId, ipfsHash, messengerType, handle);
+    function createReplyByBot(uint256 postId, bytes32 ipfsHash, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createReplyByBot(_msgSender(), postId, ipfsHash, language, messengerType, handle);
     }
 
     /**
