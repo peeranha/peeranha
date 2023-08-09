@@ -44,6 +44,12 @@ module.exports = {
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 10000000000
+    },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      gas: 2100000,
+      gasPrice: 10000000000
     }
   },
   etherscan: {
