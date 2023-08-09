@@ -6,61 +6,32 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId,
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId, LanguagesEnum, DISPATCHER_ROLE
 } = require('./utils');
 
 
 describe("Test local", function () {
 	
-	it("Test downVote expert reply community-1 -> community-2 (delete reply)", async function () {
+	xit("Delete translation with dispatcher", async function() {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const signers = await ethers.getSigners();
 		const hashContainer = getHashContainer();
-		const ipfsHashes = getHashesContainer(2);
-		const countOfCommunities = 2;
-		const communitiesIds = getIdsContainer(countOfCommunities);
-
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		const ipfsHashes = getHashesContainer(3);
+		await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
+		
 		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
+		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 
-		await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-		await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false);
-		const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-		// await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+		await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
+		await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
 
-		// await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-		// const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
-		// await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
+		await expect(peeranhaContent.connect(signers[3]).deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English]))
+		.to.be.revertedWith('not_allowed_not_dispatcher');
+		await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English]))
+		.not.to.be.revertedWith('not_allowed_not_dispatcher');
 
-		// await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-		// const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
-		// await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedExpertReply);
-
-		// await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost);
-		// const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
-		// await expect(newRatingCommunity1).to.equal(StartRating);
-		// const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-		// await expect(newRatingCommunity2).to.equal(StartRating + DeleteOwnReply + DownvotedExpertReply);
-
-		console.log(accountDeployed)
-		console.log(signers[0].address)
-		console.log(peeranhaUser.deployTransaction.from)
-
+		const translation = await peeranhaContent.getTranslation(1, 0, 0, LanguagesEnum.English)
+		expect(translation.isDeleted).to.equal(true);
 	});
-	
-	// in utils error "ReferenceError: expect is not defined"
-	const createCommunities = async (peeranhaCommunity, wallet, countOfCommunities, communitiesIds) => {
-		const ipfsHashes = getHashesContainer(countOfCommunities);
-		await Promise.all(communitiesIds.map(async(id) => {
-			return await peeranhaCommunity.createCommunity(wallet, ipfsHashes[id - 1], createTags(5));
-		}));
-
-		expect(await peeranhaCommunity.getCommunitiesCount()).to.equal(countOfCommunities)
-
-		await Promise.all(communitiesIds.map(async(id) => {
-			const community = await peeranhaCommunity.getCommunity(id);
-			return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
-		}));
-	}
 });

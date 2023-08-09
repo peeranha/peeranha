@@ -14,7 +14,7 @@ async function main() {
     }
   });
   
-  const peeranhaContent = await upgrades.upgradeProxy("0x2608ab27e1e75cB32018Fb848F025542Ec3DA93e", PeeranhaContent, {unsafeAllowLinkedLibraries: true, timeout: 0});
+  const peeranhaContent = await upgrades.upgradeProxy(CONTENT_ADDRESS, PeeranhaContent, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("Peeranha Content upgraded at address:", peeranhaContent.address);
 }
 

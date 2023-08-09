@@ -288,8 +288,11 @@ library UserLib {
   }
 
   function getUserRating(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (int32) {
-    int32 rating = self.communityRatingForUser[addr].userRating[communityId].rating;
-    return rating;
+    return self.communityRatingForUser[addr].userRating[communityId].rating;
+  }
+
+  function getUserRatingCollection(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (UserRating memory) {
+    return self.communityRatingForUser[addr].userRating[communityId];
   }
 
   /// @notice Check user existence
@@ -299,18 +302,18 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, uint32 communityId) public {
+  function updateUsersRating(UserLib.UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, UserRatingChange[] memory usersRating, uint32 communityId) public {
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(userContext, usersRating[i].user, usersRating[i].rating, communityId);
+      updateUserRating(userContext, achievementsMetadata, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
+  function updateUserRating(UserLib.UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, address userAddr, int32 rating, uint32 communityId) public {
     if (rating == 0) return;
-    updateRatingBase(userContext, userAddr, rating, communityId);
+    updateRatingBase(userContext, achievementsMetadata, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, address userAddr, int32 rating, uint32 communityId) public {
+  function updateRatingBase(UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, address userAddr, int32 rating, uint32 communityId) public {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
@@ -352,7 +355,10 @@ library UserLib {
     userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
-      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));
+      AchievementCommonLib.AchievementsType[] memory newArray = new AchievementCommonLib.AchievementsType[](2);
+      newArray[0] = AchievementCommonLib.AchievementsType.Rating;
+      newArray[1] = AchievementCommonLib.AchievementsType.SoulRating; // {} ???
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, newArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
     }
   }
 

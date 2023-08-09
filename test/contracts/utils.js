@@ -158,7 +158,7 @@ const getHashesContainer = (size) =>
 
 const createTags = (countOfTags) =>
     getHashesContainer(countOfTags).map((hash) => {
-        const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+        const hash2 = EmptyIpfs;
         return {"ipfsDoc": {hash, hash2}}
     });
     
@@ -200,7 +200,7 @@ const createUserWithAnotherRating = async function (signer, rating, peeranhaUser
 };
 
 const getUsers = (hashes) => {
-    const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const ipfsHash2 = EmptyIpfs;
     const creationTime = 0;
     const rating = 0;
     return hashes.map((hash) => {
@@ -217,6 +217,7 @@ const periodUserReward = 100;
 const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
 const periodRewardCoefficient = 1000;
+const EmptyIpfs = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const setRetingOnePeriod = [
 	{actions: 'positive', ratings: 4, result: {ratingToReward: 4, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
@@ -353,7 +354,7 @@ const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
 const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
-const AchievementsType = { "Rating":0, "Manual":1 }
+const AchievementsType = { "Rating":0, "Manual":1, "SoulRating": 2 }
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -429,7 +430,6 @@ const ModeratorDeleteReply = -2;
 const ModeratorDeleteComment = -1;
 
 const PROTOCOL_ADMIN_ROLE = ethers.utils.id("PROTOCOL_ADMIN_ROLE");
-const OWNER_MINTER_ROLE = ethers.utils.id("OWNER_MINTER_ROLE");
 const BOT_ROLE = ethers.utils.id("BOT_ROLE");
 const DISPATCHER_ROLE = ethers.utils.id("DISPATCHER_ROLE");
 
@@ -447,5 +447,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, OWNER_MINTER_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY, AchievementsType
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
 };

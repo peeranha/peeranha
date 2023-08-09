@@ -1,16 +1,27 @@
 const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
-const { PostTypeEnum, createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, DefaultCommunityId, PROTOCOL_ADMIN_ROLE } = require('./utils');
+const { PostTypeEnum, LanguagesEnum, DefaultCommunityId, PROTOCOL_ADMIN_ROLE,
+    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
 
 describe("Test community permissions", function() {
+    beforeEach(async function () {
+		const contracts = await createPeerenhaAndTokenContract();
+		peeranhaContent = contracts.peeranhaContent;
+		peeranhaUser = contracts.peeranhaUser;
+		peeranhaCommunity = contracts.peeranhaCommunity;
+		token = contracts.token;
+		peeranhaNFT = contracts.peeranhaNFT;
+		accountDeployed = contracts.accountDeployed;
+		signers = await ethers.getSigners();
+		ipfsHashes = getHashesContainer(5);
+		hashContainer = getHashContainer();
+        countOfCommunities = 3;
+        communitiesIds = getIdsContainer(countOfCommunities);
+	});
+
     it("Test community moderator", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const signers = await ethers.getSigners();
-		const hashContainer = getHashContainer();
-        const countOfCommunities = 3;
         // const countOfUsers = 3;
-        const communitiesIds = getIdsContainer(countOfCommunities);
 
         await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
         await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
@@ -49,20 +60,20 @@ describe("Test community permissions", function() {
         .to.be.revertedWith("not_allowed_admin_or_comm_admin");
 
         //post actions
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);    // edit Post Type exprt -> common
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost)).    // com moder change ipfs
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)    // edit Post Type exprt -> common
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)).    // com moder change ipfs
             to.be.revertedWith("Not_allowed_edit_not_author");
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost)).
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English)).
             to.be.revertedWith("Error_change_communityId");
-        await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost);
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).
+        await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost, LanguagesEnum.English);
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)).
             to.be.revertedWith("Error_change_communityId");
-        await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost);
-        await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], true);    // official Reply
-        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true)       // official Reply
+        await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
+        await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], true, LanguagesEnum.English);    // official Reply
+        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true, LanguagesEnum.English)       // official Reply
         //change status best reply
-        await  peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false);
+        await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
         await expect(peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1))
             .to.be.revertedWith('Only owner by post can change statust best reply');
 
@@ -88,12 +99,12 @@ describe("Test community permissions", function() {
             .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaContent.connect(signers[1]).updateDocumentationTree(signers[1].address, 1, hashContainer[1]))
 			.to.be.revertedWith('not_allowed_not_comm_admin');
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await expect( peeranhaContent.connect(signers[1]).createReply(signers[1].address, 2, 0, hashContainer[1], true)) // official reply
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await expect(peeranhaContent.connect(signers[1]).createReply(signers[1].address, 2, 0, hashContainer[1], true, LanguagesEnum.English)) // official reply
                 .to.be.revertedWith("not_allowed_not_comm_admin");
-        await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true))   // old official Reply and stay official 
+        await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true, LanguagesEnum.English))   // old official Reply and stay official 
             .to.be.revertedWith("not_allowed_not_comm_admin");
-        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], false)           // common Reply
+        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], false, LanguagesEnum.English)           // common Reply
 
         // User makes actions with community admin permission
         await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, communitiesIds[0]);
@@ -102,13 +113,69 @@ describe("Test community permissions", function() {
         await expect(peeranhaCommunity.connect(signers[1]).unfreezeCommunity(signers[1].address, communitiesIds[0]));
     });
 
+    it("Test community moderator for language", async function() {
+        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
+        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+		await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+		await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
+		await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
+
+        // common user create translation
+		await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        
+        await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, communitiesIds[0]);
+        // community moderator create translation
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+
+        // common user edit translation
+		await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        
+        // community moderator edit translation
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+
+        // common user delete translation
+		await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+
+        // community moderator delete translation
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English]);
+    });
+
+
     it("Test community administrator", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const signers = await ethers.getSigners();
-        const countOfCommunities = 3;
         // const countOfUsers = 3;
-        const communitiesIds = getIdsContainer(countOfCommunities);
-		const hashContainer = getHashContainer();
 
 		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
@@ -144,20 +211,20 @@ describe("Test community permissions", function() {
         await peeranhaContent.connect(signers[1]).updateDocumentationTree(signers[1].address, 1, hashContainer[1]);
         
         // Post actions
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost)).    // edit Post Type exprt -> common
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)).    // edit Post Type exprt -> common
             to.be.revertedWith("not_allowed_admin_or_comm_moderator");
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost)).    // com moder change ipfs
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[1], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)).    // com moder change ipfs
             to.be.revertedWith("Not_allowed_edit_not_author");
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost)).
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English)).
             to.be.revertedWith("Error_change_communityId");
-        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost)).
+        await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English)).
             to.be.revertedWith("not_allowed_admin_or_comm_moderator");
-        await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], true);    // official Reply
-        await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 2, 0, hashContainer[1], false);           // common reply
-        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 2, 1, hashContainer[1], true);      // official Reply
+        await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], true, LanguagesEnum.English);    // official Reply
+        await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 2, 0, hashContainer[1], false, LanguagesEnum.English);           // common reply
+        await peeranhaContent.connect(signers[1]).editReply(signers[1].address, 2, 1, hashContainer[1], true, LanguagesEnum.English);      // official Reply
 
         // change status Best Reply
         await expect(peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1))
@@ -208,12 +275,74 @@ describe("Test community permissions", function() {
             .to.be.revertedWith("not_allowed_admin_or_comm_admin");
         await expect(peeranhaCommunity.connect(signers[2]).updateCommunity(signers[2].address, communitiesIds[0], getHash()))
             .to.be.revertedWith("not_allowed_admin_or_comm_admin");
-        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1]);
-        await expect( peeranhaContent.connect(signers[1]).createReply(signers[1].address, 3, 0, hashContainer[1], true))           // official reply
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+        await expect(peeranhaContent.connect(signers[1]).createReply(signers[1].address, 3, 0, hashContainer[1], true, LanguagesEnum.English))           // official reply
             .to.be.revertedWith("not_allowed_not_comm_admin");
-        await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true))   //old official Reply and stay official
+        await expect(peeranhaContent.connect(signers[1]).editReply(signers[1].address, 1, 1, hashContainer[1], true, LanguagesEnum.English))   //old official Reply and stay official
             .to.be.revertedWith("not_allowed_not_comm_admin");
     });
+
+    it("Test community administrator for language", async function() {
+        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
+        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
+        await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+		await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
+		await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
+		await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
+
+        // common user create translation
+		await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        
+        await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, communitiesIds[0]);
+        await peeranhaUser.revokeCommunityModeratorPermission(signers[0].address, signers[1].address, communitiesIds[0])
+        // community admin create translation
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+
+        // common user edit translation
+		await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        
+        // community admin edit translation
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+
+        // common user delete translation
+		await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+        await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English]))
+            .to.be.revertedWith("not_allowed_not_comm_admin");
+
+        // community admin delete translation
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English]);
+        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English]);
+    });
+
 
     // Send admin invite functionality must be created before
     xit("Test grant before creating community", async function() {
