@@ -119,7 +119,6 @@ async function communityFunctions() {
   const peeranhaCommunity = await PeeranhaCommunity.attach(COMMUNITY_ADDRESS);
 
   const signers = await ethers.getSigners();
-
   const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
   // const txObj = await peeranhaCommunity.updateCommunity(signers[0].address, 3, await getBytes32FromData(testCommunity));
 
