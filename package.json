@@ -46,6 +46,8 @@
     "propose-upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/propose-upgrade.js && node scripts/change-env-values.js 0",
     "transfer-ownership:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/transfer-ownership.js && node scripts/change-env-values.js 0",
     "post-action:mumbai": "npx hardhat run --network mumbai scripts/post-action.js",
+    "post-action:sepolia": "npx hardhat run --network sepolia scripts/post-action.js",
+    "post-action:edgeware": "npx hardhat run --network edgeware scripts/post-action.js",
     "query-versions:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network mumbai scripts/query-versions.js && node scripts/change-env-values.js 0",
     "grant-community-admin:test": "cp env-test.json env.json && npx hardhat run --network mumbai scripts/grant-community-admin.js",
     "grant-community-admin:staging": "cp env-staging.json env.json && npx hardhat run --network mumbai scripts/grant-community-admin.js",

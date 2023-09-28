@@ -333,7 +333,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         string memory achievementURI,
         uint32 communityId,
         AchievementCommonLib.AchievementsType achievementsType
-    )   
+    )
         external
     {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
@@ -472,6 +472,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
 
+    /// Abort if `account` is missing `actionRole`.
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
         string memory message;
@@ -510,8 +511,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         private view
         returns (bool) 
     {
-        if ((hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
-            hasRole(PROTOCOL_ADMIN_ROLE, user))) return true;
+        if (hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), user) ||
+            hasRole(PROTOCOL_ADMIN_ROLE, user)) {
+            return true;
+        }
         return false;
     }
 

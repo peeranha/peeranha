@@ -17,7 +17,7 @@ const {
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE } = require("../test/contracts/utils");
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 
@@ -101,11 +101,14 @@ async function userFunctions() {
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
-  // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
-  // const txObj = await peeranhaUser.addUserRating("0x31339c62C0A44b875297945edb93D88092b5fa91", 100, 2);
-  // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
+  // const txObj = await peeranhaUser.createUser(signers[0].address, "0xc09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc");
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
-  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x9075aa4bd94e786c9d7780dce791b735b4947f22");
+  // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9075aa4bd94e786c9d7780dce791b735b4947f22");
+  // const txObj = await peeranhaUser.addUserRating("0x714657610f4277B60cb42CBE07BCF72Aa9bAC305", 7000, 2);
+  // const txObj = await peeranhaUser.getUserRating("0x714657610f4277B60cb42CBE07BCF72Aa9bAC305", 2);
+  // const txObj = await peeranhaUser.getUserByAddress("0x9075aa4bd94e786c9d7780dce791b735b4947f22")
+  // const txObj = await peeranhaUser.hasRole(PROTOCOL_ADMIN_ROLE, "0x9075aa4bd94e786c9d7780dce791b735b4947f22")
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -139,7 +142,7 @@ async function contentFunctions() {
   const signers = await ethers.getSigners();
 
   // const txObj = await peeranhaContent.createPost(signers[0].address, 1, await getBytes32FromData(testPost), PostTypeEnum.ExpertPost, [1], Language.Chinese);
-  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
+  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], 6, PostTypeEnum.CommonPost, Language.Vietnamese);
   // const txObj = await peeranhaContent.createReply(signers[0].address, 2, 0, await getBytes32FromData(testReply), true, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
   // const txObj = await peeranhaContent.createComment(signers[0].address, 10, 1, await getBytes32FromData(testComment), Language.English);
