@@ -88,8 +88,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags.
      * - must be a bot.
     */
-    function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
-        posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, language, messengerType, handle);
+    function createPostByBot(address postAuthor, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createPostByBot(postAuthor, communityId, ipfsHash, postType, tags, language, messengerType, handle);
     }
 
     /**
@@ -139,8 +139,8 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a new reply. 
      * - must be a bot.
     */
-    function createReplyByBot(uint256 postId, bytes32 ipfsHash, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
-        posts.createReplyByBot(_msgSender(), postId, ipfsHash, language, messengerType, handle);
+    function createReplyByBot(address replyAuthor, uint256 postId, bytes32 ipfsHash, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
+        posts.createReplyByBot(replyAuthor, _msgSender(), postId, ipfsHash, language, messengerType, handle);
     }
 
     /**
@@ -153,7 +153,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function createComment(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external override {
         dispatcherCheck(user);
-        posts.createComment(user, postId, parentReplyId, ipfsHash, language);
+        posts.createComment(user, _msgSender(), postId, parentReplyId, ipfsHash, language);
     }
 
     /**

@@ -197,6 +197,7 @@ library PostLib  {
     function createPostByBot(
         PostCollection storage self,
         address userAddr,
+        address msgSender,
         uint32 communityId,
         bytes32 ipfsHash,
         PostType postType,
@@ -205,8 +206,8 @@ library PostLib  {
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
-        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
+        self.peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.Bot, 0);
+        createPost(self, userAddr, communityId, ipfsHash, postType, tags, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post reply
@@ -309,14 +310,15 @@ library PostLib  {
     function createReplyByBot(
         PostCollection storage self,
         address userAddr,
+        address msgSender,
         uint256 postId,
         bytes32 ipfsHash,
         PostLib.Language language,
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
-        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
+        self.peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.Bot, 0);
+        createReply(self, userAddr, postId, 0, ipfsHash, false, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post comment
