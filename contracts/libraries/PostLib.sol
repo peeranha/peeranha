@@ -206,6 +206,9 @@ library PostLib  {
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
+        if (userAddr != CommonLib.BOT_ADDRESS)
+            self.peeranhaUser.checkUser(userAddr);
+
         self.peeranhaUser.checkHasRole(msgSender, UserLib.ActionRole.Bot, 0);
         createPost(self, userAddr, communityId, ipfsHash, postType, tags, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
