@@ -125,13 +125,13 @@ describe("Test community permissions", function() {
 
         // common user create translation
 		await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         
         await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, communitiesIds[0]);
         // community moderator create translation
@@ -142,13 +142,13 @@ describe("Test community permissions", function() {
 
         // common user edit translation
 		await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         
         // community moderator edit translation
         await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
@@ -158,13 +158,13 @@ describe("Test community permissions", function() {
 
         // common user delete translation
 		await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
 
         // community moderator delete translation
         await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English]);
@@ -294,53 +294,64 @@ describe("Test community permissions", function() {
 
         // common user create translation
 		await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         
         await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, communitiesIds[0]);
         await peeranhaUser.revokeCommunityModeratorPermission(signers[0].address, signers[1].address, communitiesIds[0])
         // community admin create translation
-        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+		await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).createTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
 
         // common user edit translation
 		await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).editTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         
         // community admin edit translation
-        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
-        await peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
+        await expect(peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).editTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
+			.to.be.revertedWith("not_allowed_not_bot");
 
         // common user delete translation
 		await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 0, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 0, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 0, 1, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
         await expect(peeranhaContent.connect(signers[2]).deleteTranslations(signers[2].address, 1, 1, 1, [LanguagesEnum.English]))
-            .to.be.revertedWith("not_allowed_not_comm_admin");
+            .to.be.revertedWith("not_allowed_not_bot");
 
         // community admin delete translation
-        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English]);
-        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English]);
-        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English]);
-        await peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English]);
+        await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 0, [LanguagesEnum.English]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 0, [LanguagesEnum.English]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 0, 1, [LanguagesEnum.English]))
+			.to.be.revertedWith("not_allowed_not_bot");
+        await expect(peeranhaContent.connect(signers[1]).deleteTranslations(signers[1].address, 1, 1, 1, [LanguagesEnum.English]))
     });
 
 

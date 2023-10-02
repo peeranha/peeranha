@@ -225,13 +225,12 @@ describe("Test users", function() {
     await peeranhaUser.followCommunity(signers[0].address, 2);
     await peeranhaUser.unfollowCommunity(signers[0].address, 1);
     let user = await peeranhaUser.getUserByIndex(0);
-    expect(user.followedCommunities[0]).to.equal(0);
-    expect(user.followedCommunities[1]).to.equal(2);
+    expect(user.followedCommunities[0]).to.equal(2);
 
     await peeranhaUser.followCommunity(signers[0].address, 3);
     user = await peeranhaUser.getUserByIndex(0);
-    expect(user.followedCommunities[0]).to.equal(3);
-    expect(user.followedCommunities[1]).to.equal(2);
+    expect(user.followedCommunities[0]).to.equal(2);
+    expect(user.followedCommunities[1]).to.equal(3);
   })
 
   xit("Follow community by non-existed user", async function() {
@@ -263,7 +262,7 @@ describe("Test users", function() {
     await peeranhaUser.unfollowCommunity(signers[0].address, 1);
 
     const user = await peeranhaUser.getUserByIndex(0);
-    expect(user.followedCommunities[0]).to.equal(0);
+    expect(user.followedCommunities[0]).to.equal();
   })
 
   xit("UnFollow community by non-existed user", async function() {
@@ -297,8 +296,8 @@ describe("Test users", function() {
     await peeranhaUser.unfollowCommunity(signers[0].address, 2);
 
     const user = await peeranhaUser.getUserByIndex(0);
-    expect(user.followedCommunities[0]).to.equal(0);
-    expect(user.followedCommunities[1]).to.equal(0);
+    expect(user.followedCommunities[0]).to.equal();
+    expect(user.followedCommunities[1]).to.equal();
   })
 
   it("Double unFollow community", async function() {
