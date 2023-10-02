@@ -27,13 +27,10 @@ describe("Test bot", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[1]).createPostByBot(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English, 1, 'handle');
+			await peeranhaContent.connect(signers[1]).createReplyByBot(signers[2].address, 1, hashContainer[1], LanguagesEnum.English, 1, 'handle');
 
 			await expect(peeranhaContent.connect(signers[2]).createPostByBot(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English, 1, 'handle'))
 				.to.be.revertedWith('not_allowed_not_bot');
-
-			await expect(peeranhaContent.connect(signers[1]).createReplyByBot(signers[2].address, 1, hashContainer[1], LanguagesEnum.English, 1, 'handle'))
-				.not.to.be.revertedWith('not_allowed_not_bot');
-
 			await expect(peeranhaContent.connect(signers[2]).createReplyByBot(signers[2].address, 1, hashContainer[1], LanguagesEnum.English, 1, 'handle'))
 				.to.be.revertedWith('not_allowed_not_bot');
 		});
