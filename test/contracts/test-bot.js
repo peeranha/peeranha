@@ -79,6 +79,21 @@ describe("Test bot", function () {
 			expect(post.ipfsDoc.hash).to.equal(hashContainer[0]);
 		});
 
+		it("Test another user create bot post (sending bot address)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await expect(peeranhaContent.connect(signers[2]).createPostByBot(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English, 1, 'handle'))
+				.to.be.revertedWith('not_allowed_not_bot');
+		});
+
 		it("Test create post by bot, author of post does not created", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
@@ -164,6 +179,22 @@ describe("Test bot", function () {
 			expect(post.replyCount).to.equal(1);
 			expect(reply.author).to.equal(signers[2].address);
 			expect(reply.ipfsDoc.hash).to.equal(hashContainer[1]);
+		});
+
+		it("Test another user create bot reply (sending bot address)", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const ipfsHashes = getHashesContainer(2);
+			const hashContainer = getHashContainer();
+			const signers = await ethers.getSigners();
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address)
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+			await expect(peeranhaContent.connect(signers[2]).createReplyByBot(signers[1].address, 1, hashContainer[1], LanguagesEnum.English, 1, 'handle'))
+				.to.be.revertedWith('not_allowed_not_bot');
 		});
 
 		it("Test get messenger and sender data from reply property", async function () {
