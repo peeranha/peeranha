@@ -6,7 +6,7 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, LanguagesEnum, DefaultCommunityId
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, LanguagesEnum, DefaultCommunityId, BOT_ROLE
 } = require('./utils');
 
 ///
@@ -41,6 +41,29 @@ describe("Test vote", function () {
 			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
 			const post = await peeranhaContent.getPost(1);
 			await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
+			await expect(post.rating).to.equal(1);
+			
+			const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 0);
+			await expect(statusHistory._hex).to.equal('0x01');
+		});
+
+		it("Test upVote bot post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPostByBot(1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English, 1, 'handle')
+			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1)
+			const post = await peeranhaContent.getPost(1);
+			await expect(userRating).to.equal(0);
 			await expect(post.rating).to.equal(1);
 			
 			const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 0);
@@ -242,6 +265,31 @@ describe("Test vote", function () {
 			const userRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			const post = await peeranhaContent.getPost(1);
 			await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
+			await expect(userRating2).to.equal(StartRating + DownvoteExpertPost);
+			await expect(post.rating).to.equal(-1);
+
+			const statusHistory = await peeranhaContent.getStatusHistory(peeranhaContent.deployTransaction.from, 1, 0, 0);
+			await expect(statusHistory._hex).to.equal('-0x01');
+		});
+
+		it("Test downVote bot post", async function () {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(2);
+
+			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaUser.grantRole(BOT_ROLE, signers[1].address);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+
+			await peeranhaContent.connect(signers[1]).createPostByBot(1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English, 1, 'handle')
+			await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
+
+			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+			const post = await peeranhaContent.getPost(1);
+			await expect(userRating).to.equal(0);
 			await expect(userRating2).to.equal(StartRating + DownvoteExpertPost);
 			await expect(post.rating).to.equal(-1);
 
