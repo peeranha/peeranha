@@ -355,10 +355,10 @@ library UserLib {
     userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
-      AchievementCommonLib.AchievementsType[] memory newArray = new AchievementCommonLib.AchievementsType[](2);
-      newArray[0] = AchievementCommonLib.AchievementsType.Rating;
-      newArray[1] = AchievementCommonLib.AchievementsType.SoulRating; // {} ???
-      AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, newArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
+      AchievementCommonLib.AchievementsType[] memory achievementsTypesArray = new AchievementCommonLib.AchievementsType[](2);
+      achievementsTypesArray[0] = AchievementCommonLib.AchievementsType.Rating;
+      achievementsTypesArray[1] = AchievementCommonLib.AchievementsType.SoulRating; // {} ???
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, achievementsTypesArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
     }
   }
 
