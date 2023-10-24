@@ -224,7 +224,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     /**
      * @dev Check if user with given address exists.
      */
-    function checkUser(address addr) public view {
+    function checkUser(address addr) public override view {
         require(userContext.users.isExists(addr), "user_not_found");
     }
 
