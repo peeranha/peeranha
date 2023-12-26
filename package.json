@@ -41,6 +41,7 @@
     "upgrade-content:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/upgrade-content.js && node scripts/change-env-values.js 0",
     "upgrade-content:test-edgeware": "cp env-test-edgeware.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network edgeware scripts/upgrade-content.js && node scripts/change-env-values.js 0",
     "force-import:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
+    "force-import:test-edgeware": "cp env-test-edgeware.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
     "force-import:test2": "cp env-test2.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/force-import.js && node scripts/change-env-values.js 0",
     "query-versions:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/query-versions.js && node scripts/change-env-values.js 0",
     "query-versions:test2": "cp env-test2.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network mumbai scripts/query-versions.js && node scripts/change-env-values.js 0",
