@@ -85,6 +85,11 @@ const testDocumentating = {
   ]
 };
 
+async function getError() {
+  const response = `[\"0x02f8b4830138818263a78459c815c88459c815c883014c95949b53b80f03d4191be79085c07ffedda3671f6a4680b844522f4bf80000000000000000000000009fbe2c1d7b0ebeddb2faef30be00ed838f19e499000000000000000000000000000000000000000000000000000000000000000bc0809ff5d155cb2509e1f0519ed05dca538be51f3ddc2ff193bf952dd9bb726a5263a0060cc52eed84f4a4f2c7862e5d7710e40122b9b414e9446a0fcdca07682bc1fb\"]`
+  const parsed = ethers.utils.toUtf8String(Object.values(response))
+  console.log(parsed)
+}
 
 async function main() {
   // await contentFunctions();
