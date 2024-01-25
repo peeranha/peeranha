@@ -92,11 +92,13 @@ const AchievementsType = { "Rating": 0, "Manual": 1, "SoulRating": 2 }
 const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3 }
 
 async function getChainName(chainId) {
-  let chainName = ``;
+  let chainName = '';
   if (chainId == ChainId.PolygomTest) {
-    chainName = `mumbai`;
-  } else if (chainId = ChainId.Polygon) {
-    chainName = `polygon`;
+    chainName = 'mumbai';
+  } else if (chainId == ChainId.Polygon) {
+    chainName = 'polygon';
+  } else if (chainId == ChainId.EdgeEVM) {
+    chainName = 'edgeware'
   }
   return chainName;
 }
@@ -106,6 +108,8 @@ async function verifyContract(contractAddress, chainName) {
     console.log(`Verify contract: ${contractAddress}`)
     let output = execSync(`npx hardhat verify ${contractAddress} --network ${chainName}`, { encoding: 'utf-8' });
     console.log('Verify log:\n', output);
+  } else {
+    log('Error argument')
   }
 }
 
