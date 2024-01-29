@@ -64,7 +64,13 @@ module.exports = {
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 10000000000
-    }
+    },
+    local: {
+      url: `http://localhost:8545`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      gas: 2100000,
+      gasPrice: 200000000000
+    },
   },
   etherscan: {
     apiKey: {
