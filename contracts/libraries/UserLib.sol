@@ -221,10 +221,15 @@ library UserLib {
       Action.FollowCommunity
     );
 
+    bool isAlreadyFollowed;
     for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "already_followed");
+      if (user.followedCommunities[i] == communityId) {
+        isAlreadyFollowed = true;
+        break;
+      }
     }
-    user.followedCommunities.push(communityId);
+    if (!isAlreadyFollowed)
+      user.followedCommunities.push(communityId);
 
     emit FollowedCommunity(userAddress, communityId);
   }
