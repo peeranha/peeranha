@@ -306,7 +306,7 @@ library UserLib {
   }
 
   function updateUserRating(UserLib.UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, address userAddr, int32 rating, uint32 communityId) public {
-    if (rating == 0) return;
+    if (rating == 0 || userAddr == CommonLib.BOT_ADDRESS) return;
     updateRatingBase(userContext, achievementsMetadata, userAddr, rating, communityId);
   }
 

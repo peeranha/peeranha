@@ -85,6 +85,11 @@ const testDocumentating = {
   ]
 };
 
+async function getError() {
+  const response = `[\"0x02f8b4830138818263a78459c815c88459c815c883014c95949b53b80f03d4191be79085c07ffedda3671f6a4680b844522f4bf80000000000000000000000009fbe2c1d7b0ebeddb2faef30be00ed838f19e499000000000000000000000000000000000000000000000000000000000000000bc0809ff5d155cb2509e1f0519ed05dca538be51f3ddc2ff193bf952dd9bb726a5263a0060cc52eed84f4a4f2c7862e5d7710e40122b9b414e9446a0fcdca07682bc1fb\"]`
+  const parsed = ethers.utils.toUtf8String(Object.values(response))
+  console.log(parsed)
+}
 
 async function main() {
   // await contentFunctions();
@@ -106,6 +111,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  // const txObj = await peeranhaUser.isProtocolAdmin("0x570895fd1f7d529606e495885f6eaf1924baa08e");
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);

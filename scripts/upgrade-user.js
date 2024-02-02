@@ -3,6 +3,7 @@ const { USER_ADDRESS } = require('../env.json');
 const { getChainName, verifyContract } = require('./common-action');
 
 async function main() {
+  console.log(`Peeranha user address: ${USER_ADDRESS}`)
   const UserLib = await ethers.getContractFactory("UserLib");
   console.log("Deploying UserLib...");
   const userLib = await UserLib.deploy();
@@ -14,7 +15,7 @@ async function main() {
       UserLib: userLib.address
     }
   });
-  
+
   const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("Peeranha User upgraded at address:", peeranhaUser.address);
   
@@ -23,10 +24,10 @@ async function main() {
   const chainId = JSON.stringify(PeeranhaUser.signer.provider._network.chainId);
 
   const chainName = await getChainName(chainId);
-  console.log(`Verify User contract: ${userProxyAddress}. Chain Id: ${chainId}, chain name: ${chainName}`);
+  console.log(`Verify User contract: ${userProxyAddress} Chain Id: ${chainId}, chain name: ${chainName}`);
   await verifyContract(userProxyAddress, chainName);
 
-  console.log(`Verify UserLib contract: ${userLibProxyAddress}. Chain Id: ${chainId}, chain name: ${chainName}`);
+  console.log(`Verify UserLib contract: ${userLibProxyAddress} Chain Id: ${chainId}, chain name: ${chainName}`);
   await verifyContract(userLibProxyAddress, chainName);
 }
 
