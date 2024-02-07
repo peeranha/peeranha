@@ -2,6 +2,7 @@ const { ethers, upgrades } = require("hardhat");
 const { CONTENT_ADDRESS } = require('../env.json');
 
 async function main() {
+  console.log(`Peeranha content address: ${CONTENT_ADDRESS}`)
   const PostLib = await ethers.getContractFactory("PostLib");
   console.log("Deploying PostLib...");
   const postLib = await PostLib.deploy();

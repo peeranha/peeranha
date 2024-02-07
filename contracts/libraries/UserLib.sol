@@ -491,7 +491,8 @@ library UserLib {
     uint32 communityId,
     Action action
   )
-    internal 
+    internal
+    view
     returns (User storage)
   {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
@@ -499,7 +500,7 @@ library UserLib {
         
     (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, energy);
+    // reduceEnergy(user, energy);
 
     return user;
   }
@@ -595,7 +596,7 @@ library UserLib {
     }
   }
 
-  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {
     uint16 currentPeriod = RewardLib.getPeriod();
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
