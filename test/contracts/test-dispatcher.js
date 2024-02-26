@@ -92,7 +92,7 @@ describe("Test dispatcher", function () {
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
 			const user = await peeranhaUser.getUserByIndex(0);
-			expect(user.followedCommunities[0]).to.equal(0);
+			expect(user.followedCommunities[0]).to.equal();
 		})
 	
 		it("Test give community admin with dispatcher", async function() {

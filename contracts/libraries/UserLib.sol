@@ -221,16 +221,14 @@ library UserLib {
       Action.FollowCommunity
     );
 
-    bool isAdded;
+    bool isAlreadyFollowed;
     for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "already_followed");
-
-      if (user.followedCommunities[i] == 0 && !isAdded) {
-        user.followedCommunities[i] = communityId;
-        isAdded = true;
+      if (user.followedCommunities[i] == communityId) {
+        isAlreadyFollowed = true;
+        break;
       }
     }
-    if (!isAdded)
+    if (!isAlreadyFollowed)
       user.followedCommunities.push(communityId);
 
     emit FollowedCommunity(userAddress, communityId);
@@ -255,7 +253,11 @@ library UserLib {
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
-        delete user.followedCommunities[i]; //method rewrite to 0
+        // Move the last element into the place to delete
+        user.followedCommunities[i] = user.followedCommunities[user.followedCommunities.length - 1];
+
+        // Remove the last element
+        user.followedCommunities.pop();
         
         emit UnfollowedCommunity(userAddress, communityId);
         return;
