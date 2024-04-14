@@ -30,6 +30,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
+    UserLib.TestStruct testStruct;
     AchievementLib.AchievementsMetadata achievementsMetadata;
 
     function initialize() public initializer {
@@ -135,6 +136,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         dispatcherCheck(user);
         UserLib.createIfDoesNotExist(userContext.users, user);
         UserLib.update(userContext, user, ipfsHash);
+    }
+
+    function migrateUserRating(address from, address to) public {
+        UserLib.createIfDoesNotExist(userContext.users, from);
+        UserLib.createIfDoesNotExist(userContext.users, to);
+        UserLib.migrateUserRating(userContext, from, to);
     }
 
     /**
@@ -416,6 +423,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
         UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
+    }
+
+    function getAnotherAddress(address userAddr) public override returns (UserLib.UserRating memory) {
+        return testStruct.userRating[userAddr];
     }
 
     /**

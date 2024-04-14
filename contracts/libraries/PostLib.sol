@@ -880,6 +880,7 @@ library PostLib  {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
             }
         }
+        UserLib.UserRating memory newAddress = self.peeranhaUser.getAnotherAddress(replyContainer.info.author);
 
         if (replyContainer.info.isQuickReply) {
             if (oldRating < 0 && newRating >= 0) {

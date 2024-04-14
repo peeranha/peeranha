@@ -73,6 +73,10 @@ library UserLib {
     mapping(uint16 => RewardLib.UserPeriodRewards) userPeriodRewards; // period
   }
 
+  struct TestStruct {
+    mapping(address => UserRating) userRating;
+  }
+
   struct UserRating {
     int32 rating;
     bool isActive;
@@ -313,6 +317,27 @@ library UserLib {
   function updateUserRating(UserLib.UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, address userAddr, int32 rating, uint32 communityId) public {
     if (rating == 0 || userAddr == CommonLib.BOT_ADDRESS) return;
     updateRatingBase(userContext, achievementsMetadata, userAddr, rating, communityId);
+  }
+
+  function migrateUserRating(UserLib.UserContext storage userContext, address from, address to) internal {
+    // CommunityRatingForUser storage userCommunityRatingFrom = userContext.userRatingCollection.communityRatingForUser[from];
+    // CommunityRatingForUser storage userCommunityRatingTo = userContext.userRatingCollection.communityRatingForUser[to];
+    // userCommunityRatingTo = userCommunityRatingFrom;
+
+    // userContext.userRatingCollection.communityRatingForUser[to] = userCommunityRatingFrom;
+
+    // UserRating storage userRating1 = testStruct[0];
+  }
+
+  function migrateUserRating(UserLib.TestStruct storage testStruct, address from, address to) internal {
+    // CommunityRatingForUser storage userCommunityRatingFrom = userContext.userRatingCollection.communityRatingForUser[from];
+    // CommunityRatingForUser storage userCommunityRatingTo = userContext.userRatingCollection.communityRatingForUser[to];
+    // userCommunityRatingTo = userCommunityRatingFrom;
+
+    // userContext.userRatingCollection.communityRatingForUser[to] = userCommunityRatingFrom;
+
+    // UserRating storage userRating1 = testStruct.userRating[1];
+    // testStruct.userRating[2] = userRating1;
   }
 
   function updateRatingBase(UserContext storage userContext, AchievementLib.AchievementsMetadata storage achievementsMetadata, address userAddr, int32 rating, uint32 communityId) public {
