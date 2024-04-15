@@ -3,7 +3,7 @@ const path = require('path');
 const PATH = '../image/';
 const execSync = require('child_process').execSync;
 
-const ChainId = { Polygon: 137, PolygomTest: 80001, EdgeEVM: 2021 };
+const ChainId = { Polygon: 137, PolygomMumbai: 80001, EdgeEVM: 2021, PolygonAmoy: 80002 };
 
 const testAccount = {
   displayName: "testAccount",
@@ -93,10 +93,12 @@ const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3 }
 
 async function getChainName(chainId) {
   let chainName = '';
-  if (chainId == ChainId.PolygomTest) {
+  if (chainId == ChainId.PolygomMumbai) {
     chainName = 'mumbai';
   } else if (chainId == ChainId.Polygon) {
     chainName = 'polygon';
+  } else if (chainId == ChainId.PolygonAmoy) {
+    chainName = 'amoy';
   } else if (chainId == ChainId.EdgeEVM) {
     chainName = 'edgeware'
   }

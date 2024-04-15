@@ -39,6 +39,12 @@ module.exports = {
       gas: 2100000,
       gasPrice: 20000000000
     },
+    amoy: {
+      url: `https://rpc-amoy.polygon.technology/`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      gas: 2100000,
+      gasPrice: 30000000000
+    },
     goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [ADMIN_PRIVATE_KEY],

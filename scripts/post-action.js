@@ -106,13 +106,14 @@ async function userFunctions() {
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
-  // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
+  const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.addUserRating("0x31339c62C0A44b875297945edb93D88092b5fa91", 100, 2);
   // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
-  const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
   // const txObj = await peeranhaUser.isProtocolAdmin("0x570895fd1f7d529606e495885f6eaf1924baa08e");
   // const txObj = await peeranhaUser.getUserRatingCollection("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499", 2);
+  // const txObj = await peeranhaUser.getUsersCount();
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
