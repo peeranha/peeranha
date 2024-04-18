@@ -221,16 +221,14 @@ library UserLib {
       Action.FollowCommunity
     );
 
-    bool isAdded;
+    bool isAlreadyFollowed;
     for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "already_followed");
-
-      if (user.followedCommunities[i] == 0 && !isAdded) {
-        user.followedCommunities[i] = communityId;
-        isAdded = true;
+      if (user.followedCommunities[i] == communityId) {
+        isAlreadyFollowed = true;
+        break;
       }
     }
-    if (!isAdded)
+    if (!isAlreadyFollowed)
       user.followedCommunities.push(communityId);
 
     emit FollowedCommunity(userAddress, communityId);
@@ -255,7 +253,11 @@ library UserLib {
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
-        delete user.followedCommunities[i]; //method rewrite to 0
+        // Move the last element into the place to delete
+        user.followedCommunities[i] = user.followedCommunities[user.followedCommunities.length - 1];
+
+        // Remove the last element
+        user.followedCommunities.pop();
         
         emit UnfollowedCommunity(userAddress, communityId);
         return;
@@ -491,7 +493,8 @@ library UserLib {
     uint32 communityId,
     Action action
   )
-    internal 
+    internal
+    view
     returns (User storage)
   {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
@@ -499,7 +502,7 @@ library UserLib {
         
     (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, energy);
+    // reduceEnergy(user, energy);
 
     return user;
   }
@@ -595,7 +598,7 @@ library UserLib {
     }
   }
 
-  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {
     uint16 currentPeriod = RewardLib.getPeriod();
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 
