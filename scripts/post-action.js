@@ -1,9 +1,9 @@
 const { ethers, network } = require("hardhat");
+const fetch = require('node-fetch');
 const { create } = require("ipfs-http-client");
 const bs58 = require("bs58");
 const {
   GLOBAL_ADMIN_ADDRESS,
-  IPFS_API_URL,
   USER_ADDRESS,
   NFT_ADDRESS,
   TOKEN_ADDRESS,
@@ -11,7 +11,7 @@ const {
   USERLIB_ADDRESS,
   COMMUNITY_ADDRESS,
   CONTENT_ADDRESS,
-  IPFS_API_URL_THE_GRAPH,
+  API_ENDPOINT,
   INFURA_API_KEY,
 } = require("../env.json");
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
@@ -20,34 +20,64 @@ const fs = require("fs");
 const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE } = require("../test/contracts/utils");
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
+const SAVE_FILE_SERVICE = "save-file"
 
-function getIpfsApi() {
-  return create(IPFS_API_URL);
+async function getBytes32FromData(data) {
+  const convertData = { content: Buffer.from(JSON.stringify(data), 'utf8'), encoding: 'Buffer' }
+  const ipfsHash = await saveDataIpfsS3(convertData);
+  console.log("Uploaded file to IPFS - " + ipfsHash);
+  return getBytes32FromIpfsHash(ipfsHash);
 }
 
-function getIpfsApiTheGraph() {
-  return create(IPFS_API_URL_THE_GRAPH);
+function getBytes32FromIpfsHash(ipfsResponse) {
+  if (ipfsResponse?.OK) {
+    const cid = ipfsResponse.body.cid;
+    console.log(`cid: ${cid}`)
+    return (
+      "0x" +
+      bs58
+        .decode(cid)
+        .slice(2)
+        .toString("hex")
+    );
+  } else {
+    console.log('\x1b[41m', `Error ipfs: ${JSON.stringify(ipfsResponse)}`, '\x1b[0m');
+    return null;
+  }
 }
 
-async function saveTextTheGraph(buf) {
-  await getIpfsApiTheGraph().add(buf);
+async function saveDataIpfsS3(file) {
+  return await callService(SAVE_FILE_SERVICE, { file });
 }
 
-async function saveText(text) {
-  const buf = Buffer.from(text, "utf8");
-  const saveResult = await getIpfsApi().add(buf);
-  await saveTextTheGraph(buf);
-  return saveResult.cid.toString();
-}
+async function callService(service, props, isGet = false) {
+  const url = new URL(API_ENDPOINT + service);
 
-function getBytes32FromIpfsHash(ipfsListing) {
-  return (
-    "0x" +
-    bs58
-      .decode(ipfsListing)
-      .slice(2)
-      .toString("hex")
-  );
+  if (isGet) {
+    url.search = new URLSearchParams(props).toString();
+  }
+
+  const rawResponse = await fetch(url, {
+    method: isGet ? 'GET' : 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': isGet ? '' : 'application/json',
+    },
+    ...(!isGet ? { body: JSON.stringify(props) } : {}),
+  });
+  const response = await rawResponse.json();
+
+  if (rawResponse.status < 200 || rawResponse.status > 208) {
+    return {
+      errorMessage: response.message,
+      errorCode: response.code,
+    };
+  }
+
+  return {
+    OK: true,
+    body: response,
+  };
 }
 
 async function getTags(countTags) {
@@ -65,12 +95,6 @@ async function getTags(countTags) {
   }
 
   return tags;
-}
-
-async function getBytes32FromData(data) {
-  const ipfsHash = await saveText(JSON.stringify(data));
-  console.log("Uploaded file to IPFS - " + ipfsHash);
-  return getBytes32FromIpfsHash(ipfsHash);
 }
 
 const testDocumentating = {
@@ -92,8 +116,8 @@ async function getError() {
 }
 
 async function main() {
-  // await contentFunctions();
-  await userFunctions();
+  await contentFunctions();
+  // await userFunctions();
   // await communityFunctions();
 }
 
@@ -113,6 +137,9 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
   // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xF5DFa78C158697f39a3D425F7Ad4f9fE4154c0F9")
   // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xF5DFa78C158697f39a3D425F7Ad4f9fE4154c0F9")
+  // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A");
+  // const txObj = await peeranhaUser.followCommunity(signers[0].address, 1);
+  // const txObj = await peeranhaUser.unfollowCommunity(signers[0].address, 1);
   // const txObj = await peeranhaUser.isProtocolAdmin("0x570895fd1f7d529606e495885f6eaf1924baa08e");
   // const txObj = await peeranhaUser.getUserRatingCollection("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499", 2);
   // const txObj = await peeranhaUser.getUsersCount();
@@ -147,7 +174,12 @@ async function contentFunctions() {
   const peeranhaContent = await PeeranhaContent.attach(CONTENT_ADDRESS);
   const signers = await ethers.getSigners();
 
-  const txObj = await peeranhaContent.createPost(signers[0].address, 2, await getBytes32FromData(testPost), PostTypeEnum.ExpertPost, [1], Language.Chinese);
+  const ipfsResponse = await getBytes32FromData(testPost);
+  if (!ipfsResponse) {
+    console.log('\x1b[41m', `Error ipfs: ${JSON.stringify(ipfsResponse)}`, '\x1b[0m');
+    return;
+  }
+  const txObj = await peeranhaContent.createPost(signers[0].address, 1, ipfsResponse, PostTypeEnum.ExpertPost, [1], Language.Chinese);
   // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
   // const txObj = await peeranhaContent.createReply(signers[0].address, 2, 0, await getBytes32FromData(testReply), true, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);

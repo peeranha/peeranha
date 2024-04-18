@@ -9,6 +9,7 @@
   "API_ENDPOINT": "https://dev1-api.testpeeranha.io/",
   "IPFS_API_URL_THE_GRAPH": "https://api.thegraph.com/ipfs/api/v0",
   "IPFS_API_URL": "https://ipfs.testpeeranha.io:5001",
+  "API_ENDPOINT": "https://dev1-api.testpeeranha.io/",
   "IPFS_API_URL_WEB3": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGY0QzM1MDVGZjJmNDg0ZTAwZDM3Qzk0OEFkZmEzRWU5YTk5OTMwM2QiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTU0ODk0OTI2NzgsIm5hbWUiOiJQZWVyYW5oYSBVSSJ9.lRqDmHTXLjSmWwWJWqjvaMhJPQP-fma-44EGRiClmTs",
   "POLYGON_CHILD_MANAGER_ADDRESS": "",
   "MINTABLE_ERC20_PREDICATE_PROXY": "",
