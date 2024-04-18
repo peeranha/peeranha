@@ -139,7 +139,8 @@ library UserLib {
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
-    CommunityModerator
+    CommunityModerator,
+    AdminOrCommunityAdminOrCommunityModerator
   }
 
   event UserCreated(address indexed userAddress);

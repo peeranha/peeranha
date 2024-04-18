@@ -2081,8 +2081,7 @@ describe("Test change postType and community id by moderator", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
 				
-				await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English))
-					.to.be.revertedWith('Community is frozen');
+				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 			});
 	
 			it("Test change post community Id by editPost", async function () {
@@ -5063,8 +5062,7 @@ describe("Test change postType and community id by author", function () {
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
 
-			await expect(peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English)).
-                to.be.revertedWith('Community is frozen');
+			await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 		});
 
 		it("Test change community Id", async function () {
@@ -5129,8 +5127,7 @@ describe("Test change postType and community id by author", function () {
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
 			
-			await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English))
-				.to.be.revertedWith('Community is frozen');
+			await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 		});
 
 		it("Test change post community Id by editPost", async function () {

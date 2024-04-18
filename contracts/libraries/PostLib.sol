@@ -158,7 +158,7 @@ library PostLib  {
         PostLib.Language language,
         bytes32 metadata
     ) public {
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
         self.peeranhaCommunity.checkTags(communityId, tags);
         
         self.peeranhaUser.checkActionRole(
@@ -421,7 +421,7 @@ library PostLib  {
 
         if (postContainer.info.communityId != communityId) {
             emit PostCommunityChanged(userAddr, postId, postContainer.info.communityId);
-            changePostCommunity(self, postContainer, communityId);
+            changePostCommunity(self, userAddr, postContainer, communityId);
         }
         if (postContainer.info.postType != postType) {
             emit PostTypeChanged(userAddr, postId, postContainer.info.postType);
@@ -1043,13 +1043,13 @@ library PostLib  {
     /// @param newCommunityId New community id for post
     function changePostCommunity(
         PostCollection storage self,
+        address userAddr,
         PostContainer storage postContainer,
         uint32 newCommunityId
     ) private {
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(newCommunityId);
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(newCommunityId, userAddr);
         uint32 oldCommunityId = postContainer.info.communityId;
-        PostType postType = postContainer.info.postType;
-        VoteLib.StructRating memory typeRating = getTypesRating(postType);
+        VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
 
         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
         int32 changePostAuthorRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
@@ -1096,7 +1096,7 @@ library PostLib  {
         uint32 communityId, 
         bytes32 documentationTreeIpfsHash
     ) public {
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
@@ -1156,7 +1156,8 @@ library PostLib  {
         address userAddr
     ) private {
         PostContainer storage postContainer = getPostContainer(postCollection, postId);
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
+        uint32 communityId = postContainer.info.communityId;
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
         if (replyId != 0)
             getReplyContainerSafe(postContainer, replyId);
         if (commentId != 0)
@@ -1165,7 +1166,7 @@ library PostLib  {
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
-            postContainer.info.communityId,
+            communityId,
             UserLib.Action.NONE,
             UserLib.ActionRole.Bot,
             false

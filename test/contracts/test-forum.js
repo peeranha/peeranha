@@ -174,12 +174,11 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
 
-			await expect(peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)).to.be.revertedWith('Community is frozen');
+			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaCommunity.unfreezeCommunity(signers[0].address, 1);
 
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
-		});
-			
+		});	
 	});
 
 	describe('Create reply', function () {
@@ -1845,7 +1844,7 @@ describe("Test post", function () {
 			await expect(peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0])).to.be.revertedWith('Community does not exist');
 		});
 
-		it("Test set documentation position for frozen community ", async function () {
+		it("Test set documentation position for frozen community", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -1854,7 +1853,7 @@ describe("Test post", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
 
-			await expect(peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0])).to.be.revertedWith('Community is frozen');
+			await peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0]);
 		});
 
 		it("Test edit documentation position", async function () {
@@ -1872,7 +1871,7 @@ describe("Test post", function () {
 			expect(documentationTree.hash).to.equal(hashContainer[1]);
 		});
 
-		it("Test edit documentation position for frozen community ", async function () {
+		it("Test edit documentation position for frozen community", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const signers = await ethers.getSigners();
 			const hashContainer = getHashContainer();
@@ -1883,7 +1882,7 @@ describe("Test post", function () {
 			await peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0])
 
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
-			await expect(peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0])).to.be.revertedWith('Community is frozen');
+			await peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0]);
 		});
 
 	});

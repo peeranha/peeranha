@@ -146,7 +146,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function followCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         UserLib.createIfDoesNotExist(userContext.users, user);
         UserLib.followCommunity(userContext, user, communityId);
     }
@@ -264,7 +264,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) public override {
         dispatcherCheck(user);
         checkUser(userAddr);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
@@ -282,7 +282,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
         checkUser(userAddr);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
@@ -298,7 +298,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         require(userAddr != user, "self_revoke");
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
@@ -315,7 +315,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
@@ -336,8 +336,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     )   
         external
     {
+        onlyExistingAndNotFrozenCommunity(_msgSender(), communityId);
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        onlyExistingAndNotFrozenCommunity(communityId);
         userContext.achievementsContainer.configureNewAchievement(achievementsMetadata, maxCount, lowerBound, achievementURI, communityId, achievementsType);
     }
 
@@ -474,35 +474,52 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
-        string memory message;
+        (bool isHasRole, string memory message) = isHasRoles(actionCaller, actionRole, communityId);
+        require(isHasRole, message);
+    }
+
+    function isHasRoles(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view returns (bool, string memory) {
         bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, actionCaller);
         bool isCommunityAdmin = hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller);
         bool isCommunityModerator = hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller);
+        string memory message;
+        bool isHasRole;
 
         if (actionRole == UserLib.ActionRole.NONE) {
-            return;
+            isHasRole = true;
+            message = '';
         } else if (actionRole == UserLib.ActionRole.Admin && !isAdmin) {
+            isHasRole = false;
             message = "not_allowed_not_admin";
         } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
+            isHasRole = false;
             message = "not_allowed_not_bot";
         } else if (actionRole == UserLib.ActionRole.Dispatcher && !hasRole(DISPATCHER_ROLE, actionCaller)) {
             message = "not_allowed_not_dispatcher";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
+            isHasRole = false;
             message = "not_allowed_admin_or_comm_moderator";
-        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || (isCommunityAdmin))) {
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || isCommunityAdmin)) {
+            isHasRole = false;
             message = "not_allowed_admin_or_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityAdmin && !isCommunityAdmin) {
+            isHasRole = false;
             message = "not_allowed_not_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityModerator && !isCommunityModerator) {
+            isHasRole = false;
             message = "not_allowed_not_comm_moderator";
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator &&   // test
+        !(isAdmin || isCommunityAdmin || isCommunityModerator)) {
+            isHasRole = false;
+            message = "not_allowed_admin_or_comm_admin_or_comm_moderator";
         } else {
-            return;
+            isHasRole = true;
+            message = '';
         }
-
-        revert(message);
+        return (isHasRole, message);
     }
-    
+
     function hasModeratorRole(
         address user,
         uint32 communityId
@@ -519,9 +536,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return bytes32(role + communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId) private {
+    function onlyExistingAndNotFrozenCommunity(address actionCaller, uint32 communityId) private {
         if (communityId == 0) return;
-        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, actionCaller);
     }
 
     /**

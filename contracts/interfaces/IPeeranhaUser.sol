@@ -16,6 +16,7 @@ interface IPeeranhaUser {
     function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool isCreate) external;
     function isProtocolAdmin(address userAddr) external view returns (bool);
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) external view;
+    function isHasRoles(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) external view returns (bool, string memory);
     function getRatingToReward(address user, uint16 period, uint32 communityId) external view returns (int32);
     function getPeriodRewardShares(uint16 period) external view returns(RewardLib.PeriodRewardShares memory);
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external view returns(uint32[] memory);

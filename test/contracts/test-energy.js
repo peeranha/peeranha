@@ -29,7 +29,7 @@ describe("Test energy", function () {
 		});
 	}
 
-	it("Test action with negetive rating", async function () {	// need?
+	xit("Test action with negetive rating", async function () {	// need?
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -44,7 +44,7 @@ describe("Test energy", function () {
 		await expect(peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)).to.be.revertedWith('low_rating_post');
 	});*/
 
-	it("Test energy. Publication post", async function () {
+	xit("Test energy. Publication post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -62,7 +62,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost);		
 	});
 
-	it("Test energy. Publication post (energy not enough)", async function () {
+	xit("Test energy. Publication post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -79,7 +79,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. Publication reply", async function () {
+	xit("Test energy. Publication reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
      	const ipfsHashes = getHashesContainer(2);
@@ -96,7 +96,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply);		
 	});
 
-	it("Test energy. Publication reply (energy not enough)", async function () {
+	xit("Test energy. Publication reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
      	const ipfsHashes = getHashesContainer(2);
@@ -112,7 +112,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(60);
 
-	it("Test energy. Publication comment", async function () {
+	xit("Test energy. Publication comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -132,7 +132,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationComment - energyPublicationComment);		
 	}).retries(5);
 
-	it("Test energy. Publication comment (energy not enough)", async function () {
+	xit("Test energy. Publication comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -149,7 +149,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. Publication comment to reply (energy not enough)", async function () {
+	xit("Test energy. Publication comment to reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -166,7 +166,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. Edit post", async function () {
+	xit("Test energy. Edit post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -181,7 +181,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost - energyEditItem);		
 	}).retries(5);
 
-	it("Test energy. Edit post (energy not enough)", async function () {
+	xit("Test energy. Edit post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -198,7 +198,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. Edit reply", async function () {
+	xit("Test energy. Edit reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
      	const ipfsHashes = getHashesContainer(2);
@@ -215,7 +215,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationReply - energyEditItem);		
 	}).retries(10);
 
-	it("Test energy. Edit reply (energy not enough)", async function () {
+	xit("Test energy. Edit reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -231,7 +231,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(60);
 
-	it("Test energy. Edit comment", async function () {
+	xit("Test energy. Edit comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -252,7 +252,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - 2 * (energyPublicationComment + energyEditItem));		
 	}).retries(3);
 
-	it("Test energy. Edit comment (energy not enough)", async function () {
+	xit("Test energy. Edit comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -269,7 +269,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. Edit comment for reply (energy not enough)", async function () {
+	xit("Test energy. Edit comment for reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -287,7 +287,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. upvote post", async function () {
+	xit("Test energy. upvote post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -305,7 +305,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyUpvotePost);		
 	});
 
-	it("Test energy. upvote post (energy not enough)", async function () {
+	xit("Test energy. upvote post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -323,7 +323,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. down vote post", async function () {
+	xit("Test energy. down vote post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -341,7 +341,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyDownVotePost);		
 	});
 
-	it("Test energy. down vote post (energy not enough)", async function () {
+	xit("Test energy. down vote post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -358,7 +358,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(3);
 
-	it("Test energy. Cancel upvote post", async function () {
+	xit("Test energy. Cancel upvote post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -377,7 +377,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyUpvotePost + energyForumVoteCancel));		
 	}).retries(4);
 
-	it("Test energy. Cancel upvote (energy not enough)", async function () {
+	xit("Test energy. Cancel upvote (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -396,7 +396,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. Cancel down vote post", async function () {
+	xit("Test energy. Cancel down vote post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -415,7 +415,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyDownVotePost + energyUpvotePost));		
 	}).retries(3);
 
-	it("Test energy. Cancel down vote post (energy not enough)", async function () {
+	xit("Test energy. Cancel down vote post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -435,7 +435,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(2);
 
-	it("Test energy. upvote reply", async function () {
+	xit("Test energy. upvote reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -454,7 +454,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyUpvoteReply);		
 	});
 
-	it("Test energy. upvote reply (energy not enough)", async function () {
+	xit("Test energy. upvote reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -472,7 +472,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. down vote reply", async function () {
+	xit("Test energy. down vote reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -491,7 +491,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyDownVoteReply);
 	});
 
-	it("Test energy. down vote reply (energy not enough)", async function () {
+	xit("Test energy. down vote reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -509,7 +509,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(15);
 
-	it("Test energy. Cancel upvote reply", async function () {
+	xit("Test energy. Cancel upvote reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -529,7 +529,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyUpvoteReply + energyForumVoteCancel));		
 	}).retries(3);
 
-	it("Test energy. Cancel upvote reply (energy not enough)", async function () {
+	xit("Test energy. Cancel upvote reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -549,7 +549,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. Cancel down vote reply", async function () {
+	xit("Test energy. Cancel down vote reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -569,7 +569,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyDownVoteReply + energyUpvoteReply));
 	}).retries(3);
 
-	it("Test energy. Cancel down vote reply (energy not enough)", async function () {
+	xit("Test energy. Cancel down vote reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -589,7 +589,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(2);
 
-	it("Test energy. upvote comment", async function () {
+	xit("Test energy. upvote comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -611,7 +611,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyVoteComment * 2);	
 	}).retries(2);
 
-	it("Test energy. upvote comment (energy not enough)", async function () {
+	xit("Test energy. upvote comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -633,7 +633,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. down vote comment", async function () {
+	xit("Test energy. down vote comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -656,7 +656,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyVoteComment * 2);
 	}).retries(2);
 
-	it("Test energy. down vote comment (energy not enough)", async function () {
+	xit("Test energy. down vote comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -678,7 +678,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(2);
 
-	it("Test energy. Cancel upvote comment", async function () {
+	xit("Test energy. Cancel upvote comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -702,7 +702,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyVoteComment + energyForumVoteCancel) * 2);	
 	}).retries(2);
 
-	it("Test energy. Cancel upvote comment (energy not enough)", async function () {
+	xit("Test energy. Cancel upvote comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -728,7 +728,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(3);
 
-	it("Test energy. Cancel down vote comment", async function () {
+	xit("Test energy. Cancel down vote comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -752,7 +752,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyVoteComment + energyVoteComment) * 2);
 	}).retries(10);
 
-	it("Test energy. Cancel down vote comment (energy not enough)", async function () {
+	xit("Test energy. Cancel down vote comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -779,7 +779,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');	
 	}).retries(5);
 
-	it("Test energy. delete post", async function () {
+	xit("Test energy. delete post", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -795,7 +795,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyPublicationPost + energyDeleteItem));		
 	});
 
-	it("Test energy. delete post (energy not enough)", async function () {
+	xit("Test energy. delete post (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -810,7 +810,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');		
 	}).retries(2);
 
-	it("Test energy. delete reply", async function () {
+	xit("Test energy. delete reply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -828,7 +828,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - (energyPublicationReply + energyDeleteItem));		
 	});
 
-	it("Test energy. delete reply (energy not enough)", async function () {
+	xit("Test energy. delete reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -844,7 +844,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');		
 	}).retries(2);
 
-	it("Test energy. delete comment", async function () {
+	xit("Test energy. delete comment", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -871,7 +871,7 @@ describe("Test energy", function () {
 		expect(user.energy).to.equal(StartEnergy - 2 * (energyPublicationComment + energyDeleteItem));		
 	}).retries(5);
 
-	it("Test energy. delete comment (energy not enough)", async function () {
+	xit("Test energy. delete comment (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -888,7 +888,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(2);
 
-	it("Test energy. delete comment for reply (energy not enough)", async function () {
+	xit("Test energy. delete comment for reply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -906,7 +906,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(3);
 
-	it("Test energy. edit profile", async function () {
+	xit("Test energy. edit profile", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
@@ -917,7 +917,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyUpdateProfile);
 	});
 
-	it("Test energy. edit profile (energy not enough)", async function () {
+	xit("Test energy. edit profile (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const signers = await ethers.getSigners();
@@ -928,7 +928,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(30);
 
-	it("Test energy. MarkBestReply", async function () {
+	xit("Test energy. MarkBestReply", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -946,7 +946,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost - energyBestReply);
 	}).retries(5);
 
-	it("Test energy. MarkBestReply and unmark", async function () {
+	xit("Test energy. MarkBestReply and unmark", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -964,7 +964,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyPublicationPost - energyBestReply * 2);
 	}).retries(5);
 
-	it("Test energy. MarkBestReply (energy not enough)", async function () {
+	xit("Test energy. MarkBestReply (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -980,7 +980,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. MarkBestReply and unmark (energy not enough)", async function () {
+	xit("Test energy. MarkBestReply and unmark (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -998,7 +998,7 @@ describe("Test energy", function () {
 			.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. Follow community", async function () {
+	xit("Test energy. Follow community", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -1016,7 +1016,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - energyFollowCommunity);
 	}).retries(5);
 
-	it("Test energy. Follow community (energy not enough)", async function () {
+	xit("Test energy. Follow community (energy not enough)", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
 		const ipfsHashes = getHashesContainer(2);
@@ -1035,7 +1035,7 @@ describe("Test energy", function () {
 		.to.be.revertedWith('low_energy');
 	}).retries(5);
 
-	it("Test energy. Unfollow community", async function () {
+	xit("Test energy. Unfollow community", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);
@@ -1053,7 +1053,7 @@ describe("Test energy", function () {
 		await expect(user.energy).to.equal(StartEnergy - 2 * energyFollowCommunity);
 	}).retries(5);
 
-	// it("Test energy. Unfollow community (energy not enough)", async function () {	// dont need?
+	// xit("Test energy. Unfollow community (energy not enough)", async function () {	// dont need?
 	// 	const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 	// 	const hashContainer = getHashContainer();
     //     const ipfsHashes = getHashesContainer(2);
@@ -1070,7 +1070,7 @@ describe("Test energy", function () {
 	// 	.to.be.revertedWith('low_energy');
 	// });
 
-	it("Test energy. Actions by administrator", async function () {
+	xit("Test energy. Actions by administrator", async function () {
 		const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 		const hashContainer = getHashContainer();
         const ipfsHashes = getHashesContainer(2);

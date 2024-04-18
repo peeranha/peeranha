@@ -17,7 +17,7 @@ const {
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE } = require("../test/contracts/utils");
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 
@@ -111,6 +111,8 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.giveAdminPermission("0x570895Fd1f7d529606E495885f6EAF1924BAa08e")
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0xf5800B1a93C4b0A87a60E9751d1309Ce93CC0D3A")
+  // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xF5DFa78C158697f39a3D425F7Ad4f9fE4154c0F9")
+  // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xF5DFa78C158697f39a3D425F7Ad4f9fE4154c0F9")
   // const txObj = await peeranhaUser.isProtocolAdmin("0x570895fd1f7d529606e495885f6eaf1924baa08e");
   // const txObj = await peeranhaUser.getUserRatingCollection("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499", 2);
   // const txObj = await peeranhaUser.getUsersCount();

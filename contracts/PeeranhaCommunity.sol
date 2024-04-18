@@ -41,7 +41,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be a new community.
      * - Sender must be a admin.
      */
-    function createCommunity(address user, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public  {
+    function createCommunity(address user, bytes32 ipfsHash, CommunityLib.Tag[] memory tags) public {
         dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.Admin, 0);
         uint32 communityId = communities.createCommunity(ipfsHash, tags);
@@ -56,9 +56,9 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be admin or community admin.
      */
-    function updateCommunity(address user, uint32 communityId, bytes32 ipfsHash) public  {
+    function updateCommunity(address user, uint32 communityId, bytes32 ipfsHash) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(communityId, user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateCommunity(communityId, ipfsHash);
     }
@@ -71,9 +71,9 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be admin or community admin.
      */
-    function freezeCommunity(address user, uint32 communityId) public  {      // todo: unitests
+    function freezeCommunity(address user, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(communityId, user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.freeze(communityId);
     }
@@ -86,7 +86,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community.  
      * - Sender must be admin and community moderator.
      */
-    function unfreezeCommunity(address user, uint32 communityId) public  {
+    function unfreezeCommunity(address user, uint32 communityId) public {
         dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.unfreeze(communityId);
@@ -101,9 +101,9 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing community. 
      * - Must be admin and community admin
      */
-    function createTag(address user, uint32 communityId, bytes32 ipfsHash) public  { // community admin || global moderator
+    function createTag(address user, uint32 communityId, bytes32 ipfsHash) public { // community admin || global moderator
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(communityId, user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.createTag(communityId, ipfsHash);
     }
@@ -117,7 +117,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      * - Must be an existing tag.  
      * - Sender must be admin or community admin.
      */
-    function updateTag(address user, uint32 communityId, uint8 tagId, bytes32 ipfsHash) public  onlyExistingTag(tagId, communityId) {
+    function updateTag(address user, uint32 communityId, uint8 tagId, bytes32 ipfsHash) public onlyExistingTag(tagId, communityId) {
         dispatcherCheck(user);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateTag(tagId, communityId, ipfsHash);
@@ -178,8 +178,15 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         return communities.getTag(communityId, tagId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId) public view override {
-        CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+    function onlyExistingAndNotFrozenCommunity(uint32 communityId, address userAddress) public view override {
+        bool isFrozenCommunity = CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+
+        if (isFrozenCommunity) {
+            (bool isHasRole, string memory message) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+            require(isHasRole,
+                "Community is frozen"
+            );
+        }
     }
 
     modifier onlyExistingTag(uint8 tagId, uint32 communityId) {

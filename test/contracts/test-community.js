@@ -1,5 +1,7 @@
 const { expect } = require("chai");
-const { createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer } = require('./utils');
+const { PROTOCOL_ADMIN_ROLE, LanguagesEnum, PostTypeEnum,
+    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer
+} = require('./utils');
 
 
 describe("Test communities", function() {
@@ -119,4 +121,92 @@ describe("Test communities", function() {
                 }
         }));
     })
+
+    it("Test freeze community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        
+        const community = await peeranhaCommunity.getCommunity(1);
+        await expect(community.isFrozen).to.equal(true);
+    });
+
+    it("Test unfreeze community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        await peeranhaCommunity.unfreezeCommunity(signers[0].address, 1);
+        
+        const community = await peeranhaCommunity.getCommunity(1);
+        await expect(community.isFrozen).to.equal(false);
+    });
+
+    it("Test protocol admin create post in frozen community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+        await peeranhaUser.connect(signers[0]).grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
+
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        
+        await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+    });
+
+    it("Test community admin create post in frozen community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+        await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 1);
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        
+        await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+    });
+
+    it("Test community moderator create post in frozen community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+        await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        
+        await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+    });
+
+    it("Test community moderator create post in frozen community", async function () {
+        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
+        const ipfsHashes = getHashesContainer(2);
+        const signers = await ethers.getSigners();
+        const hashContainer = getHashContainer();
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+
+        await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+        await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
+        
+        await expect(peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English)).to.be.revertedWith('Community is frozen');
+    });
 });

@@ -177,7 +177,7 @@ describe("Test users", function() {
     await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
     await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
     
-    await expect(peeranhaUser.followCommunity(signers[0].address, 1)).to.be.revertedWith('Community is frozen');
+    await peeranhaUser.followCommunity(signers[0].address, 1);
   })
 
   it("Follow on deferent communities", async function() {

@@ -201,16 +201,15 @@ library CommunityLib {
         emit CommunityUnfrozen(msg.sender, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal view {
+    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal view returns (bool) {
         Community storage community = self.communities[communityId].info;
 
         require(
             community.ipfsDoc.hash != bytes32(0x0),
             "Community does not exist"
         );
-        require(!community.isFrozen,
-            "Community is frozen"
-        );
+
+        return community.isFrozen;
     }
 
     function onlyExistingTag(CommunityCollection storage self, uint8 tagId, uint32 communityId) internal view {
