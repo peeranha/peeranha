@@ -17,6 +17,7 @@ async function main() {
   const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
 
+  console.log(`USER_ADDRESS: ${USER_ADDRESS}`);
   console.log('Starting force import for Peeranah User...')
   const peeranhaUser = await upgrades.forceImport(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log('Force import ended.')
