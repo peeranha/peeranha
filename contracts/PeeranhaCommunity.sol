@@ -182,7 +182,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         bool isFrozenCommunity = CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
 
         if (isFrozenCommunity) {
-            (bool isHasRole, string memory message) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+            (bool isHasRole,) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
             require(isHasRole,
                 "Community is frozen"
             );
