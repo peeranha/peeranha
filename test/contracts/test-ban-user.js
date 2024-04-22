@@ -37,6 +37,10 @@ describe("Test ban users", function() {
             expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(false);
         });
 
+        it("Test unBan not bunned user", async function() {
+			await expect(peeranhaUser.unBanUser(signers[0].address, signers[1].address)).to.be.revertedWith('User_is_not_banned');
+        });
+
         it("Test ban community user", async function() {
             await peeranhaUser.banCommunityUser(signers[0].address, signers[1].address, 1);
             expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(true);
@@ -46,6 +50,10 @@ describe("Test ban users", function() {
             await peeranhaUser.banCommunityUser(signers[0].address, signers[1].address, 1);
             await peeranhaUser.unBanCommunityUser(signers[0].address, signers[1].address, 1);
             expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(false);
+        });
+
+        it("Test unBan not bunned community user", async function() {
+			await expect(peeranhaUser.unBanCommunityUser(signers[0].address, signers[1].address, 1)).to.be.revertedWith('User_is_not_banned');
         });
     });
 

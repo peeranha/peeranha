@@ -302,7 +302,7 @@ library UserLib {
     address userAddress,
     address targetUserAddress
   ) public {
-    require(isBannedUser(bannedUsers, targetUserAddress, 0), "User_is_not_banned"); // test
+    require(isBannedUser(bannedUsers, targetUserAddress, 0), "User_is_not_banned");
     bannedUsers.bannedUserInfo[targetUserAddress].isGlobalBan = false;
 
     emit UnBanUser(userAddress, targetUserAddress);
@@ -334,7 +334,7 @@ library UserLib {
     address targetUserAddress,
     uint32 communityId
   ) public {
-    require(isBannedUser(bannedUsers, targetUserAddress, communityId), "User_is_not_banned"); // test
+    require(isBannedUser(bannedUsers, targetUserAddress, communityId), "User_is_not_banned");
     bannedUsers.bannedUserInfo[targetUserAddress].userCommunityBans[communityId] = false;
 
     emit UnBanCommunityUser(userAddress, targetUserAddress, communityId);

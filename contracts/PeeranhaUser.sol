@@ -517,7 +517,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         } else {
             checkUser(actionCaller);        // need?
         }
-        require(UserLib.isBannedUser(bannedUsers, actionCaller, communityId), "user_is_banned"); // test
+        require(!UserLib.isBannedUser(bannedUsers, actionCaller, communityId), "user_is_banned"); // test
 
         if (hasModeratorRole(actionCaller, communityId)) {
             return;
