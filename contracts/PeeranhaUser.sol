@@ -489,29 +489,22 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
             isHasRole = true;
             message = '';
         } else if (actionRole == UserLib.ActionRole.Admin && !isAdmin) {
-            isHasRole = false;
             message = "not_allowed_not_admin";
         } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
-            isHasRole = false;
             message = "not_allowed_not_bot";
         } else if (actionRole == UserLib.ActionRole.Dispatcher && !hasRole(DISPATCHER_ROLE, actionCaller)) {
             message = "not_allowed_not_dispatcher";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
-            isHasRole = false;
             message = "not_allowed_admin_or_comm_moderator";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || isCommunityAdmin)) {
-            isHasRole = false;
             message = "not_allowed_admin_or_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityAdmin && !isCommunityAdmin) {
-            isHasRole = false;
             message = "not_allowed_not_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityModerator && !isCommunityModerator) {
-            isHasRole = false;
             message = "not_allowed_not_comm_moderator";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator &&   // test
         !(isAdmin || isCommunityAdmin || isCommunityModerator)) {
-            isHasRole = false;
             message = "not_allowed_admin_or_comm_admin_or_comm_moderator";
         } else {
             isHasRole = true;
