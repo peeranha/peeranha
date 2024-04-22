@@ -175,6 +175,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function banUser(address userAddress, address targetUserAddress) public override {
         dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
         checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
         (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.Admin, 0);
         require(!isHasRole, "You_can_not_ban_admin");
@@ -209,6 +210,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function banCommunityUser(address userAddress, address targetUserAddress, uint32 communityId) public override {
         dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
         checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
         (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
         require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");  // test
