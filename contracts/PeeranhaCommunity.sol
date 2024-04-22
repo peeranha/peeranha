@@ -58,7 +58,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function updateCommunity(address user, uint32 communityId, bytes32 ipfsHash) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId, user);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.updateCommunity(communityId, ipfsHash);
     }
@@ -73,7 +73,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function freezeCommunity(address user, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId, user);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.freeze(communityId);
     }
@@ -103,7 +103,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
      */
     function createTag(address user, uint32 communityId, bytes32 ipfsHash) public { // community admin || global moderator
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId, user);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         communities.createTag(communityId, ipfsHash);
     }
@@ -178,11 +178,11 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         return communities.getTag(communityId, tagId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId, address userAddress) public view override {
+    function onlyExistingAndNotFrozenCommunity(address userAddress, uint32 communityId) public view override {
         bool isFrozenCommunity = CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
 
         if (isFrozenCommunity) {
-            (bool isHasRole, string memory message) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+            (bool isHasRole,) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
             require(isHasRole,
                 "Community is frozen"
             );

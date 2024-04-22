@@ -538,7 +538,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     function onlyExistingAndNotFrozenCommunity(address actionCaller, uint32 communityId) private {
         if (communityId == 0) return;
-        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, actionCaller);
+        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(actionCaller, communityId);
     }
 
     /**
