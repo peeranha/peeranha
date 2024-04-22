@@ -158,7 +158,7 @@ library PostLib  {
         PostLib.Language language,
         bytes32 metadata
     ) public {
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
         
         self.peeranhaUser.checkActionRole(
@@ -1047,7 +1047,7 @@ library PostLib  {
         PostContainer storage postContainer,
         uint32 newCommunityId
     ) private {
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(newCommunityId, userAddr);
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, newCommunityId);
         uint32 oldCommunityId = postContainer.info.communityId;
         VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
 
@@ -1096,7 +1096,7 @@ library PostLib  {
         uint32 communityId, 
         bytes32 documentationTreeIpfsHash
     ) public {
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
@@ -1157,7 +1157,7 @@ library PostLib  {
     ) private {
         PostContainer storage postContainer = getPostContainer(postCollection, postId);
         uint32 communityId = postContainer.info.communityId;
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId, userAddr);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         if (replyId != 0)
             getReplyContainerSafe(postContainer, replyId);
         if (commentId != 0)
