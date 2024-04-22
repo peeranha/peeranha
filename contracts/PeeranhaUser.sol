@@ -213,7 +213,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         checkUser(targetUserAddress);
         checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
         (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
-        require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");  // test
+        require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");
 
         UserLib.banCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
     }
