@@ -55,6 +55,26 @@ describe("Test ban users", function() {
         it("Test unBan not bunned community user", async function() {
 			await expect(peeranhaUser.unBanCommunityUser(signers[0].address, signers[1].address, 1)).to.be.revertedWith('User_is_not_banned');
         });
+
+        it("Test ban and community ban user", async function() {
+            await peeranhaUser.banCommunityUser(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.banUser(signers[0].address, signers[1].address);
+            expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(true);
+        });
+
+        it("Test only unban user", async function() {
+            await peeranhaUser.banCommunityUser(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.banUser(signers[0].address, signers[1].address);
+            await peeranhaUser.unBanUser(signers[0].address, signers[1].address);
+            expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(true);
+        });
+
+        it("Test only unban community user", async function() {
+            await peeranhaUser.banCommunityUser(signers[0].address, signers[1].address, 1);
+            await peeranhaUser.banUser(signers[0].address, signers[1].address);
+            await peeranhaUser.unBanCommunityUser(signers[0].address, signers[1].address, 1);
+            expect(await peeranhaUser.isBanedUser(signers[1].address, 1)).to.equal(true);
+        });
     });
 
     describe("Test global ban", function() {
