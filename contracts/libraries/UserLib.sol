@@ -156,10 +156,10 @@ library UserLib {
   event UserUpdated(address indexed userAddress);
   event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
   event UnfollowedCommunity(address indexed userAddress, uint32 indexed communityId);
-  event BanCommunityUser(address indexed userAddress, address indexed targetAddress, uint32 indexed communityId);
-  event UnBanCommunityUser(address indexed userAddress, address indexed targetAddress, uint32 indexed communityId);
-  event BanUser(address indexed userAddress, address indexed targetAddress);
-  event UnBanUser(address indexed userAddress, address indexed targetAddress);
+  event BanUser(address indexed userAddress, address indexed targetUserAddress);
+  event UnBanUser(address indexed userAddress, address indexed targetUserAddress);
+  event BanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
+  event UnBanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
 
 
   /// @notice Create new user info record
