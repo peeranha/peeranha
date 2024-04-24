@@ -631,7 +631,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
-     * @dev Get current period.
+     * @dev Get user status. Is global ban or community ban.
     */
     function isBanedUser(address userAddress, uint32 communityId) external view returns (bool) {
         return UserLib.isBannedUser(bannedUsers, userAddress, communityId);
