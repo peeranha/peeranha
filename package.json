@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node scripts/change-env-values.js 3 && npx hardhat test && node scripts/change-env-values.js 0",
     "test-bot": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-bot.js && node scripts/change-env-values.js 0",
+    "test-ban-user": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-ban-user.js && node scripts/change-env-values.js 0",
     "test-local": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-local.js && node scripts/change-env-values.js 0",
     "test-nft": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-NFT.js && node scripts/change-env-values.js 0",
     "test-user": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-user.js && node scripts/change-env-values.js 0",
@@ -16,6 +17,7 @@
     "test-forum": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-forum.js && node scripts/change-env-values.js 0",
     "test-token": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-1token.js && node scripts/change-env-values.js 0",
     "test-community-permissions": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-community-permissions.js && node scripts/change-env-values.js 0",
+    "test-community": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-community.js && node scripts/change-env-values.js 0",
     "test-dispatcher": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-dispatcher.js && node scripts/change-env-values.js 0",
     "test-change-postType-community": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-change-postType-community.js && node scripts/change-env-values.js 0",
     "compile": "node scripts/change-env-values.js 0 && npx hardhat compile",
@@ -99,6 +101,6 @@
     "ipfs-http-client": "^52.0.1"
   },
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.7.0"
   }
 }

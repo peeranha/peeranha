@@ -103,6 +103,15 @@ library UserLib {
     address[] userList;
   }
 
+  struct BannedUsers {
+    mapping(address => BannedUserInfo) bannedUserInfo;
+  }
+
+  struct BannedUserInfo {
+    mapping(uint32 => bool) userCommunityBans;  // communityId
+    bool isGlobalBan;
+  }
+
   struct UserRatingChange {
     address user;
     int32 rating;
@@ -139,13 +148,18 @@ library UserLib {
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
-    CommunityModerator
+    CommunityModerator,
+    AdminOrCommunityAdminOrCommunityModerator
   }
 
   event UserCreated(address indexed userAddress);
   event UserUpdated(address indexed userAddress);
   event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
   event UnfollowedCommunity(address indexed userAddress, uint32 indexed communityId);
+  event BanUser(address indexed userAddress, address indexed targetUserAddress);
+  event UnBanUser(address indexed userAddress, address indexed targetUserAddress);
+  event BanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
+  event UnBanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
 
 
   /// @notice Create new user info record
@@ -264,6 +278,76 @@ library UserLib {
       }
     }
     revert("comm_not_followed");
+  }
+
+  /// @notice Ban user
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be ban
+  function banUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress
+  ) public {
+    require(!isBannedUser(bannedUsers, targetUserAddress, 0), "Already_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].isGlobalBan = true;
+
+    emit BanUser(userAddress, targetUserAddress);
+  }
+
+  /// @notice unBan user
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be unBan
+  function unBanUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress
+  ) public {
+    require(isBannedUser(bannedUsers, targetUserAddress, 0), "User_is_not_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].isGlobalBan = false;
+
+    emit UnBanUser(userAddress, targetUserAddress);
+  }
+
+  /// @notice Ban user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be ban
+  /// @param communityId The community where the user will be ban
+  function banCommunityUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress,
+    uint32 communityId
+  ) public {
+    require(!isBannedUser(bannedUsers, targetUserAddress, communityId), "Already_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].userCommunityBans[communityId] = true;
+
+    emit BanCommunityUser(userAddress, targetUserAddress, communityId);
+  }
+
+  /// @notice unBan user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be unBan
+  /// @param communityId The community where the user will be unBan
+  function unBanCommunityUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress,
+    uint32 communityId
+  ) public {
+    require(isBannedUser(bannedUsers, targetUserAddress, communityId), "User_is_not_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].userCommunityBans[communityId] = false;
+
+    emit UnBanCommunityUser(userAddress, targetUserAddress, communityId);
+  }
+
+  /// @notice Is banned user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param userAddress user address
+  /// @param communityId community id
+  function isBannedUser(BannedUsers storage bannedUsers, address userAddress, uint32 communityId) internal view returns (bool isBanned) {
+    bool isCommunityBan =  bannedUsers.bannedUserInfo[userAddress].userCommunityBans[communityId];
+    bool isGlobalBan = bannedUsers.bannedUserInfo[userAddress].isGlobalBan;
+    return isCommunityBan || isGlobalBan;
   }
 
   /// @notice Get the number of users
@@ -500,7 +584,7 @@ library UserLib {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
     int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
         
-    (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
+    (int16 ratingAllowed, string memory message,) = getRatingAndRatingForAction(actionCaller, dataUser, action);
     require(userRating >= ratingAllowed, message);
     // reduceEnergy(user, energy);
 

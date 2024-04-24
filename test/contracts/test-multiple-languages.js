@@ -266,8 +266,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-					.to.be.revertedWith('Community is frozen');
+				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
 			});
 		});
 
@@ -408,8 +407,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
-					.to.be.revertedWith('Community is frozen');
+				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
 			});
 		});
 
@@ -688,8 +686,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-					.to.be.revertedWith('Community is frozen');
+				await peeranhaContent.createTranslations(signers[0].address, 1, 0, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
 			});
 
 			it("Test create translation for comment to reply, community was frozen", async function () {
@@ -700,8 +697,7 @@ describe("Test translations", function () {
 				await peeranhaContent.createComment(signers[0].address, 1, 1, hashContainer[1], LanguagesEnum.Spanish);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 1)
 
-				await expect(peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]))
-					.to.be.revertedWith('Community is frozen');
+				await peeranhaContent.createTranslations(signers[0].address, 1, 1, 1, [LanguagesEnum.English], [ipfsHashes[1]]);
 			});
 		});
 	});

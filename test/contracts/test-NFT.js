@@ -47,8 +47,7 @@ describe("Test NFT", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
 
-			await expect(peeranhaUser.configureNewAchievement(111, 15, URIContainer[0], 1, AchievementsType.Rating))
-				.to.be.revertedWith('Community is frozen');
+			await peeranhaUser.configureNewAchievement(111, 15, URIContainer[0], 1, AchievementsType.Rating);
 		});
 
 		it("Add achievement/ Boundary test", async function () {

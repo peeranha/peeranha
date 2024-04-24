@@ -90,7 +90,6 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(1);
 
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
@@ -116,7 +115,6 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 		
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(2);
 				
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
@@ -152,7 +150,6 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[2], 1);
 		
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(3);
 				
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
@@ -193,7 +190,6 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[2], 1);
 		
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-				console.log(rewardPeriods)
 				expect(rewardPeriods.length).to.equal(2);
 				
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
@@ -226,7 +222,6 @@ describe("Test wallet", function () {
 				await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, ratings[1], 1);
 		
 				const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
-				console.log(rewardPeriods)
 
 				const userPeriodRating = await peeranhaUser.getPeriodRating(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 				expect(userPeriodRating.ratingToReward).to.equal(results[0].ratingToReward);

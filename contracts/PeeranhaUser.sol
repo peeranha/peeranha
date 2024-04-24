@@ -31,6 +31,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     UserLib.UserContext userContext;
     AchievementLib.AchievementsMetadata achievementsMetadata;
+    UserLib.BannedUsers bannedUsers;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -146,7 +147,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function followCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         UserLib.createIfDoesNotExist(userContext.users, user);
         UserLib.followCommunity(userContext, user, communityId);
     }
@@ -161,6 +162,75 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function unfollowCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
         UserLib.unfollowCommunity(userContext, user, communityId);
+    }
+
+    /**
+     * @dev Ban user.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Can not ban global administrator.
+     * - Must be an existing user. 
+     */
+    function banUser(address userAddress, address targetUserAddress) public override {
+        dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
+        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.Admin, 0);
+        require(!isHasRole, "You_can_not_ban_admin");
+
+        UserLib.banUser(bannedUsers, userAddress, targetUserAddress);
+    }
+
+    /**
+     * @dev Unban user.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - The user must be banned. 
+     */
+    function unBanUser(address userAddress, address targetUserAddress) public override {
+        dispatcherCheck(userAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
+
+        UserLib.unBanUser(bannedUsers, userAddress, targetUserAddress);
+    }
+
+    /**
+     * @dev Ban user in community.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator, community admin or community moderator.
+     * - Can not ban global administrator, community admin or community moderator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function banCommunityUser(address userAddress, address targetUserAddress, uint32 communityId) public override {
+        dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+        require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");
+
+        UserLib.banCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
+    }
+
+    /**
+     * @dev Unban user in community.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator, community admin or community moderator.
+     * - The user must be banned. 
+     */
+    function unBanCommunityUser(address userAddress, address targetUserAddress, uint32 communityId) public override {
+        dispatcherCheck(userAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+
+        UserLib.unBanCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
     }
 
     /**
@@ -264,7 +334,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) public override {
         dispatcherCheck(user);
         checkUser(userAddr);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         
         _grantRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
@@ -282,7 +352,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function giveCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
         checkUser(userAddr);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _grantRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
@@ -298,7 +368,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityAdminPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         require(userAddr != user, "self_revoke");
         _revokeRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userAddr);
@@ -315,7 +385,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function revokeCommunityModeratorPermission(address user, address userAddr, uint32 communityId) public {
         dispatcherCheck(user);
-        onlyExistingAndNotFrozenCommunity(communityId);
+        onlyExistingAndNotFrozenCommunity(user, communityId);
         checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         _revokeRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userAddr);
     }
@@ -336,8 +406,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     )   
         external
     {
+        onlyExistingAndNotFrozenCommunity(_msgSender(), communityId);
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        onlyExistingAndNotFrozenCommunity(communityId);
         userContext.achievementsContainer.configureNewAchievement(achievementsMetadata, maxCount, lowerBound, achievementURI, communityId, achievementsType);
     }
 
@@ -447,6 +517,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         } else {
             checkUser(actionCaller);        // need?
         }
+        require(!UserLib.isBannedUser(bannedUsers, actionCaller, communityId), "user_is_banned"); // test
 
         if (hasModeratorRole(actionCaller, communityId)) {
             return;
@@ -474,13 +545,20 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
-        string memory message;
+        (bool isHasRole, string memory message) = isHasRoles(actionCaller, actionRole, communityId);
+        require(isHasRole, message);
+    }
+
+    function isHasRoles(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view returns (bool, string memory) {
         bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, actionCaller);
         bool isCommunityAdmin = hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller);
         bool isCommunityModerator = hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller);
+        string memory message;
+        bool isHasRole;
 
         if (actionRole == UserLib.ActionRole.NONE) {
-            return;
+            isHasRole = true;
+            message = '';
         } else if (actionRole == UserLib.ActionRole.Admin && !isAdmin) {
             message = "not_allowed_not_admin";
         } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
@@ -490,19 +568,22 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
             message = "not_allowed_admin_or_comm_moderator";
-        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || (isCommunityAdmin))) {
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdmin && !(isAdmin || isCommunityAdmin)) {
             message = "not_allowed_admin_or_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityAdmin && !isCommunityAdmin) {
             message = "not_allowed_not_comm_admin";
         } else if (actionRole == UserLib.ActionRole.CommunityModerator && !isCommunityModerator) {
             message = "not_allowed_not_comm_moderator";
+        } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator &&   // test
+        !(isAdmin || isCommunityAdmin || isCommunityModerator)) {
+            message = "not_allowed_admin_or_comm_admin_or_comm_moderator";
         } else {
-            return;
+            isHasRole = true;
+            message = '';
         }
-
-        revert(message);
+        return (isHasRole, message);
     }
-    
+
     function hasModeratorRole(
         address user,
         uint32 communityId
@@ -519,9 +600,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return bytes32(role + communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(uint32 communityId) private {
+    function onlyExistingAndNotFrozenCommunity(address actionCaller, uint32 communityId) private {
         if (communityId == 0) return;
-        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        userContext.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(actionCaller, communityId);
     }
 
     /**
@@ -548,7 +629,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function getPeriod() external view returns (uint16) {
         return RewardLib.getPeriod();
     }
-    
+
+    /**
+     * @dev Get user status. Is global ban or community ban.
+    */
+    function isBanedUser(address userAddress, uint32 communityId) external view returns (bool) {
+        return UserLib.isBannedUser(bannedUsers, userAddress, communityId);
+    }
+
     function getVersion() public pure returns (uint256) {
         return 3;
     }
