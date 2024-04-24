@@ -11,6 +11,10 @@ interface IPeeranhaUser {
     function updateUser(address user, bytes32 ipfsHash) external;
     function followCommunity(address user, uint32 communityId) external;
     function unfollowCommunity(address user, uint32 communityId) external;
+    function banCommunityUser(address user, address targetUserAddress, uint32 communityId) external;
+    function unBanCommunityUser(address user, address targetUserAddress, uint32 communityId) external;
+    function banUser(address user, address targetUserAddress) external;
+    function unBanUser(address user, address targetUserAddress) external;
     function initCommunityAdminPermission(address user, uint32 communityId) external;
     function giveCommunityAdminPermission(address user, address userAddr, uint32 communityId) external;
     function checkActionRole(address actionCaller, address dataUser, uint32 communityId, UserLib.Action action, UserLib.ActionRole actionRole, bool isCreate) external;

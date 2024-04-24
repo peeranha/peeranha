@@ -31,6 +31,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
 
     UserLib.UserContext userContext;
     AchievementLib.AchievementsMetadata achievementsMetadata;
+    UserLib.BannedUsers bannedUsers;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -161,6 +162,75 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function unfollowCommunity(address user, uint32 communityId) public override {
         dispatcherCheck(user);
         UserLib.unfollowCommunity(userContext, user, communityId);
+    }
+
+    /**
+     * @dev Ban user.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - Can not ban global administrator.
+     * - Must be an existing user. 
+     */
+    function banUser(address userAddress, address targetUserAddress) public override {
+        dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
+        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.Admin, 0);
+        require(!isHasRole, "You_can_not_ban_admin");
+
+        UserLib.banUser(bannedUsers, userAddress, targetUserAddress);
+    }
+
+    /**
+     * @dev Unban user.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator.
+     * - The user must be banned. 
+     */
+    function unBanUser(address userAddress, address targetUserAddress) public override {
+        dispatcherCheck(userAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
+
+        UserLib.unBanUser(bannedUsers, userAddress, targetUserAddress);
+    }
+
+    /**
+     * @dev Ban user in community.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator, community admin or community moderator.
+     * - Can not ban global administrator, community admin or community moderator.
+     * - Must be an existing community.
+     * - Must be an existing user. 
+     */
+    function banCommunityUser(address userAddress, address targetUserAddress, uint32 communityId) public override {
+        dispatcherCheck(userAddress);
+        checkUser(targetUserAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+        require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");
+
+        UserLib.banCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
+    }
+
+    /**
+     * @dev Unban user in community.
+     *
+     * Requirements:
+     *
+     * - Sender must be global administrator, community admin or community moderator.
+     * - The user must be banned. 
+     */
+    function unBanCommunityUser(address userAddress, address targetUserAddress, uint32 communityId) public override {
+        dispatcherCheck(userAddress);
+        checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
+
+        UserLib.unBanCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
     }
 
     /**
@@ -447,6 +517,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         } else {
             checkUser(actionCaller);        // need?
         }
+        require(!UserLib.isBannedUser(bannedUsers, actionCaller, communityId), "user_is_banned"); // test
 
         if (hasModeratorRole(actionCaller, communityId)) {
             return;
@@ -558,7 +629,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function getPeriod() external view returns (uint16) {
         return RewardLib.getPeriod();
     }
-    
+
+    /**
+     * @dev Get user status. Is global ban or community ban.
+    */
+    function isBanedUser(address userAddress, uint32 communityId) external view returns (bool) {
+        return UserLib.isBannedUser(bannedUsers, userAddress, communityId);
+    }
+
     function getVersion() public pure returns (uint256) {
         return 3;
     }

@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node scripts/change-env-values.js 3 && npx hardhat test && node scripts/change-env-values.js 0",
     "test-bot": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-bot.js && node scripts/change-env-values.js 0",
+    "test-ban-user": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-ban-user.js && node scripts/change-env-values.js 0",
     "test-local": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-local.js && node scripts/change-env-values.js 0",
     "test-nft": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-NFT.js && node scripts/change-env-values.js 0",
     "test-user": "node scripts/change-env-values.js 3 && npx hardhat test test/contracts/test-user.js && node scripts/change-env-values.js 0",
