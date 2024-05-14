@@ -43,7 +43,7 @@ module.exports = {
       url: `https://rpc-amoy.polygon.technology/`,
       accounts: [ADMIN_PRIVATE_KEY],
       gas: 2100000,
-      gasPrice: 30000000000
+      gasPrice: 10000000000
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
@@ -59,7 +59,7 @@ module.exports = {
       gasPrice: 10000000000
     },
     edgeware: {
-      url: `https://edgeware-evm.jelliedowl.net/`,
+      url: `https://edgeware-rpc-evm.edgscan.ink/`,
       accounts: [ADMIN_PRIVATE_KEY],
       chainId: 2021,
       gas: 2100000,
