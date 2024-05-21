@@ -201,7 +201,7 @@ library CommunityLib {
         emit CommunityUnfrozen(msg.sender, communityId);
     }
 
-    function onlyExistingAndNotFrozenCommunity(CommunityCollection storage self, uint32 communityId) internal view returns (bool) {
+    function isFrozenCommunityAndOnlyExisting(CommunityCollection storage self, uint32 communityId) internal view returns (bool) {
         Community storage community = self.communities[communityId].info;
 
         require(

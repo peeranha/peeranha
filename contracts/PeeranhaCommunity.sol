@@ -179,7 +179,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     }
 
     function onlyExistingAndNotFrozenCommunity(address userAddress, uint32 communityId) public view override {
-        bool isFrozenCommunity = CommunityLib.onlyExistingAndNotFrozenCommunity(communities, communityId);
+        bool isFrozenCommunity = CommunityLib.isFrozenCommunityAndOnlyExisting(communities, communityId);
 
         if (isFrozenCommunity) {
             (bool isHasRole,) = peeranhaUser.isHasRoles(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
@@ -194,11 +194,11 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
         _;
     }
     
-    function checkTags(uint32 communityId, uint8[] memory tags) public  view override {
+    function checkTags(uint32 communityId, uint8[] memory tags) public view override {
         CommunityLib.checkTags(communities, communityId, tags);
     }
 
     function getVersion() public pure returns (uint256) {
-        return 1;
+        return 100;
     }
 }
