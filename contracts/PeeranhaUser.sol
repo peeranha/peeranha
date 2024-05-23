@@ -638,7 +638,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     function getVersion() public pure returns (uint256) {
-        return 4;
+        return 100;
     }
 
     /**
