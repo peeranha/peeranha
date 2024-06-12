@@ -63,6 +63,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function editPost(address user, uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType, PostLib.Language language) external override {
         dispatcherCheck(user);
+        posts.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(user, communityId);
         posts.editPost(user, postId, ipfsHash, tags, communityId, postType, language);
     }
 
@@ -359,6 +360,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     */
     function getDocumentationTree(uint32 communityId) external view returns (CommonLib.IpfsHash memory) {
         return documentationTree.ipfsDoc[communityId];
+    }
+
+    function checkPostCommuntiy(address userAddress, uint32 communityId, uint256 postId) private {
+
     }
 
     function getVersion() public pure returns (uint256) {
