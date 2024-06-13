@@ -45,9 +45,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a community.
      * - must be tags.
     */
-    function createPost(address user, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.createPost(user, communityId, ipfsHash, postType, tags, language, bytes32(0x0));
+    function createPost(address userAddress, uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        posts.createPost(userAddress, communityId, ipfsHash, postType, tags, language, bytes32(0x0));
     }
 
     /**
@@ -61,10 +61,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be tags
      * - if not author of the post must be protocol admin or community moderator
     */
-    function editPost(address user, uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(user, communityId);
-        posts.editPost(user, postId, ipfsHash, tags, communityId, postType, language);
+    function editPost(address userAddress, uint256 postId, bytes32 ipfsHash, uint8[] memory tags, uint32 communityId, PostLib.PostType postType, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.editPost(userAddress, postId, ipfsHash, tags, communityId, postType, language);
     }
 
     /**
@@ -74,9 +74,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a post.
     */
-    function deletePost(address user, uint256 postId) external override {
-        dispatcherCheck(user);
-        posts.deletePost(user, postId);
+    function deletePost(address userAddress, uint256 postId) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.deletePost(userAddress, postId);
     }
 
     /**
@@ -90,6 +91,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a bot.
     */
     function createPostByBot(uint32 communityId, bytes32 ipfsHash, PostLib.PostType postType, uint8[] memory tags, PostLib.Language language, CommonLib.MessengerType messengerType, string memory handle) external override {
+        /////
         posts.createPostByBot(_msgSender(), communityId, ipfsHash, postType, tags, language, messengerType, handle);
     }
 
@@ -101,9 +103,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post.
      * - must be a new reply. 
     */
-    function createReply(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.createReply(user, postId, parentReplyId, ipfsHash, isOfficialReply, language, bytes32(0x0));
+    function createReply(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.createReply(userAddress, postId, parentReplyId, ipfsHash, isOfficialReply, language, bytes32(0x0));
     }
 
     /**
@@ -114,9 +117,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be new info about reply.
     */
-    function editReply(address user, uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.editReply(user, postId, replyId, ipfsHash, isOfficialReply, language);
+    function editReply(address userAddress, uint256 postId, uint16 replyId, bytes32 ipfsHash, bool isOfficialReply, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.editReply(userAddress, postId, replyId, ipfsHash, isOfficialReply, language);
     }
 
     /**
@@ -126,9 +130,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a reply.
     */
-    function deleteReply(address user, uint256 postId, uint16 replyId) external override {
-        dispatcherCheck(user);
-        posts.deleteReply(user, postId, replyId);
+    function deleteReply(address userAddress, uint256 postId, uint16 replyId) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.deleteReply(userAddress, postId, replyId);
     }
 
     /**
@@ -152,9 +157,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a new comment.
      * - must be a post or a reply.
     */
-    function createComment(address user, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.createComment(user, postId, parentReplyId, ipfsHash, language);
+    function createComment(address userAddress, uint256 postId, uint16 parentReplyId, bytes32 ipfsHash, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.createComment(userAddress, postId, parentReplyId, ipfsHash, language);
     }
 
     /**
@@ -165,9 +171,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a comment.
      * - must be new info about reply.
     */
-    function editComment(address user, uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash, PostLib.Language language) external override {
-        dispatcherCheck(user);
-        posts.editComment(user, postId, parentReplyId, commentId, ipfsHash, language);
+    function editComment(address userAddress, uint256 postId, uint16 parentReplyId, uint8 commentId, bytes32 ipfsHash, PostLib.Language language) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.editComment(userAddress, postId, parentReplyId, commentId, ipfsHash, language);
     }
 
     /**
@@ -177,9 +184,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a comment.
     */
-    function deleteComment(address user, uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
-        dispatcherCheck(user);
-        posts.deleteComment(user, postId, parentReplyId, commentId);
+    function deleteComment(address userAddress, uint256 postId, uint16 parentReplyId, uint8 commentId) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.deleteComment(userAddress, postId, parentReplyId, commentId);
     }
 
     /**
@@ -190,9 +198,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a reply.
      * - must be a role ?
     */ 
-    function changeStatusBestReply(address user, uint256 postId, uint16 replyId) external override {
-        dispatcherCheck(user);
-        posts.changeStatusBestReply(user, postId, replyId);
+    function changeStatusBestReply(address userAddress, uint256 postId, uint16 replyId) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.changeStatusBestReply(userAddress, postId, replyId);
     }
 
     /**
@@ -202,9 +211,10 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a post/reply/comment.
     */ 
-    function voteItem(address user, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
-        dispatcherCheck(user);
-        posts.voteForumItem(user, postId, replyId, commentId, isUpvote);
+    function voteItem(address userAddress, uint256 postId, uint16 replyId, uint8 commentId, bool isUpvote) external override {
+        dispatcherCheck(userAddress);
+        checkPostCommuntiy(userAddress, postId);
+        posts.voteForumItem(userAddress, postId, replyId, commentId, isUpvote);
     }
 
     /**
@@ -215,9 +225,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a post/reply/comment.
      * - must be admin ot community moderator role.
     */ 
-    function createTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
-        dispatcherCheck(user);
-        translations.createTranslations(posts, user, postId, replyId, commentId, languages, ipfsHashs);
+    function createTranslations(address userAddress, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        dispatcherCheck(userAddress);
+        translations.createTranslations(posts, userAddress, postId, replyId, commentId, languages, ipfsHashs);
     }
 
     /**
@@ -229,9 +239,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a Translations.
      * - must be admin ot community moderator role.
     */ 
-    function editTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
-        dispatcherCheck(user);
-        translations.editTranslations(posts, user, postId, replyId, commentId, languages, ipfsHashs);
+    function editTranslations(address userAddress, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages, bytes32[] memory ipfsHashs) external override {
+        dispatcherCheck(userAddress);
+        translations.editTranslations(posts, userAddress, postId, replyId, commentId, languages, ipfsHashs);
     }
 
     /**
@@ -243,9 +253,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      * - must be a Translation.
      * - must be admin ot community moderator role.
     */
-    function deleteTranslations(address user, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
-        dispatcherCheck(user);
-        translations.deleteTranslations(posts, user, postId, replyId, commentId, languages);
+    function deleteTranslations(address userAddress, uint256 postId, uint16 replyId, uint8 commentId, PostLib.Language[] memory languages) external override {
+        dispatcherCheck(userAddress);
+        translations.deleteTranslations(posts, userAddress, postId, replyId, commentId, languages);
     }
 
     /**
@@ -255,9 +265,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
      *
      * - must be a community moderator.
     */ 
-    function updateDocumentationTree(address user, uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
-        dispatcherCheck(user);
-        documentationTree.updateDocumentationTree(posts, user, communityId, documentationTreeIpfsHash);
+    function updateDocumentationTree(address userAddress, uint32 communityId, bytes32 documentationTreeIpfsHash) external override {
+        dispatcherCheck(userAddress);
+        documentationTree.updateDocumentationTree(posts, userAddress, communityId, documentationTreeIpfsHash);
     }
 
     // check need for prod?
@@ -362,8 +372,9 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
         return documentationTree.ipfsDoc[communityId];
     }
 
-    function checkPostCommuntiy(address userAddress, uint32 communityId, uint256 postId) private {
-
+    function checkPostCommuntiy(address userAddress, uint256 postId) private {
+        PostLib.PostContainer storage postContainer = posts.getPostContainer(postId);
+        posts.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddress, postContainer.info.communityId);
     }
 
     function getVersion() public pure returns (uint256) {
