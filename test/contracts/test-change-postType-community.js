@@ -13,7 +13,7 @@ const {
 // change postType and communityId for post by moderator and author
 ///
 
-describe("Test change postType and community id by moderator", function () {
+describe("Test change postType and community id by moderator and common user", function () {
 
 	describe('Change post type', function () {
 
@@ -2081,7 +2081,8 @@ describe("Test change postType and community id by moderator", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
 				
-				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
+				await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English))
+					.to.be.revertedWith('Community is frozen');
 			});
 	
 			it("Test change post community Id by editPost", async function () {
@@ -5127,7 +5128,8 @@ describe("Test change postType and community id by author", function () {
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
 			
-			await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
+			await expect(peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English)).
+				to.be.revertedWith('Community is frozen');
 		});
 
 		it("Test change post community Id by editPost", async function () {
