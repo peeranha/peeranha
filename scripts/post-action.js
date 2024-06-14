@@ -138,8 +138,8 @@ async function getError() {
 
 async function main() {
   // await getError()
-  await contentFunctions();
-  // await userFunctions();
+  // await contentFunctions();
+  await userFunctions();
   // await communityFunctions();
 }
 
@@ -152,21 +152,22 @@ async function userFunctions() {
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
-  const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
+  // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists(signers[0].address);
   // const txObj = await peeranhaUser.updateUser(signers[0].address, await getBytes32FromData(testAccount));
-  // const txObj = await peeranhaUser.addUserRating("0x31339c62C0A44b875297945edb93D88092b5fa91", 100, 2);
+  // const txObj = await peeranhaUser.addUserRating("0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 100, 2);
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x31339c62c0a44b875297945edb93d88092b5fa91")
   // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x570895fd1f7d529606e495885f6eaf1924baa08e");
+  // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499")
   // const txObj = await peeranhaUser.followCommunity(signers[0].address, 1);
   // const txObj = await peeranhaUser.unfollowCommunity(signers[0].address, 1);
-  // const txObj = await peeranhaUser.banCommunityUser(signers[0].address, "0xed5aec8204ac145bb388fdf7a36dc518fab9e0f3", 2);
-  // const txObj = await peeranhaUser.unBanCommunityUser(signers[0].address, "0xed5aec8204ac145bb388fdf7a36dc518fab9e0f3", 2);
-  // const txObj = await peeranhaUser.isBanedUser(signers[0].address, 2);
-  // const txObj = await peeranhaUser.isProtocolAdmin("0x31339c62c0a44b875297945edb93d88092b5fa91");
+  // const txObj = await peeranhaUser.banCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
+  const txObj = await peeranhaUser.unBanCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
+  // const txObj = await peeranhaUser.isBanedUser("0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
+  // const txObj = await peeranhaUser.isProtocolAdmin("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.getUserRatingCollection("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499", 2);
   // const txObj = await peeranhaUser.getUsersCount();
   // const txObj = await peeranhaUser.getUsersCount();
@@ -184,8 +185,10 @@ async function communityFunctions() {
   const peeranhaCommunity = await PeeranhaCommunity.attach(COMMUNITY_ADDRESS);
 
   const signers = await ethers.getSigners();
-  const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
+  // const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
   // const txObj = await peeranhaCommunity.updateCommunity(signers[0].address, 3, await getBytes32FromData(testCommunity));
+  const txObj = await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
+  // const txObj = await peeranhaCommunity.unfreezeCommunity(signers[0].address, 1);
   // const txObj = await peeranhaCommunity.getCommunity(2);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -208,9 +211,9 @@ async function contentFunctions() {
     console.log('\x1b[41m', `Error ipfs: ${JSON.stringify(ipfsResponse)}`, '\x1b[0m');
     return;
   }
-  const txObj = await peeranhaContent.createPost(signers[0].address, 1, ipfsResponse, PostTypeEnum.ExpertPost, [1], Language.Chinese);
+  const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1], Language.English);
   // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
-  // const txObj = await peeranhaContent.createReply(signers[0].address, 2, 0, await getBytes32FromData(testReply), true, Language.Chinese);
+  // const txObj = await peeranhaContent.createReply(signers[0].address, 129, 0, await getBytes32FromData(testReply), false, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
   // const txObj = await peeranhaContent.createComment(signers[0].address, 10, 1, await getBytes32FromData(testComment), Language.English);
   // const txObj = await peeranhaContent.editComment(signers[0].address, 2, 1, 1, await getBytes32FromData(testComment), Language.English)
