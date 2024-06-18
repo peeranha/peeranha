@@ -89,7 +89,7 @@ const commentTranslation = {
 };
 
 const AchievementsType = { "Rating": 0, "Manual": 1, "SoulRating": 2 }
-const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3 }
+const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3, "Russian": 4, "Ukrainian": 5, "French": 6, "German": 7 }
 
 async function getChainName(chainId) {
   let chainName = '';
