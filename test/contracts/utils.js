@@ -353,7 +353,7 @@ const StartRatingWithoutAction = 0;
 const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
-const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
+const LanguagesEnum = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3, "Russian": 4, "Ukrainian": 5, "French": 6, "German": 7 }
 const AchievementsType = { "Rating":0, "Manual":1, "SoulRating": 2 }
 
                                                             // energy

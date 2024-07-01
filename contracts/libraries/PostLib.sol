@@ -23,9 +23,9 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
-    enum Language { English, Chinese, Spanish, Vietnamese }
+    enum Language { English, Chinese, Spanish, Vietnamese, Russian, Ukrainian, French, German }
     enum ItemProperties { MessengerSender, Language }
-    uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
+    uint256 constant LANGUAGE_LENGTH = 8;       // Update after add new language
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;

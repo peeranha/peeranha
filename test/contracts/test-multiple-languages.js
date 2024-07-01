@@ -46,6 +46,43 @@ describe("Test translations", function () {
 				expect(await getInt(itemLanguage)).to.equal(LanguagesEnum.Spanish);
 			});
 
+			it("Test create post (all languages)", async function () {
+				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Chinese);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Vietnamese);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Russian);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Ukrainian);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.French);
+				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.German);
+				
+				const englishItemLanguage = await peeranhaContent.getItemLanguage(1, 0, 0);
+				expect(await getInt(englishItemLanguage)).to.equal(LanguagesEnum.English);
+
+				const chineseItemLanguage = await peeranhaContent.getItemLanguage(2, 0, 0);
+				expect(await getInt(chineseItemLanguage)).to.equal(LanguagesEnum.Chinese);
+
+				const spanishItemLanguage = await peeranhaContent.getItemLanguage(3, 0, 0);
+				expect(await getInt(spanishItemLanguage)).to.equal(LanguagesEnum.Spanish);
+
+				const vietnameseItemLanguage = await peeranhaContent.getItemLanguage(4, 0, 0);
+				expect(await getInt(vietnameseItemLanguage)).to.equal(LanguagesEnum.Vietnamese);
+
+				const russianItemLanguage = await peeranhaContent.getItemLanguage(5, 0, 0);
+				expect(await getInt(russianItemLanguage)).to.equal(LanguagesEnum.Russian);
+
+				const ukrainianItemLanguage = await peeranhaContent.getItemLanguage(6, 0, 0);
+				expect(await getInt(ukrainianItemLanguage)).to.equal(LanguagesEnum.Ukrainian);
+
+				const frenchItemLanguage = await peeranhaContent.getItemLanguage(7, 0, 0);
+				expect(await getInt(frenchItemLanguage)).to.equal(LanguagesEnum.French);
+
+				const germanItemLanguage = await peeranhaContent.getItemLanguage(8, 0, 0);
+				expect(await getInt(germanItemLanguage)).to.equal(LanguagesEnum.German);
+			});
+
 			it("Test edit post language", async function () {
 				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
