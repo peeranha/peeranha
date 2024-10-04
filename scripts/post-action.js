@@ -18,13 +18,25 @@ const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPo
 const crypto = require("crypto");
 const fs = require("fs");
 const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE } = require("../test/contracts/utils");
+const abiDecoder = require('abi-decoder'); // eslint-disable-line import/no-extraneous-dependencies
+const abi = require('../../peeranha-subgraph/abis/PeeranhaContent.json');
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 const SAVE_FILE_SERVICE = "save-file"
+const OTIMISTIC_TRANSACTION = "optimistic-transaction"
 
 async function getBytes32FromData(data) {
   const convertData = { content: Buffer.from(JSON.stringify(data), 'utf8'), encoding: 'Buffer' }
   const ipfsHash = await saveDataIpfsS3(convertData);
+  console.log("Uploaded file to IPFS - " + JSON.stringify(ipfsHash));
+  return getBytes32FromIpfsHash(ipfsHash);
+}
+
+async function getOptimisticData(txHash, chainId) { // fix get network
+  // console.log(`${JSON.stringify(ethers.getDefaultProvider())}`);
+  console.log(`data: ${txHash}`)
+  const convertData = { transactionHash: txHash, network: 1}
+  const ipfsHash = await callOptimisticLambda(convertData);
   console.log("Uploaded file to IPFS - " + JSON.stringify(ipfsHash));
   return getBytes32FromIpfsHash(ipfsHash);
 }
@@ -48,6 +60,10 @@ function getBytes32FromIpfsHash(ipfsResponse) {
 
 async function saveDataIpfsS3(file) {
   return await callService(SAVE_FILE_SERVICE, { file });
+}
+
+async function callOptimisticLambda(data) {
+  return await callService(OTIMISTIC_TRANSACTION, data);
 }
 
 async function callService(service, props, isGet = false) {
@@ -109,37 +125,56 @@ const testDocumentating = {
   ]
 };
 
-async function getError() {
-  const tx = await ethers.provider.getTransaction("0x7517b92b7584fdbc4d36ff4a72f7412f4bd49839690eca42ae564be1522ba792");
-  // console.log(tx);
-
-  const unsignedTx = {
-      to: tx.to,
-      nonce: tx.nonce,
-      gasLimit: tx.gasLimit,
-      gasPrice: tx.gasPrice,
-      data: tx.data,
-      value: tx.value,
-      chainId: tx.chainId
-  };
-  const signature = {
-      v: tx.v,
-      r: tx.r,
-      s: tx.s
+async function decodeData(transactionHash) {
+  console.log(`transactionHash ${transactionHash}`)
+  abiDecoder.addABI(abi);
+  const tx = await ethers.provider.getTransaction(transactionHash);
+  if (!tx) {
+    console.log(`transaction does not found ${transactionHash}`)
   }
+  const txData = tx.data;
 
-  const raw = ethers.utils.serializeTransaction(unsignedTx, signature);
-  console.log(raw);
+  const decodedData = abiDecoder.decodeMethod(txData);
+  console.log(JSON.stringify(decodedData));
+  console.log();
+}
 
-  const txLog = ethers.utils.parseTransaction(raw)
-  console.log(txLog);
+async function getError() {
+  const tx = await ethers.provider.getTransaction("0x174f99fea2fe14a3e8372a3271850477e28789dc5151f29044db70b9ca933bbf");
+  // const tx = await ethers.provider.getTransactionReceipt("0x2523840a7c454c71adabe80e7539de16a6bf6b4a1fe3164255330a584fc7b563");
+  console.log(tx);
+
+  // const unsignedTx = {
+  //     to: tx.to,
+  //     nonce: tx.nonce,
+  //     gasLimit: tx.gasLimit,
+  //     gasPrice: tx.gasPrice,
+  //     data: tx.data,
+  //     value: tx.value,
+  //     chainId: tx.chainId
+  // };
+  // const signature = {
+  //     v: tx.v,
+  //     r: tx.r,
+  //     s: tx.s
+  // }
+
+  // const raw = ethers.utils.serializeTransaction(unsignedTx, signature);
+  // console.log(raw);
+
+  // const txLog = ethers.utils.parseTransaction(raw)
+  // console.log(txLog);
 
 }
 
 async function main() {
+  // await getOptimisticData("0xf488cafb971f94c0b45de6abf8c7968c6f1a2506e9a9a806fc9bea826827802d");
   // await getError()
-  // await contentFunctions();
-  await userFunctions();
+  // await decodeData('0x403869bfc17d33e2292c3eeb6e7b83ff5957c5d6802fc3e7eb00844246e26d5e');
+  // await decodeData('0x910ca38dc611cbd003e5240f0fb3d11bb1345cdfe6d6cc41b30bf9bdf90a7ea5');
+  // await decodeData('0xcffe3ffa01eb5dfe6757f1834fdd55373ceac3250e8f567f1932f8b7b7f72105');
+  await contentFunctions();
+  // await userFunctions();
   // await communityFunctions();
 }
 
@@ -164,7 +199,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499")
   // const txObj = await peeranhaUser.followCommunity(signers[0].address, 1);
   // const txObj = await peeranhaUser.unfollowCommunity(signers[0].address, 1);
-  // const txObj = await peeranhaUser.banCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
+  // const txObj = await peeranhaUser.banCommunityUser(signers[0].address, "0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 2);
   const txObj = await peeranhaUser.unBanCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
   // const txObj = await peeranhaUser.isBanedUser("0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
   // const txObj = await peeranhaUser.isProtocolAdmin("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
@@ -187,8 +222,8 @@ async function communityFunctions() {
   const signers = await ethers.getSigners();
   // const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
   // const txObj = await peeranhaCommunity.updateCommunity(signers[0].address, 3, await getBytes32FromData(testCommunity));
-  const txObj = await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
-  // const txObj = await peeranhaCommunity.unfreezeCommunity(signers[0].address, 1);
+  // const txObj = await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
+  const txObj = await peeranhaCommunity.unfreezeCommunity(signers[0].address, 2);
   // const txObj = await peeranhaCommunity.getCommunity(2);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -206,16 +241,17 @@ async function contentFunctions() {
   const peeranhaContent = await PeeranhaContent.attach(CONTENT_ADDRESS);
   const signers = await ethers.getSigners();
 
-  const ipfsResponse = await getBytes32FromData(testPost);
-  if (!ipfsResponse) {
-    console.log('\x1b[41m', `Error ipfs: ${JSON.stringify(ipfsResponse)}`, '\x1b[0m');
-    return;
-  }
-  const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1], Language.English);
-  // const txObj = await peeranhaContent.editPost(signers[0].address, 1, await getBytes32FromData(testPost), [], Language.Vietnamese);
-  // const txObj = await peeranhaContent.createReply(signers[0].address, 129, 0, await getBytes32FromData(testReply), false, Language.Chinese);
+  // const ipfsResponse = await getBytes32FromData(testPost);
+  // if (!ipfsResponse) {
+  //   console.log('\x1b[41m', `Error ipfs: ${JSON.stringify(ipfsResponse)}`, '\x1b[0m');
+  //   return;
+  // }
+
+  // const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1,3], Language.English);
+  // const txObj = await peeranhaContent.editPost(signers[0].address, 336, await getBytes32FromData(testPost), [4,3], 2, PostTypeEnum.CommonPost, Language.English);
+  const txObj = await peeranhaContent.createReply(signers[0].address, 600, 0, await getBytes32FromData(testReply), false, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
-  // const txObj = await peeranhaContent.createComment(signers[0].address, 10, 1, await getBytes32FromData(testComment), Language.English);
+  // const txObj = await peeranhaContent.createComment(signers[0].address, 315, 0, await getBytes32FromData(testComment), Language.English);
   // const txObj = await peeranhaContent.editComment(signers[0].address, 2, 1, 1, await getBytes32FromData(testComment), Language.English)
   // const txObj = await peeranhaContent.updateDocumentationTree(1, await getBytes32FromData(testDocumentating));
   // const txObj = await peeranhaContent.createTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
@@ -224,8 +260,15 @@ async function contentFunctions() {
   // const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
   // const txObj = await peeranhaContent.getVersion();
 
+  // const txObj = await peeranhaContent.getPost(485);
+  // const txObj = await peeranhaContent.getReply(594, 3);
+  // const txObj = await peeranhaContent.getComment(315, 0, 1);
+
+  // await getOptimisticData(txObj.hash, 1);
+
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
+  console.log(`txObj.hash ${txObj.hash}`);
   await txObj.wait();
   console.log('Transaction confirmed');
 }
