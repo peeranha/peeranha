@@ -90,6 +90,6 @@ contract PeeranhaNFT is IPeeranhaNFT, ChildMintableERC721Upgradeable {
   }
 
   function getVersion() public pure returns (uint256) {
-      return 100;
+      return 41;
   }
 }
