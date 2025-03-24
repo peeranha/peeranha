@@ -188,7 +188,6 @@ async function userFunctions() {
 		}
 	});
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
-  const signers = await ethers.getSigners();
 
   // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists(signers[0].address);
