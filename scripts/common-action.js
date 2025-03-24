@@ -1,6 +1,9 @@
 const env = require("hardhat");
 const path = require('path');
 const PATH = '../image/';
+const execSync = require('child_process').execSync;
+
+const ChainId = { Polygon: 137, PolygomMumbai: 80001, EdgeEVM: 2021, PolygonAmoy: 80002 };
 
 const testAccount = {
   displayName: "testAccount",
@@ -18,19 +21,99 @@ const NFT = {
   attributes: "TestInfo",
 };
 
+/* en, zh, es, vi */
+
 const testCommunity = {
-  title: "testCommunity6.new",
-  description: "testCommunity.new",
+  name: "test Community6.new",
+  description: "test Community.new",
+  language: "zh",
   website: "www.new",
-  language: "ua.new",
+  translations: [
+    {
+      name: "auto translate 1",
+      description: "test Community Language2",
+      enableAutotranslation: true,
+      language: "es",
+    },
+    {
+      name: "",
+      description: "",
+      enableAutotranslation: false,
+      language: "vi",
+    }
+  ]
 };
 
 const testTag = {
-  title: "testTagNew",
-  description: "testNewTag1",
+  name: "test TagNew",
+  description: "test NewTag1",
+  language: 1,
+  translations: [
+    {
+      name: "test TagLanguage2",
+      description: "test Language2 Tag1",
+      language: 2,
+    },
+    {
+      name: "test TagLanguage3",
+      description: "test Language3 Tag1",
+      language: 3,
+    }
+  ]
 };
 
-const AchievementsType = { "Rating": 0 }
+const testPost = {
+  title: "Test post",
+  content: "Test post description"
+};
+
+const postTranslation = {
+  title: "Test post translation vietnamese edited",
+  content: "Test post description translation vietnamese edited"
+};
+
+const testReply = {
+  content: "Second reply postID 1"
+};
+
+const replyTranslation = {
+  content: "Test reply translation"
+};
+
+const testComment = {
+  content: "Comment to reply"
+};
+
+const commentTranslation = {
+  content: "Test comment translation to reply"
+};
+
+const AchievementsType = { "Rating": 0, "Manual": 1, "SoulRating": 2 }
+const Language = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3, "Russian": 4, "Ukrainian": 5, "French": 6, "German": 7 }
+
+async function getChainName(chainId) {
+  let chainName = '';
+  if (chainId == ChainId.PolygomMumbai) {
+    chainName = 'mumbai';
+  } else if (chainId == ChainId.Polygon) {
+    chainName = 'polygon';
+  } else if (chainId == ChainId.PolygonAmoy) {
+    chainName = 'amoy';
+  } else if (chainId == ChainId.EdgeEVM) {
+    chainName = 'edgeware'
+  }
+  return chainName;
+}
+
+async function verifyContract(contractAddress, chainName) {
+  if (contractAddress && chainName) {
+    console.log(`Verify contract: ${contractAddress}`)
+    let output = execSync(`npx hardhat verify ${contractAddress} --network ${chainName}`, { encoding: 'utf-8' });
+    console.log('Verify log:\n', output);
+  } else {
+    log('Error argument')
+  }
+}
 
 const achievements = (env) => {
   return [
@@ -109,4 +192,4 @@ const achievements = (env) => {
   ]
 }
 
-module.exports = { achievements, NFT, testAccount, PATH, testCommunity, testTag };
+module.exports = { achievements, getChainName, verifyContract, Language, NFT, testAccount, PATH, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation };

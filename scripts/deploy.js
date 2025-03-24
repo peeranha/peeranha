@@ -56,17 +56,27 @@ async function main() {
   const peeranhaCommunityTokenFactory = await upgrades.deployProxy(PeeranhaCommunityTokenFactory, [peeranhaUser.address, peeranhaCommunity.address], {timeout: 0});
   console.log("Peeranha community token factory deployed to:", peeranhaCommunityTokenFactory.address);
 
-  console.log(` 
-            Deployed to:
-  Peeranha User: ${peeranhaUser.address}
-  UserLib: ${userLib.address}
-  PostLib: ${postLib.address}
-  Peeranha Community: ${peeranhaCommunity.address}
-  PeeranhaContent: ${peeranhaContent.address}
-  Peeranha token: ${peeranhaToken.address}
-  Peeranha NFT: ${peeranhaNFT.address}
-  Peeranha community token factory: ${peeranhaCommunityTokenFactory.address}
-  `)
+  console.log(`Contracts for the post-action`);
+  console.log(`
+    "USERLIB_ADDRESS": "${userLib.address}",
+    "POSTLIB_ADDRESS": "${postLib.address}",
+    "USER_ADDRESS": "${peeranhaUser.address}",
+    "COMMUNITY_ADDRESS": "${peeranhaCommunity.address}",
+    "CONTENT_ADDRESS": "${peeranhaContent.address}",
+    "TOKEN_ADDRESS": "${peeranhaToken.address}",
+    "NFT_ADDRESS": "${peeranhaNFT.address}",
+    "TOKEN_FACTORY_ADDRESS": "${peeranhaCommunityTokenFactory.address}",
+  `);
+
+  console.log(`Contracts for The Graph`);
+  console.log(`
+    "userAddress": "${peeranhaUser.address}",
+    "communityAddress": "${peeranhaCommunity.address}",
+    "contentAddress": "${peeranhaContent.address}",
+    "tokenAddress": "${peeranhaToken.address}",
+    "nftAddress": "${peeranhaNFT.address}",
+    "tokenFactoryAddress": "${peeranhaCommunityTokenFactory.address}",
+  `);
 }
 
 main()

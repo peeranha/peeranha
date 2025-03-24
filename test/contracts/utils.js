@@ -175,7 +175,7 @@ const getHashesContainer = (size) =>
 
 const createTags = (countOfTags) =>
     getHashesContainer(countOfTags).map((hash) => {
-        const hash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+        const hash2 = EmptyIpfs;
         return {"ipfsDoc": {hash, hash2}}
     });
     
@@ -211,13 +211,13 @@ const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 }
 
-const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer) {
+const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer, communityId) {
 	await peeranhaUser.connect(signer).createUser(signer.address, hashContainer[0]);
-	await peeranhaUser.addUserRating(signer.address, rating, 1);
+	await peeranhaUser.addUserRating(signer.address, rating, communityId);
 };
 
 const getUsers = (hashes) => {
-    const ipfsHash2 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const ipfsHash2 = EmptyIpfs;
     const creationTime = 0;
     const rating = 0;
     return hashes.map((hash) => {
@@ -234,6 +234,7 @@ const periodUserReward = 100;
 const fraction = (10 ** 18);
 const poolToken = 1000 * fraction;
 const periodRewardCoefficient = 1000;
+const EmptyIpfs = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const setRetingOnePeriod = [
 	{actions: 'positive', ratings: 4, result: {ratingToReward: 4, penalty: 0}, periodRewards: 4 * periodRewardCoefficient},
@@ -369,7 +370,8 @@ const StartRatingWithoutAction = 0;
 const DefaultCommunityId = 3;
 
 const PostTypeEnum = { "ExpertPost":0, "CommonPost":1, "Tutorial":2 }
-const LanguagesEnum = { "English":0, "Chinese":1, "Spanish": 2, "Vietnamese": 3 }
+const LanguagesEnum = { "English": 0, "Chinese": 1, "Spanish": 2, "Vietnamese": 3, "Russian": 4, "Ukrainian": 5, "French": 6, "German": 7 }
+const AchievementsType = { "Rating":0, "Manual":1, "SoulRating": 2 }
 
                                                             // energy
 const energyDownVotePost = 5;
@@ -462,5 +464,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
 };

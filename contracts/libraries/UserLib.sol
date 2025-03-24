@@ -103,6 +103,15 @@ library UserLib {
     address[] userList;
   }
 
+  struct BannedUsers {
+    mapping(address => BannedUserInfo) bannedUserInfo;
+  }
+
+  struct BannedUserInfo {
+    mapping(uint32 => bool) userCommunityBans;  // communityId
+    bool isGlobalBan;
+  }
+
   struct UserRatingChange {
     address user;
     int32 rating;
@@ -139,13 +148,18 @@ library UserLib {
     AdminOrCommunityModerator,
     AdminOrCommunityAdmin,
     CommunityAdmin,
-    CommunityModerator
+    CommunityModerator,
+    AdminOrCommunityAdminOrCommunityModerator
   }
 
   event UserCreated(address indexed userAddress);
   event UserUpdated(address indexed userAddress);
   event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
   event UnfollowedCommunity(address indexed userAddress, uint32 indexed communityId);
+  event BanUser(address indexed userAddress, address indexed targetUserAddress);
+  event UnBanUser(address indexed userAddress, address indexed targetUserAddress);
+  event BanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
+  event UnBanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
 
 
   /// @notice Create new user info record
@@ -157,6 +171,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     require(self.users[userAddress].ipfsDoc.hash == bytes32(0x0), "user_exists");
 
     User storage user = self.users[userAddress];
@@ -190,6 +205,7 @@ library UserLib {
     address userAddress,
     bytes32 ipfsHash
   ) internal {
+    // TODO CHECK ipfsHash ? not null
     User storage user = checkRatingAndEnergy(
       userContext,
       userAddress,
@@ -219,16 +235,14 @@ library UserLib {
       Action.FollowCommunity
     );
 
-    bool isAdded;
+    bool isAlreadyFollowed;
     for (uint i; i < user.followedCommunities.length; i++) {
-      require(user.followedCommunities[i] != communityId, "already_followed");
-
-      if (user.followedCommunities[i] == 0 && !isAdded) {
-        user.followedCommunities[i] = communityId;
-        isAdded = true;
+      if (user.followedCommunities[i] == communityId) {
+        isAlreadyFollowed = true;
+        break;
       }
     }
-    if (!isAdded)
+    if (!isAlreadyFollowed)
       user.followedCommunities.push(communityId);
 
     emit FollowedCommunity(userAddress, communityId);
@@ -253,13 +267,87 @@ library UserLib {
 
     for (uint i; i < user.followedCommunities.length; i++) {
       if (user.followedCommunities[i] == communityId) {
-        delete user.followedCommunities[i]; //method rewrite to 0
+        // Move the last element into the place to delete
+        user.followedCommunities[i] = user.followedCommunities[user.followedCommunities.length - 1];
+
+        // Remove the last element
+        user.followedCommunities.pop();
         
         emit UnfollowedCommunity(userAddress, communityId);
         return;
       }
     }
     revert("comm_not_followed");
+  }
+
+  /// @notice Ban user
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be ban
+  function banUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress
+  ) public {
+    require(!isBannedUser(bannedUsers, targetUserAddress, 0), "Already_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].isGlobalBan = true;
+
+    emit BanUser(userAddress, targetUserAddress);
+  }
+
+  /// @notice unBan user
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be unBan
+  function unBanUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress
+  ) public {
+    require(isBannedUser(bannedUsers, targetUserAddress, 0), "User_is_not_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].isGlobalBan = false;
+
+    emit UnBanUser(userAddress, targetUserAddress);
+  }
+
+  /// @notice Ban user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be ban
+  /// @param communityId The community where the user will be ban
+  function banCommunityUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress,
+    uint32 communityId
+  ) public {
+    require(!isBannedUser(bannedUsers, targetUserAddress, communityId), "Already_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].userCommunityBans[communityId] = true;
+
+    emit BanCommunityUser(userAddress, targetUserAddress, communityId);
+  }
+
+  /// @notice unBan user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param targetUserAddress The address of the user who will be unBan
+  /// @param communityId The community where the user will be unBan
+  function unBanCommunityUser(
+    BannedUsers storage bannedUsers,
+    address userAddress,
+    address targetUserAddress,
+    uint32 communityId
+  ) public {
+    require(isBannedUser(bannedUsers, targetUserAddress, communityId), "User_is_not_banned");
+    bannedUsers.bannedUserInfo[targetUserAddress].userCommunityBans[communityId] = false;
+
+    emit UnBanCommunityUser(userAddress, targetUserAddress, communityId);
+  }
+
+  /// @notice Is banned user in community
+  /// @param bannedUsers The mapping containing all info about users`s bans
+  /// @param userAddress user address
+  /// @param communityId community id
+  function isBannedUser(BannedUsers storage bannedUsers, address userAddress, uint32 communityId) internal view returns (bool isBanned) {
+    bool isCommunityBan =  bannedUsers.bannedUserInfo[userAddress].userCommunityBans[communityId];
+    bool isGlobalBan = bannedUsers.bannedUserInfo[userAddress].isGlobalBan;
+    return isCommunityBan || isGlobalBan;
   }
 
   /// @notice Get the number of users
@@ -286,8 +374,11 @@ library UserLib {
   }
 
   function getUserRating(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (int32) {
-    int32 rating = self.communityRatingForUser[addr].userRating[communityId].rating;
-    return rating;
+    return self.communityRatingForUser[addr].userRating[communityId].rating;
+  }
+
+  function getUserRatingCollection(UserRatingCollection storage self, address addr, uint32 communityId) internal view returns (UserRating memory) {
+    return self.communityRatingForUser[addr].userRating[communityId];
   }
 
   /// @notice Check user existence
@@ -297,18 +388,38 @@ library UserLib {
     return self.users[addr].ipfsDoc.hash != bytes32(0x0);
   }
 
-  function updateUsersRating(UserLib.UserContext storage userContext, UserRatingChange[] memory usersRating, RewardLib.CommunityReward storage communityReward, uint32 communityId) public {  // check public могут вызвать снаружи?
+  function updateUsersRating(
+    UserLib.UserContext storage userContext,
+    UserRatingChange[] memory usersRating,
+    RewardLib.CommunityReward storage communityReward,
+    AchievementLib.AchievementsMetadata storage achievementsMetadata,
+    uint32 communityId
+  ) public {  // check public могут вызвать снаружи?
     for (uint i; i < usersRating.length; i++) {
-      updateUserRating(userContext, communityReward, usersRating[i].user, usersRating[i].rating, communityId);
+      updateUserRating(userContext, communityReward, achievementsMetadata, usersRating[i].user, usersRating[i].rating, communityId);
     }
   }
 
-  function updateUserRating(UserLib.UserContext storage userContext, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId) public {
-    if (rating == 0) return;
-    updateRatingBase(userContext, communityReward, userAddr, rating, communityId);
+  function updateUserRating(
+    UserLib.UserContext storage userContext,
+    RewardLib.CommunityReward storage communityReward,
+    AchievementLib.AchievementsMetadata storage achievementsMetadata,
+    address userAddr,
+    int32 rating,
+    uint32 communityId
+  ) public {
+    if (rating == 0 || userAddr == CommonLib.BOT_ADDRESS) return;
+    updateRatingBase(userContext, communityReward, achievementsMetadata, userAddr, rating, communityId);
   }
 
-  function updateRatingBase(UserContext storage userContext, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId) public {
+  function updateRatingBase(
+    UserContext storage userContext,
+    RewardLib.CommunityReward storage communityReward,
+    AchievementLib.AchievementsMetadata storage achievementsMetadata,
+    address userAddr,
+    int32 rating,
+    uint32 communityId
+  ) public {
     uint16 currentPeriod = RewardLib.getPeriod();
     
     CommunityRatingForUser storage userCommunityRating = userContext.userRatingCollection.communityRatingForUser[userAddr];
@@ -349,11 +460,23 @@ library UserLib {
     userCommunityRating.userRating[communityId].rating += rating;
 
     if (rating > 0) {
-      AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));  // todo: tests
+      AchievementCommonLib.AchievementsType[] memory newArray = new AchievementCommonLib.AchievementsType[](2);
+      newArray[0] = AchievementCommonLib.AchievementsType.Rating;
+      newArray[1] = AchievementCommonLib.AchievementsType.SoulRating; // {} ???
+      AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, newArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
     }
   }
 
-  function updateUserPeriodRating(UserContext storage userContext, CommunityRatingForUser storage userCommunityRating, RewardLib.CommunityReward storage communityReward, address userAddr, int32 rating, uint32 communityId, uint16 currentPeriod, uint16 previousPeriod) private {
+  function updateUserPeriodRating(
+    UserContext storage userContext,
+    CommunityRatingForUser storage userCommunityRating,
+    RewardLib.CommunityReward storage communityReward,
+    address userAddr,
+    int32 rating,
+    uint32 communityId,
+    uint16 currentPeriod,
+    uint16 previousPeriod
+  ) private {
     RewardLib.PeriodRating storage currentPeriodRating = userCommunityRating.userPeriodRewards[currentPeriod].periodRating[communityId];
     bool isFirstTransactionInPeriod = !currentPeriodRating.isActive;
 
@@ -491,20 +614,21 @@ library UserLib {
     uint32 communityId,
     Action action
   )
-    internal 
+    internal
+    view
     returns (User storage)
   {
     UserLib.User storage user = UserLib.getUserByAddress(userContext.users, actionCaller);
     int32 userRating = UserLib.getUserRating(userContext.userRatingCollection, actionCaller, communityId);
         
-    (int16 ratingAllowed, string memory message, uint8 energy) = getRatingAndRatingForAction(actionCaller, dataUser, action);
+    (int16 ratingAllowed, string memory message,) = getRatingAndRatingForAction(actionCaller, dataUser, action);
     require(userRating >= ratingAllowed, message);
-    reduceEnergy(user, energy);
+    // reduceEnergy(user, energy);
 
     return user;
   }
 
-  function getRatingAndRatingForAction(
+  function getRatingAndRatingForAction( // TODO getRatingAndRatingForAction -> getRatingAndEnergyForAction
     address actionCaller,
     address dataUser,
     Action action
@@ -544,13 +668,13 @@ library UserLib {
     } else if (action == Action.UpVotePost) {
       require(actionCaller != dataUser, "not_allowed_vote_post");   // toDO unittest post/reply/comment upvote+downvote
       ratingAllowed = UPVOTE_POST_ALLOWED;
-      message = "low_rating_upvote";       // TODO unittests
+      message = "low_rating_upvote_post";
       energy = ENERGY_UPVOTE_QUESTION;
 
     } else if (action == Action.UpVoteReply) {
       require(actionCaller != dataUser, "not_allowed_vote_reply");
       ratingAllowed = UPVOTE_REPLY_ALLOWED;
-      message = "low_rating_upvote_post";
+      message = "low_rating_upvote_reply";
       energy = ENERGY_UPVOTE_ANSWER;
 
     } else if (action == Action.VoteComment) {
@@ -595,7 +719,7 @@ library UserLib {
     }
   }
 
-  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {    
+  function reduceEnergy(UserLib.User storage user, uint8 energy) internal {
     uint16 currentPeriod = RewardLib.getPeriod();
     uint32 periodsHavePassed = currentPeriod - user.lastUpdatePeriod;
 

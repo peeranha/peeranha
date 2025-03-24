@@ -1,8 +1,12 @@
 const { ethers } = require("hardhat");
-const { USER_ADDRESS } = require('../env.json');
+const { USER_ADDRESS, USERLIB_ADDRESS } = require('../env.json');
 
 async function main() {
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+    libraries: {
+      UserLib: USERLIB_ADDRESS
+    }
+  });
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   const signers = await ethers.getSigners();

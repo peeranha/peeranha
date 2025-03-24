@@ -75,4 +75,8 @@ library CommonLib {
         result := mload(add(source, 32))
     }
   }
+
+  function composeMessengerSenderProperty(MessengerType messengerType, string memory handle) internal pure returns (bytes32 result) {
+    return bytes32(uint256(messengerType)) | stringToBytes32(handle);
+  }
 }

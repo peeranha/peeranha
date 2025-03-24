@@ -47,7 +47,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
 
   function createNewCommunityToken(address userAddress, uint32 communityId, address tokenAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
     dispatcherCheck(userAddress);
-    factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+    factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddress, communityId);
     require(factoryData.peeranhaUser.isProtocolAdmin(userAddress), "not_allowed_not_protocal_admin");  // tests
     factoryData.peeranhaCommunitiesToken[communityId].push(new PeeranhaCommunityToken(tokenAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this)));
     

@@ -23,9 +23,9 @@ library PostLib  {
 
     enum PostType { ExpertPost, CommonPost, Tutorial }
     enum TypeContent { Post, Reply, Comment }
-    enum Language { English, Chinese, Spanish, Vietnamese }
-    enum ReplyProperties { MessengerSender }
-    uint256 constant LANGUAGE_LENGTH = 4;       // Update after add new language
+    enum Language { English, Chinese, Spanish, Vietnamese, Russian, Ukrainian, French, German }
+    enum ItemProperties { MessengerSender, Language }
+    uint256 constant LANGUAGE_LENGTH = 8;       // Update after add new language
 
     struct Comment {
         CommonLib.IpfsHash ipfsDoc;
@@ -132,11 +132,13 @@ library PostLib  {
     event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
     event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
     event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
-    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);   // dont delete (for indexing)
+    event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);     // dont delete (for indexing)
     event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
     event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    event PostTypeChanged(address indexed user, uint256 indexed postId, PostType oldPostType);
+    event PostCommunityChanged(address indexed user, uint256 indexed postId, uint32 indexed oldCommunityId);
 
     /// @notice Publication post 
     /// @param self The mapping containing all posts
@@ -145,15 +147,18 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with post information
     /// @param postType Type of post
     /// @param tags Tags in post (min 1 tag)
+    /// @param metadata metadata for bot property
     function createPost(
         PostCollection storage self,
         address userAddr,
         uint32 communityId, 
         bytes32 ipfsHash,
         PostType postType,
-        uint8[] memory tags
+        uint8[] memory tags,
+        PostLib.Language language,
+        bytes32 metadata
     ) public {
-        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         self.peeranhaCommunity.checkTags(communityId, tags);
         
         self.peeranhaUser.checkActionRole(
@@ -166,10 +171,9 @@ library PostLib  {
         );
 
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+        require(tags.length > 0, "At least one tag is required.");
 
         PostContainer storage post = self.posts[++self.postCount];
-
-        require(tags.length > 0, "At least one tag is required.");
         post.info.tags = tags;
 
         post.info.ipfsDoc.hash = ipfsHash;
@@ -177,8 +181,32 @@ library PostLib  {
         post.info.author = userAddr;
         post.info.postTime = CommonLib.getTimestamp();
         post.info.communityId = communityId;
+        post.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
+        post.properties[uint8(ItemProperties.MessengerSender)] = metadata;
 
         emit PostCreated(userAddr, communityId, self.postCount);
+    }
+
+    /// @notice Publication post
+    /// @param self The mapping containing all posts
+    /// @param userAddr Author of the post
+    /// @param communityId Community where the post will be ask
+    /// @param ipfsHash IPFS hash of document with post information
+    /// @param messengerType The type of messenger from which the action was called
+    /// @param handle Nickname of the user who triggered the action
+    function createPostByBot(
+        PostCollection storage self,
+        address userAddr,
+        uint32 communityId,
+        bytes32 ipfsHash,
+        PostType postType,
+        uint8[] memory tags,
+        PostLib.Language language,
+        CommonLib.MessengerType messengerType,
+        string memory handle
+    ) public {
+        self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
+        createPost(self, CommonLib.BOT_ADDRESS, communityId, ipfsHash, postType, tags, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post reply
@@ -188,13 +216,16 @@ library PostLib  {
     /// @param parentReplyId The reply where the reply will be post
     /// @param ipfsHash IPFS hash of document with reply information
     /// @param isOfficialReply Flag is showing "official reply" or not
+    /// @param metadata metadata for bot property
     function createReply(
         PostCollection storage self,
         address userAddr,
         uint256 postId,
         uint16 parentReplyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        PostLib.Language language,
+        bytes32 metadata
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(postContainer.info.postType != PostType.Tutorial, 
@@ -225,13 +256,16 @@ library PostLib  {
 
         ReplyContainer storage replyContainer;
         if (postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost) {
-          uint16 countReplies = uint16(postContainer.info.replyCount);
+            uint16 countReplies = uint16(postContainer.info.replyCount);
 
-          for (uint16 i = 1; i <= countReplies; i++) {
-            replyContainer = getReplyContainer(postContainer, i);
-            require(userAddr != replyContainer.info.author || replyContainer.info.isDeleted,
-                "Users can not publish 2 replies for expert and common posts.");
-          }
+            for (uint16 i = 1; i <= countReplies; i++) {
+                replyContainer = getReplyContainer(postContainer, i);
+                require(
+                    (userAddr != replyContainer.info.author && userAddr != CommonLib.BOT_ADDRESS) || 
+                    replyContainer.properties[uint8(ItemProperties.MessengerSender)] != metadata || 
+                    replyContainer.info.isDeleted,
+                    "Users can not publish 2 replies for expert and common posts.");
+            }
         }
 
         replyContainer = postContainer.replies[++postContainer.info.replyCount];
@@ -242,7 +276,7 @@ library PostLib  {
             }
 
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-                if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
+                if (getActiveReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 }
@@ -259,6 +293,8 @@ library PostLib  {
         replyContainer.info.author = userAddr;
         replyContainer.info.ipfsDoc.hash = ipfsHash;
         replyContainer.info.postTime = timestamp;
+        replyContainer.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
+        replyContainer.properties[uint8(ItemProperties.MessengerSender)] = metadata;
 
         emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
@@ -275,16 +311,12 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         bytes32 ipfsHash,
+        PostLib.Language language,
         CommonLib.MessengerType messengerType,
         string memory handle
     ) public {
         self.peeranhaUser.checkHasRole(userAddr, UserLib.ActionRole.Bot, 0);
-        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false);
-
-        PostContainer storage postContainer = getPostContainer(self, postId);
-        ReplyContainer storage replyContainer = getReplyContainer(postContainer, postContainer.info.replyCount);
-
-        replyContainer.properties[uint8(ReplyProperties.MessengerSender)] = bytes32(uint256(messengerType)) | CommonLib.stringToBytes32(handle);
+        createReply(self, CommonLib.BOT_ADDRESS, postId, 0, ipfsHash, false, language, CommonLib.composeMessengerSenderProperty(messengerType, handle));
     }
 
     /// @notice Post comment
@@ -298,23 +330,24 @@ library PostLib  {
         address userAddr,
         uint256 postId,
         uint16 parentReplyId,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
 
-        Comment storage comment;
+        CommentContainer storage commentContainer;
         uint8 commentId;            // struct? gas
         address author;
 
         if (parentReplyId == 0) {
             commentId = ++postContainer.info.commentCount;
-            comment = postContainer.comments[commentId].info;
+            commentContainer = postContainer.comments[commentId];
             author = postContainer.info.author;
         } else {
             ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, parentReplyId);
             commentId = ++replyContainer.info.commentCount;
-            comment = replyContainer.comments[commentId].info;
+            commentContainer = replyContainer.comments[commentId];
             if (postContainer.info.author == userAddr)
                 author = userAddr;
             else
@@ -330,9 +363,10 @@ library PostLib  {
             true
         );
 
-        comment.author = userAddr;
-        comment.ipfsDoc.hash = ipfsHash;
-        comment.postTime = CommonLib.getTimestamp();
+        commentContainer.info.author = userAddr;
+        commentContainer.info.ipfsDoc.hash = ipfsHash;
+        commentContainer.info.postTime = CommonLib.getTimestamp();
+        commentContainer.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
 
         emit CommentCreated(userAddr, postId, parentReplyId, commentId);
     }
@@ -352,7 +386,8 @@ library PostLib  {
         bytes32 ipfsHash,
         uint8[] memory tags,
         uint32 communityId, 
-        PostType postType
+        PostType postType,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         if(userAddr == postContainer.info.author) {
@@ -383,18 +418,22 @@ library PostLib  {
             );
         }
 
+
         if (postContainer.info.communityId != communityId) {
-            self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
-            postContainer.info.communityId = communityId;
+            emit PostCommunityChanged(userAddr, postId, postContainer.info.communityId);
+            changePostCommunity(self, userAddr, postContainer, communityId);
         }
         if (postContainer.info.postType != postType) {
-            postTypeChangeCalculation(self, postContainer, postType);
-            postContainer.info.postType = postType;
+            emit PostTypeChanged(userAddr, postId, postContainer.info.postType);
+            changePostType(self, postContainer, postType);
         }
-        if (tags.length > 0)
+        if (tags.length > 0) {
+            self.peeranhaCommunity.checkTags(postContainer.info.communityId, tags);
             postContainer.info.tags = tags;
-
-        self.peeranhaCommunity.checkTags(postContainer.info.communityId, postContainer.info.tags);
+        }
+        if (postContainer.properties[uint8(ItemProperties.Language)] != bytes32(uint256(language))) {
+            postContainer.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
+        }
 
         emit PostEdited(userAddr, postId);
     }
@@ -411,7 +450,8 @@ library PostLib  {
         uint256 postId,
         uint16 replyId,
         bytes32 ipfsHash,
-        bool isOfficialReply
+        bool isOfficialReply,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         ReplyContainer storage replyContainer = getReplyContainerSafe(postContainer, replyId);
@@ -429,6 +469,8 @@ library PostLib  {
 
         if (replyContainer.info.ipfsDoc.hash != ipfsHash)
             replyContainer.info.ipfsDoc.hash = ipfsHash;
+        if (replyContainer.properties[uint8(ItemProperties.Language)] != bytes32(uint256(language)))
+            replyContainer.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
 
         if (isOfficialReply) {
             postContainer.info.officialReply = replyId;
@@ -452,7 +494,8 @@ library PostLib  {
         uint256 postId,
         uint16 parentReplyId,
         uint8 commentId,
-        bytes32 ipfsHash
+        bytes32 ipfsHash,
+        PostLib.Language language
     ) public {
         PostContainer storage postContainer = getPostContainer(self, postId);
         CommentContainer storage commentContainer = getCommentContainerSafe(postContainer, parentReplyId, commentId);
@@ -469,6 +512,8 @@ library PostLib  {
 
         if (commentContainer.info.ipfsDoc.hash != ipfsHash)
             commentContainer.info.ipfsDoc.hash = ipfsHash;
+        if (commentContainer.properties[uint8(ItemProperties.Language)] != bytes32(uint256(language)))
+            commentContainer.properties[uint8(ItemProperties.Language)] = bytes32(uint256(language));
         
         emit CommentEdited(userAddr, postId, parentReplyId, commentId);
     }
@@ -594,7 +639,7 @@ library PostLib  {
             if (replyContainer.info.isQuickReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
-            if (isBestReply && postType != PostType.Tutorial) {
+            if (isBestReply && postType != PostType.Tutorial) { // todo: need? postType != PostType.Tutorial
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
         }
@@ -946,52 +991,96 @@ library PostLib  {
         self.peeranhaUser.updateUsersRating(usersRating, communityId);
     }
 
-    // @notice Recalculation rating for all users who were active in the post
+    // @notice Change postType for post and recalculation rating for all users who were active in the post
     /// @param self The mapping containing all posts
     /// @param postContainer Post where changing post type
     /// @param newPostType New post type
-    function postTypeChangeCalculation(
+    function changePostType(
         PostCollection storage self,
         PostContainer storage postContainer,
         PostType newPostType
     ) private {
         PostType oldPostType = postContainer.info.postType;
-        require(newPostType != PostType.Tutorial || postContainer.info.replyCount == 0, "Error_postType");
+        require(newPostType != PostType.Tutorial || getActiveReplyCount(postContainer) == 0, "Error_postType");
         
         VoteLib.StructRating memory oldTypeRating = getTypesRating(oldPostType);
         VoteLib.StructRating memory newTypeRating = getTypesRating(newPostType);
 
         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
-        int32 changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
+        int32 changePostAuthorRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
                                 (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
-        self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
+        uint16 bestReplyId = postContainer.info.bestReply;
         for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
             ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
             (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
-            changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+            int32 changeReplyAuthorRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
-                    changeUserRating += newTypeRating.firstReply - oldTypeRating.firstReply;
+                    changeReplyAuthorRating += newTypeRating.firstReply - oldTypeRating.firstReply;
                 }
                 if (replyContainer.info.isQuickReply) {
-                    changeUserRating += newTypeRating.quickReply - oldTypeRating.quickReply;
+                    changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
-            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
+                changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
+                changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
+            }
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, postContainer.info.communityId);
+        }
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, postContainer.info.communityId);
+        postContainer.info.postType = newPostType;
+    }
+
+    // @notice Change communityId for post and recalculation rating for all users who were active in the post
+    /// @param self The mapping containing all posts
+    /// @param postContainer Post where changing post type
+    /// @param newCommunityId New community id for post
+    function changePostCommunity(
+        PostCollection storage self,
+        address userAddr,
+        PostContainer storage postContainer,
+        uint32 newCommunityId
+    ) private {
+        self.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, newCommunityId);
+        uint32 oldCommunityId = postContainer.info.communityId;
+        VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
+
+        (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+        int32 changePostAuthorRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+
+        uint16 bestReplyId = postContainer.info.bestReply;
+        for (uint16 replyId = 1; replyId <= postContainer.info.replyCount; replyId++) {
+            ReplyContainer storage replyContainer = getReplyContainer(postContainer, replyId);
+            if (replyContainer.info.isDeleted) continue;
+            (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
+
+            int32 changeReplyAuthorRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            if (replyContainer.info.rating >= 0) {
+                if (replyContainer.info.isFirstReply) {
+                    changeReplyAuthorRating += typeRating.firstReply;
+                }
+                if (replyContainer.info.isQuickReply) {
+                    changeReplyAuthorRating += typeRating.quickReply;
+                }
+            }
+            if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
+                changeReplyAuthorRating += typeRating.acceptReply;
+                changePostAuthorRating += typeRating.acceptedReply;
+            }
+
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
+            self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
         }
 
-        if (postContainer.info.bestReply != 0) {
-            self.peeranhaUser.updateUserRating(postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply, postContainer.info.communityId);
-            self.peeranhaUser.updateUserRating(
-                getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
-                newTypeRating.acceptReply - oldTypeRating.acceptReply,
-                postContainer.info.communityId
-            );
-        }
+        self.peeranhaUser.updateUserRating(postContainer.info.author, -changePostAuthorRating, oldCommunityId);
+        self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, newCommunityId);
+        postContainer.info.communityId = newCommunityId;
     }
 
     // @notice update documentation ipfs tree
@@ -1007,7 +1096,7 @@ library PostLib  {
         uint32 communityId, 
         bytes32 documentationTreeIpfsHash
     ) public {
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(communityId);
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
@@ -1031,6 +1120,7 @@ library PostLib  {
     /// @param ipfsHash IPFS hash of document with translation information
     function initTranslation(
         TranslationCollection storage self,
+        PostCollection storage postCollection,
         uint256 postId,
         uint16 replyId,
         uint8 commentId,
@@ -1038,10 +1128,13 @@ library PostLib  {
         address userAddr,
         bytes32 ipfsHash
     ) private {
-        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");      // todo test
+        require(!CommonLib.isEmptyIpfs(ipfsHash), "Invalid_ipfsHash");
+        require(uint256(getItemProperty(postCollection, uint8(ItemProperties.Language), postId, replyId, commentId)) != uint256(language), "Error_its_original_language");
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
 
         TranslationContainer storage translationContainer = self.translations[item];
+        require(CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_already_exist.");
+
         translationContainer.info.ipfsDoc.hash = ipfsHash;
         translationContainer.info.author = userAddr;
         translationContainer.info.postTime = CommonLib.getTimestamp();
@@ -1063,7 +1156,8 @@ library PostLib  {
         address userAddr
     ) private {
         PostContainer storage postContainer = getPostContainer(postCollection, postId);
-        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(postContainer.info.communityId);
+        uint32 communityId = postContainer.info.communityId;
+        postCollection.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddr, communityId);
         if (replyId != 0)
             getReplyContainerSafe(postContainer, replyId);
         if (commentId != 0)
@@ -1072,9 +1166,9 @@ library PostLib  {
         postCollection.peeranhaUser.checkActionRole(
             userAddr,
             userAddr,
-            postContainer.info.communityId,
+            communityId,
             UserLib.Action.NONE,
-            UserLib.ActionRole.CommunityAdmin,      // todo: add test
+            UserLib.ActionRole.Bot,
             false
         );
     }
@@ -1098,11 +1192,11 @@ library PostLib  {
         Language[] memory languages,
         bytes32[] memory ipfsHashs
     ) internal {
+        require(languages.length == ipfsHashs.length && languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
-        require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
-            initTranslation( self, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
+            initTranslation(self, postCollection, postId, replyId, commentId, languages[i], userAddr, ipfsHashs[i]);
         }
     }
 
@@ -1125,12 +1219,13 @@ library PostLib  {
         Language[] memory languages,
         bytes32[] memory ipfsHashs
     ) internal {
+        require(languages.length == ipfsHashs.length && languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
-        require(languages.length == ipfsHashs.length, "Error_array");
         for (uint32 i; i < languages.length; i++) {
             require(!CommonLib.isEmptyIpfs(ipfsHashs[i]), "Invalid_ipfsHash");
             TranslationContainer storage translationContainer = getTranslationSafe(self, postId, replyId, commentId, languages[i]);
+            translationContainer.info.author = userAddr;
             translationContainer.info.ipfsDoc.hash = ipfsHashs[i];
 
             emit TranslationEdited(userAddr, postId, replyId, commentId, languages[i]);
@@ -1154,6 +1249,7 @@ library PostLib  {
         uint8 commentId,
         Language[] memory languages
     ) internal {
+        require(languages.length != 0, "Error_array");
         validateTranslationParams(postCollection, postId, replyId, commentId, userAddr);
 
         for (uint32 i; i < languages.length; i++) {
@@ -1176,7 +1272,7 @@ library PostLib  {
         Language language
     ) private pure returns (bytes32) {
         return bytes32(postId << 192 | uint256(replyId) << 128 | uint256(commentId) << 64 | uint256(language));
-    }  
+    }
 
     function updateDocumentationTreeByPost(
         DocumentationTree storage self,
@@ -1302,21 +1398,6 @@ library PostLib  {
         return getReplyContainer(postContainer, replyId).info;
     }
 
-    /// @notice Return comment for unit tests
-    /// @param self The mapping containing all posts
-    /// @param postId Post where is the reply
-    /// @param parentReplyId The parent reply
-    /// @param commentId The comment which need find
-    function getComment(
-        PostCollection storage self, 
-        uint256 postId,
-        uint16 parentReplyId,
-        uint8 commentId
-    ) public view returns (Comment memory) {
-        PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
-        return getCommentContainer(postContainer, parentReplyId, commentId).info;
-    }
-
     /// @notice Return property for item
     /// @param self The mapping containing all posts
     /// @param postId Post where is the reply
@@ -1341,6 +1422,29 @@ library PostLib  {
 
         }
         return postContainer.properties[propertyId];
+    }
+
+    /// @notice Return comment for unit tests
+    /// @param self The mapping containing all posts
+    /// @param postId Post where is the reply
+    /// @param parentReplyId The parent reply
+    /// @param commentId The comment which need find
+    function getComment(
+        PostCollection storage self, 
+        uint256 postId,
+        uint16 parentReplyId,
+        uint8 commentId
+    ) public view returns (Comment memory) {
+        PostContainer storage postContainer = self.posts[postId];          // todo: return storage -> memory?
+        return getCommentContainer(postContainer, parentReplyId, commentId).info;
+    }
+
+    /// @notice Return replies count
+    /// @param postContainer post where get replies count
+    function getActiveReplyCount(
+        PostContainer storage postContainer
+    ) private view returns (uint16) {
+        return postContainer.info.replyCount - postContainer.info.deletedReplyCount;
     }
 
     /// @notice Get flag status vote (upvote/dovnvote) for post/reply/comment
@@ -1408,8 +1512,8 @@ library PostLib  {
     ) private view returns (TranslationContainer storage) {
         bytes32 item = getTranslationItemHash(postId, replyId, commentId, language);
         TranslationContainer storage translationContainer = self.translations[item];
-        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_not_exist."); // todo: tests
-        require(!translationContainer.info.isDeleted, "Translation_deleted.");                         // todo: tests
+        require(!CommonLib.isEmptyIpfs(translationContainer.info.ipfsDoc.hash), "Translation_not_exist.");
+        require(!translationContainer.info.isDeleted, "Translation_deleted.");
         
         return translationContainer;
     }

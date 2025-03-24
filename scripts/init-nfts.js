@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { create } = require('ipfs-http-client');
 const bs58 = require('bs58');
-const { IPFS_API_URL, USER_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
+const { IPFS_API_URL, USER_ADDRESS, USERLIB_ADDRESS, IPFS_API_URL_THE_GRAPH } = require('../env.json');
 const { achievements, PATH } = require('./common-action');
 var fs = require('fs');
 
@@ -56,7 +56,11 @@ async function main() {
   console.log("Begin initializing NFTs");
   console.log(`Images path: ${PATH}`);
   
-  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser");
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+   	libraries: {
+  		UserLib: USERLIB_ADDRESS,
+  	}
+  });
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
   await initAchievement(peeranhaUser);
 
@@ -75,7 +79,7 @@ async function initAchievement(peeranhaUser) {
     };
     console.log(`init NFT ${name}`);
     const nftIPFS = "ipfs://" + await saveText(JSON.stringify(nft));
-    const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, nftIPFS, type);
+    const tx = await peeranhaUser.configureNewAchievement(maxCount, lowerBound, nftIPFS, 0, type);
     console.log(`Sent transaction ${tx.hash} to init NFT ${name}`);
 
     console.log(`Waiting for confirmation`)
