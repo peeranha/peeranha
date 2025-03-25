@@ -32,7 +32,7 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   event CommunityTokenCreated(address indexed communityTokenContractAddress, uint32 indexed communityId);
   event SetCommunityTokenPool(uint16 indexed period); 
   event CommunityRewardSettingsUpdated(address indexed communityTokenContractAddress);
-  event PayCommunityRewards(address indexed user, uint16 indexed period);
+  event PayCommunityRewards(address indexed userAddress, uint16 indexed period);
 
   function initialize(address peeranhaUserContractAddress, address peeranhaCommunityContractAddress) public initializer {
     factoryData.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
