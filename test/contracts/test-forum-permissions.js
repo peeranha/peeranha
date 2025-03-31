@@ -17,7 +17,7 @@ const {
 ///
 
 describe("Test permissions", function () {
-    xdescribe("Test set role admin", function () {
+    describe("Test set role admin", function () {
         it("Test grant role with set role admin", async function() {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
@@ -36,7 +36,7 @@ describe("Test permissions", function () {
         });
     });
 
-    xdescribe("Test admin role", function () {
+    describe("Test admin role", function () {
 		it("Test give admin permission", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
             const hashContainer = getHashContainer();
@@ -92,7 +92,7 @@ describe("Test permissions", function () {
         });
     });
 
-    xdescribe("Test call action control", function () {
+    describe("Test call action control", function () {
         it("Test call updateUserRating", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaContentAddress, accountDeployed} = await createPeerenhaAndTokenContract();
             const hashContainer = getHashContainer();
@@ -140,7 +140,7 @@ describe("Test permissions", function () {
         });
     });
 
-    xdescribe("Common user", function () {
+    describe("Common user", function () {
 		it("Test post comment by common user", async function () {
 			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
@@ -474,7 +474,7 @@ describe("Test permissions", function () {
         })
     });
 
-    xdescribe("General admin", function () {
+    describe("General admin", function () {
 
         it("Test delete post", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -1032,7 +1032,7 @@ describe("Test permissions", function () {
         })
     })
 
-    xdescribe("Community admin", function () {
+    describe("Community admin", function () {
 
         it("Test delete post", async function () {
             const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
@@ -1649,47 +1649,40 @@ describe("Test permissions", function () {
     
 
     describe("Verified role", function () {
-        it("Test verifier initializing", async function () {
-            const { peeranhaUser } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-   
-            await expect(peeranhaUser.connect(signers[1]).initVerifierPermission())
-                .to.be.revertedWith("user_not_admin");
+        let peeranhaUser, peeranhaContent, peeranhaCommunity, signers, hashContainer, ipfsHashes;
+
+        beforeEach(async function () {
+            const contracts = await createPeerenhaAndTokenContract();
+            peeranhaUser = contracts.peeranhaUser;
+            peeranhaContent = contracts.peeranhaContent;
+            peeranhaCommunity = contracts.peeranhaCommunity;
+            signers = await ethers.getSigners();
+            hashContainer = getHashContainer();
+            ipfsHashes = getHashesContainer(1);
+
+            await peeranhaUser.setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
+            await peeranhaUser.setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
         });
 
-        it("Test common user granting VERIFIED_ROLE or VERIFIER_ROLE", async function () {
-            const { peeranhaUser } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-    
+        it("Test common user granting VERIFIED_ROLE or VERIFIER_ROLE", async function () {    
             await expect(peeranhaUser.connect(signers[1]).grantRole(VERIFIED_ROLE, signers[2].address))
-                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0ce23c3e399818cfee81a7ab0880f714e53d7672b08df0fa62f2843416e1ea09");
             await expect(peeranhaUser.connect(signers[1]).grantRole(VERIFIER_ROLE, signers[2].address))
-                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
         });
     
-        it("Test admin granting VERIFIER_ROLE", async function () {
-            const { peeranhaUser } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-    
+        it("Test admin granting VERIFIER_ROLE", async function () {    
             await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
             const hasRole = await peeranhaUser.hasRole(VERIFIER_ROLE, signers[1].address);
             expect(hasRole).to.be.true;
         });
     
-        it("Test admin granting VERIFIED_ROLE", async function () {
-            const { peeranhaUser } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-   
-            await peeranhaUser.initVerifierPermission();
+        it("Test admin granting VERIFIED_ROLE", async function () {   
             await expect(peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address))
                 .to.be.revertedWith("AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x0ce23c3e399818cfee81a7ab0880f714e53d7672b08df0fa62f2843416e1ea09");
         });
     
-        it("Test VERIFIER_ROLE user granting VERIFIED_ROLE", async function () {
-            const { peeranhaUser } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-    
-            await peeranhaUser.initVerifierPermission();
+        it("Test VERIFIER_ROLE user granting VERIFIED_ROLE", async function () {    
             await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
             await peeranhaUser.connect(signers[1]).grantRole(VERIFIED_ROLE, signers[2].address);
             const hasRole = await peeranhaUser.hasRole(VERIFIED_ROLE, signers[2].address);
@@ -1697,12 +1690,6 @@ describe("Test permissions", function () {
         });
     
         it("Test common user or VERIFIER_ROLE user creating a post", async function () {
-            const { peeranhaContent, peeranhaUser, peeranhaCommunity } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-            const hashContainer = getHashContainer();
-            const ipfsHashes = getHashesContainer(1);
-            await peeranhaUser.initVerifierPermission();
-            
             await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
             await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
     
@@ -1716,12 +1703,6 @@ describe("Test permissions", function () {
         });
     
         it("Test VERIFIED_ROLE user creating a post", async function () {
-            const { peeranhaContent, peeranhaUser, peeranhaCommunity } = await createPeerenhaAndTokenContract();
-            const signers = await ethers.getSigners();
-            const hashContainer = getHashContainer();
-            const ipfsHashes = getHashesContainer(1);
-            await peeranhaUser.initVerifierPermission();
-    
             await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
             await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
 

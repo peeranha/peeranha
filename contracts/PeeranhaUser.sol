@@ -325,12 +325,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         _grantRole(communityModeratorRole, userAddr);
     }
 
-    function initVerifierPermission() public {
-        require(hasRole(PROTOCOL_ADMIN_ROLE, _msgSender()), "user_not_admin");
-        _setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
-        _setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
-    }
-
     /**
      * @dev Give community administrator permission.
      *
