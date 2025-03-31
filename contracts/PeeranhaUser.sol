@@ -28,9 +28,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
     UserLib.UserContext userContext;
-    RewardLib.CommunityReward communityReward;
     AchievementLib.AchievementsMetadata achievementsMetadata;
     UserLib.BannedUsers bannedUsers;
+    RewardLib.CommunityReward communityReward;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -620,7 +620,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      * @dev Get active users in period in community.
     */
     function getCommunityActiveUsersInPeriod(uint16 period, uint32 communityId) external view returns (address[] memory) {
-        return communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
+        return communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
     }
 
     /**

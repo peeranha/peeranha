@@ -3,13 +3,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "./interfaces/IPeeranhaCommunityTokenFactory.sol";
+import "./interfaces/ICommunityTokenRewardFactory.sol";
 import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 
-import "./PeeranhaCommunityToken.sol";
+import "./CommunityToken.sol";
 import "./libraries/TokenLib.sol";
 import "./base/NativeMetaTransaction.sol";
+
+// import "@openzeppelin/contracts/access/AccessControl.sol";
 
 ///
 // todo: tests
@@ -18,9 +20,9 @@ import "./base/NativeMetaTransaction.sol";
 //  period_not_ended
 ///
 
-contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initializable, NativeMetaTransaction {
+contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializable, NativeMetaTransaction {
   struct FactoryData {  // name
-    mapping(uint32 => IPeeranhaCommunityToken[]) peeranhaCommunitiesToken;  // communityId
+    mapping(uint32 => ICommunityToken[]) communitiesToken;  // communityId
     mapping(uint16 => bool) isSetPool;                                      // period
     uint32[] factoryCommunitiesId;    // todo: uinttest 
     TokenLib.StatusRewardContainer statusRewardContainer;
@@ -30,9 +32,9 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
   FactoryData factoryData;
 
   event CommunityTokenCreated(address indexed communityTokenContractAddress, uint32 indexed communityId);
-  event SetCommunityTokenPool(uint16 indexed period); 
+  event SetReadyToClaimCommunityPeriodRewards(uint16 indexed period); 
   event CommunityRewardSettingsUpdated(address indexed communityTokenContractAddress);
-  event PayCommunityRewards(address indexed userAddress, uint16 indexed period);
+  event ClaimRewards(address indexed userAddress, uint16 indexed period);
 
   function initialize(address peeranhaUserContractAddress, address peeranhaCommunityContractAddress) public initializer {
     factoryData.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
@@ -45,23 +47,23 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     }
   }
 
-  function createNewCommunityToken(address userAddress, uint32 communityId, address tokenAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
+  function createNewCommunityTokenReward(address userAddress, uint32 communityId, address tokenAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
     dispatcherCheck(userAddress);
     factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddress, communityId);
     require(factoryData.peeranhaUser.isProtocolAdmin(userAddress), "not_allowed_not_protocal_admin");  // tests
-    factoryData.peeranhaCommunitiesToken[communityId].push(new PeeranhaCommunityToken(tokenAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this)));
+    factoryData.communitiesToken[communityId].push(new CommunityToken(tokenAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this)));
     
-    bool isAddedCommunityId;
+    bool existingCommunityId;
     for (uint256 i; i < factoryData.factoryCommunitiesId.length; i++) {
       if (factoryData.factoryCommunitiesId[i] == communityId)
-        isAddedCommunityId = true;
+        existingCommunityId = true;
     }
-    if (!isAddedCommunityId) {
+    if (!existingCommunityId) {
       factoryData.factoryCommunitiesId.push(communityId);
     }
 
-    uint256 contractsCommunityTokenLength = factoryData.peeranhaCommunitiesToken[communityId].length;
-    address communityTokenAddress = address(factoryData.peeranhaCommunitiesToken[communityId][contractsCommunityTokenLength - 1]);
+    uint256 contractsCommunityTokenLength = factoryData.communitiesToken[communityId].length;
+    address communityTokenAddress = address(factoryData.communitiesToken[communityId][contractsCommunityTokenLength - 1]);
     emit CommunityTokenCreated(communityTokenAddress, communityId);
   }
 
@@ -76,16 +78,16 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
       return NativeMetaTransaction._msgSender();
   }
 
-  function updateCommunityRewardSettings(address userAddress, uint32 communityId, address communityTokenContractAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
+  function updateCommunityRewardSettings(address userAddress, uint32 communityId, address communityTokenContractAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override {
     dispatcherCheck(userAddress);
-    IPeeranhaCommunityToken peeranhaCommunityToken = getContractCommunityToken(communityId, communityTokenContractAddress);
-    peeranhaCommunityToken.updateCommunityRewardSettings(maxRewardPerPeriod, activeUsersInPeriod);
+    ICommunityToken communityToken = getContractCommunityToken(communityId, communityTokenContractAddress);
+    communityToken.updateCommunityRewardSettings(maxRewardPerPeriod, maxRewardPerUser);
 
     emit CommunityRewardSettingsUpdated(communityTokenContractAddress);
   }
   
   // set pools
-  function setTotalPeriodRewards(uint16 period) external override {
+  function setReadyToClaimPeriodRewards(uint16 period) external override {
     require(RewardLib.getPeriod() > period + 1, "period_not_ended");  // todo: tests
     require(factoryData.peeranhaUser.isProtocolAdmin(_msgSender()), "not_allowed_not_protocal_admin");  // todo: tests
 
@@ -94,19 +96,19 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
       RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, factoryData.factoryCommunitiesId[i]);
-      IPeeranhaCommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(factoryData.factoryCommunitiesId[i]);
+      ICommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(factoryData.factoryCommunitiesId[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
-        IPeeranhaCommunityToken peeranhaCommunityToken = contractsCommunityToken[communityTokenIndex];
-        if (address(peeranhaCommunityToken) != address(0)) {
-          peeranhaCommunityToken.setTotalPeriodReward(periodRewardShares, period);
+        ICommunityToken communityToken = contractsCommunityToken[communityTokenIndex];
+        if (address(communityToken) != address(0)) {
+          communityToken.setReadyToClaimPeriodRewards(periodRewardShares, period);
         }
       }
     }
-    emit SetCommunityTokenPool(period);
+    emit SetReadyToClaimCommunityPeriodRewards(period);
   }
 
-  function payCommunityRewards(address userAddress, uint16 period) external override {
+  function claimRewards(address userAddress, uint16 period) external override {
     dispatcherCheck(userAddress);
     require(!factoryData.statusRewardContainer.statusReward[userAddress][period].isPaid, "reward_already_picked_up.");
     require(factoryData.isSetPool[period], "pool_not_set");    // todo: tests
@@ -116,36 +118,36 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     uint256 rewardCommunitiesLength = rewardCommunities.length;
 
     for (uint256 i; i < rewardCommunitiesLength; i++) {
-      IPeeranhaCommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(rewardCommunities[i]);
+      ICommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(rewardCommunities[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
-        IPeeranhaCommunityToken peeranhaCommunityToken = contractsCommunityToken[communityTokenIndex];
+        ICommunityToken communityToken = contractsCommunityToken[communityTokenIndex];
 
         int32 ratingToReward = factoryData.peeranhaUser.getRatingToReward(userAddress, period, rewardCommunities[i]);
-        if (address(peeranhaCommunityToken) != address(0) && ratingToReward > 0) {
+        if (address(communityToken) != address(0) && ratingToReward > 0) {
           RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, rewardCommunities[i]);
           uint16 per = period;  // ??????
-          peeranhaCommunityToken.payCommunityReward(periodRewardShares, userAddress, CommonLib.toUInt32FromInt32(ratingToReward), per);
+          communityToken.claimReward(periodRewardShares, userAddress, CommonLib.toUInt32FromInt32(ratingToReward), per);
         }
       }
     }
-    emit PayCommunityRewards(userAddress, period);
+    emit ClaimRewards(userAddress, period);
   }
 
-  function getContractCommunityToken(uint32 communityId, address communityTokenContractAddress) public view returns(IPeeranhaCommunityToken) {
-    IPeeranhaCommunityToken[] memory icontractsCommunityToken =  getContractsCommunityToken(communityId);
+  function getContractCommunityToken(uint32 communityId, address communityTokenContractAddress) public view returns(ICommunityToken) {
+    ICommunityToken[] memory icontractsCommunityToken =  getContractsCommunityToken(communityId);
 
     for (uint32 communityToken; communityToken < icontractsCommunityToken.length; communityToken++) {
-      IPeeranhaCommunityToken iPeeranhaCommunityToken = icontractsCommunityToken[communityToken];
-      if (address(iPeeranhaCommunityToken) == communityTokenContractAddress)
-        return iPeeranhaCommunityToken;
+      ICommunityToken iCommunityToken = icontractsCommunityToken[communityToken];
+      if (address(iCommunityToken) == communityTokenContractAddress)
+        return iCommunityToken;
     }
     revert("Community_token_contract_not_exist"); // todo: tests
   }
 
-  function getContractsCommunityToken(uint32 communityId) public view returns(IPeeranhaCommunityToken[] memory) {
-    require(factoryData.peeranhaCommunitiesToken[communityId].length != 0, "Token_communityId_not_exist");
-    return factoryData.peeranhaCommunitiesToken[communityId];
+  function getContractsCommunityToken(uint32 communityId) public view returns(ICommunityToken[] memory) {
+    require(factoryData.communitiesToken[communityId].length != 0, "Token_communityId_not_exist");
+    return factoryData.communitiesToken[communityId];
   }
 
   function getUserCommunityRewardGraph(address userAddress, uint16 period, uint32 communityId, address communityTokenContractAddress) public view override returns(uint256) {
@@ -156,14 +158,14 @@ contract PeeranhaCommunityTokenFactory is IPeeranhaCommunityTokenFactory, Initia
     return userReward;
   }
 
-  // function getCommunityToken(address communityTokenContractAddress, uint32 communityId) external view returns(PeeranhaCommunityToken.CommunityToken memory) {
-  //   IPeeranhaCommunityToken peeranhaCommunityToken = getContractCommunityToken(communityId, communityTokenContractAddress);
-  //   return peeranhaCommunityToken.getCommunityTokenData();
+  // function getCommunityToken(address communityTokenContractAddress, uint32 communityId) external view returns(communityToken.CommunityToken memory) {
+  //   ICommunityToken communityToken = getContractCommunityToken(communityId, communityTokenContractAddress);
+  //   return communityToken.getCommunityTokenData();
   // }
 
   // only for unit tests  // todo: add change-env-value
   function getAddressLastCreatedContract(uint32 communityId) external view returns(address) {
-    IPeeranhaCommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(communityId);
+    ICommunityToken[] memory contractsCommunityToken = getContractsCommunityToken(communityId);
     uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
     return address(contractsCommunityToken[contractsCommunityTokenLength - 1]);
   }

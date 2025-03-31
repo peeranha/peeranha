@@ -25,10 +25,10 @@ library RewardLib {
 
   // period reward for all communities
   struct CommunityReward {
-    mapping(uint32 => CommunityPeriofReward) communityPeriofReward; // communityID
+    mapping(uint32 => CommunityPeriodReward) communityPeriodReward; // communityID
   }
 
-  struct CommunityPeriofReward {
+  struct CommunityPeriodReward {
     mapping(uint16 => PeriodRewardShares) communityPeriodRewardShares; // period
   }
 

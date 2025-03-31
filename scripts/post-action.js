@@ -238,7 +238,7 @@ async function tokenFactoryFunctions() {
   const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
   const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(TOKEN_FACTORY_ADDRESS);
 
-  const txObj = await peeranhaCommunityTokenFactory.createNewCommunityToken(1, TOKEN_ADDRESS, 200, 5);
+  const txObj = await peeranhaCommunityTokenFactory.createNewCommunityTokenReward(1, TOKEN_ADDRESS, 200, 5);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);

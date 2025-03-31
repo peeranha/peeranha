@@ -547,11 +547,11 @@ library UserLib {
         if (dataUpdateUserRatingPreviousPeriod.ratingToRewardChange > 0) {
           uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
           userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
-          communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
+          communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares += changeTotalRewardShares;
         } else {
           uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
           userContext.periodRewardContainer.periodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
-          communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
+          communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[previousPeriod].totalRewardShares -= changeTotalRewardShares;
         }
       }
     }
@@ -561,11 +561,11 @@ library UserLib {
       if (dataUpdateUserRatingCurrentPeriod.ratingToRewardChange > 0) {
         uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
-        communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
+        communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares += changeTotalRewardShares;
       } else {
         uint32 changeTotalRewardShares = CommonLib.toUInt32FromInt32(-getRewardShare(userContext, userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
         userContext.periodRewardContainer.periodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
-        communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
+        communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[currentPeriod].totalRewardShares -= changeTotalRewardShares;
       }
 
       int32 changeRating;
@@ -592,7 +592,7 @@ library UserLib {
     // Activate period rating for community if this is the first change
     if (isFirstTransactionInPeriod) {
       currentPeriodRating.isActive = true;
-      communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr);
+      communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr);
     }
   }
 
@@ -744,7 +744,7 @@ library UserLib {
   }
 
   function getPeriodRewardShares(RewardLib.CommunityReward storage communityReward, uint16 period, uint32 communityId) internal view returns(RewardLib.PeriodRewardShares memory) {
-    return communityReward.communityPeriofReward[communityId].communityPeriodRewardShares[period];
+    return communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period];
   }
 
   function getUserRewardCommunities(UserContext storage userContext, address user, uint16 rewardPeriod) internal view returns(uint32[] memory) {

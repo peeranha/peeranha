@@ -104,6 +104,7 @@
     "ipfs-http-client": "^52.0.1"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "node-fetch": "^2.7.0"
   }
 }

@@ -751,9 +751,9 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
-			await expect(peeranhaTokenFactory.connect(signers[3]).createNewCommunityToken(signers[0].address, 1, token.address, 100, 20))
+			await expect(peeranhaTokenFactory.connect(signers[3]).createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20))
 				.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaTokenFactory.connect(signers[1]).createNewCommunityToken(signers[0].address, 1, token.address, 100, 20))
+			await expect(peeranhaTokenFactory.connect(signers[1]).createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20))
 				.not.to.be.revertedWith('not_allowed_not_dispatcher');
 		});
 
@@ -765,7 +765,7 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityToken(signers[0].address, 1, token.address, 100, 20);			
+			await peeranhaTokenFactory.createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20);			
 
 			await expect(peeranhaTokenFactory.connect(signers[3]).updateCommunityRewardSettings(signers[0].address, 1, await peeranhaTokenFactory.getAddressLastCreatedContract(1), 20, 2))
 				.to.be.revertedWith('not_allowed_not_dispatcher');
@@ -781,13 +781,13 @@ describe("Test dispatcher", function () {
 			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityToken(signers[0].address, 1, token.address, 100, 20);
+			await peeranhaTokenFactory.createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20);
 			await wait(PeriodTime * 2);
-			await peeranhaTokenFactory.setTotalPeriodRewards(0);
+			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(0);
 
-			await expect(peeranhaTokenFactory.connect(signers[3]).payCommunityReward(signers[0].address, 0))
+			await expect(peeranhaTokenFactory.connect(signers[3]).claimReward(signers[0].address, 0))
 				.to.be.revertedWith('not_allowed_not_dispatcher');
-			await expect(peeranhaTokenFactory.connect(signers[1]).payCommunityReward(signers[0].address, 0))
+			await expect(peeranhaTokenFactory.connect(signers[1]).claimReward(signers[0].address, 0))
 				.not.to.be.revertedWith('not_allowed_not_dispatcher');
 		});
 	});

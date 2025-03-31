@@ -16,7 +16,7 @@ describe("Test community token", function() {
         await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
         await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
-        await expect(peeranhaTokenFactory.connect(signers[1]).createNewCommunityToken(signers[1].address, 1, token.address, 100, 20)).to.be.revertedWith('Community is frozen');
+        await expect(peeranhaTokenFactory.connect(signers[1]).createNewCommunityTokenReward(signers[1].address, 1, token.address, 100, 20)).to.be.revertedWith('Community is frozen');
 
         // await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);        
     });
