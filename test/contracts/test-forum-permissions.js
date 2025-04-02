@@ -4,9 +4,8 @@ const {
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
-    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, DefaultCommunityId, PROTOCOL_ADMIN_ROLE, BOT_ROLE, LanguagesEnum,
-    VERIFIED_ROLE,
-    VERIFIER_ROLE
+    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, DefaultCommunityId,
+    LanguagesEnum, PROTOCOL_ADMIN_ROLE, BOT_ROLE, VERIFIED_ROLE, VERIFIER_ROLE
 } = require('./utils');
 
 ///
