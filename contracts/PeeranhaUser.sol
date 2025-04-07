@@ -610,6 +610,18 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get user rating in a given period and community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and valid period.
+     * - Must be an existing community.
+    */
+    function getUserPeriodCommunityRating(address user, uint16 rewardPeriod, uint32 communityId) public override view returns(uint32 rating, uint32 penalty) {
+        return UserLib.getUserPeriodCommunityRating(userContext, user, rewardPeriod, communityId);
+    }
+
+    /**
      * @dev Get active users in period.
     */
     function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {

@@ -29,11 +29,11 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializa
     IPeeranhaUser peeranhaUser;
     IPeeranhaCommunity peeranhaCommunity;
   }
+
   FactoryData factoryData;
 
   event CommunityTokenCreated(address indexed communityTokenContractAddress, uint32 indexed communityId);
   event SetReadyToClaimCommunityPeriodRewards(uint16 indexed period); 
-  event CommunityRewardSettingsUpdated(address indexed communityTokenContractAddress);
   event ClaimRewards(address indexed userAddress, uint16 indexed period);
 
   function initialize(address peeranhaUserContractAddress, address peeranhaCommunityContractAddress) public initializer {
@@ -76,14 +76,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializa
       returns (address sender)
   {
       return NativeMetaTransaction._msgSender();
-  }
-
-  function updateCommunityRewardSettings(address userAddress, uint32 communityId, address communityTokenContractAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override {
-    dispatcherCheck(userAddress);
-    ICommunityToken communityToken = getContractCommunityToken(communityId, communityTokenContractAddress);
-    communityToken.updateCommunityRewardSettings(maxRewardPerPeriod, maxRewardPerUser);
-
-    emit CommunityRewardSettingsUpdated(communityTokenContractAddress);
   }
   
   // set pools

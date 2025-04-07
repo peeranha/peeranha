@@ -152,6 +152,13 @@ library UserLib {
     AdminOrCommunityAdminOrCommunityModerator
   }
 
+  struct UpdateRatingEvent {
+    address userAddress;
+    uint32 communityId;
+    uint16 currentPeriod;
+    uint16 previousPeriod;
+  }
+
   event UserCreated(address indexed userAddress);
   event UserUpdated(address indexed userAddress);
   event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
@@ -160,7 +167,7 @@ library UserLib {
   event UnBanUser(address indexed userAddress, address indexed targetUserAddress);
   event BanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
   event UnBanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
-
+  event UpdateUserRating(address indexed userAddress, uint32 indexed communityId, uint16 currentPeriod, uint16 previousPeriod);
 
   /// @notice Create new user info record
   /// @param self The mapping containing all users
@@ -465,6 +472,8 @@ library UserLib {
       newArray[1] = AchievementCommonLib.AchievementsType.SoulRating; // {} ???
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, newArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
     }
+
+    emit UpdateUserRating(userAddr, communityId, currentPeriod, previousPeriod);
   }
 
   function updateUserPeriodRating(
@@ -749,5 +758,10 @@ library UserLib {
 
   function getUserRewardCommunities(UserContext storage userContext, address user, uint16 rewardPeriod) internal view returns(uint32[] memory) {
     return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].rewardCommunities;
+  }
+
+  function getUserPeriodCommunityRating(UserContext storage userContext, address user, uint16 rewardPeriod, uint32 communityId) internal view returns(uint32 rating, uint32 penalty) {
+    RewardLib.PeriodRating storage userPeriodCommuntiyRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
+    return (userPeriodCommuntiyRating.ratingToReward, userPeriodCommuntiyRating.penalty);
   }
 }

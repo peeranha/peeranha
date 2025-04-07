@@ -36,12 +36,21 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
 
   struct CommunityTokenContainer {
     CommunityTokenInfo info;
-    mapping(uint16 => uint256) readyToClaimRewardPool;
+    mapping(uint16 => RewardPeriodParams) rewardPeriodParams;    // period
+  }
+
+  struct RewardPeriodParams {
+    uint256 maxTotalTokenPool;
+    uint256 maxRewardPerUser;
+    uint256 availableBalance;
+    uint256 totalTokenPool;
+
+    mapping(address => bool) isClaimed;
   }
 
   CommunityTokenContainer communityTokenContainer;
 
-  event AddBalance(uint256 indexed amount);   // name
+  event CommunityRewardSettingsUpdated();
 
   constructor(address tokenAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser, address communityTokenRewardFactoryAddress) {
     // if address = 0?
@@ -65,9 +74,12 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
     return NativeMetaTransaction._msgSender();
   }
 
-  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override {
+  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override { // check role
+    // dispatcherCheck(userAddress); 
+    
     communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerUser;
+    emit CommunityRewardSettingsUpdated();
   }
 
   function getAvailableRewardsBalance() public view override returns(uint256) {   // public?
@@ -80,26 +92,34 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
   }
 
   // get pool
-  function getTotalPeriodReward(uint16 period) public view returns(uint256) {
-    return communityTokenContainer.readyToClaimRewardPool[period];
+  function getTotalPeriodReward(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
+    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
+    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
   }
 
   // set pool
   function setReadyToClaimPeriodRewards(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
     require(_msgSender() == communityTokenContainer.info.communityTokenRewardFactoryAddress, "only_community_token_reward_factory_contract_can_call_this_action");
 
-    uint256 totalPeriodReward = communityTokenContainer.info.maxRewardPerPeriod;
-    uint256 maxPeriodRewardForAllUser = periodRewardShares.activeUsersInPeriod.length * communityTokenContainer.info.maxRewardPerUser;   // min?
-    totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
+    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
+    rewardPeriodParams.maxTotalTokenPool = communityTokenContainer.info.maxRewardPerPeriod;
+    rewardPeriodParams.maxRewardPerUser = communityTokenContainer.info.maxRewardPerUser;
+    rewardPeriodParams.availableBalance = getAvailableRewardsBalance();
 
-    totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
-    communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
-    
-    communityTokenContainer.readyToClaimRewardPool[period] = totalPeriodReward;
+    RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[period - 2];
+    if (claimPeriodRewardParams.availableBalance > 0) {
+      uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
+      uint256 maxPeriodRewardForAllUser = periodRewardShares.activeUsersInPeriod.length * claimPeriodRewardParams.maxRewardPerUser;   // min?
+      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
+      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
+      communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
+
+      claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+    }
   }
 
   function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) public view override returns(uint256) {
-    uint256 totalPeriodReward = getTotalPeriodReward(period);
+    (uint256 totalPeriodReward, , ) = getTotalPeriodReward(period);
     uint256 userReward = getUserReward(periodRewardShares, ratingToReward * 1000, totalPeriodReward);
 
     return userReward;

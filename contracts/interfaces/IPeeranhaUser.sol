@@ -27,4 +27,5 @@ interface IPeeranhaUser {
     function getUserRewardCommunities(address user, uint16 rewardPeriod) external view returns(uint32[] memory);
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) external;
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) external;
+    function getUserPeriodCommunityRating(address user, uint16 rewardPeriod, uint32 communityId) external view returns(uint32 rating, uint32 penalty);
 }
