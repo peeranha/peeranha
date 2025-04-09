@@ -28,7 +28,7 @@ describe("Test community token factory", function () {
 			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
 			const communityTokenContract = await getContract(addressLastCreatedContract, "PeeranhaCommunityToken");
-			const communityTokenData = await communityTokenContract.getCommunityTokenData();
+			const communityTokenData = await communityTokenContract.getCommunityTokenRewardData();
 
 			expect(communityTokenData).to.have.ownPropertyDescriptor('name');
 			expect(communityTokenData).to.have.ownPropertyDescriptor('symbol');
@@ -78,7 +78,7 @@ describe("Test community token factory", function () {
 			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
 			await peeranhaTokenFactory.updateCommunityRewardSettings(accountDeployed, 1, addressLastCreatedContract, 20, 2);
 			const communityTokenContract = await getContract(addressLastCreatedContract, "PeeranhaCommunityToken");
-			const communityTokenData = await communityTokenContract.getCommunityTokenData();
+			const communityTokenData = await communityTokenContract.getCommunityTokenRewardData();
 			
 			expect(communityTokenData.name).to.equal(await token.name());
 			expect(communityTokenData.symbol).to.equal(await token.symbol());
@@ -139,7 +139,7 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
@@ -165,7 +165,7 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
@@ -196,7 +196,7 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 			await expect(peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0])).
 				to.be.revertedWith('reward_already_picked_up.');
@@ -226,7 +226,7 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
@@ -255,7 +255,7 @@ describe("Test community token factory", function () {
 			await wait(PeriodTime);
 	
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(signers[0].address);
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
@@ -284,7 +284,7 @@ describe("Test community token factory", function () {
 			await wait(PeriodTime);
 	
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(signers[0].address);
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(rewardPeriods[0]);
+			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);

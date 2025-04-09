@@ -783,7 +783,7 @@ describe("Test dispatcher", function () {
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaTokenFactory.createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20);
 			await wait(PeriodTime * 2);
-			await peeranhaTokenFactory.setReadyToClaimPeriodRewardss(0);
+			await peeranhaTokenFactory.startPeriod(0);
 
 			await expect(peeranhaTokenFactory.connect(signers[3]).claimReward(signers[0].address, 0))
 				.to.be.revertedWith('not_allowed_not_dispatcher');

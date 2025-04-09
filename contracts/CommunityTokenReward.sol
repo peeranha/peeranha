@@ -1,12 +1,13 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./interfaces/ICommunityToken.sol";
+import "./interfaces/ICommunityTokenReward.sol";
 import "./interfaces/ICommunityTokenRewardFactory.sol";
 import "./libraries/CommonLib.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionNonUpgrade.sol";
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 
 // transfer: 
@@ -18,7 +19,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 //    IERC20Upgradeable(tokenAddress).balanceOf(userAddress)
 
 
-contract CommunityToken is ICommunityToken, NativeMetaTransaction {  
+contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNonUpgrade, AccessControl {
 
   // sumAccruedTokens -> free tokens (added - pool)
   // sumSpentTokens -> active tokens tokens (pools - give reward)
@@ -32,11 +33,13 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
     uint256 reservedTokens;
     uint256 createTime;
     address communityTokenRewardFactoryAddress;
+    uint32 communityId;
   }
 
   struct CommunityTokenContainer {
     CommunityTokenInfo info;
     mapping(uint16 => RewardPeriodParams) rewardPeriodParams;    // period
+    IPeeranhaUser peeranhaUser;
   }
 
   struct RewardPeriodParams {
@@ -45,14 +48,16 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
     uint256 availableBalance;
     uint256 totalTokenPool;
 
-    mapping(address => bool) isClaimed;
+    mapping(address => bool) statusReward;
   }
 
   CommunityTokenContainer communityTokenContainer;
 
+  event StartPeriod(uint16 indexed period); 
   event CommunityRewardSettingsUpdated();
+  event ClaimRewards(address indexed userAddress, uint16 indexed period);
 
-  constructor(address tokenAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser, address communityTokenRewardFactoryAddress) {
+  constructor(address tokenAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser, address communityTokenRewardFactoryAddress, uint32 communityId, address peeranhaUserContractAddress) {
     // if address = 0?
     communityTokenContainer.info.tokenAddress = tokenAddress;
     communityTokenContainer.info.name = IERC20Metadata(communityTokenContainer.info.tokenAddress).name();
@@ -61,22 +66,31 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerUser;
     communityTokenContainer.info.createTime = CommonLib.getTimestamp();
     communityTokenContainer.info.communityTokenRewardFactoryAddress = communityTokenRewardFactoryAddress;
+    communityTokenContainer.info.communityId = communityId;
+    communityTokenContainer.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
   }
 
   // This is to support Native meta transactions
   // never use msg.sender directly, use _msgSender() instead
   function _msgSender()
       internal
-      override
+      override(Context, NativeMetaTransactionNonUpgrade)
       view
       returns (address sender)
   {
-    return NativeMetaTransaction._msgSender();
+    return NativeMetaTransactionNonUpgrade._msgSender();
   }
 
-  function updateCommunityRewardSettings(uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override { // check role
-    // dispatcherCheck(userAddress); 
-    
+  function dispatcherCheck(address userAddress) internal {
+    if (userAddress != _msgSender()) {
+      communityTokenContainer.peeranhaUser.onlyDispatcher(_msgSender());
+    }
+  }
+
+  function updateCommunityRewardSettings(address userAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override {
+    dispatcherCheck(userAddress); 
+    communityTokenContainer.peeranhaUser.checkHasRole(_msgSender(), UserLib.ActionRole.CommunityAdmin, communityTokenContainer.info.communityId); // todo tests
+
     communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerUser;
     emit CommunityRewardSettingsUpdated();
@@ -98,7 +112,7 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
   }
 
   // set pool
-  function setReadyToClaimPeriodRewards(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
+  function startNewPeriod(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
     require(_msgSender() == communityTokenContainer.info.communityTokenRewardFactoryAddress, "only_community_token_reward_factory_contract_can_call_this_action");
 
     RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
@@ -116,33 +130,48 @@ contract CommunityToken is ICommunityToken, NativeMetaTransaction {
 
       claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
     }
+
+    emit StartPeriod(period);
   }
 
-  function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) public view override returns(uint256) {
+  function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) public view override returns(uint256) { // public?
     (uint256 totalPeriodReward, , ) = getTotalPeriodReward(period);
     uint256 userReward = getUserReward(periodRewardShares, ratingToReward * 1000, totalPeriodReward);
 
     return userReward;
   }
 
-  function claimReward(RewardLib.PeriodRewardShares memory periodRewardShares, address userAddress, uint32 ratingToReward, uint16 period) external override {
-    uint256 userReward = getUserCommunityReward(periodRewardShares, ratingToReward, period);
+  function claimReward(address userAddress, uint16 period) external override {
+    dispatcherCheck(userAddress);
+    require(!communityTokenContainer.rewardPeriodParams[period].statusReward[userAddress], "reward_already_picked_up.");  // todo tests
+    uint256 totalTokenPool = communityTokenContainer.rewardPeriodParams[period].totalTokenPool;
+    require(totalTokenPool > 0, "pool_not_set");    // todo: tests
 
-    if (userReward > 0) {
-      IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
-      communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
-    }
+    RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityTokenContainer.info.communityId);
+    int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityTokenContainer.info.communityId);
+    uint256 userReward = getUserCommunityReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward), period);
+    require(userReward > 0, "user reward is 0");  // todo tests
+
+    IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
+    communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
+    communityTokenContainer.rewardPeriodParams[period].statusReward[userAddress] = true;
+
+    emit ClaimRewards(userAddress, period);
   }
 
-  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 poolToken) private pure returns(uint256) {
+  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 totalPeriodReward) private pure returns(uint256) {
     if (ratingToReward == 0 || periodRewardShares.totalRewardShares == 0) return 0;
 
-    uint256 userReward = (poolToken * ratingToReward);
+    uint256 userReward = (totalPeriodReward * ratingToReward);
     userReward /= periodRewardShares.totalRewardShares;
     return userReward;
   }
 
-  function getCommunityTokenData() external view override returns (CommunityTokenInfo memory) {
+  function getCommunityTokenRewardData() external view override returns (CommunityTokenInfo memory) {
     return communityTokenContainer.info;
+  }
+
+  function getVersion() public pure returns (uint256) {
+    return 1;
   }
 }
