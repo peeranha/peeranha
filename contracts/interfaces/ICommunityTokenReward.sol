@@ -11,6 +11,5 @@ interface ICommunityTokenReward {
     function startNewPeriod(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external;
     function updateCommunityRewardSettings(address userAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external;
     function getCommunityTokenRewardData() external view returns(CommunityTokenReward.CommunityTokenInfo memory);
-    function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) external view returns(uint256);
     function claimReward(address userAddress, uint16 period) external;
 }

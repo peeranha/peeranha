@@ -108,7 +108,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
   // get pool
   function getTotalPeriodReward(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
     RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
-    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
+    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance); // maxTotalTokenPool or totalTokenPool
   }
 
   // set pool
@@ -134,13 +134,6 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
     emit StartPeriod(period);
   }
 
-  function getUserCommunityReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint16 period) public view override returns(uint256) { // public?
-    (uint256 totalPeriodReward, , ) = getTotalPeriodReward(period);
-    uint256 userReward = getUserReward(periodRewardShares, ratingToReward * 1000, totalPeriodReward);
-
-    return userReward;
-  }
-
   function claimReward(address userAddress, uint16 period) external override {
     dispatcherCheck(userAddress);
     require(!communityTokenContainer.rewardPeriodParams[period].statusReward[userAddress], "reward_already_picked_up.");  // todo tests
@@ -149,7 +142,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
 
     RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityTokenContainer.info.communityId);
     int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityTokenContainer.info.communityId);
-    uint256 userReward = getUserCommunityReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward), period);
+    uint256 userReward = getUserReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward) * 1000, totalTokenPool);
     require(userReward > 0, "user reward is 0");  // todo tests
 
     IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
@@ -159,10 +152,10 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
     emit ClaimRewards(userAddress, period);
   }
 
-  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 totalPeriodReward) private pure returns(uint256) {
+  function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 totalTokenPool) private pure returns(uint256) {
     if (ratingToReward == 0 || periodRewardShares.totalRewardShares == 0) return 0;
 
-    uint256 userReward = (totalPeriodReward * ratingToReward);
+    uint256 userReward = (totalTokenPool * ratingToReward);
     userReward /= periodRewardShares.totalRewardShares;
     return userReward;
   }
