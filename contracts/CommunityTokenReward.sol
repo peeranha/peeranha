@@ -106,9 +106,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
   }
 
   // get pool
-  function getTotalPeriodReward(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
+  function getPeriodRewardPatams(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 totalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
     RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
-    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance); // maxTotalTokenPool or totalTokenPool
+    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.totalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
   }
 
   // set pool
