@@ -144,7 +144,7 @@ contract PeeranhaToken is IPeeranhaToken, ChildMintableERC20Upgradeable, ERC20Ca
     
     require(
       !statusRewardContainer.statusReward[user][period].isPaid,
-      "reward_already_picked_up."
+      "reward_already_claimed."
     );
 
     statusRewardContainer.statusReward[user][period].isPaid = true;

@@ -368,7 +368,7 @@ describe("Test wallet", function () {
 
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			await token.claimReward(signers[0].address, rewardPeriods[0]);
-			await expect(token.claimReward(signers[0].address, rewardPeriods[0])).to.be.revertedWith('reward_already_picked_up.');
+			await expect(token.claimReward(signers[0].address, rewardPeriods[0])).to.be.revertedWith('reward_already_claimed.');
 		});
 
 		///

@@ -664,7 +664,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, achievementsMetadata, userAddr, rating, communityId);
     }*/
 
     // Used for unit tests

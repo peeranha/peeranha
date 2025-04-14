@@ -199,7 +199,7 @@ describe("Test community token factory", function () {
 			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
 			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 			await expect(peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0])).
-				to.be.revertedWith('reward_already_picked_up.');
+				to.be.revertedWith('reward_already_claimed.');
 		});
 
 		it("Test get community reward (not full poll)", async function () {

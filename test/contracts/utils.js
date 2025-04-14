@@ -121,7 +121,7 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
-    const PeeranhaTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
+    const PeeranhaTokenFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
     const peeranhaTokenFactory = await PeeranhaTokenFactory.deploy();
     await peeranhaTokenFactory.deployed();
     await peeranhaTokenFactory.initialize(peeranhaUserContractAddress, peeranhaCommunityContractAddress);

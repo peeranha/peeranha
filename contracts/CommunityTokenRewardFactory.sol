@@ -1,14 +1,12 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./interfaces/ICommunityTokenRewardFactory.sol";
 import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 
 import "./CommunityTokenReward.sol";
-import "./libraries/TokenLib.sol";
 import "./base/NativeMetaTransaction.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
@@ -20,12 +18,11 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 //  period_not_ended
 ///
 
-contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
   struct FactoryData {  // name
     mapping(uint32 => ICommunityTokenReward[]) communitiesTokenReward;  // communityId
     mapping(uint16 => bool) isSetPool;                                      // period
     uint32[] factoryCommunitiesId;    // todo: uinttest 
-    TokenLib.StatusRewardContainer statusRewardContainer;
     IPeeranhaUser peeranhaUser;
     IPeeranhaCommunity peeranhaCommunity;
   }
@@ -59,7 +56,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializa
     factoryData.peeranhaUser.checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0); // todo test
 
     factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddress, communityId);
-    require(factoryData.peeranhaUser.isProtocolAdmin(userAddress), "not_allowed_not_protocal_admin");  // todo test
     factoryData.communitiesTokenReward[communityId].push(new CommunityTokenReward(tokenAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this), communityId, address(factoryData.peeranhaUser)));
     
     bool existingCommunityId;
@@ -88,12 +84,11 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializa
   }
   
   // set pools
-  function startPeriod(uint16 period) external override onlyRole(OWNER_COMMUNITY_TOKEN_FACTORY) {
-    require(RewardLib.getPeriod() > period + 1, "period_not_ended");  // todo: tests
-    require(factoryData.peeranhaUser.isProtocolAdmin(_msgSender()), "not_allowed_not_protocal_admin");  // todo: tests
-
+  function startPeriod() external override onlyRole(OWNER_COMMUNITY_TOKEN_FACTORY) {
+    uint16 period = RewardLib.getPeriod();
     require(!factoryData.isSetPool[period], "pools_already_set");    // todo: tests
     factoryData.isSetPool[period] = true;
+
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
       RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, factoryData.factoryCommunitiesId[i]);
@@ -102,7 +97,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, Initializa
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
         ICommunityTokenReward communityToken = contractsCommunityToken[communityTokenIndex];
         if (address(communityToken) != address(0)) {
-          communityToken.startNewPeriod(periodRewardShares, period);
+          communityToken.startNewPeriod(periodRewardShares.activeUsersInPeriod.length, period);
         }
       }
     }

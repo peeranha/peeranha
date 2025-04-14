@@ -48,17 +48,32 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
     uint256 availableBalance;
     uint256 totalTokenPool;
 
-    mapping(address => bool) statusReward;
+    mapping(address => bool) rewardClaimedByAddress;
   }
 
   CommunityTokenContainer communityTokenContainer;
 
   event StartPeriod(uint16 indexed period); 
-  event CommunityRewardSettingsUpdated();
+  event CommunityRewardSettingsUpdated(address indexed userAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser);
   event ClaimRewards(address indexed userAddress, uint16 indexed period);
 
-  constructor(address tokenAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser, address communityTokenRewardFactoryAddress, uint32 communityId, address peeranhaUserContractAddress) {
-    // if address = 0?
+  constructor(
+    address tokenAddress,
+    uint256 maxRewardPerPeriod,
+    uint256 maxRewardPerUser,
+    address communityTokenRewardFactoryAddress,
+    uint32 communityId,
+    address peeranhaUserContractAddress
+  ) 
+    NativeMetaTransactionNonUpgrade("CommunityTokenReward")
+  {
+    require(communityId > 0, "community_id_is_zero");
+    require(tokenAddress != address(0), "token_address_is_zero"); // test
+    require(IERC20Metadata(tokenAddress).decimals() > 0, "token_address_is_not_erc20");
+    require(IERC20Metadata(tokenAddress).totalSupply() > 0, "token_address_is_not_erc20");
+    // require(maxRewardPerPeriod > 0, "max_reward_per_period_is_zero");
+    // require(maxRewardPerUser > 0, "max_reward_per_user_is_zero");
+
     communityTokenContainer.info.tokenAddress = tokenAddress;
     communityTokenContainer.info.name = IERC20Metadata(communityTokenContainer.info.tokenAddress).name();
     communityTokenContainer.info.symbol = IERC20Metadata(communityTokenContainer.info.tokenAddress).symbol();
@@ -93,7 +108,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
 
     communityTokenContainer.info.maxRewardPerPeriod = maxRewardPerPeriod;
     communityTokenContainer.info.maxRewardPerUser = maxRewardPerUser;
-    emit CommunityRewardSettingsUpdated();
+    emit CommunityRewardSettingsUpdated(userAddress, maxRewardPerPeriod, maxRewardPerUser);
   }
 
   function getAvailableRewardsBalance() public view override returns(uint256) {   // public?
@@ -106,37 +121,40 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
   }
 
   // get pool
-  function getPeriodRewardPatams(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 totalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
+  function getPeriodRewardParams(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 totalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
     RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
     return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.totalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
   }
 
   // set pool
-  function startNewPeriod(RewardLib.PeriodRewardShares memory periodRewardShares, uint16 period) external override {
+  function startNewPeriod(uint256 countActiveUsersInPeriod, uint16 currentPeriod) external override {
     require(_msgSender() == communityTokenContainer.info.communityTokenRewardFactoryAddress, "only_community_token_reward_factory_contract_can_call_this_action");
 
-    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
+    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[currentPeriod];
     rewardPeriodParams.maxTotalTokenPool = communityTokenContainer.info.maxRewardPerPeriod;
     rewardPeriodParams.maxRewardPerUser = communityTokenContainer.info.maxRewardPerUser;
     rewardPeriodParams.availableBalance = getAvailableRewardsBalance();
 
-    RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[period - 2];
-    if (claimPeriodRewardParams.availableBalance > 0) {
-      uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
-      uint256 maxPeriodRewardForAllUser = periodRewardShares.activeUsersInPeriod.length * claimPeriodRewardParams.maxRewardPerUser;   // min?
-      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
-      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
-      communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
+    // ignore for first 2 period && check that the company has started for currentPeriod - 2
+    if (currentPeriod >= 2 && communityTokenContainer.rewardPeriodParams[currentPeriod - 2].availableBalance > 0) {  // todo test
+      RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[currentPeriod - 2];
+      if (claimPeriodRewardParams.availableBalance > 0) {
+        uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
+        uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
+        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
+        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
+        communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
 
-      claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+        claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+      }
     }
 
-    emit StartPeriod(period);
+    emit StartPeriod(currentPeriod);
   }
 
   function claimReward(address userAddress, uint16 period) external override {
     dispatcherCheck(userAddress);
-    require(!communityTokenContainer.rewardPeriodParams[period].statusReward[userAddress], "reward_already_picked_up.");  // todo tests
+    require(!communityTokenContainer.rewardPeriodParams[period].rewardClaimedByAddress[userAddress], "reward_already_claimed.");  // todo tests
     uint256 totalTokenPool = communityTokenContainer.rewardPeriodParams[period].totalTokenPool;
     require(totalTokenPool > 0, "pool_not_set");    // todo: tests
 
@@ -147,7 +165,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
 
     IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
     communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
-    communityTokenContainer.rewardPeriodParams[period].statusReward[userAddress] = true;
+    communityTokenContainer.rewardPeriodParams[period].rewardClaimedByAddress[userAddress] = true;
 
     emit ClaimRewards(userAddress, period);
   }
