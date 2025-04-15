@@ -456,7 +456,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
     }
 
     /**
-     * @dev Get information about user rewards. (Rating to reward and penalty) Need for unitTests
+     * @dev Get information about user rewards. (Rating to reward and penalty)
      *
      * Requirements:
      *

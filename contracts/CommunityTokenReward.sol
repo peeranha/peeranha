@@ -21,8 +21,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, AccessControl {
 
-  // sumAccruedTokens -> free tokens (added - pool)
-  // sumSpentTokens -> active tokens tokens (pools - give reward)
   // reservedTokens - not taked pool
   struct CommunityTokenInfo {
     string name;
@@ -48,7 +46,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     uint256 availableBalance;
     uint256 totalTokenPool;
 
-    mapping(address => bool) rewardClaimedByAddress;
+    mapping(address => bool) isRewardClaimedByAddress;
   }
 
   CommunityTokenContainer communityTokenContainer;
@@ -130,16 +128,20 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     rewardPeriodParams.maxRewardPerUser = communityTokenContainer.info.maxRewardPerUser;
     rewardPeriodParams.availableBalance = getAvailableRewardsBalance();
 
-    // ignore for first 2 period && check that the company has started for the currentPeriod - 2
+    // ignore for first 2 period
     if (currentPeriod >= 2 && communityTokenContainer.rewardPeriodParams[currentPeriod - 2].availableBalance > 0) {  // todo test
-      RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[currentPeriod - 2];
-      uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
-      uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
-      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
-      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
-      communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
 
-      claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+      RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[currentPeriod - 2];
+      // check that the company has started for the currentPeriod - 2
+      if (claimPeriodRewardParams.availableBalance > 0) {
+        uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
+        uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
+        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
+        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
+        communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
+
+        claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+      }
     }
 
     emit StartPeriod(currentPeriod);
@@ -147,7 +149,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
 
   function claimReward(address userAddress, uint16 period) external override {
     dispatcherCheck(userAddress);
-    require(!communityTokenContainer.rewardPeriodParams[period].rewardClaimedByAddress[userAddress], "reward_already_claimed.");  // todo tests
+    require(!communityTokenContainer.rewardPeriodParams[period].isRewardClaimedByAddress[userAddress], "reward_already_claimed.");  // todo tests
     uint256 totalTokenPool = communityTokenContainer.rewardPeriodParams[period].totalTokenPool;
     require(totalTokenPool > 0, "pool_not_set");    // todo: tests
 
@@ -158,7 +160,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
 
     IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
     communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
-    communityTokenContainer.rewardPeriodParams[period].rewardClaimedByAddress[userAddress] = true;
+    communityTokenContainer.rewardPeriodParams[period].isRewardClaimedByAddress[userAddress] = true;
 
     emit ClaimRewards(userAddress, period);
   }

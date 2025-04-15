@@ -11,18 +11,12 @@ import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-///
-// todo: tests
-//  getReward
-//  not_allowed_not_protocal_admin x2
-//  period_not_ended
-///
 
 contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransactionUpgradeable, AccessControlEnumerableUpgradeable {
-  struct FactoryData {  // name
+  struct FactoryData {
     mapping(uint32 => ICommunityTokenReward[]) communitiesTokenReward;  // communityId
-    mapping(uint16 => bool) isSetPool;                                      // period
-    uint32[] factoryCommunitiesId;    // todo: uinttest 
+    mapping(uint16 => bool) isSetPool;  // period
+    uint32[] factoryCommunitiesId;
     IPeeranhaUser peeranhaUser;
     IPeeranhaCommunity peeranhaCommunity;
   }
@@ -122,7 +116,18 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     return factoryData.communitiesTokenReward[communityId];
   }
 
-  // function getUserCommunityReward(address userAddress, uint16 period, uint32 communityId, address communityTokenContractAddress) public view override returns(uint256) {
+  // only for unit tests  // todo: add change-env-value
+  function getAddressLastCreatedContract(uint32 communityId) external view returns(address) {
+    ICommunityTokenReward[] memory contractsCommunityToken = getContractsCommunityToken(communityId);
+    uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
+    return address(contractsCommunityToken[contractsCommunityTokenLength - 1]);
+  }
+
+  function getFactoryCommunitiesId() external view returns(uint32[] memory) {
+    return factoryData.factoryCommunitiesId;
+  }
+
+    // function getUserCommunityReward(address userAddress, uint16 period, uint32 communityId, address communityTokenContractAddress) public view override returns(uint256) {
   //   RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, communityId);
   //   int32 ratingToReward = factoryData.peeranhaUser.getRatingToReward(userAddress, period, communityId);
   //   uint256 userReward = getContractCommunityTokenReward(communityId, communityTokenContractAddress).getUserCommunityReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward), period);
@@ -134,17 +139,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   //   ICommunityTokenReward communityTokenReward = getContractCommunityTokenReward(communityId, communityTokenContractAddress);
   //   return communityTokenReward.getCommunityTokenRewardData();
   // }
-
-  // only for unit tests  // todo: add change-env-value
-  function getAddressLastCreatedContract(uint32 communityId) external view returns(address) {
-    ICommunityTokenReward[] memory contractsCommunityToken = getContractsCommunityToken(communityId);
-    uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
-    return address(contractsCommunityToken[contractsCommunityTokenLength - 1]);
-  }
-
-  function getFactoryCommunitiesId() external view returns(uint32[] memory) {
-    return factoryData.factoryCommunitiesId;
-  }
 
   function getVersion() public pure returns (uint256) {
     return 1;
