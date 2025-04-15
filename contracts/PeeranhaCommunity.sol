@@ -4,13 +4,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/CommunityLib.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "./interfaces/IPeeranhaCommunity.sol";
 import "./interfaces/IPeeranhaUser.sol";
 
 
-contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTransaction {
+contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTransactionUpgradeable {
     using CommunityLib for CommunityLib.CommunityCollection;
     using CommunityLib for CommunityLib.Community;
 
@@ -23,7 +23,7 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     }
     
     function __Peeranha_init() public onlyInitializing {
-        __NativeMetaTransaction_init("PeeranhaCommunity");
+        __NativeMetaTransactionUpgradeable_init("PeeranhaCommunity");
     }
 
     function dispatcherCheck(address user) internal {

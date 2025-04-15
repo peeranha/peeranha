@@ -10,12 +10,12 @@ import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "./interfaces/IPeeranhaUser.sol";
 
 
-contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgradeable, AccessControlEnumerableUpgradeable {
     // TODO: This is still not used
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
@@ -39,7 +39,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function __Peeranha_init() public onlyInitializing {
         __AccessControlEnumerable_init();
         __Peeranha_init_unchained();
-        __NativeMetaTransaction_init("PeeranhaUser");
+        __NativeMetaTransactionUpgradeable_init("PeeranhaUser");
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
@@ -54,12 +54,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
         internal
-        override(ContextUpgradeable, NativeMetaTransaction)
+        override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
         virtual
         view
         returns (address sender)
     {
-        return NativeMetaTransaction._msgSender();
+        return NativeMetaTransactionUpgradeable._msgSender();
     }
 
     function dispatcherCheck(address user) internal view {

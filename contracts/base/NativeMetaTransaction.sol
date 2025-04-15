@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "./EIP712Base.sol";
 
-contract NativeMetaTransaction is EIP712Base, ContextUpgradeable {
+contract NativeMetaTransaction is EIP712Base, Context {
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
         bytes(
             "MetaTransaction(uint256 nonce,address from,bytes functionSignature)"
@@ -28,14 +28,7 @@ contract NativeMetaTransaction is EIP712Base, ContextUpgradeable {
         bytes functionSignature;
     }
 
-    function __NativeMetaTransaction_init(
-        string memory name
-    )
-        internal
-        onlyInitializing
-    {
-        __EIP712_init(name);
-    }
+    constructor(string memory name) EIP712Base(name) {}
 
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead

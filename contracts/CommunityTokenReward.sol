@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./interfaces/ICommunityTokenReward.sol";
 import "./interfaces/ICommunityTokenRewardFactory.sol";
 import "./libraries/CommonLib.sol";
-import "./base/NativeMetaTransactionNonUpgrade.sol";
+import "./base/NativeMetaTransaction.sol";
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 //    IERC20Upgradeable(tokenAddress).balanceOf(userAddress)
 
 
-contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNonUpgrade, AccessControl {
+contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, AccessControl {
 
   // sumAccruedTokens -> free tokens (added - pool)
   // sumSpentTokens -> active tokens tokens (pools - give reward)
@@ -65,14 +65,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
     uint32 communityId,
     address peeranhaUserContractAddress
   ) 
-    NativeMetaTransactionNonUpgrade("CommunityTokenReward")
+    NativeMetaTransaction("CommunityTokenReward")
   {
-    require(communityId > 0, "community_id_is_zero");
     require(tokenAddress != address(0), "token_address_is_zero"); // test
-    require(IERC20Metadata(tokenAddress).decimals() > 0, "token_address_is_not_erc20");
-    require(IERC20Metadata(tokenAddress).totalSupply() > 0, "token_address_is_not_erc20");
-    // require(maxRewardPerPeriod > 0, "max_reward_per_period_is_zero");
-    // require(maxRewardPerUser > 0, "max_reward_per_user_is_zero");
 
     communityTokenContainer.info.tokenAddress = tokenAddress;
     communityTokenContainer.info.name = IERC20Metadata(communityTokenContainer.info.tokenAddress).name();
@@ -89,11 +84,11 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
   // never use msg.sender directly, use _msgSender() instead
   function _msgSender()
       internal
-      override(Context, NativeMetaTransactionNonUpgrade)
+      override(Context, NativeMetaTransaction)
       view
       returns (address sender)
   {
-    return NativeMetaTransactionNonUpgrade._msgSender();
+    return NativeMetaTransaction._msgSender();
   }
 
   function dispatcherCheck(address userAddress) internal {
@@ -135,18 +130,16 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransactionNon
     rewardPeriodParams.maxRewardPerUser = communityTokenContainer.info.maxRewardPerUser;
     rewardPeriodParams.availableBalance = getAvailableRewardsBalance();
 
-    // ignore for first 2 period && check that the company has started for currentPeriod - 2
+    // ignore for first 2 period && check that the company has started for the currentPeriod - 2
     if (currentPeriod >= 2 && communityTokenContainer.rewardPeriodParams[currentPeriod - 2].availableBalance > 0) {  // todo test
       RewardPeriodParams storage claimPeriodRewardParams = communityTokenContainer.rewardPeriodParams[currentPeriod - 2];
-      if (claimPeriodRewardParams.availableBalance > 0) {
-        uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
-        uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
-        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
-        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
-        communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
+      uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
+      uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
+      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
+      totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
+      communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
 
-        claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
-      }
+      claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
     }
 
     emit StartPeriod(currentPeriod);

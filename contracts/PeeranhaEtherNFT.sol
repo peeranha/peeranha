@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 import "./interfaces/IPeeranhaEtherNFT.sol";
 
 contract PeeranhaEtherNFT is
@@ -14,7 +14,7 @@ contract PeeranhaEtherNFT is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     AccessControlUpgradeable,
-    NativeMetaTransaction,
+    NativeMetaTransactionUpgradeable,
     IPeeranhaEtherNFT
 {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
@@ -23,16 +23,16 @@ contract PeeranhaEtherNFT is
         __ERC721_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(PREDICATE_ROLE, predicateProxyAddress);
-        __NativeMetaTransaction_init(name_);
+        __NativeMetaTransactionUpgradeable_init(name_);
     }
 
     function _msgSender()
       internal
-      override(ContextUpgradeable, NativeMetaTransaction)
+      override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
       view
       returns (address sender)
     {
-      return NativeMetaTransaction._msgSender();
+      return NativeMetaTransactionUpgradeable._msgSender();
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable, IERC165Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {

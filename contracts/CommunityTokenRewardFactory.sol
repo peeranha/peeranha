@@ -7,7 +7,7 @@ import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 
 import "./CommunityTokenReward.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
@@ -18,7 +18,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 //  period_not_ended
 ///
 
-contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransactionUpgradeable, AccessControlEnumerableUpgradeable {
   struct FactoryData {  // name
     mapping(uint32 => ICommunityTokenReward[]) communitiesTokenReward;  // communityId
     mapping(uint16 => bool) isSetPool;                                      // period
@@ -76,11 +76,11 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // never use msg.sender directly, use _msgSender() instead
   function _msgSender()
       internal
-      override(ContextUpgradeable, NativeMetaTransaction)
+      override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
       view
       returns (address sender)
   {
-      return NativeMetaTransaction._msgSender();
+      return NativeMetaTransactionUpgradeable._msgSender();
   }
   
   // set pools
