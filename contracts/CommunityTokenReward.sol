@@ -53,7 +53,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
 
   event StartPeriod(uint16 indexed period); 
   event CommunityRewardSettingsUpdated(address indexed userAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser);
-  event ClaimRewards(address indexed userAddress, uint16 indexed period);
+  event ClaimCommunityReward(address indexed userAddress, uint32 indexed communityId, uint16 indexed period);
 
   constructor(
     address tokenAddress,
@@ -114,9 +114,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
   }
 
   // get pool
-  function getPeriodRewardParams(uint16 period) public view returns(uint256 maxTotalTokenPool, uint256 totalTokenPool, uint256 maxTokensPerUser, uint256 balance) {
+  function getPeriodRewardParams(uint16 period) public view returns(uint256 totalTokenPool, uint256 maxTotalTokenPool, uint256 maxTokensPerUser, uint256 availableBalance) {
     RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[period];
-    return (rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.totalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
+    return (rewardPeriodParams.totalTokenPool, rewardPeriodParams.maxTotalTokenPool, rewardPeriodParams.maxRewardPerUser, rewardPeriodParams.availableBalance);
   }
 
   // set pool
@@ -153,8 +153,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     uint256 totalTokenPool = communityTokenContainer.rewardPeriodParams[period].totalTokenPool;
     require(totalTokenPool > 0, "pool_not_set");    // todo: tests
 
-    RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityTokenContainer.info.communityId);
-    int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityTokenContainer.info.communityId);
+    uint32 communityId = communityTokenContainer.info.communityId;
+    RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityId);
+    int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityId);
     uint256 userReward = getUserReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward) * 1000, totalTokenPool);
     require(userReward > 0, "user reward is 0");  // todo tests
 
@@ -162,7 +163,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
     communityTokenContainer.rewardPeriodParams[period].isRewardClaimedByAddress[userAddress] = true;
 
-    emit ClaimRewards(userAddress, period);
+    emit ClaimCommunityReward(userAddress, communityId, period);
   }
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 totalTokenPool) private pure returns(uint256) {

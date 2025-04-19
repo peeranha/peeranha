@@ -152,13 +152,6 @@ library UserLib {
     AdminOrCommunityAdminOrCommunityModerator
   }
 
-  struct UpdateRatingEvent {
-    address userAddress;
-    uint32 communityId;
-    uint16 currentPeriod;
-    uint16 previousPeriod;
-  }
-
   event UserCreated(address indexed userAddress);
   event UserUpdated(address indexed userAddress);
   event FollowedCommunity(address indexed userAddress, uint32 indexed communityId);
@@ -167,7 +160,7 @@ library UserLib {
   event UnBanUser(address indexed userAddress, address indexed targetUserAddress);
   event BanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
   event UnBanCommunityUser(address indexed userAddress, address indexed targetUserAddress, uint32 indexed communityId);
-  event UpdateUserRating(address indexed userAddress, uint32 indexed communityId, uint16 currentPeriod, uint16 previousPeriod);
+  event UpdateUserRating(address indexed userAddress, uint32 indexed communityId, int32 changeRating, uint16 currentPeriod, uint16 previousPeriod);
 
   /// @notice Create new user info record
   /// @param self The mapping containing all users
@@ -473,7 +466,7 @@ library UserLib {
       AchievementLib.updateUserAchievements(userContext.achievementsContainer, achievementsMetadata, userAddr, newArray, int64(userCommunityRating.userRating[communityId].rating), communityId);
     }
 
-    emit UpdateUserRating(userAddr, communityId, currentPeriod, previousPeriod);
+    emit UpdateUserRating(userAddr, communityId, rating, currentPeriod, previousPeriod);
   }
 
   function updateUserPeriodRating(
