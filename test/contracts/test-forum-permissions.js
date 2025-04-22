@@ -4,7 +4,8 @@ const {
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
-    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, DefaultCommunityId, PROTOCOL_ADMIN_ROLE, BOT_ROLE, LanguagesEnum
+    AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment, DefaultCommunityId,
+    LanguagesEnum, PROTOCOL_ADMIN_ROLE, BOT_ROLE, VERIFIED_ROLE, VERIFIER_ROLE
 } = require('./utils');
 
 ///
@@ -1640,6 +1641,79 @@ describe("Test permissions", function () {
 			expect((await peeranhaContent.getComment(1, 1, 1)).isDeleted).to.be.true;
 			expect(userRating).to.be.equal(userOldRating + ModeratorDeleteComment + ModeratorDeleteComment);
 			expect(adminRating).to.be.equal(adminOldRating);
+        });
+    });
+
+    // TODO: test for init permissions
+    
+
+    describe("Verified role", function () {
+        let peeranhaUser, peeranhaContent, peeranhaCommunity, signers, hashContainer, ipfsHashes;
+
+        beforeEach(async function () {
+            const contracts = await createPeerenhaAndTokenContract();
+            peeranhaUser = contracts.peeranhaUser;
+            peeranhaContent = contracts.peeranhaContent;
+            peeranhaCommunity = contracts.peeranhaCommunity;
+            signers = await ethers.getSigners();
+            hashContainer = getHashContainer();
+            ipfsHashes = getHashesContainer(1);
+
+            await peeranhaUser.setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
+            await peeranhaUser.setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
+        });
+
+        it("Test common user granting VERIFIED_ROLE or VERIFIER_ROLE", async function () {    
+            await expect(peeranhaUser.connect(signers[1]).grantRole(VERIFIED_ROLE, signers[2].address))
+                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0ce23c3e399818cfee81a7ab0880f714e53d7672b08df0fa62f2843416e1ea09");
+            await expect(peeranhaUser.connect(signers[1]).grantRole(VERIFIER_ROLE, signers[2].address))
+                .to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0xd0c934f24ef5a377dc3832429ce607cbe940a3ca3c6cd7e532bd35b4b212d196");
+        });
+    
+        it("Test admin granting VERIFIER_ROLE", async function () {    
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
+            const hasRole = await peeranhaUser.hasRole(VERIFIER_ROLE, signers[1].address);
+            expect(hasRole).to.be.true;
+        });
+    
+        it("Test admin granting VERIFIED_ROLE", async function () {   
+            await expect(peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address))
+                .to.be.revertedWith("AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x0ce23c3e399818cfee81a7ab0880f714e53d7672b08df0fa62f2843416e1ea09");
+        });
+    
+        it("Test VERIFIER_ROLE user granting VERIFIED_ROLE", async function () {    
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
+            await peeranhaUser.connect(signers[1]).grantRole(VERIFIED_ROLE, signers[2].address);
+            const hasRole = await peeranhaUser.hasRole(VERIFIED_ROLE, signers[2].address);
+            expect(hasRole).to.be.true;
+        });
+    
+        it("Test common user or VERIFIER_ROLE user creating a post", async function () {
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+            await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+    
+            await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+            await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+    
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
+    
+            await expect(peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [], LanguagesEnum.English))
+                .to.be.revertedWith("user_not_verified");
+        });
+    
+        it("Test VERIFIED_ROLE user creating a post", async function () {
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+            await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+
+            await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+            await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+    
+            await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1].address);
+            await peeranhaUser.connect(signers[1]).grantRole(VERIFIED_ROLE, signers[2].address);
+    
+            await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
+            const post = await peeranhaContent.getPost(1);
+            expect(post.author).to.equal(signers[2].address);
         });
     });
 });

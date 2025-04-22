@@ -27,6 +27,9 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
+    bytes32 public constant VERIFIER_ROLE = bytes32(keccak256("VERIFIER_ROLE"));
+    bytes32 public constant VERIFIED_ROLE = bytes32(keccak256("VERIFIED_ROLE"));
+
     UserLib.UserContext userContext;
     AchievementLib.AchievementsMetadata achievementsMetadata;
     UserLib.BannedUsers bannedUsers;
@@ -536,8 +539,14 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         return userContext.userRatingCollection.communityRatingForUser[userAddr].rewardPeriods;
     }
 
+    function checkUserVerified(address actionCaller) public override view {
+        bool isVerified = hasRole(VERIFIED_ROLE, actionCaller);
+        require(isVerified, "user_not_verified");
+    }
+
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
+        checkUserVerified(actionCaller);
         (bool isHasRole, string memory message) = isHasRoles(actionCaller, actionRole, communityId);
         require(isHasRole, message);
     }
