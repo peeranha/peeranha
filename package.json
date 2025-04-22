@@ -31,6 +31,7 @@
     "prepare:staging-edgeware": "cp env-staging-edgeware.json env.json",
     "deploy:local": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network local scripts/deploy.js && node scripts/change-env-values.js 0",
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/deploy.js && node scripts/change-env-values.js 0",
+    "deploy-factory:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/deployFactory.js && node scripts/change-env-values.js 0",
     "deploy:test-edgeware": "cp env-test-edgeware.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network edgeware scripts/deploy.js && node scripts/change-env-values.js 0",
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network amoy scripts/deploy.js && node scripts/change-env-values.js 0",
     "deploy:staging-edgeware": "cp env-staging-edgeware.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network edgeware scripts/deploy.js && node scripts/change-env-values.js 0",

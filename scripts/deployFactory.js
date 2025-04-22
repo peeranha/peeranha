@@ -1,10 +1,11 @@
 const { ethers, upgrades } = require("hardhat");
+const { USER_ADDRESS, COMMUNITY_ADDRESS } = require('../env.json');
 
 async function main() {
-  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
-  console.log("Deploying PeeranhaCommunityTokenFactory...");
-  const peeranhaCommunityTokenFactory = await upgrades.deployProxy(PeeranhaCommunityTokenFactory, [], {timeout: 0});
-  console.log("Peeranha Community Token Factory deployed to:", peeranhaCommunityTokenFactory.address);
+  const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
+  console.log("Deploying CommunityTokenRewardFactory...");
+  const communityTokenRewardFactory = await upgrades.deployProxy(CommunityTokenRewardFactory, [USER_ADDRESS, COMMUNITY_ADDRESS], {timeout: 0});
+  console.log("communityTokenRewardFactory deployed to:", communityTokenRewardFactory.address);
 }
 
 main()

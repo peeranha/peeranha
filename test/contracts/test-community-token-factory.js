@@ -19,14 +19,14 @@ describe("Test community token factory", function () {
 	describe("Community token", function () {
 
 		it("Test create community token", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			const communityTokenContract = await getContract(addressLastCreatedContract, "PeeranhaCommunityToken");
 			const communityTokenData = await communityTokenContract.getCommunityTokenRewardData();
 
@@ -46,37 +46,37 @@ describe("Test community token factory", function () {
 			expect(communityTokenData.maxRewardPerUser).to.equal(5);
 			expect(communityTokenData.reservedTokens).to.equal(0);
 			// expect(communityTokenData.createTime).to.equal();
-			expect(communityTokenData.peeranhaCommunityTokenFactoryAddress).to.equal(peeranhaTokenFactory.address);
+			expect(communityTokenData.peeranhaCommunityTokenFactoryAddress).to.equal(communityTokenRewardFactory.address);
 		});
 
 		it("Test create community token (community does not exist)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
-			await expect(peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20)).to.be.revertedWith('Community does not exist');
+			await expect(communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20)).to.be.revertedWith('Community does not exist');
 		});
 
 		it("Test create community token", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(accountDeployed, 1);
 
-			await expect(peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20)).to.be.revertedWith('Community is frozen');
+			await expect(communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20)).to.be.revertedWith('Community is frozen');
 		});
 
 		it("Test edit community token", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
-			await peeranhaTokenFactory.updateCommunityRewardSettings(accountDeployed, 1, addressLastCreatedContract, 20, 2);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
+			await communityTokenRewardFactory.updateCommunityRewardSettings(accountDeployed, 1, addressLastCreatedContract, 20, 2);
 			const communityTokenContract = await getContract(addressLastCreatedContract, "PeeranhaCommunityToken");
 			const communityTokenData = await communityTokenContract.getCommunityTokenRewardData();
 			
@@ -88,46 +88,46 @@ describe("Test community token factory", function () {
 			expect(communityTokenData.maxRewardPerUser).to.equal(10);
 			expect(communityTokenData.reservedTokens).to.equal(0);
 			// expect(communityContract.createTime).to.equal();
-			expect(communityTokenData.peeranhaCommunityTokenFactoryAddress).to.equal(peeranhaTokenFactory.address);
+			expect(communityTokenData.peeranhaCommunityTokenFactoryAddress).to.equal(communityTokenRewardFactory.address);
 		});
 
 		it("Test edit not exist community token", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
-			await expect(peeranhaTokenFactory.updateCommunityRewardSettings(accountDeployed, 1, peeranhaCommunity.address, 20, 2)).to.be.revertedWith('Community_token_contract_not_exist');
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await expect(communityTokenRewardFactory.updateCommunityRewardSettings(accountDeployed, 1, peeranhaCommunity.address, 20, 2)).to.be.revertedWith('Community_token_contract_not_exist');
 		});
 
 		it("Test edit community token (community dont has any community tokens)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 
-			await expect(peeranhaTokenFactory.updateCommunityRewardSettings(accountDeployed, 1, peeranhaCommunity.address, 20, 2)).to.be.revertedWith('Token_communityId_not_exist');
+			await expect(communityTokenRewardFactory.updateCommunityRewardSettings(accountDeployed, 1, peeranhaCommunity.address, 20, 2)).to.be.revertedWith('Token_communityId_not_exist');
 		});
 	});
 
 	describe("Get community reward", function () {
 
 		it("Test get community reward", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 			
 			const ownerMintTokens = parseEther("10");
 			await token.mint(ownerMintTokens);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			await token.transfer(addressLastCreatedContract, parseEther("10"));
 	
 			await peeranhaUser.addUserRating(signers[1].address, 5, 1);
@@ -139,22 +139,22 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
 			expect(balance).to.equal(5 * fraction);
 		});
 
 		it("Test get community reward (empty pool)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 
 			await peeranhaUser.addUserRating(signers[1].address, 5, 1);
 			await wait(PeriodTime);
@@ -165,26 +165,26 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
 			expect(balance).to.equal(0);
 		});
 
 		it("Test double get community reward", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 
 			const ownerMintTokens = parseEther("10");
 			await token.mint(ownerMintTokens);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			await token.transfer(addressLastCreatedContract, parseEther("10"));
 
 			await peeranhaUser.addUserRating(signers[1].address, 5, 1);
@@ -196,25 +196,25 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
-			await expect(peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0])).
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await expect(communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0])).
 				to.be.revertedWith('reward_already_claimed.');
 		});
 
 		it("Test get community reward (not full poll)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 			
 			const ownerMintTokens = parseEther("10");
 			await token.mint(ownerMintTokens);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			await token.transfer(addressLastCreatedContract, parseEther("1.2"));
 	
 			await peeranhaUser.addUserRating(signers[1].address, 5, 1);
@@ -226,8 +226,8 @@ describe("Test community token factory", function () {
 			const ratingToReward = await peeranhaUser.getRatingToReward(signers[1].address, rewardPeriods[0], 1);
 			expect(ratingToReward).to.equal(5);
 	
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
 			// console.log(fraction * 1.1) why 1100000000000000100 ??? 
@@ -235,18 +235,18 @@ describe("Test community token factory", function () {
 		});
 
 		it("Test get community reward (no active user)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
 			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 			
 			const ownerMintTokens = parseEther("10");
 			await token.mint(ownerMintTokens);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			await token.transfer(addressLastCreatedContract, parseEther("10"));
 	
 			await peeranhaUser.addUserRating(signers[0].address, 5, 1);
@@ -255,15 +255,15 @@ describe("Test community token factory", function () {
 			await wait(PeriodTime);
 	
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(signers[0].address);
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
 			expect(balance).to.equal(0);
 		});
 
 		it("Test get community reward (active in another community)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, communityTokenRewardFactory, accountDeployed } = await createPeerenhaAndTokenContract();
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			const signers = await ethers.getSigners();
@@ -271,11 +271,11 @@ describe("Test community token factory", function () {
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
-			await peeranhaTokenFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
+			await communityTokenRewardFactory.createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20);
 			
 			const ownerMintTokens = parseEther("10");
 			await token.mint(ownerMintTokens);
-			const addressLastCreatedContract = await peeranhaTokenFactory.getAddressLastCreatedContract(1)
+			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			await token.transfer(addressLastCreatedContract, parseEther("10"));
 	
 			await peeranhaUser.addUserRating(signers[0].address, 5, 2);
@@ -284,8 +284,8 @@ describe("Test community token factory", function () {
 			await wait(PeriodTime);
 	
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(signers[0].address);
-			await peeranhaTokenFactory.startPeriod(rewardPeriods[0]);
-			await peeranhaTokenFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
+			await communityTokenRewardFactory.startPeriod(rewardPeriods[0]);
+			await communityTokenRewardFactory.connect(signers[1]).claimRewards(signers[1].address, rewardPeriods[0]);
 	
 			const balance = await getBalance(token, signers[1].address);
 			expect(balance).to.equal(0);

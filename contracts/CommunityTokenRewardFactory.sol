@@ -26,7 +26,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   FactoryData factoryData;
 
   event CommunityTokenCreated(address indexed communityTokenContractAddress, uint32 indexed communityId);
-  event StartPeriodFactory(uint16 indexed period); 
+  event FactoryPeriodStarted(uint16 indexed period); 
 
   function initialize(address peeranhaUserContractAddress, address peeranhaCommunityContractAddress) public initializer {
     factoryData.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
@@ -96,7 +96,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
       }
     }
 
-    emit StartPeriodFactory(period);
+    emit FactoryPeriodStarted(period);
   }
 
 

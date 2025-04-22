@@ -10,15 +10,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 
-// transfer: 
-//    payable(userAddress).transfer(amount);
-//    IERC20Upgradeable(tokenAddress).transfer(userAddress, 2);
-//
-// balace:
-//    userAddress.balance
-//    IERC20Upgradeable(tokenAddress).balanceOf(userAddress)
-
-
 contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, AccessControl {
 
   // reservedTokens - not taked pool
@@ -51,9 +42,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
 
   CommunityTokenContainer communityTokenContainer;
 
-  event StartPeriod(uint16 indexed period); 
+  event PeriodStarted(uint16 indexed period); 
   event CommunityRewardSettingsUpdated(address indexed userAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser);
-  event ClaimCommunityReward(address indexed userAddress, uint32 indexed communityId, uint16 indexed period);
+  event RewardClaimed(address indexed userAddress, uint32 indexed communityId, uint16 indexed period);
 
   constructor(
     address tokenAddress,
@@ -144,7 +135,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
       }
     }
 
-    emit StartPeriod(currentPeriod);
+    emit PeriodStarted(currentPeriod);
   }
 
   function claimReward(address userAddress, uint16 period) external override {
@@ -163,7 +154,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     communityTokenContainer.info.reservedTokens -= userReward;   // todo: tests
     communityTokenContainer.rewardPeriodParams[period].isRewardClaimedByAddress[userAddress] = true;
 
-    emit ClaimCommunityReward(userAddress, communityId, period);
+    emit RewardClaimed(userAddress, communityId, period);
   }
 
   function getUserReward(RewardLib.PeriodRewardShares memory periodRewardShares, uint32 ratingToReward, uint256 totalTokenPool) private pure returns(uint256) {

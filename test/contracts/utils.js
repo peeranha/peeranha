@@ -121,10 +121,10 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
-    const PeeranhaTokenFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
-    const peeranhaTokenFactory = await PeeranhaTokenFactory.deploy();
-    await peeranhaTokenFactory.deployed();
-    await peeranhaTokenFactory.initialize(peeranhaUserContractAddress, peeranhaCommunityContractAddress);
+    const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
+    const communityTokenRewardFactory = await CommunityTokenRewardFactory.deploy();
+    await communityTokenRewardFactory.deployed();
+    await communityTokenRewardFactory.initialize(peeranhaUserContractAddress, peeranhaCommunityContractAddress);
 
     const PostLib = await ethers.getContractFactory("PostLib")
     const postLib = await PostLib.deploy();
@@ -156,7 +156,7 @@ const createPeerenhaAndTokenContract = async function () {
         peeranhaCommunity: peeranhaCommunity,
         token: token,
         peeranhaNFT: peeranhaNFT,
-        peeranhaTokenFactory: peeranhaTokenFactory,
+        communityTokenRewardFactory: communityTokenRewardFactory,
         accountDeployed: peeranhaContent.deployTransaction.from,
     }
 };
