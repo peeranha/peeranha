@@ -432,6 +432,8 @@ const ModeratorDeleteComment = -1;
 const PROTOCOL_ADMIN_ROLE = ethers.utils.id("PROTOCOL_ADMIN_ROLE");
 const BOT_ROLE = ethers.utils.id("BOT_ROLE");
 const DISPATCHER_ROLE = ethers.utils.id("DISPATCHER_ROLE");
+const VERIFIER_ROLE = ethers.utils.id("VERIFIER_ROLE");
+const VERIFIED_ROLE = ethers.utils.id("VERIFIED_ROLE");
 
 const TRANSACTION_DELAY = 3000;
 
@@ -447,5 +449,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, VERIFIER_ROLE, VERIFIED_ROLE, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
 };
