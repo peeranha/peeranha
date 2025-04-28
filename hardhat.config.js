@@ -66,10 +66,11 @@ module.exports = {
       gasPrice: 10000000000
     },
     sepolia: {
-      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://sepolia.base.org`,
       accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 84532,
       gas: 2100000,
-      gasPrice: 10000000000
+      gasPrice: 30000000
     },
     local: {
       url: `http://localhost:8545`,
