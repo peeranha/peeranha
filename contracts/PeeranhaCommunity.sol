@@ -199,6 +199,6 @@ contract PeeranhaCommunity is IPeeranhaCommunity, Initializable, NativeMetaTrans
     }
 
     function getVersion() public pure returns (uint256) {
-        return 100;
+        return 41;
     }
 }
