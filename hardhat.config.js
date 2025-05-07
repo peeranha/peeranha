@@ -42,7 +42,7 @@ module.exports = {
     amoy: {
       url: `https://rpc-amoy.polygon.technology/`,
       accounts: [ADMIN_PRIVATE_KEY],
-      gas: 2100000,
+      gas: 4100000,
       gasPrice: 30000000000
     },
     goerli: {

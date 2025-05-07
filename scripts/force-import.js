@@ -1,6 +1,6 @@
 
 const { ethers, upgrades } = require("hardhat");
-const { USER_ADDRESS, COMMUNITY_ADDRESS, CONTENT_ADDRESS, NFT_ADDRESS, TOKEN_ADDRESS, USERLIB_ADDRESS, POSTLIB_ADDRESS } = require('../env.json');
+const { USER_ADDRESS, COMMUNITY_ADDRESS, CONTENT_ADDRESS, NFT_ADDRESS, TOKEN_ADDRESS, COMMUNITY_TOKEN_FACTORY_ADDRESS, USERLIB_ADDRESS, POSTLIB_ADDRESS } = require('../env.json');
 
 async function main() {
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
@@ -16,6 +16,7 @@ async function main() {
   });
   const PeeranhaNFT = await ethers.getContractFactory("PeeranhaNFT");
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaToken");
+  // const CommunityTokenFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
 
   console.log(`USER_ADDRESS: ${USER_ADDRESS}`);
   console.log('Starting force import for Peeranah User...')
@@ -33,6 +34,9 @@ async function main() {
   console.log('Starting force import for Peeranah Token...')
   const peeranhaToken = await upgrades.forceImport(TOKEN_ADDRESS, PeeranhaToken, {timeout: 0});
   console.log('Force import ended.')
+  // console.log('Starting force import for Community token factory...')
+  // const communityTokenFactory = await upgrades.forceImport(COMMUNITY_TOKEN_FACTORY_ADDRESS, CommunityTokenFactory, {timeout: 0});
+  // console.log('Force import ended.')
 }
 
 

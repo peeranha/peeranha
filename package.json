@@ -32,6 +32,7 @@
     "prepare:staging-edgeware": "cp env-staging-edgeware.json env.json",
     "deploy:local": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network local scripts/deploy.js || node scripts/change-env-values.js 0",
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/deploy.js || node scripts/change-env-values.js 0",
+    "deploy-token-factory:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/deploy-community-token-factory.js || node scripts/change-env-values.js 0",
     "deploy:test-edgeware": "cp env-test-edgeware.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network edgeware scripts/deploy.js || node scripts/change-env-values.js 0",
     "deploy:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network amoy scripts/deploy.js || node scripts/change-env-values.js 0",
     "deploy:staging-edgeware": "cp env-staging-edgeware.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network edgeware scripts/deploy.js || node scripts/change-env-values.js 0",
@@ -39,6 +40,7 @@
     "deploy:prod-edgeware": "cp env-prod-edgeware.json env.json || node scripts/change-env-values.js 0 && npx hardhat run --network edgeware scripts/deploy.js",
     "deploy-ether:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network goerli scripts/deployEther.js || node scripts/change-env-values.js 0",
     "upgrade:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/upgrade.js || node scripts/change-env-values.js 0",
+    "upgrade-community-token-factory:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/upgrade-community-token-factory.js || node scripts/change-env-values.js 0",
     "upgrade:test-edgeware": "cp env-test-edgeware.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network edgeware scripts/upgrade.js || node scripts/change-env-values.js 0",
     "upgrade:test2": "cp env-test2.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/upgrade.js || node scripts/change-env-values.js 0",
     "upgrade-user:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/upgrade-user.js || node scripts/change-env-values.js 0",
@@ -106,6 +108,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
+    "abi-decoder": "^2.4.0",
     "node-fetch": "^2.7.0"
   }
 }

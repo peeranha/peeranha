@@ -11,14 +11,14 @@ const {
   USERLIB_ADDRESS,
   COMMUNITY_ADDRESS,
   CONTENT_ADDRESS,
-  TOKEN_FACTORY_ADDRESS,
+  COMMUNITY_TOKEN_FACTORY_ADDRESS,
   API_ENDPOINT,
   INFURA_API_KEY,
 } = require("../env.json");
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, OWNER_COMMUNITY_TOKEN_FACTORY } = require("../test/contracts/utils");
 const abiDecoder = require('abi-decoder'); // eslint-disable-line import/no-extraneous-dependencies
 const abi = require('../../peeranha-subgraph/abis/PeeranhaContent.json');
 
@@ -140,42 +140,55 @@ async function decodeData(transactionHash) {
   console.log();
 }
 
+async function decodeLog(logs) {
+  // const receipt = await promisify(web3.eth.getTransactionReceipt)(txHash);
+  // const logs = _.compact(ABIDecoder.decodeLogs(receipt.logs));
+  // console.log(`transactionHash ${transactionHash}`)
+  abiDecoder.addABI(abi);
+
+  // const tx = await ethers.provider.getTransactionReceipt("0x545e5abf40eb13b3ea51dea2aaf80eea7a724e7989884ea4f89498369ba965b9");
+  // console.log(tx.logs);
+
+  const decodedData = abiDecoder.decodeLogs(logs);
+  console.log(JSON.stringify(decodedData));
+}
+
 async function getError() {
-  const tx = await ethers.provider.getTransaction("0x174f99fea2fe14a3e8372a3271850477e28789dc5151f29044db70b9ca933bbf");
-  // const tx = await ethers.provider.getTransactionReceipt("0x2523840a7c454c71adabe80e7539de16a6bf6b4a1fe3164255330a584fc7b563");
+  // const tx = await ethers.provider.getTransaction("0x0317e19334c75dd31b4782e6d6cca45af056b94d352e1629a49a5e2fd6ab7561");
+  const tx = await ethers.provider.getTransactionReceipt("0x2523840a7c454c71adabe80e7539de16a6bf6b4a1fe3164255330a584fc7b563");
   console.log(tx);
 
-  // const unsignedTx = {
-  //     to: tx.to,
-  //     nonce: tx.nonce,
-  //     gasLimit: tx.gasLimit,
-  //     gasPrice: tx.gasPrice,
-  //     data: tx.data,
-  //     value: tx.value,
-  //     chainId: tx.chainId
-  // };
-  // const signature = {
-  //     v: tx.v,
-  //     r: tx.r,
-  //     s: tx.s
-  // }
+  const unsignedTx = {
+      to: tx.to,
+      nonce: tx.nonce,
+      gasLimit: tx.gasLimit,
+      gasPrice: tx.gasPrice,
+      data: tx.data,
+      value: tx.value,
+      chainId: tx.chainId
+  };
+  const signature = {
+      v: tx.v,
+      r: tx.r,
+      s: tx.s
+  }
 
-  // const raw = ethers.utils.serializeTransaction(unsignedTx, signature);
-  // console.log(raw);
+  const raw = ethers.utils.serializeTransaction(unsignedTx, signature);
+  console.log(raw);
 
-  // const txLog = ethers.utils.parseTransaction(raw)
-  // console.log(txLog);
+  const txLog = ethers.utils.parseTransaction(raw)
+  console.log(txLog);
 
 }
 
 async function main() {
   // await getOptimisticData("0xf488cafb971f94c0b45de6abf8c7968c6f1a2506e9a9a806fc9bea826827802d");
   // await getError()
-  // await decodeData('0x403869bfc17d33e2292c3eeb6e7b83ff5957c5d6802fc3e7eb00844246e26d5e');
-  // await decodeData('0x910ca38dc611cbd003e5240f0fb3d11bb1345cdfe6d6cc41b30bf9bdf90a7ea5');
-  // await decodeData('0xcffe3ffa01eb5dfe6757f1834fdd55373ceac3250e8f567f1932f8b7b7f72105');
+  // await decodeData('0xb48bb10922eecaf23c730f614032392b659fb17128a6958ba71ed82c7386dc2a');
+  // await decodeLog('0xb48bb10922eecaf23c730f614032392b659fb17128a6958ba71ed82c7386dc2a');
   await contentFunctions();
-  await communityTokenFunctions();
+  // await communityTokenFactoryFunctions();
+  // await communityTokenFunctions();
   // await userFunctions();
   // await communityFunctions();
 }
@@ -187,6 +200,7 @@ async function userFunctions() {
 			UserLib: USERLIB_ADDRESS,
 		}
 	});
+  console.log(`USER_ADDRESS ${USER_ADDRESS}`)
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
   // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
@@ -194,15 +208,21 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.updateUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.addUserRating("0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 100, 2);
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
+  
+  // const txObj = await peeranhaUser.hasRole(OWNER_COMMUNITY_TOKEN_FACTORY, signers[0].address);
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x31339c62c0a44b875297945edb93d88092b5fa91")
   // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x570895fd1f7d529606e495885f6eaf1924baa08e");
-  // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499")
+  // const txObj = await peeranhaUser.grantRole(OWNER_COMMUNITY_TOKEN_FACTORY, "0x31339c62C0A44b875297945edb93D88092b5fa91");
+  // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
+  // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
+  // const txObj = await peeranhaUser.getRoleAdmin(OWNER_COMMUNITY_TOKEN_FACTORY);
+
   // const txObj = await peeranhaUser.followCommunity(signers[0].address, 1);
   // const txObj = await peeranhaUser.unfollowCommunity(signers[0].address, 1);
   // const txObj = await peeranhaUser.banCommunityUser(signers[0].address, "0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 2);
-  const txObj = await peeranhaUser.unBanCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
+  // const txObj = await peeranhaUser.unBanCommunityUser(signers[0].address, "0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
   // const txObj = await peeranhaUser.isBanedUser("0x48086ef90c4a9E86BbFF12d02d447929A6fa824B", 2);
   // const txObj = await peeranhaUser.isProtocolAdmin("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.getUserRatingCollection("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499", 2);
@@ -234,11 +254,15 @@ async function communityFunctions() {
   console.log('Transaction confirmed');
 }
 
-async function tokenFactoryFunctions() {
-  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityTokenFactory");
-  const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(TOKEN_FACTORY_ADDRESS);
+async function communityTokenFactoryFunctions() {
+  const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
+  const communityTokenRewardFactory = await CommunityTokenRewardFactory.attach("0xed0bFfdaF4037c88F97029886503a1C361f6cFBb");
+  const signers = await ethers.getSigners();
 
-  const txObj = await peeranhaCommunityTokenFactory.createNewCommunityTokenReward(1, TOKEN_ADDRESS, 200, 5);
+  // const txObj = await communityTokenRewardFactory.createNewCommunityTokenReward(signers[0].address, 4, "0x0000000000000000000000000000000000001010", 200, 5);
+  const txObj = await communityTokenRewardFactory.startPeriod();
+  // const txObj = await communityTokenRewardFactory.getFactoryCommunitiesId();
+  // const txObj = await communityTokenRewardFactory.getAddressLastCreatedContract(1);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
@@ -247,16 +271,29 @@ async function tokenFactoryFunctions() {
 }
 
 async function communityTokenFunctions() {
-  const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityToken");
-  const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(/* community token address */);
+  const CommunityTokenReward = await ethers.getContractFactory("CommunityTokenReward");
+  const communityTokenReward = await CommunityTokenReward.attach("0x7eC902Ff10323c99609AE375080981E410A6cE7B");
+  const signers = await ethers.getSigners();
 
-  const txObj = await peeranhaCommunityTokenFactory.addBalance(200);
+  const txObj = await communityTokenReward.getCommunityTokenRewardData();
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`);
   await txObj.wait();
   console.log('Transaction confirmed');
 }
+
+// async function communityTokenFunctions() {
+//   const PeeranhaCommunityTokenFactory = await ethers.getContractFactory("PeeranhaCommunityToken");
+//   const peeranhaCommunityTokenFactory = await PeeranhaCommunityTokenFactory.attach(/* community token address */);
+
+//   const txObj = await peeranhaCommunityTokenFactory.addBalance(200);
+
+//   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
+//   console.log(`Waiting for transaction confirmation`);
+//   await txObj.wait();
+//   console.log('Transaction confirmed');
+// }
 
 async function contentFunctions() {
   const PeeranhaContent = await ethers.getContractFactory("PeeranhaContent", {
@@ -275,7 +312,7 @@ async function contentFunctions() {
 
   // const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1,3], Language.English);
   // const txObj = await peeranhaContent.editPost(signers[0].address, 336, await getBytes32FromData(testPost), [4,3], 2, PostTypeEnum.CommonPost, Language.English);
-  const txObj = await peeranhaContent.createReply(signers[0].address, 600, 0, await getBytes32FromData(testReply), false, Language.Chinese);
+  // const txObj = await peeranhaContent.createReply(signers[0].address, 650, 0, await getBytes32FromData(testReply), false, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
   // const txObj = await peeranhaContent.createComment(signers[0].address, 315, 0, await getBytes32FromData(testComment), Language.English);
   // const txObj = await peeranhaContent.editComment(signers[0].address, 2, 1, 1, await getBytes32FromData(testComment), Language.English)
@@ -284,10 +321,12 @@ async function contentFunctions() {
   // const txObj = await peeranhaContent.editTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
   // const txObj = await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [Language.English]);
   // const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
+  const txObj = await peeranhaContent.voteItem(signers[0].address, 650, 0, 0, false);
   // const txObj = await peeranhaContent.getVersion();
 
-  // const txObj = await peeranhaContent.getPost(485);
-  // const txObj = await peeranhaContent.getReply(594, 3);
+
+  // const txObj = await peeranhaContent.getPost(650);
+  // const txObj = await peeranhaContent.getReply(650, 0);
   // const txObj = await peeranhaContent.getComment(315, 0, 1);
 
   // await getOptimisticData(txObj.hash, 1);

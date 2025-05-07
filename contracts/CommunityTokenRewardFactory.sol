@@ -80,7 +80,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // set pools
   function startPeriod() external override onlyRole(OWNER_COMMUNITY_TOKEN_FACTORY) {
     uint16 period = RewardLib.getPeriod();
-    require(!factoryData.isSetPool[period], "pools_already_set");    // todo: tests
+    require(!factoryData.isSetPool[period], "pool_already_set");    // todo: tests
     factoryData.isSetPool[period] = true;
 
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;

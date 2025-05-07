@@ -456,6 +456,8 @@ library UserLib {
       previousPeriod = currentPeriod;
     }
 
+    emit UpdateUserRating(userAddr, communityId, 0, currentPeriod, previousPeriod); // del
+
     updateUserPeriodRating(userContext, userCommunityRating, communityReward, userAddr, rating, communityId, currentPeriod, previousPeriod);
     userCommunityRating.userRating[communityId].rating += rating;
 
