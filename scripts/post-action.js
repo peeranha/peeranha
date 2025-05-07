@@ -184,12 +184,11 @@ async function getError() {
 async function main() {
   // await getOptimisticData("0xf488cafb971f94c0b45de6abf8c7968c6f1a2506e9a9a806fc9bea826827802d");
   // await getError()
-  // await decodeData('0xb48bb10922eecaf23c730f614032392b659fb17128a6958ba71ed82c7386dc2a');
-  // await decodeLog('0xb48bb10922eecaf23c730f614032392b659fb17128a6958ba71ed82c7386dc2a');
-  await contentFunctions();
-  // await communityTokenFactoryFunctions();
-  // await communityTokenFunctions();
-  // await userFunctions();
+  // await decodeData('0x403869bfc17d33e2292c3eeb6e7b83ff5957c5d6802fc3e7eb00844246e26d5e');
+  // await decodeData('0x910ca38dc611cbd003e5240f0fb3d11bb1345cdfe6d6cc41b30bf9bdf90a7ea5');
+  // await decodeData('0xcffe3ffa01eb5dfe6757f1834fdd55373ceac3250e8f567f1932f8b7b7f72105');
+  // await contentFunctions();
+  await userFunctions();
   // await communityFunctions();
 }
 
@@ -203,7 +202,7 @@ async function userFunctions() {
   console.log(`USER_ADDRESS ${USER_ADDRESS}`)
   const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
 
-  // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
+  const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists(signers[0].address);
   // const txObj = await peeranhaUser.updateUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.addUserRating("0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 100, 2);
@@ -242,10 +241,10 @@ async function communityFunctions() {
   const peeranhaCommunity = await PeeranhaCommunity.attach(COMMUNITY_ADDRESS);
 
   const signers = await ethers.getSigners();
-  // const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
+  const txObj = await peeranhaCommunity.createCommunity(signers[0].address, await getBytes32FromData(testCommunity), await getTags(5));
   // const txObj = await peeranhaCommunity.updateCommunity(signers[0].address, 3, await getBytes32FromData(testCommunity));
   // const txObj = await peeranhaCommunity.freezeCommunity(signers[0].address, 2);
-  const txObj = await peeranhaCommunity.unfreezeCommunity(signers[0].address, 2);
+  // const txObj = await peeranhaCommunity.unfreezeCommunity(signers[0].address, 2);
   // const txObj = await peeranhaCommunity.getCommunity(2);
 
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
@@ -310,7 +309,7 @@ async function contentFunctions() {
   //   return;
   // }
 
-  // const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1,3], Language.English);
+  const txObj = await peeranhaContent.createPost(signers[0].address, 2, ipfsResponse, PostTypeEnum.CommonPost, [1,3], Language.English);
   // const txObj = await peeranhaContent.editPost(signers[0].address, 336, await getBytes32FromData(testPost), [4,3], 2, PostTypeEnum.CommonPost, Language.English);
   // const txObj = await peeranhaContent.createReply(signers[0].address, 650, 0, await getBytes32FromData(testReply), false, Language.Chinese);
   // const txObj = await peeranhaContent.editReply(signers[0].address, 1, 1, await getBytes32FromData(testReply), true, Language.Vietnamese);
@@ -321,7 +320,7 @@ async function contentFunctions() {
   // const txObj = await peeranhaContent.editTranslations(signers[0].address, 2, 0, 0, [Language.Spanish], [await getBytes32FromData(postTranslation)]);
   // const txObj = await peeranhaContent.deleteTranslations(signers[0].address, 1, 0, 0, [Language.English]);
   // const txObj = await peeranhaContent.updateDocumentationTree(signers[0].address, 1, await getBytes32FromData(testDocumentating));
-  const txObj = await peeranhaContent.voteItem(signers[0].address, 650, 0, 0, false);
+  // const txObj = await peeranhaContent.voteItem(signers[0].address, 650, 0, 0, false);
   // const txObj = await peeranhaContent.getVersion();
 
 
