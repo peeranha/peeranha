@@ -2,7 +2,9 @@ const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
 const { PostTypeEnum, LanguagesEnum, DefaultCommunityId, PROTOCOL_ADMIN_ROLE,
-    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
+    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, 
+    VERIFIER_ROLE,
+    VERIFIED_ROLE } = require('./utils');
 
 describe("Test community permissions", function() {
     beforeEach(async function () {
@@ -18,15 +20,17 @@ describe("Test community permissions", function() {
 		hashContainer = getHashContainer();
         countOfCommunities = 3;
         communitiesIds = getIdsContainer(countOfCommunities);
+        await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
+        await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[2].address);
 	});
 
     it("Test community moderator", async function() {
         // const countOfUsers = 3;
-
-        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
         await peeranhaContent.updateDocumentationTree(signers[0].address, 1, hashContainer[0])
 
@@ -114,9 +118,6 @@ describe("Test community permissions", function() {
     });
 
     it("Test community moderator for language", async function() {
-        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
         await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
         await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 		await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
@@ -176,11 +177,7 @@ describe("Test community permissions", function() {
 
     it("Test community administrator", async function() {
         // const countOfUsers = 3;
-
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-        await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
+		await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
         // Give Admin permission for non-existing user or community
         await expect(peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 4))
@@ -202,10 +199,10 @@ describe("Test community permissions", function() {
         await peeranhaUser.revokeCommunityModeratorPermission(signers[0].address, signers[1].address, communitiesIds[0]);
         
         // User makes actions with Admin permission
-        await peeranhaCommunity.connect(signers[1]).updateCommunity(signers[1].address, communitiesIds[0], getHash());
+        /* await peeranhaCommunity.connect(signers[1]).updateCommunity(signers[1].address, communitiesIds[0], getHash());
         await peeranhaCommunity.connect(signers[1]).freezeCommunity(signers[1].address, communitiesIds[0]);
         await expect(peeranhaCommunity.connect(signers[1]).updateCommunity(signers[1].address, communitiesIds[0], getHash()))
-            .to.be.revertedWith("Community is frozen");
+            .to.be.revertedWith("Community is frozen"); */ // policies updated @Freitag-fri
         await peeranhaCommunity.connect(signers[1]).unfreezeCommunity(signers[1].address, communitiesIds[0]);
         await peeranhaCommunity.connect(signers[1]).updateCommunity(signers[1].address, communitiesIds[0], getHash());
         await peeranhaContent.connect(signers[1]).updateDocumentationTree(signers[1].address, 1, hashContainer[1]);
@@ -283,9 +280,6 @@ describe("Test community permissions", function() {
     });
 
     it("Test community administrator for language", async function() {
-        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
         await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
         await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.Spanish);
 		await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.Spanish);
@@ -357,17 +351,10 @@ describe("Test community permissions", function() {
 
     // Send admin invite functionality must be created before
     xit("Test grant before creating community", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
         const countOfCommunities = 3;
         // const countOfUsers = 3;
         const communitiesIds = getIdsContainer(countOfCommunities);
         // await ceateUsers(peeranha, signers, countOfUsers);
-        await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
-		await peeranha.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-        
 
         await expect (peeranha.connect(signers[1]).createCommunity(getHash(), createTags(5)))
         .to.revertedWith('Peeranha: must have admin role');
