@@ -5,14 +5,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./libraries/PostLib.sol";
 import "./libraries/CommonLib.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "./interfaces/IPeeranhaContent.sol";
 import "./interfaces/IPeeranhaUser.sol";
 import "./interfaces/IPeeranhaCommunity.sol";
 
 
-contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransaction {
+contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransactionUpgradeable {
     using PostLib for PostLib.Post;
     using PostLib for PostLib.DocumentationTree;
     using PostLib for PostLib.Reply;
@@ -27,7 +27,7 @@ contract PeeranhaContent is IPeeranhaContent, Initializable, NativeMetaTransacti
     function initialize(address peeranhaCommunityContractAddress, address peeranhaUserContractAddress) public initializer {
         posts.peeranhaCommunity = IPeeranhaCommunity(peeranhaCommunityContractAddress);
         posts.peeranhaUser = IPeeranhaUser(peeranhaUserContractAddress);
-        __NativeMetaTransaction_init("PeeranhaContent");
+        __NativeMetaTransactionUpgradeable_init("PeeranhaContent");
     }
 
     function dispatcherCheck(address user) internal {

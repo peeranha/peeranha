@@ -504,12 +504,12 @@ describe("Test boost", function () {
 			const userBoostPeriods = await token.getStakeUserPeriods(accountDeployed);
 			const rewardPeriods = await peeranhaUser.getActiveUserPeriods(peeranhaUser.deployTransaction.from)
 			
-			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-			console.log(periodRewardShares);
+			const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+			console.log(periodRewardShares.totalRewardShares);
 			console.log(rewardPeriods)
 			console.log(userBoostPeriods)
 			expect(rewardPeriods[0] + 1).to.equal(userBoostPeriods[0]);
-			expect(periodRewardShares).to.equal(5 * periodRewardCoefficient);
+			expect(periodRewardShares.totalRewardShares).to.equal(5 * periodRewardCoefficient);
 
 
 			// const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[1], 1);
@@ -543,9 +543,9 @@ describe("Test boost", function () {
 			console.log(rewardPeriods)
 			const ratingToReward = await peeranhaUser.getRatingToReward(peeranhaUser.deployTransaction.from, rewardPeriods[0], 1);
 
-			const periodRewardShares = await peeranhaUser.getPeriodReward(rewardPeriods[0]);
-			console.log(periodRewardShares);
-			expect(periodRewardShares).to.equal(5 * 6 * periodRewardCoefficient);
+			const periodRewardShares = await peeranhaUser.getPeriodRewardShares(rewardPeriods[0]);
+			console.log(periodRewardShares.totalRewardShares);
+			expect(periodRewardShares.totalRewardShares).to.equal(5 * 6 * periodRewardCoefficient);
 			expect(ratingToReward).to.equal(5);
 
 			// await token.claimReward(signers[0].address, rewardPeriods[1]);

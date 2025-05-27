@@ -6,6 +6,7 @@
   "CONTENT_ADDRESS": "0x9EDa3BFB1C538B5978a49443bC940f2EecB21c1A",
   "TOKEN_ADDRESS": "0xce5ACD3f96C8C71Ca1237776a6398d8045412858",
   "NFT_ADDRESS": "0xa21D95085985496F754F16Cee5cbfb0eb1118108",
+  "COMMUNITY_TOKEN_FACTORY_ADDRESS": "",
   "IPFS_API_URL_THE_GRAPH": "https://api.thegraph.com/ipfs/api/v0",
   "IPFS_API_URL": "https://ipfs.testpeeranha.io:5001",
   "API_ENDPOINT": "https://staging-api.testpeeranha.io/",

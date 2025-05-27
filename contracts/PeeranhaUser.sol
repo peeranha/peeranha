@@ -3,29 +3,27 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 
 import "./libraries/UserLib.sol";
+import "./libraries/RewardLib.sol";
 import "./libraries/CommonLib.sol";
 import "./libraries/AchievementLib.sol";
 import "./libraries/AchievementCommonLib.sol";
-import "./base/NativeMetaTransaction.sol";
+import "./base/NativeMetaTransactionUpgradeable.sol";
 
 import "./interfaces/IPeeranhaUser.sol";
 
 
-contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, AccessControlEnumerableUpgradeable {
+contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgradeable, AccessControlEnumerableUpgradeable {
     // TODO: This is still not used
     using UserLib for UserLib.UserCollection;
     using UserLib for UserLib.UserRatingCollection;
     using AchievementLib for AchievementLib.AchievementsContainer;
 
     bytes32 public constant PROTOCOL_ADMIN_ROLE = bytes32(keccak256("PROTOCOL_ADMIN_ROLE"));
-
     uint256 public constant COMMUNITY_ADMIN_ROLE = uint256(keccak256("COMMUNITY_ADMIN_ROLE"));
     uint256 public constant COMMUNITY_MODERATOR_ROLE = uint256(keccak256("COMMUNITY_MODERATOR_ROLE"));
-
     bytes32 public constant BOT_ROLE = bytes32(keccak256("BOT_ROLE"));
     bytes32 public constant DISPATCHER_ROLE = bytes32(keccak256("DISPATCHER_ROLE"));
 
@@ -35,6 +33,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     UserLib.UserContext userContext;
     AchievementLib.AchievementsMetadata achievementsMetadata;
     UserLib.BannedUsers bannedUsers;
+    RewardLib.CommunityReward communityReward;
 
     function initialize() public initializer {
         __Peeranha_init();
@@ -45,7 +44,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     function __Peeranha_init() public onlyInitializing {
         __AccessControlEnumerable_init();
         __Peeranha_init_unchained();
-        __NativeMetaTransaction_init("PeeranhaUser");
+        __NativeMetaTransactionUpgradeable_init("PeeranhaUser");
     }
 
     function __Peeranha_init_unchained() internal onlyInitializing {
@@ -60,12 +59,12 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
         internal
-        override(ContextUpgradeable, NativeMetaTransaction)
+        override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
         virtual
         view
         returns (address sender)
     {
-        return NativeMetaTransaction._msgSender();
+        return NativeMetaTransactionUpgradeable._msgSender();
     }
 
     function dispatcherCheck(address user) internal view {
@@ -116,6 +115,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function getPeriodRewardShares(uint16 period) public view override returns(RewardLib.PeriodRewardShares memory) {
         return UserLib.getPeriodRewardShares(userContext, period);
+    }
+
+    function getPeriodCommunityRewardShares(uint16 period, uint32 communityId) public view override returns(RewardLib.PeriodRewardShares memory) {
+        return UserLib.getPeriodRewardShares(communityReward, period, communityId);
     }
 
     /**
@@ -459,8 +462,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
         return CommonLib.toInt32FromUint256(periodRating.ratingToReward) - CommonLib.toInt32FromUint256(periodRating.penalty);
     }
 
-    
-    // TODO: Why is it commented? Remove this code if not needed.
     /**
      * @dev Get information about user rewards. (Rating to reward and penalty)
      *
@@ -471,14 +472,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     /*function getPeriodRating(address user, uint16 rewardPeriod, uint32 communityId) public view returns(RewardLib.PeriodRating memory) {
         return userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
-    }*/
-
-    // TODO: Why is it commented? Remove this code if not needed.
-    /**
-     * @dev Get information abour sum rating to reward all users
-     */
-    /*function getPeriodReward(uint16 rewardPeriod) public view returns(uint256) {
-        return userContext.periodRewardContainer.periodRewardShares[rewardPeriod].totalRewardShares;
     }*/
     
     /**
@@ -492,7 +485,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUserRating(address userAddr, int32 rating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, achievementsMetadata, userAddr, rating, communityId);
     }
 
     /**
@@ -506,7 +499,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
      */
     function updateUsersRating(UserLib.UserRatingChange[] memory usersRating, uint32 communityId) public override {
         require(msg.sender == address(userContext.peeranhaContent), "internal_call_unauthorized");
-        UserLib.updateUsersRating(userContext, achievementsMetadata, usersRating, communityId);
+        UserLib.updateUsersRating(userContext, usersRating, communityReward, achievementsMetadata, communityId);
     }
 
     /**
@@ -635,10 +628,29 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     }
 
     /**
+     * @dev Get user rating in a given period and community.
+     *
+     * Requirements:
+     *
+     * - Must be an existing user and valid period.
+     * - Must be an existing community.
+    */
+    function getUserPeriodCommunityRating(address user, uint16 rewardPeriod, uint32 communityId) public override view returns(uint32 rating, uint32 penalty) {
+        return UserLib.getUserPeriodCommunityRating(userContext, user, rewardPeriod, communityId);
+    }
+
+    /**
      * @dev Get active users in period.
     */
     function getActiveUsersInPeriod(uint16 period) external view returns (address[] memory) {
         return userContext.periodRewardContainer.periodRewardShares[period].activeUsersInPeriod;
+    }
+
+    /**
+     * @dev Get active users in period in community.
+    */
+    function getCommunityActiveUsersInPeriod(uint16 period, uint32 communityId) external view returns (address[] memory) {
+        return communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
     }
 
     /**
@@ -670,7 +682,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransaction, Ac
     // Used for unit tests
     /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
-        UserLib.updateUserRating(userContext, achievementsMetadata, userAddr, rating, communityId);
+        UserLib.updateUserRating(userContext, communityReward, achievementsMetadata, userAddr, rating, communityId);
     }*/
 
     // Used for unit tests

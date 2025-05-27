@@ -473,4 +473,55 @@ describe("Test dispatcher", function () {
 			expect(await peeranhaCommunity.getTagsCount(1)).to.equal(5);
 		});
 	})
+
+	describe("Community token factory actions", function() {
+		it("Test create community token with dispatcher", async function() {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(3);
+			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+
+			await expect(peeranhaTokenFactory.connect(signers[3]).createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20))
+				.to.be.revertedWith('not_allowed_not_dispatcher');
+			await expect(peeranhaTokenFactory.connect(signers[1]).createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20))
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
+		});
+
+		it("Test update community token with dispatcher", async function() {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(3);
+			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaTokenFactory.createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20);			
+
+			await expect(peeranhaTokenFactory.connect(signers[3]).updateCommunityRewardSettings(signers[0].address, 1, await peeranhaTokenFactory.getAddressLastCreatedContract(1), 20, 2))
+				.to.be.revertedWith('not_allowed_not_dispatcher');
+			await expect(peeranhaTokenFactory.connect(signers[1]).updateCommunityRewardSettings(signers[0].address, 1, await peeranhaTokenFactory.getAddressLastCreatedContract(1), 20, 2))
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
+		});
+
+		it("Test pay community reward with dispatcher", async function() {
+			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, peeranhaTokenFactory, accountDeployed } = await createPeerenhaAndTokenContract();
+			const signers = await ethers.getSigners();
+			const hashContainer = getHashContainer();
+			const ipfsHashes = getHashesContainer(3);
+			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
+			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+			await peeranhaTokenFactory.createNewCommunityTokenReward(signers[0].address, 1, token.address, 100, 20);
+			await wait(PeriodTime * 2);
+			await peeranhaTokenFactory.startPeriod(0);
+
+			await expect(peeranhaTokenFactory.connect(signers[3]).claimReward(signers[0].address, 0))
+				.to.be.revertedWith('not_allowed_not_dispatcher');
+			await expect(peeranhaTokenFactory.connect(signers[1]).claimReward(signers[0].address, 0))
+				.not.to.be.revertedWith('not_allowed_not_dispatcher');
+		});
+	});
 });

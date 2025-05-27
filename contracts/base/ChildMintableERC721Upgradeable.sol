@@ -7,14 +7,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import "./IChildToken.sol";
-import "./NativeMetaTransaction.sol";
+import "./NativeMetaTransactionUpgradeable.sol";
 
 ///
 // check ERC721Upgradeable already in ERC721URIStorageUpgradeable
 ///
 contract ChildMintableERC721Upgradeable is
     IChildToken,
-    NativeMetaTransaction,
+    NativeMetaTransactionUpgradeable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
@@ -37,7 +37,7 @@ contract ChildMintableERC721Upgradeable is
         __ERC721_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(DEPOSITOR_ROLE, childChainManager);
-        __NativeMetaTransaction_init(name_);
+        __NativeMetaTransactionUpgradeable_init(name_);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override (ERC721EnumerableUpgradeable, ERC721Upgradeable) {
@@ -56,12 +56,12 @@ contract ChildMintableERC721Upgradeable is
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
         internal
-        override(ContextUpgradeable, NativeMetaTransaction)
+        override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
         virtual
         view
         returns (address sender)
     {
-        return NativeMetaTransaction._msgSender();
+        return NativeMetaTransactionUpgradeable._msgSender();
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, AccessControlEnumerableUpgradeable) returns (bool) {

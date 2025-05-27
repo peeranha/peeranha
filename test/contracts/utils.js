@@ -13,6 +13,11 @@ async function wait(ms) {
     await delay(ms);
 }
 
+// const MyContract = await ethers.getContractFactory("MyContract");
+// const contract = await MyContract.attach(
+//   "0x..." // The deployed contract address
+// );
+
 async function getBalance(contract, user) {
     const balance = await contract.balanceOf(user);
 	return await getInt(balance);
@@ -116,6 +121,11 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
+    const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
+    const communityTokenRewardFactory = await CommunityTokenRewardFactory.deploy();
+    await communityTokenRewardFactory.deployed();
+    await communityTokenRewardFactory.initialize(peeranhaUserContractAddress, peeranhaCommunityContractAddress);
+
     const PostLib = await ethers.getContractFactory("PostLib")
     const postLib = await PostLib.deploy();
 
@@ -131,13 +141,13 @@ const createPeerenhaAndTokenContract = async function () {
         return value;
     });
 
-    
+
     await peeranhaUser.initialize();
     await peeranhaContent.initialize(peeranhaCommunityContractAddress, peeranhaUserContractAddress);
     await peeranhaCommunity.initialize(peeranhaUserContractAddress);
     await token.initialize("Peeranha", "PEER", peeranhaUserContractAddress, peeranhaUserContractAddress); // fix address
     await peeranhaNFT.initialize("PeeranhaNFT", "PEERNFT", peeranhaUserContractAddress, "0x56fB95C7d03E24DB7f03B246506f80145e2Ca0f8");       // fix address
-    
+
     await peeranhaUser.setContractAddresses(peeranhaCommunityContractAddress, peeranhaContentAddress, peeranhaNFTContractAddress, peeranhaTokenContractAddress);
 
     return {
@@ -146,8 +156,16 @@ const createPeerenhaAndTokenContract = async function () {
         peeranhaCommunity: peeranhaCommunity,
         token: token,
         peeranhaNFT: peeranhaNFT,
+        communityTokenRewardFactory: communityTokenRewardFactory,
         accountDeployed: peeranhaContent.deployTransaction.from,
+        communityTokenRewrdFactory: communityTokenRewardFactory,
     }
+};
+
+const getContract = async function (contractAddress, contractName) {
+    const Contract = await ethers.getContractFactory(contractName);
+    const contract = await Contract.attach(contractAddress);
+    return contract;
 };
 
 const getIdsContainer = (countOfCommunities) =>
@@ -434,6 +452,7 @@ const ModeratorDeleteReply = -2;
 const ModeratorDeleteComment = -1;
 
 const PROTOCOL_ADMIN_ROLE = ethers.utils.id("PROTOCOL_ADMIN_ROLE");
+const OWNER_COMMUNITY_TOKEN_FACTORY = ethers.utils.id("OWNER_COMMUNITY_TOKEN_FACTORY");
 const BOT_ROLE = ethers.utils.id("BOT_ROLE");
 const DISPATCHER_ROLE = ethers.utils.id("DISPATCHER_ROLE");
 const VERIFIER_ROLE = ethers.utils.id("VERIFIER_ROLE");
@@ -442,7 +461,7 @@ const VERIFIED_ROLE = ethers.utils.id("VERIFIED_ROLE");
 const TRANSACTION_DELAY = 3000;
 
 module.exports = { 
-    wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther,
+    wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther, getContract,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHashTranslation, getTranslationValues, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, LanguagesEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, activeIn1st2nd3rdPeriod, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,
@@ -453,5 +472,5 @@ module.exports = {
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
     DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DeleteOwnReply, DefaultCommunityId,
-    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, VERIFIER_ROLE, VERIFIED_ROLE, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
+    PROTOCOL_ADMIN_ROLE, BOT_ROLE, DISPATCHER_ROLE, VERIFIER_ROLE, VERIFIED_ROLE, OWNER_COMMUNITY_TOKEN_FACTORY, TRANSACTION_DELAY, EmptyIpfs, AchievementsType
 };

@@ -51,6 +51,11 @@ async function main() {
   await peeranhaUser.setContractAddresses(peeranhaCommunity.address, peeranhaContent.address, peeranhaNFT.address, peeranhaToken.address);
   console.log("Set contract addresses to Peeranha User", peeranhaToken.address);
 
+  const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
+  console.log("Deploying communityTokenRewardFactory...");
+  const communityTokenRewardFactory = await upgrades.deployProxy(CommunityTokenRewardFactory, [peeranhaUser.address, peeranhaCommunity.address], {timeout: 0});
+  console.log("community token reward factory deployed to:", communityTokenRewardFactory.address);
+
   console.log(`Contracts for the post-action`);
   console.log(`
     "USERLIB_ADDRESS": "${userLib.address}",
@@ -60,6 +65,7 @@ async function main() {
     "CONTENT_ADDRESS": "${peeranhaContent.address}",
     "TOKEN_ADDRESS": "${peeranhaToken.address}",
     "NFT_ADDRESS": "${peeranhaNFT.address}",
+    "COMMUNITY_TOKEN_FACTORY_ADDRESS": "${communityTokenRewardFactory.address}",
   `);
 
   console.log(`Contracts for The Graph`);
@@ -69,6 +75,7 @@ async function main() {
     "contentAddress": "${peeranhaContent.address}",
     "tokenAddress": "${peeranhaToken.address}",
     "nftAddress": "${peeranhaNFT.address}",
+    "tokenFactoryAddress": "${communityTokenRewardFactory.address}",
   `);
 }
 

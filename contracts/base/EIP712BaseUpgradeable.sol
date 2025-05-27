@@ -1,8 +1,9 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract EIP712Base {
+contract EIP712BaseUpgradeable is Initializable {
     struct EIP712Domain {
         string name;
         string version;
@@ -19,7 +20,15 @@ contract EIP712Base {
     );
     bytes32 internal domainSeperator;
 
-    constructor(string memory name) {
+    // supposed to be called once while initializing.
+    // one of the contractsa that inherits this contract follows proxy pattern
+    // so it is not possible to do this in a constructor
+    function __EIP712Upgradeable_init(
+        string memory name
+    )
+        internal
+        onlyInitializing
+    {
         _setDomainSeperator(name);
     }
 

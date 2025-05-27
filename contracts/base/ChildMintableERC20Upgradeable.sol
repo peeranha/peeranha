@@ -5,12 +5,12 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "./IChildToken.sol";
-import "./NativeMetaTransaction.sol";
+import "./NativeMetaTransactionUpgradeable.sol";
 
 
 contract ChildMintableERC20Upgradeable is
     IChildToken,
-    NativeMetaTransaction,
+    NativeMetaTransactionUpgradeable,
     ERC20Upgradeable,
     AccessControlEnumerableUpgradeable
 {
@@ -24,19 +24,19 @@ contract ChildMintableERC20Upgradeable is
         __ERC20_init(name_, symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(DEPOSITOR_ROLE, childChainManager);
-        __NativeMetaTransaction_init(name_);
+        __NativeMetaTransactionUpgradeable_init(name_);
     }
 
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender()
         internal
-        override(ContextUpgradeable, NativeMetaTransaction)
+        override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
         virtual
         view
         returns (address sender)
     {
-        return NativeMetaTransaction._msgSender();
+        return NativeMetaTransactionUpgradeable._msgSender();
     }
 
     /**
