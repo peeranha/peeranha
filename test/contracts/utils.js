@@ -191,11 +191,15 @@ const getHash = () => "0x" + crypto.randomBytes(32).toString("hex");
 
 const registerTwoUsers = async function (peeranhaUser, signers, hashContainer) {
 	await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+    await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+    await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
 	await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+    await peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address);
 }
 
 const createUserWithAnotherRating = async function (signer, rating, peeranhaUser, hashContainer, communityId) {
 	await peeranhaUser.connect(signer).createUser(signer.address, hashContainer[0]);
+    await peeranhaUser.grantRole(VERIFIED_ROLE, signer.address);
 	await peeranhaUser.addUserRating(signer.address, rating, communityId);
 };
 

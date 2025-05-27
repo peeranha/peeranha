@@ -7,21 +7,39 @@ const {
   	ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
   	FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
   	AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DISPATCHER_ROLE
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DISPATCHER_ROLE,
+	VERIFIER_ROLE,
+	VERIFIED_ROLE
 } = require('./utils');
 
 
 describe("Test dispatcher", function () {
+	let peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed;
+	let signers;
+	let hashContainer;
+	let ipfsHashes;
+	beforeEach(async function() {
+		({ peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract());
+		signers = await ethers.getSigners();
+		hashContainer = getHashContainer();
+		ipfsHashes = getHashesContainer(3);
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
+		await peeranhaUser.connect(signers[4]).createUser(signers[4].address, hashContainer[0]);
+		await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+		await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[2].address);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[3].address);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[4].address);
+		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
+	});
+	
 	
 	describe("User actions", function() {
 		it("Create user with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-	
-			const signers = await ethers.getSigners();
-			
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
 			await expect(peeranhaUser.connect(signers[1]).createUser(signers[2].address, hashContainer[1]))
 			.not.to.be.revertedWith('not_allowed_not_dispatcher');
 	
@@ -30,12 +48,7 @@ describe("Test dispatcher", function () {
 		});
 	
 		it("Test user editing with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+			const usersCount = await peeranhaUser.getUsersCount();
 			const user = await peeranhaUser.getUserByIndex(0);
 			expect(user.ipfsDoc.hash).to.equal(hashContainer[0]);
 	
@@ -47,21 +60,10 @@ describe("Test dispatcher", function () {
 	
 			const changedUser = await peeranhaUser.getUserByIndex(0);
 			expect(changedUser.ipfsDoc.hash).to.equal(hashContainer[1]);
-	
-			expect(await peeranhaUser.getUsersCount()).to.equal(1);
+			expect(await peeranhaUser.getUsersCount()).to.equal(usersCount);
 		})
 	
 		it("Follow community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			const signers = await ethers.getSigners();
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-	
 			await expect(peeranhaUser.connect(signers[2]).followCommunity(signers[0].address, 1))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 	
@@ -73,16 +75,6 @@ describe("Test dispatcher", function () {
 		})
 	
 		it("Unfollow community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			const signers = await ethers.getSigners();
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-	
-	
 			await peeranhaUser.followCommunity(signers[0].address, 1);
 	
 			await expect(peeranhaUser.connect(signers[2]).unfollowCommunity(signers[0].address, 1))
@@ -96,18 +88,6 @@ describe("Test dispatcher", function () {
 		})
 	
 		it("Test give community admin with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 	
 			await expect(peeranhaUser.connect(signers[2]).giveCommunityModeratorPermission(signers[2].address, signers[3].address, 1))
@@ -126,18 +106,6 @@ describe("Test dispatcher", function () {
 		});
 	
 		it("Test give community moderator with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
-
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaUser.connect(signers[2]).giveCommunityModeratorPermission(signers[2].address, signers[3].address, 1))
@@ -156,19 +124,6 @@ describe("Test dispatcher", function () {
 		});
 	
 		it("Test revoke community admin with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[4]).createUser(signers[4].address, hashContainer[0]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-	
 			await peeranhaUser.connect(signers[1]).giveCommunityAdminPermission(signers[0].address, signers[2].address, 1);
 	
 			await expect(peeranhaUser.connect(signers[2]).giveCommunityModeratorPermission(signers[2].address, signers[3].address, 1))
@@ -184,17 +139,6 @@ describe("Test dispatcher", function () {
 		});
 	
 		it("Test revoke community moderator with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[3]).createUser(signers[3].address, hashContainer[0]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 	
 			await expect(peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[2], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English))
@@ -212,13 +156,6 @@ describe("Test dispatcher", function () {
 
 	describe("Token actions", function() {
 		it("Test get reward with dispatcher", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
 			await peeranhaUser.addUserRating(peeranhaUser.deployTransaction.from, 5, 1);
 			await wait(PeriodTime);
 	
@@ -242,13 +179,6 @@ describe("Test dispatcher", function () {
 		});
 	
 		it("Test set stake with dispatcher", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const hashContainer = getHashContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-	
 			await token.mint(parseEther("2"))
 	
 			await expect(token.connect(signers[3]).setStake(accountDeployed, parseEther("1")))
@@ -265,15 +195,6 @@ describe("Test dispatcher", function () {
 
 	describe("Content actions", function() {
 		it("Create post with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-	
 			await expect(peeranhaContent.connect(signers[2]).createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 
@@ -286,15 +207,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Edit post with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English))
@@ -309,15 +221,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Delete post with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).deletePost(signers[0].address, 1))
@@ -330,15 +233,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Create reply with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English))
@@ -351,15 +245,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Edit reply with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -376,15 +261,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Delete reply with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -398,15 +274,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Create comment with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await expect(peeranhaContent.connect(signers[3]).createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English))
@@ -419,15 +286,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Edit comment with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
@@ -444,15 +302,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Delete comment with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.createComment(signers[0].address, 1, 0, hashContainer[1], LanguagesEnum.English);
@@ -466,16 +315,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Change status best reply with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
 			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
@@ -490,16 +329,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Vote item with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 	
 			await expect(peeranhaContent.connect(signers[4]).voteItem(signers[0].address, 1, 0, 0, 1))
@@ -514,15 +343,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Create translation with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(2);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
 	
 			await expect(peeranhaContent.connect(signers[3]).createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]))
@@ -537,16 +357,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Edit translation with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]])
 	
@@ -560,16 +370,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Delete translation with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.Spanish);
 			await peeranhaContent.createTranslations(signers[0].address, 1, 0, 0, [LanguagesEnum.English], [ipfsHashes[1]]);
 
@@ -583,17 +383,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Update documentation tree with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
-			
 			await expect(peeranhaContent.connect(signers[3]).updateDocumentationTree(signers[0].address, 1, hashContainer[0]))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaContent.connect(signers[1]).updateDocumentationTree(signers[0].address, 1, hashContainer[0]))
@@ -606,14 +395,6 @@ describe("Test dispatcher", function () {
 
 	describe("Community actions", function() {
 		it("Create community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
 			await expect(peeranhaCommunity.connect(signers[3]).createCommunity(signers[0].address, ipfsHashes[0], createTags(5)))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaCommunity.connect(signers[1]).createCommunity(signers[0].address, ipfsHashes[0], createTags(5)))
@@ -624,15 +405,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Update community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			const community = await peeranhaCommunity.getCommunity(1);
 			expect(community.ipfsDoc.hash).to.equal(ipfsHashes[0]);
 	
@@ -647,15 +419,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Freeze community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			const community = await peeranhaCommunity.getCommunity(1);
 			expect(community.isFrozen).to.equal(false);
 	
@@ -670,15 +433,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Unfreeze community with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
 	
 			const community = await peeranhaCommunity.getCommunity(1);
@@ -695,17 +449,7 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Create tag with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
 			const countOfTags = 5;
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(countOfTags));
-	
 			await expect(peeranhaCommunity.connect(signers[3]).createTag(signers[0].address, 1, ipfsHashes[1]))
 			.to.be.revertedWith('not_allowed_not_dispatcher');
 			await expect(peeranhaCommunity.connect(signers[1]).createTag(signers[0].address, 1, ipfsHashes[1]))
@@ -717,17 +461,6 @@ describe("Test dispatcher", function () {
 		});
 
 		it("Update tag with dispatcher", async function() {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const countOfTags = 5;
-			const signers = await ethers.getSigners();
-			const hashContainer = getHashContainer();
-			const ipfsHashes = getHashesContainer(3);
-			await peeranhaUser.grantRole(DISPATCHER_ROLE, signers[1].address);
-			
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-	
-			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(countOfTags));
-			
 			expect(await peeranhaCommunity.getTagsCount(1)).to.equal(5);
 	
 			await expect(peeranhaCommunity.connect(signers[3]).updateTag(signers[0].address, 1, 1, hashContainer[1]))

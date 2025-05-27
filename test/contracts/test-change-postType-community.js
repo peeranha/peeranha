@@ -6,12 +6,22 @@ const {
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId,
+	VERIFIED_ROLE,
+	VERIFIER_ROLE
 } = require('./utils');
 
 ///
 // change postType and communityId for post by moderator and author
 ///
+
+async function createUser(peeranhaUser, verifier, user, hash) {
+	if (!(await peeranhaUser.connect(verifier).hasRole(VERIFIER_ROLE, verifier.address))) {
+		await peeranhaUser.grantRole(VERIFIER_ROLE, verifier.address);
+	}
+	await peeranhaUser.connect(user).createUser(user.address, hash);
+	await peeranhaUser.connect(verifier).grantRole(VERIFIED_ROLE, user.address);
+}
 
 describe("Test change postType and community id by moderator and common user", function () {
 
@@ -25,8 +35,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await expect(peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)).
@@ -39,8 +49,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -56,8 +66,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -73,8 +83,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -90,8 +100,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -107,8 +117,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 		
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 		
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -127,8 +137,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -144,8 +154,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -161,8 +171,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -178,8 +188,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -197,8 +207,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -214,8 +224,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -234,8 +244,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -255,8 +265,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -276,8 +286,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -297,8 +307,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -318,8 +328,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -339,8 +349,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -363,8 +373,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -384,8 +394,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -405,8 +415,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -426,8 +436,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -447,8 +457,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -468,8 +478,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -492,8 +502,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -522,8 +532,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -552,8 +562,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -581,8 +591,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -610,8 +620,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -639,8 +649,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -672,8 +682,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -705,8 +715,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -738,8 +748,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -771,8 +781,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -804,8 +814,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -837,8 +847,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -873,8 +883,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -897,8 +907,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -921,8 +931,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -949,8 +959,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -980,8 +990,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1004,8 +1014,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1028,8 +1038,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1056,8 +1066,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1087,8 +1097,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1117,8 +1127,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1147,8 +1157,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1181,8 +1191,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1218,8 +1228,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1253,8 +1263,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1288,8 +1298,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1327,8 +1337,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1369,8 +1379,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1390,8 +1400,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1411,8 +1421,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1439,8 +1449,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1465,8 +1475,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1491,8 +1501,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1523,8 +1533,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1560,8 +1570,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1579,8 +1589,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1600,8 +1610,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1626,8 +1636,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1656,8 +1666,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1687,8 +1697,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1721,8 +1731,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1740,8 +1750,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1762,8 +1772,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1781,8 +1791,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -1803,8 +1813,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1830,8 +1840,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1860,8 +1870,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1892,8 +1902,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -1927,8 +1937,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1945,8 +1955,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1966,8 +1976,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -1987,8 +1997,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2011,8 +2021,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2029,8 +2039,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2055,8 +2065,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 	
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 	
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2074,8 +2084,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 	
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 	
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2092,8 +2102,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 	
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 	
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2113,8 +2123,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 	
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 	
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2138,8 +2148,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const communitiesIds = getIdsContainer(countOfCommunities);
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2163,8 +2173,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2187,8 +2197,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -2212,8 +2222,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const communitiesIds = getIdsContainer(countOfCommunities);
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2237,8 +2247,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2262,8 +2272,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -2290,8 +2300,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const communitiesIds = getIdsContainer(countOfCommunities);
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2320,8 +2330,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2349,8 +2359,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -2379,8 +2389,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const communitiesIds = getIdsContainer(countOfCommunities);
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2409,8 +2419,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2439,8 +2449,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -2472,8 +2482,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2514,8 +2524,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2546,8 +2556,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2578,8 +2588,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2610,8 +2620,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2642,8 +2652,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = DefaultCommunityId;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2674,8 +2684,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, DefaultCommunityId);
@@ -2706,8 +2716,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, DefaultCommunityId);
@@ -2738,8 +2748,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, DefaultCommunityId);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, DefaultCommunityId);
@@ -2773,8 +2783,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2819,8 +2829,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2855,8 +2865,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -2894,8 +2904,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2922,8 +2932,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -2950,8 +2960,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -2982,8 +2992,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3017,8 +3027,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3050,8 +3060,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3083,8 +3093,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3120,8 +3130,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3160,8 +3170,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3204,8 +3214,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3238,8 +3248,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3276,8 +3286,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3327,8 +3337,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3375,8 +3385,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3413,8 +3423,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3455,8 +3465,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3510,8 +3520,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3535,8 +3545,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3560,8 +3570,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3592,8 +3602,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3624,7 +3634,7 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3649,8 +3659,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3681,8 +3691,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3719,8 +3729,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3762,8 +3772,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3785,8 +3795,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -3811,8 +3821,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 2);
@@ -3850,8 +3860,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 2);
@@ -3882,8 +3892,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3916,8 +3926,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -3953,8 +3963,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -3977,8 +3987,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4004,8 +4014,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4034,8 +4044,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4066,8 +4076,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 2);
@@ -4106,8 +4116,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 2);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 2);
@@ -4139,8 +4149,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -4174,8 +4184,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -4212,8 +4222,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4234,8 +4244,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4259,8 +4269,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4286,8 +4296,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4316,8 +4326,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4338,8 +4348,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 2;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4368,8 +4378,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4389,8 +4399,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4412,8 +4422,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4438,8 +4448,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -4467,8 +4477,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4497,8 +4507,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4530,8 +4540,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 2;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4559,8 +4569,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4588,8 +4598,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4624,8 +4634,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4657,8 +4667,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4697,8 +4707,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4730,8 +4740,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4757,8 +4767,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4801,8 +4811,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 3;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4827,8 +4837,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 3;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4850,8 +4860,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 3;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -4876,8 +4886,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 3;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4907,8 +4917,8 @@ describe("Test change postType and community id by moderator and common user", f
 					const countOfCommunities = 3;
 					const communitiesIds = getIdsContainer(countOfCommunities);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4939,8 +4949,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -4962,8 +4972,8 @@ describe("Test change postType and community id by moderator and common user", f
 				const countOfCommunities = 3;
 				const communitiesIds = getIdsContainer(countOfCommunities);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5006,8 +5016,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 2;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await expect(peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English)).
@@ -5021,8 +5031,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 2;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5038,8 +5048,8 @@ describe("Test change postType and community id by author", function () {
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 
@@ -5056,8 +5066,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 2;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5073,8 +5083,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 3;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5102,8 +5112,8 @@ describe("Test change postType and community id by author", function () {
 			const hashContainer = getHashContainer();
 			const ipfsHashes = getHashesContainer(2);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5121,8 +5131,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 2;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5139,8 +5149,8 @@ describe("Test change postType and community id by author", function () {
 			const countOfCommunities = 2;
 			const communitiesIds = getIdsContainer(countOfCommunities);
 
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+			await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+			await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 			await createCommunities(peeranhaCommunity, signers[0].address, countOfCommunities, communitiesIds);
 
 			await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5164,8 +5174,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5181,8 +5191,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5198,8 +5208,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5215,8 +5225,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5232,8 +5242,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5249,8 +5259,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5266,8 +5276,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -5283,8 +5293,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -5303,8 +5313,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5324,8 +5334,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5345,8 +5355,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5366,8 +5376,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5387,8 +5397,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -5408,8 +5418,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
@@ -5432,8 +5442,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -5462,8 +5472,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -5492,8 +5502,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5521,8 +5531,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5550,8 +5560,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5579,8 +5589,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
@@ -5613,8 +5623,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5646,8 +5656,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5679,8 +5689,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5712,8 +5722,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5745,8 +5755,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5778,8 +5788,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5814,9 +5824,9 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[2], hashContainer[2]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5839,9 +5849,9 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[2], hashContainer[2]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5867,9 +5877,9 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[2], hashContainer[2]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -5892,9 +5902,9 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[2]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[2], hashContainer[2]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -5920,8 +5930,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5952,8 +5962,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -5987,8 +5997,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6023,8 +6033,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 				await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6062,8 +6072,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6083,8 +6093,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6107,8 +6117,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6133,7 +6143,7 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6154,8 +6164,8 @@ describe("Test change postType and community id by author", function () {
 				const hashContainer = getHashContainer();
 				const ipfsHashes = getHashesContainer(2);
 
-				await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-				await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+				await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+				await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 				await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -6185,8 +6195,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6204,8 +6214,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -6225,8 +6235,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6251,8 +6261,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6280,8 +6290,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6311,8 +6321,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6345,8 +6355,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6364,8 +6374,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -6386,8 +6396,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6405,8 +6415,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -6427,8 +6437,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6454,8 +6464,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6484,8 +6494,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6516,8 +6526,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await createUserWithAnotherRating(signers[2], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[3], 100, peeranhaUser, hashContainer, 1);
 					await createUserWithAnotherRating(signers[4], 100, peeranhaUser, hashContainer, 1);
@@ -6551,8 +6561,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6569,8 +6579,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6590,8 +6600,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6611,8 +6621,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
@@ -6635,8 +6645,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
@@ -6653,8 +6663,8 @@ describe("Test change postType and community id by author", function () {
 					const hashContainer = getHashContainer();
 					const ipfsHashes = getHashesContainer(2);
 
-					await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-					await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+					await createUser(peeranhaUser, signers[0], signers[1], hashContainer[0]);
+					await createUser(peeranhaUser, signers[0], signers[0], hashContainer[1]);
 					await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 					await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
