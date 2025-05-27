@@ -69,8 +69,8 @@ module.exports = {
       url: `https://sepolia.base.org`,
       accounts: [ADMIN_PRIVATE_KEY],
       chainId: 84532,
-      gas: 2100000,
-      gasPrice: 30000000
+      gas: 7000000,
+      gasPrice: 920000000
     },
     local: {
       url: `http://localhost:8545`,
