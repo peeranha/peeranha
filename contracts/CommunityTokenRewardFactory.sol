@@ -142,6 +142,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // }
 
   function getVersion() public pure returns (uint256) {
-    return 3;
+    return 5;
   }
 }
