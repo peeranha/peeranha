@@ -1,20 +1,33 @@
 const { expect } = require("chai");
 const { PROTOCOL_ADMIN_ROLE, LanguagesEnum, PostTypeEnum,
-    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer
+    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer,
+    VERIFIER_ROLE,
+    VERIFIED_ROLE
 } = require('./utils');
 
 
 describe("Test communities", function() {
+    let peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed;
+    let signers;
+    let hashContainer;
+    let ipfsHashes;
+    let communitiesIds;
+    const countOfCommunities = 3;
+    beforeEach(async function() {
+        ({ peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract());
+        signers = await ethers.getSigners();
+        hashContainer = getHashContainer();
+        ipfsHashes = getHashesContainer(countOfCommunities);
+        communitiesIds = getIdsContainer(countOfCommunities);
+        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
+        await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+        await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[2].address);
+    })
     it("Test community creating", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const countOfCommunities = 3;
-        const communitiesIds = getIdsContainer(countOfCommunities);
-        const ipfsHashes = getHashesContainer(countOfCommunities);
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await Promise.all(communitiesIds.map(async(id) => {
             return await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[id - 1], createTags(5));
         }));
@@ -28,25 +41,10 @@ describe("Test communities", function() {
     });
 
     it("Test community creating / Not enough Tags", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const countOfCommunities = 2;
-        const ipfsHashes = getHashesContainer(countOfCommunities);
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await expect(peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(4))).to.be.revertedWith('Require at least 5 tags');
     });
 
     it("Test community editing", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         const community = await peeranhaCommunity.getCommunity(1);
         await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[0]);
@@ -58,13 +56,7 @@ describe("Test communities", function() {
     })
 
     it("Test tags creation", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
         const countOfTags = 5;
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
         const tags = createTags(countOfTags);
 
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], tags);
@@ -82,13 +74,6 @@ describe("Test communities", function() {
     })
 
     it("Test tag editing", async function() {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         expect(await peeranhaCommunity.getTagsCount(1)).to.equal(5);
 
@@ -99,13 +84,6 @@ describe("Test communities", function() {
     })
 
     xit("Test tags creation/ Add existing tag", async function() { // TODO: how it works?
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const hashContainer = getHashContainer();
-        const signers = await ethers.getSigners();
-        
-		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         let tagList = await peeranhaCommunity.getTags(1);
         await peeranhaCommunity.createTag(signers[0].address, 1, tagList[4].ipfsDoc.hash);
@@ -123,11 +101,6 @@ describe("Test communities", function() {
     })
 
     it("Test freeze community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
         await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
@@ -137,11 +110,6 @@ describe("Test communities", function() {
     });
 
     it("Test unfreeze community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
         await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
@@ -152,12 +120,6 @@ describe("Test communities", function() {
     });
 
     it("Test protocol admin create post in frozen community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
         await peeranhaUser.connect(signers[0]).grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
 
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
@@ -167,13 +129,6 @@ describe("Test communities", function() {
     });
 
     it("Test community admin create post in frozen community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         await peeranhaUser.giveCommunityAdminPermission(signers[0].address, signers[1].address, 1);
         await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
@@ -182,13 +137,6 @@ describe("Test communities", function() {
     });
 
     it("Test community moderator create post in frozen community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         await peeranhaUser.giveCommunityModeratorPermission(signers[0].address, signers[1].address, 1);
         await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
@@ -197,13 +145,6 @@ describe("Test communities", function() {
     });
 
     it("Test community moderator create post in frozen community", async function () {
-        const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-        const ipfsHashes = getHashesContainer(2);
-        const signers = await ethers.getSigners();
-        const hashContainer = getHashContainer();
-        await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
         await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
         await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
         
