@@ -85,8 +85,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
 
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
-      RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period - 2, factoryData.factoryCommunitiesId[i]);
-      uint256 countActiveUsersInPeriod = periodRewardShares.activeUsersInPeriod.length;
+      uint256 countActiveUsersInPeriod = factoryData.peeranhaUser.getCountCommunityActiveUsersInPeriodWithPositiveRating(period - 2, factoryData.factoryCommunitiesId[i]);
       ICommunityTokenReward[] memory contractsCommunityToken = getContractsCommunityToken(factoryData.factoryCommunitiesId[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
@@ -128,6 +127,11 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     return factoryData.factoryCommunitiesId;
   }
 
+  function isSetPoolForCurrentPeriod() override external view returns(bool) {
+    uint16 period = RewardLib.getPeriod();
+    return factoryData.isSetPool[period];
+  }
+
     // function getUserCommunityReward(address userAddress, uint16 period, uint32 communityId, address communityTokenContractAddress) public view override returns(uint256) {
   //   RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, communityId);
   //   int32 ratingToReward = factoryData.peeranhaUser.getRatingToReward(userAddress, period, communityId);
@@ -142,6 +146,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // }
 
   function getVersion() public pure returns (uint256) {
-    return 2;
+    return 9;
   }
 }

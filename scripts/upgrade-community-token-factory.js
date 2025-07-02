@@ -7,7 +7,7 @@ async function main() {
   
   const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
   console.log("Upgrading CommunityTokenRewardFactory...");
-  const communityTokenRewardFactory = await upgrades.upgradeProxy("0xed0bFfdaF4037c88F97029886503a1C361f6cFBb", CommunityTokenRewardFactory, {timeout: 0});
+  const communityTokenRewardFactory = await upgrades.upgradeProxy("0x2fDf856dC94AD06Dc40840C34abeE15fD837F2A3", CommunityTokenRewardFactory, {timeout: 0});
   console.log("CommunityTokenRewardFactory upgraded at:", communityTokenRewardFactory.address);
 }
 
