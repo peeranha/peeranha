@@ -67,8 +67,8 @@ const unitTest = [
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
-    { field: 'function getContractInformation(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
-	{ field: 'function getPeriod(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+    { field: 'function getContractInformation(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function getPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function claimReward(', value: ``, path: `../contracts/PeeranhaToken.sol`, isFunction: true },
 	{ field: 'function getVotedUsers(', value: ``, path: `../contracts/PeeranhaContent.sol`, isFunction: true },
 ];

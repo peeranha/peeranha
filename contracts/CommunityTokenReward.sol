@@ -126,7 +126,7 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
       // check that the company has started for the currentPeriod - 2
       if (claimPeriodRewardParams.availableBalance > 0) {
         uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
-        uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // min?
+        uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // need min?
         totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
         totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
         communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
@@ -170,6 +170,6 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
   }
 
   function getVersion() public pure returns (uint256) {
-    return 1;
+    return 2;
   }
 }

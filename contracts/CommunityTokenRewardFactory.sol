@@ -45,12 +45,12 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     }
   }
 
-  function createNewCommunityTokenReward(address userAddress, uint32 communityId, address tokenAddress, uint256 maxRewardPerPeriod, uint256 activeUsersInPeriod) external override {
+  function createNewCommunityTokenReward(address userAddress, uint32 communityId, address tokenAddress, uint256 maxRewardPerPeriod, uint256 maxRewardPerUser) external override {
     dispatcherCheck(userAddress);
     factoryData.peeranhaUser.checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0); // todo test
 
     factoryData.peeranhaCommunity.onlyExistingAndNotFrozenCommunity(userAddress, communityId);
-    factoryData.communitiesTokenReward[communityId].push(new CommunityTokenReward(tokenAddress, maxRewardPerPeriod, activeUsersInPeriod, address(this), communityId, address(factoryData.peeranhaUser)));
+    factoryData.communitiesTokenReward[communityId].push(new CommunityTokenReward(tokenAddress, maxRewardPerPeriod, maxRewardPerUser, address(this), communityId, address(factoryData.peeranhaUser)));
     
     bool existingCommunityId;
     for (uint256 i; i < factoryData.factoryCommunitiesId.length; i++) {
@@ -85,13 +85,14 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
 
     uint256 rewardCommunitiesLength = factoryData.factoryCommunitiesId.length;
     for (uint256 i; i < rewardCommunitiesLength; i++) {
-      RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period, factoryData.factoryCommunitiesId[i]);
+      RewardLib.PeriodRewardShares memory periodRewardShares = factoryData.peeranhaUser.getPeriodCommunityRewardShares(period - 2, factoryData.factoryCommunitiesId[i]);
+      uint256 countActiveUsersInPeriod = periodRewardShares.activeUsersInPeriod.length;
       ICommunityTokenReward[] memory contractsCommunityToken = getContractsCommunityToken(factoryData.factoryCommunitiesId[i]);
       uint256 contractsCommunityTokenLength = contractsCommunityToken.length;
       for (uint256 communityTokenIndex; communityTokenIndex < contractsCommunityTokenLength; communityTokenIndex++) {
         ICommunityTokenReward communityToken = contractsCommunityToken[communityTokenIndex];
         if (address(communityToken) != address(0)) {
-          communityToken.startNewPeriod(periodRewardShares.activeUsersInPeriod.length, period);
+          communityToken.startNewPeriod(countActiveUsersInPeriod, period);
         }
       }
     }
@@ -141,6 +142,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // }
 
   function getVersion() public pure returns (uint256) {
-    return 1;
+    return 5;
   }
 }
