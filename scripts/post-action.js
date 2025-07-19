@@ -195,12 +195,12 @@ async function main() {
 async function userFunctions() {
   const signers = await ethers.getSigners();
   const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
-		libraries: {
-			UserLib: USERLIB_ADDRESS,
-		}
-	});
-  console.log(`USER_ADDRESS ${USER_ADDRESS}`)
-  const peeranhaUser = await PeeranhaUser.attach(USER_ADDRESS);
+        libraries: {
+            UserLib: "0xC8c3872Be1a50403C52e14c1d4892FcF192dEf14",
+        }
+    });
+  console.log(`USER_ADDRESS ${signers[0].address}`)
+  const peeranhaUser = await PeeranhaUser.attach("0xdde933d7824dF50a6B6c0ce4C80DD85F6a80EFb0");
 
   const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists(signers[0].address);

@@ -72,6 +72,13 @@ module.exports = {
       gas: 7000000,
       gasPrice: 920000000
     },
+    supra: {
+      url: `https://rpc-evmstaging.supra.com/rpc/v1/eth`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 119,
+      gas: 4100000,
+      gasPrice: 12000000000
+    },
     local: {
       url: `http://localhost:8545`,
       accounts: [ADMIN_PRIVATE_KEY],
