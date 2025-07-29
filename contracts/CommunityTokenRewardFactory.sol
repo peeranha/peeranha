@@ -21,7 +21,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     IPeeranhaCommunity peeranhaCommunity;
   }
 
-  bytes32 public constant OWNER_COMMUNITY_TOKEN_FACTORY = bytes32(keccak256("OWNER_COMMUNITY_TOKEN_FACTORY"));
+  bytes32 public constant OWNER_COMMUNITY_TOKEN_FACTORY = bytes32(keccak256("OWNER_COMMUNITY_TOKEN_FACTORY")); // add START_FACTORY_PERIOD_ROLE
 
   FactoryData factoryData;
 
@@ -146,6 +146,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // }
 
   function getVersion() public pure returns (uint256) {
-    return 9;
+    return 10;
   }
 }

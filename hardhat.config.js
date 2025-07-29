@@ -1,5 +1,7 @@
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
+// require("@nomicfoundation/hardhat-toolbox");
+// require("@nomicfoundation/hardhat-verify");
 require('@openzeppelin/hardhat-upgrades');
 require('@openzeppelin/hardhat-defender');
 require("@nomiclabs/hardhat-etherscan");
@@ -65,12 +67,20 @@ module.exports = {
       gas: 2100000,
       gasPrice: 10000000000
     },
-    sepolia: {
+    base_sepolia: {
       url: `https://sepolia.base.org`,
       accounts: [ADMIN_PRIVATE_KEY],
       chainId: 84532,
       gas: 7000000,
-      gasPrice: 920000000
+      gasPrice: 6318562,
+      // url: 'https://base-sepolia.blockpi.network/v1/rpc/public',
+    },
+    supra: {
+      url: `https://rpc-evm-devnet.supra.com/rpc/v1/eth`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 996447617256,
+      gas: 210000000,
+      gasPrice: 30000000000
     },
     local: {
       url: `http://localhost:8545`,
@@ -83,7 +93,19 @@ module.exports = {
     apiKey: {
       polygonMumbai: POLYGON_API_KEY,
       polygon: POLYGON_API_KEY,
-      goerli: GOERLI_API_KEY
-    }
-  }
+      goerli: GOERLI_API_KEY,
+      base_sepolia: "base_sepolia"
+    },
+    /*customChains: [
+      {
+        network: "base_sepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/testnet/evm/84532/etherscan",
+          browserURL: "https://base.testnet.thesuperscan.io"
+        }
+      }
+    ]*/
+  },
+  
 };

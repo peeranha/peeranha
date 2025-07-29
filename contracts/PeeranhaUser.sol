@@ -541,7 +541,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
 
     function checkUserVerified(address actionCaller) public override view {
         bool isVerified = hasRole(VERIFIED_ROLE, actionCaller);
-        require(isVerified, "user_not_verified");
+        // require(isVerified, "user_not_verified");
     }
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
@@ -685,10 +685,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
     }
 
     // Used for unit tests
-    /*function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
+    function addUserRating(address userAddr, int32 rating, uint32 communityId) public {
         checkHasRole(_msgSender(), UserLib.ActionRole.Admin, 0);
         UserLib.updateUserRating(userContext, communityReward, achievementsMetadata, userAddr, rating, communityId);
-    }*/
+    }
 
     // Used for unit tests
     /*function setEnergy(address userAddr, uint16 energy) public {

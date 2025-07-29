@@ -594,7 +594,7 @@ library UserLib {
     // Activate period rating for community if this is the first change
     if (isFirstTransactionInPeriod) {
       currentPeriodRating.isActive = true;
-      communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr);
+      communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[currentPeriod].activeUsersInPeriod.push(userAddr); ///
     }
   }
 
