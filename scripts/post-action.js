@@ -20,7 +20,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, OWNER_COMMUNITY_TOKEN_FACTORY } = require("../test/contracts/utils");
 const abiDecoder = require('abi-decoder'); // eslint-disable-line import/no-extraneous-dependencies
-const abi = require('../../peeranha-subgraph/abis/PeeranhaContent.json');
+// const abi = require('../../peeranha-subgraph/abis/PeeranhaContent.json');
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
 const SAVE_FILE_SERVICE = "save-file"
@@ -205,7 +205,7 @@ async function userFunctions() {
   const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists(signers[0].address);
   // const txObj = await peeranhaUser.updateUser(signers[0].address, await getBytes32FromData(testAccount));
-  // const txObj = await peeranhaUser.addUserRating("0x48086ef90c4a9e86bbff12d02d447929a6fa824b", 100, 2);
+  // const txObj = await peeranhaUser.addUserRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 3, 1);
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   
   // const txObj = await peeranhaUser.hasRole(OWNER_COMMUNITY_TOKEN_FACTORY, signers[0].address);
@@ -228,6 +228,12 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.getUsersCount();
   // const txObj = await peeranhaUser.getUsersCount();
   // const txObj = await peeranhaUser.getUserByAddress("0xd06b205d2826b481e64492f85694d07e57a17b19");
+
+  // const txObj = await peeranhaUser.getCountCommunityActiveUsersInPeriodWithPositiveRating(22983 + 1179, 1);
+
+  // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 22983 + 1267, 1)
+  // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 24187, 1)
+  // const txObj = await peeranhaUser.getPeriod();
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
