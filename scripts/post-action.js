@@ -18,7 +18,7 @@ const {
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, OWNER_COMMUNITY_TOKEN_FACTORY, VERIFIED_ROLE, VERIFIER_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, START_FACTORY_PERIOD_ROLE, VERIFIED_ROLE, VERIFIER_ROLE } = require("../test/contracts/utils");
 const abiDecoder = require('abi-decoder'); // eslint-disable-line import/no-extraneous-dependencies
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
@@ -244,7 +244,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x570895fd1f7d529606e495885f6eaf1924baa08e");
-  // const txObj = await peeranhaUser.grantRole(OWNER_COMMUNITY_TOKEN_FACTORY, "0x1bd5E2E125e376E0fF08B33b478A4753dD8CF371");
+  // const txObj = await peeranhaUser.grantRole(START_FACTORY_PERIOD_ROLE, "0x1bd5E2E125e376E0fF08B33b478A4753dD8CF371");
   // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.getRoleAdmin(VERIFIED_ROLE);
