@@ -6,7 +6,7 @@ const {
 	energyFollowCommunity, energyForumVoteCancel, energyCreateCommunity, energyCreateTag, energyArray, TRANSACTION_DELAY, LanguagesEnum
 } = require('./utils');
 
-// TODO
+// TODO + add verification
 describe("Test energy", function () {
 	/*for (const { rating, energy, status } of energyArray) {
 		

@@ -2,7 +2,9 @@ const { expect } = require("chai");
 const crypto = require("crypto");
 const { ethers } = require("hardhat");
 const { PostTypeEnum, LanguagesEnum, DefaultCommunityId, PROTOCOL_ADMIN_ROLE,
-    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash } = require('./utils');
+    createPeerenhaAndTokenContract, getIdsContainer, getHashesContainer, createTags, getHashContainer, getHash, 
+    VERIFIER_ROLE,
+    VERIFIED_ROLE} = require('./utils');
 
 describe("Test ban users", function() {
     beforeEach(async function () {
@@ -20,7 +22,10 @@ describe("Test ban users", function() {
         communitiesIds = getIdsContainer(countOfCommunities);
 
 		await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
+        await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
         await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+        await peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address);
 		await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 	});
 
