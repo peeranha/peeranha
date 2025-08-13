@@ -37,6 +37,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
 
     function initialize() public initializer {
         __Peeranha_init();
+        setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
+        setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
     }
     
     function __Peeranha_init() public onlyInitializing {
@@ -183,8 +185,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         dispatcherCheck(userAddress);
         checkUser(targetUserAddress);
         checkHasRole(userAddress, UserLib.ActionRole.Admin, 0);
-        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.Admin, 0);
-        require(!isHasRole, "You_can_not_ban_admin");
+        bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, targetUserAddress);
+        require(!isAdmin, "You_can_not_ban_admin");
 
         UserLib.banUser(bannedUsers, userAddress, targetUserAddress);
     }
@@ -218,8 +220,10 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         dispatcherCheck(userAddress);
         checkUser(targetUserAddress);
         checkHasRole(userAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
-        (bool isHasRole,) = isHasRoles(targetUserAddress, UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator, communityId);
-        require(!isHasRole, "You_can_not_ban_admin_communityAdmin_or_communityModerator");
+        bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, targetUserAddress);
+        bool isCommunityAdmin = hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), targetUserAddress);
+        bool isCommunityModerator = hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), targetUserAddress);
+        require(!isAdmin && !isCommunityAdmin && !isCommunityModerator, "You_can_not_ban_admin_communityAdmin_or_communityModerator");
 
         UserLib.banCommunityUser(bannedUsers, userAddress, targetUserAddress, communityId);
     }
@@ -546,7 +550,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
 
     function checkHasRole(address actionCaller, UserLib.ActionRole actionRole, uint32 communityId) public override view {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
-        checkUserVerified(actionCaller);
         (bool isHasRole, string memory message) = isHasRoles(actionCaller, actionRole, communityId);
         require(isHasRole, message);
     }
@@ -555,17 +558,23 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         bool isAdmin = hasRole(PROTOCOL_ADMIN_ROLE, actionCaller);
         bool isCommunityAdmin = hasRole(getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), actionCaller);
         bool isCommunityModerator = hasRole(getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), actionCaller);
+        bool isBot = hasRole(BOT_ROLE, actionCaller);
+        bool isDispatcher = hasRole(DISPATCHER_ROLE, actionCaller);
         string memory message;
         bool isHasRole;
+
+        if (!isAdmin && !isCommunityAdmin && !isCommunityModerator && !isBot && !isDispatcher && actionCaller != CommonLib.BOT_ADDRESS) {
+            checkUserVerified(actionCaller);
+        }
 
         if (actionRole == UserLib.ActionRole.NONE) {
             isHasRole = true;
             message = '';
         } else if (actionRole == UserLib.ActionRole.Admin && !isAdmin) {
             message = "not_allowed_not_admin";
-        } else if (actionRole == UserLib.ActionRole.Bot && !hasRole(BOT_ROLE, actionCaller)) {
+        } else if (actionRole == UserLib.ActionRole.Bot && !isBot) {
             message = "not_allowed_not_bot";
-        } else if (actionRole == UserLib.ActionRole.Dispatcher && !hasRole(DISPATCHER_ROLE, actionCaller)) {
+        } else if (actionRole == UserLib.ActionRole.Dispatcher && !isDispatcher) {
             message = "not_allowed_not_dispatcher";
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityModerator && 
             !(isAdmin || (isCommunityModerator))) {
@@ -652,7 +661,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         uint32 penalty;
         for (uint i; i < countActiveUsers; i++) {
             (rating, penalty) = UserLib.getUserPeriodCommunityRating(userContext, allActiveUsers[i], period, communityId);
-            if(rating > 0)
+            if(rating > penalty) //test
                 countActiveUsersWithPositiveRating++;
         }
         return countActiveUsersWithPositiveRating;
@@ -673,7 +682,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
     }
 
     function getVersion() public pure returns (uint256) {
-        return 100;
+        return 105;
     }
 
     /**

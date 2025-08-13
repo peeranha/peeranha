@@ -233,12 +233,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.createUser(signers[0].address, await getBytes32FromData(testAccount));
   // const txObj = await peeranhaUser.isUserExists("0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.updateUser(signers[0].address, await getBytes32FromData(testAccount));
-  
-  const txObj = await peeranhaUser.addUserRating("0xd29bb5c65c2e7721c5f81f128d243702a0049c01", -2, 1);
-  // 0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499
-  // 0x31339c62C0A44b875297945edb93D88092b5fa91
-  // 0xd29bb5c65c2e7721c5f81f128d243702a0049c01
-
+  // const txObj = await peeranhaUser.addUserRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 3, 1);
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   
   // const txObj = await peeranhaUser.hasRole(VERIFIED_ROLE, "0x27C87b99BbDd93857D841d72e0Fd7d176a915Ec0");
@@ -265,9 +260,12 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.getUsersCount();
   // const txObj = await peeranhaUser.getUserByAddress("0xd06b205d2826b481e64492f85694d07e57a17b19");
 
+  // const txObj = await peeranhaUser.getCountCommunityActiveUsersInPeriodWithPositiveRating(22983 + 1179, 1);
   // const txObj = await peeranhaUser.getContractInformation();
 
-  // const txObj = await peeranhaUser.getCountCommunityActiveUsersInPeriodWithPositiveRating(22983 + 811, 1);
+  // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 22983 + 1267, 1)
+  // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 24187, 1)
+  // const txObj = await peeranhaUser.getPeriod();
 
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);

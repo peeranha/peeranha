@@ -1,5 +1,5 @@
 const { ethers, upgrades } = require("hardhat");
-const { CONTENT_ADDRESS } = require('../env.json');
+const { COMMUNITY_TOKEN_FACTORY_ADDRESS } = require('../env.json');
 const { getChainName, verifyContract } = require('./common-action');
 
 async function main() {
@@ -7,7 +7,7 @@ async function main() {
   
   const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
   console.log("Upgrading CommunityTokenRewardFactory...");
-  const communityTokenRewardFactory = await upgrades.upgradeProxy("0x2fDf856dC94AD06Dc40840C34abeE15fD837F2A3", CommunityTokenRewardFactory, {timeout: 0});
+  const communityTokenRewardFactory = await upgrades.upgradeProxy(COMMUNITY_TOKEN_FACTORY_ADDRESS, CommunityTokenRewardFactory, {timeout: 0});
   console.log("CommunityTokenRewardFactory upgraded at:", communityTokenRewardFactory.address);
 }
 

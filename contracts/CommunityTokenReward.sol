@@ -150,9 +150,9 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
     require(totalTokenPool > 0, "pool_not_set");    // todo: tests
 
     uint32 communityId = communityTokenContainer.info.communityId;
-    RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityId);    // 8000
-    int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityId);      // 3 || 3000
-    uint256 userReward = getUserReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward) * 1000, totalTokenPool); // 8000 3000 2800
+    RewardLib.PeriodRewardShares memory periodRewardShares = communityTokenContainer.peeranhaUser.getPeriodCommunityRewardShares(period, communityId);
+    int32 ratingToReward = communityTokenContainer.peeranhaUser.getRatingToReward(userAddress, period, communityId);
+    uint256 userReward = getUserReward(periodRewardShares, CommonLib.toUInt32FromInt32(ratingToReward) * 1000, totalTokenPool);
     require(userReward > 0, "user reward is 0");  // todo tests
 
     IERC20Metadata(communityTokenContainer.info.tokenAddress).transfer(userAddress, userReward);
