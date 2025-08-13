@@ -1,19 +1,29 @@
 const { expect } = require("chai");
-const { wait, getInt, getAddressContract, createPeerenhaAndTokenContract, hashContainer, createTags, getHashesContainer, PROTOCOL_ADMIN_ROLE, AchievementsType } = require('./utils');
+const { wait, getInt, getAddressContract, createPeerenhaAndTokenContract, hashContainer, createTags, getHashesContainer, PROTOCOL_ADMIN_ROLE, AchievementsType, VERIFIED_ROLE, VERIFIER_ROLE } = require('./utils');
 const bs58 = require('bs58');
 
 
 describe("Test NFT", function () {
 	const ipfsHashes = getHashesContainer(2);
+	let peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed;
+	let URIContainer;
+	let signers;
+	beforeEach(async function () {
+		({ peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract());
+		URIContainer = getURIContainer();
+		signers = await ethers.getSigners();
+		await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+		await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+		await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[1].address);
+		await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
+		await peeranhaUser.grantRole(VERIFIED_ROLE, signers[2].address);
+	});
 
 	describe("Test common NFT", function () {
 
 		it("Add achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(111, 15, URIContainer[0], 0, AchievementsType.Rating);
 			const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1)
 
@@ -30,20 +40,11 @@ describe("Test NFT", function () {
 		});
 
 		it("Add achievement community not exist", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await expect(peeranhaUser.configureNewAchievement(111, 15, URIContainer[0], 1, AchievementsType.Rating))
 				.to.be.revertedWith('Community does not exist');
 		});
 
 		it("Add achievement community is frozen", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(signers[0].address, 1);
 
@@ -51,11 +52,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add achievement/ Boundary test", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(1, 15, URIContainer[0], 0, AchievementsType.Rating);
 			await peeranhaUser.configureNewAchievement(999999, 100, URIContainer[1], 0, AchievementsType.Rating);
 			const peeranhaAchievement1 = await peeranhaUser.getAchievementConfig(1);
@@ -71,10 +67,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add achievement with 0 token pool", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 0, AchievementsType.Rating);
 
 			const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1);
@@ -84,33 +76,16 @@ describe("Test NFT", function () {
 		});
 
 		it("Add achievement with exceeded token pool", async function () {		// need?
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-		
 			await expect(peeranhaUser.configureNewAchievement(1000000, 15, URIContainer[0], 0, AchievementsType.Rating))
 				.to.be.revertedWith('Max count of achievements must be less than 1 000 000');
 		});
 
 		it("Add achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			const URIContainer = getURIContainer();
-		
 			await expect(peeranhaUser.connect(signers[1]).configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.Rating))
 			.to.be.revertedWith('not_allowed_not_admin');
 		});
 
 		it("New admin add achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
 			await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, signers[1].address);
 
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
@@ -119,13 +94,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 			await expect(peeranhaUser.connect(signers[1]).configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.Rating))
@@ -133,13 +101,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Call NFT action from NFT contract", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 
@@ -148,12 +109,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give 1st NFT", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
 			await peeranhaUser.addUserRating(accountDeployed, 10, 1);
@@ -175,11 +130,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test add achievement after user achieved its requirements", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.addUserRating(accountDeployed, 10, 1);
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
@@ -195,11 +145,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give 1st NFT (try double)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[1], 0, AchievementsType.Rating);
@@ -215,11 +160,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give 1st NFT low rating", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
@@ -233,12 +173,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give NFT 2 users", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
 
@@ -267,13 +201,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give NFT 3 users with maximum count 2", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(2, 15, URIContainer[1], 0, AchievementsType.Rating);
@@ -301,11 +228,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give NFTs for 2 achievements", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
@@ -342,12 +264,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test transfer token", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
@@ -371,12 +287,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test update rating after transfer", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[0]);
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[0], 0, AchievementsType.Rating);
@@ -398,10 +308,7 @@ describe("Test NFT", function () {
 	describe("Test manual NFT", function () {
 
 		it("Test add manual achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
+			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.Manual);
 
@@ -419,11 +326,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give manual achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.Manual);
 			await peeranhaUser.mintManualNFT(signers[0].address, 1);
 
@@ -441,11 +343,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test twice give manual achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.Manual);
 			await peeranhaUser.mintManualNFT(signers[0].address, 1);
 			await expect(peeranhaUser.mintManualNFT(signers[0].address, 1))
@@ -453,13 +350,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test mint over manual nft", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-			await peeranhaUser.connect(signers[2]).createUser(signers[2].address, hashContainer[1]);
-
 			await peeranhaUser.configureNewAchievement(2, 0, URIContainer[0], 0, AchievementsType.Manual);
 			await peeranhaUser.mintManualNFT(signers[0].address, 1);
 			await peeranhaUser.mintManualNFT(signers[1].address, 1);
@@ -468,34 +358,17 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give not exist manual achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await expect(peeranhaUser.mintManualNFT(signers[0].address, 1))
 				.to.be.revertedWith('you_can_not_mint_the_type');	// NFT does not exist
 		});
 
 		it("Test mint rating achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.Rating);
 			await expect(peeranhaUser.mintManualNFT(signers[0].address, 1))
 				.to.be.revertedWith('you_can_not_mint_the_type');
 		});
 
 		it("Add manual achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-	
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 			await expect(peeranhaUser.connect(signers[1]).configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.Manual))
@@ -503,12 +376,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add manual achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-	
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 			await peeranhaUser.configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.Manual);
@@ -518,21 +385,11 @@ describe("Test NFT", function () {
 		});
 
 		it("Call NFT action from NFT contract (config manual achievement)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-	
 			await expect(peeranhaNFT.configureNewAchievementNFT(1, 15, URIContainer[0], AchievementsType.Manual))
 				.to.be.revertedWith('AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
 
 		xit("Call NFT action from NFT contract (mint manual achievement)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-	
 			await expect(peeranhaNFT.mint(signers[0].address, 1))
 				.to.be.revertedWith('AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
@@ -541,11 +398,6 @@ describe("Test NFT", function () {
 	describe("Test soul bound NFT", function () {
 
 		it("Test add soul bound achievement (10 max count)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.SoulRating);
 
 			const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1)
@@ -562,11 +414,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test add soul bound achievement (0 max count)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(0, 0, URIContainer[0], 0, AchievementsType.SoulRating);
 
 			const peeranhaAchievement = await peeranhaUser.getAchievementConfig(1)
@@ -583,22 +430,12 @@ describe("Test NFT", function () {
 		});
 
 		it("Test mint soul bound achievement", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-
 			await peeranhaUser.configureNewAchievement(10, 0, URIContainer[0], 0, AchievementsType.SoulRating);
 			await expect(peeranhaUser.mintManualNFT(signers[0].address, 1))
 				.to.be.revertedWith('you_can_not_mint_the_type');
 		});
 
 		it("Test give 1st NFT achiuevement's community - 0 (soul rating)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 0, AchievementsType.SoulRating);
 			const communityId = await peeranhaUser.getAchievementCommunity(1);
@@ -622,11 +459,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give 1st NFT  the same achiuevement's community (soul rating)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 1, AchievementsType.SoulRating);
 			const communityId = await peeranhaUser.getAchievementCommunity(1);
@@ -650,11 +482,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give 1st NFT another achiuevement's community  (soul rating)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 2, AchievementsType.SoulRating);
@@ -673,11 +500,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test give rating and soulRating NFT ", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 0, AchievementsType.SoulRating);
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[1], 0, AchievementsType.Rating);
@@ -708,11 +530,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Test transefer soulRating NFT, rating nft exist (soul bound first)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 0, AchievementsType.SoulRating);
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[1], 0, AchievementsType.Rating);
@@ -726,11 +543,6 @@ describe("Test NFT", function () {
 		// test getAchievementTypeForNft() function ↑↓
 
 		it("Test transefer soulRating NFT, rating nft exist (soul bound second)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const URIContainer = getURIContainer();
-			const signers = await ethers.getSigners();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[1]);
-
 			await peeranhaCommunity.createCommunity(signers[0].address, ipfsHashes[0], createTags(5));
 			await peeranhaUser.configureNewAchievement(0, 15, URIContainer[0], 0, AchievementsType.Rating);
 			await peeranhaUser.configureNewAchievement(5, 15, URIContainer[1], 0, AchievementsType.SoulRating);
@@ -742,13 +554,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add soul bound achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-	
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-	
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 			await expect(peeranhaUser.connect(signers[1]).configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.SoulRating))
@@ -756,12 +561,6 @@ describe("Test NFT", function () {
 		});
 
 		it("Add soul bound achievement without admin rights", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-	
 			const tokensCount = await peeranhaNFT.balanceOf(accountDeployed);
 			await expect(await getInt(tokensCount)).to.equal(0);
 			await peeranhaUser.configureNewAchievement(100, 15, URIContainer[0], 0, AchievementsType.SoulRating);
@@ -771,21 +570,11 @@ describe("Test NFT", function () {
 		});
 
 		it("Call NFT action from NFT contract (config manual achievement)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-	
 			await expect(peeranhaNFT.configureNewAchievementNFT(0, 15, URIContainer[0], AchievementsType.Manual))
 				.to.be.revertedWith('AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
 
 		xit("Call NFT action from NFT contract (mint manual achievement)", async function () {
-			const { peeranhaContent, peeranhaUser, peeranhaCommunity, token, peeranhaNFT, accountDeployed } = await createPeerenhaAndTokenContract();
-			const signers = await ethers.getSigners();
-			const URIContainer = getURIContainer();
-			await peeranhaUser.createUser(signers[0].address, hashContainer[0]);
-	
 			await expect(peeranhaNFT.mint(signers[0].address, 1))
 				.to.be.revertedWith('AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x2f9627ff5c142077d96045d38d0d6d2cd69818f8a475262b53db7ed0d39e7b22');
 		});
