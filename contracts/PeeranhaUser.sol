@@ -661,7 +661,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         uint32 penalty;
         for (uint i; i < countActiveUsers; i++) {
             (rating, penalty) = UserLib.getUserPeriodCommunityRating(userContext, allActiveUsers[i], period, communityId);
-            if(rating > 0)
+            if(rating > penalty) //test
                 countActiveUsersWithPositiveRating++;
         }
         return countActiveUsersWithPositiveRating;
@@ -682,7 +682,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
     }
 
     function getVersion() public pure returns (uint256) {
-        return 100;
+        return 105;
     }
 
     /**
