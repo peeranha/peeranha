@@ -653,6 +653,20 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         return communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
     }
 
+    function getCountCommunityActiveUsersInPeriodWithPositiveRating(uint16 period, uint32 communityId) external override view returns (uint256) {
+        address[] memory allActiveUsers = communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
+        uint256 countActiveUsers = allActiveUsers.length;
+        uint256 countActiveUsersWithPositiveRating = 0;
+        uint32 rating;
+        uint32 penalty;
+        for (uint i; i < countActiveUsers; i++) {
+            (rating, penalty) = UserLib.getUserPeriodCommunityRating(userContext, allActiveUsers[i], period, communityId);
+            if(rating > 0)
+                countActiveUsersWithPositiveRating++;
+        }
+        return countActiveUsersWithPositiveRating;
+    }
+
     /**
      * @dev Get current period.
     */

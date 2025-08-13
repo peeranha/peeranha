@@ -114,11 +114,6 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
   function startNewPeriod(uint256 countActiveUsersInPeriod, uint16 currentPeriod) external override {
     require(_msgSender() == communityTokenContainer.info.communityTokenRewardFactoryAddress, "only_community_token_reward_factory_contract_can_call_this_action");
 
-    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[currentPeriod];
-    rewardPeriodParams.maxTotalTokenPool = communityTokenContainer.info.maxRewardPerPeriod;
-    rewardPeriodParams.maxRewardPerUser = communityTokenContainer.info.maxRewardPerUser;
-    rewardPeriodParams.availableBalance = getAvailableRewardsBalance();
-
     // ignore for first 2 period
     if (currentPeriod >= 2 && communityTokenContainer.rewardPeriodParams[currentPeriod - 2].availableBalance > 0) {  // todo test
 
@@ -128,13 +123,23 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
         uint256 totalPeriodReward = claimPeriodRewardParams.maxTotalTokenPool;
         uint256 maxPeriodRewardForAllUser = countActiveUsersInPeriod * claimPeriodRewardParams.maxRewardPerUser;   // need min?
         totalPeriodReward = CommonLib.minUint256(totalPeriodReward, maxPeriodRewardForAllUser);
-        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, getAvailableRewardsBalance());
-        communityTokenContainer.info.reservedTokens += totalPeriodReward;  // todo: tests
+        totalPeriodReward = CommonLib.minUint256(totalPeriodReward, claimPeriodRewardParams.availableBalance);  // test claimPeriodRewardParams.availableBalance
+        communityTokenContainer.info.reservedTokens -= claimPeriodRewardParams.maxTotalTokenPool - totalPeriodReward;  // todo: tests + description
 
         claimPeriodRewardParams.totalTokenPool = totalPeriodReward;
+        claimPeriodRewardParams.availableBalance += claimPeriodRewardParams.maxTotalTokenPool - totalPeriodReward;
       }
     }
 
+    uint256 availableRewardsBalance = getAvailableRewardsBalance();
+    RewardPeriodParams storage rewardPeriodParams = communityTokenContainer.rewardPeriodParams[currentPeriod];
+    rewardPeriodParams.availableBalance = availableRewardsBalance;
+    rewardPeriodParams.maxTotalTokenPool = CommonLib.minUint256(availableRewardsBalance, communityTokenContainer.info.maxRewardPerPeriod);    // test (balance off)
+    rewardPeriodParams.maxRewardPerUser =  rewardPeriodParams.maxRewardPerUser > rewardPeriodParams.maxTotalTokenPool ?                       // test (balance off)
+                                            rewardPeriodParams.maxTotalTokenPool :
+                                            communityTokenContainer.info.maxRewardPerUser;
+
+    communityTokenContainer.info.reservedTokens += rewardPeriodParams.maxTotalTokenPool;  // todo: tests
     emit PeriodStarted(currentPeriod);
   }
 
@@ -170,6 +175,6 @@ contract CommunityTokenReward is ICommunityTokenReward, NativeMetaTransaction, A
   }
 
   function getVersion() public pure returns (uint256) {
-    return 2;
+    return 10;
   }
 }
