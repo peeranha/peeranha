@@ -16,7 +16,7 @@ async function main() {
     }
   });
 
-  const peeranhaUser = await upgrades.upgradeProxy("0xa11AE585A404877975ea29C83F91F31639B72871", PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0});
+  const peeranhaUser = await upgrades.upgradeProxy(USER_ADDRESS, PeeranhaUser, {unsafeAllowLinkedLibraries: true, timeout: 0});
   console.log("Peeranha User upgraded at address:", peeranhaUser.address);
   
   const userLibProxyAddress = await userLib.resolvedAddress;
