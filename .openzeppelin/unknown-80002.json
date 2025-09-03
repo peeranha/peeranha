@@ -1,33 +1,48 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x7C8AaF787477D4D5937DeeBe95D35914bAB12846"
+    "address": "0x35a5931a7Bf8486558700Bb379fb528EDe036406"
   },
   "proxies": [
     {
-      "address": "0x0409170935e270E9456a9602A0c0D6CB9865A1a2",
+      "address": "0x429593CE195204F86886B38FAdf25635c632eCa4",
       "kind": "transparent"
     },
     {
-      "address": "0x00db9D50fc820Fe8c59836afCa394233e3dEB24b",
+      "address": "0x9875C65Fc23794D8Fc79C3e514C13787f824E96b",
       "kind": "transparent"
     },
     {
-      "address": "0x9EDa3BFB1C538B5978a49443bC940f2EecB21c1A",
+      "address": "0xb98d7D3B3ea8fa34354b6DD24aED50e3BA02aD7A",
       "kind": "transparent"
     },
     {
-      "address": "0xa21D95085985496F754F16Cee5cbfb0eb1118108",
+      "address": "0xAd963127b0d4e343F427102F5441d6446F2e7b20",
       "kind": "transparent"
     },
     {
-      "address": "0xce5ACD3f96C8C71Ca1237776a6398d8045412858",
+      "address": "0xcA5fFC540fA933ccA1Bc06F566AAd96320D82966",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xC499600583Cf0630e9d4b174a228C87A5DfF1Ea9",
+      "txHash": "0x3c22f9cca9627e1005ab1c6e572b5aa28e1f5ce0b29841100845ffe025286081",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xA541E514D3aB88413411F72D65d51f9241656cE4",
+      "txHash": "0xda701731cefa19541a49bb1dd59889974d87e99c072e94c00b12d7c4aeeebf16",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x91AdfA9d9867b23eDc6Cc786677eA5D1aEA46202",
+      "txHash": "0xe860e5da0228edf686920447125f3db283492387753668cdabf4e059c1a278ab",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "3e4addfd47ee63ef0072e41721aa2ba698fb4ca17b01e96bfd2fb2ee96dfe9b3": {
-      "address": "0xda99829545319EBbB73F853474561EfdE5E0ea3d",
+    "6a5dd750eadd472dcfa40812aa6ad9877466d26c20bdb0208d0f3da2b552cefc": {
+      "address": "0xa01F5D91A3a722F7Bde21d4aca64c1dcC036c276",
       "layout": {
         "storage": [
           {
@@ -115,7 +130,7 @@
             "label": "userContext",
             "offset": 0,
             "slot": "203",
-            "type": "t_struct(UserContext)21726_storage",
+            "type": "t_struct(UserContext)21369_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:33"
           },
@@ -123,7 +138,7 @@
             "label": "achievementsMetadata",
             "offset": 0,
             "slot": "213",
-            "type": "t_struct(AchievementsMetadata)14964_storage",
+            "type": "t_struct(AchievementsMetadata)14607_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:34"
           },
@@ -131,7 +146,7 @@
             "label": "bannedUsers",
             "offset": 0,
             "slot": "214",
-            "type": "t_struct(BannedUsers)21741_storage",
+            "type": "t_struct(BannedUsers)21384_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:35"
           },
@@ -139,7 +154,7 @@
             "label": "communityReward",
             "offset": 0,
             "slot": "215",
-            "type": "t_struct(CommunityReward)21447_storage",
+            "type": "t_struct(CommunityReward)21090_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:36"
           }
@@ -181,23 +196,23 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IPeeranhaCommunity)14340": {
+          "t_contract(IPeeranhaCommunity)13992": {
             "label": "contract IPeeranhaCommunity",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaContent)14591": {
+          "t_contract(IPeeranhaContent)14243": {
             "label": "contract IPeeranhaContent",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaNFT)14661": {
+          "t_contract(IPeeranhaNFT)14313": {
             "label": "contract IPeeranhaNFT",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaToken)14674": {
+          "t_contract(IPeeranhaToken)14326": {
             "label": "contract IPeeranhaToken",
             "numberOfBytes": "20"
           },
-          "t_enum(AchievementsType)14901": {
+          "t_enum(AchievementsType)14544": {
             "label": "enum AchievementCommonLib.AchievementsType",
             "members": [
               "Rating",
@@ -222,15 +237,15 @@
             "label": "mapping(address => mapping(uint64 => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(BannedUserInfo)21748_storage)": {
+          "t_mapping(t_address,t_struct(BannedUserInfo)21391_storage)": {
             "label": "mapping(address => struct UserLib.BannedUserInfo)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(CommunityRatingForUser)21690_storage)": {
+          "t_mapping(t_address,t_struct(CommunityRatingForUser)21333_storage)": {
             "label": "mapping(address => struct UserLib.CommunityRatingForUser)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)21670_storage)": {
+          "t_mapping(t_address,t_struct(User)21313_storage)": {
             "label": "mapping(address => struct UserLib.User)",
             "numberOfBytes": "32"
           },
@@ -250,11 +265,11 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(PeriodRewardShares)21459_storage)": {
+          "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)": {
             "label": "mapping(uint16 => struct RewardLib.PeriodRewardShares)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(UserPeriodRewards)21468_storage)": {
+          "t_mapping(t_uint16,t_struct(UserPeriodRewards)21111_storage)": {
             "label": "mapping(uint16 => struct RewardLib.UserPeriodRewards)",
             "numberOfBytes": "32"
           },
@@ -262,15 +277,15 @@
             "label": "mapping(uint32 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21453_storage)": {
+          "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21096_storage)": {
             "label": "mapping(uint32 => struct RewardLib.CommunityPeriodReward)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(PeriodRating)21435_storage)": {
+          "t_mapping(t_uint32,t_struct(PeriodRating)21078_storage)": {
             "label": "mapping(uint32 => struct RewardLib.PeriodRating)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(UserRating)21695_storage)": {
+          "t_mapping(t_uint32,t_struct(UserRating)21338_storage)": {
             "label": "mapping(uint32 => struct UserLib.UserRating)",
             "numberOfBytes": "32"
           },
@@ -278,11 +293,11 @@
             "label": "mapping(uint64 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint64,t_struct(AchievementConfig)14941_storage)": {
+          "t_mapping(t_uint64,t_struct(AchievementConfig)14584_storage)": {
             "label": "mapping(uint64 => struct AchievementLib.AchievementConfig)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint64,t_struct(AchievementMetadata)14971_storage)": {
+          "t_mapping(t_uint64,t_struct(AchievementMetadata)14614_storage)": {
             "label": "mapping(uint64 => struct AchievementLib.AchievementMetadata)",
             "numberOfBytes": "32"
           },
@@ -290,7 +305,7 @@
             "label": "mapping(uint8 => bytes32)",
             "numberOfBytes": "32"
           },
-          "t_struct(AchievementConfig)14941_storage": {
+          "t_struct(AchievementConfig)14584_storage": {
             "label": "struct AchievementLib.AchievementConfig",
             "members": [
               {
@@ -313,14 +328,14 @@
               },
               {
                 "label": "achievementsType",
-                "type": "t_enum(AchievementsType)14901",
+                "type": "t_enum(AchievementsType)14544",
                 "offset": 24,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(AchievementMetadata)14971_storage": {
+          "t_struct(AchievementMetadata)14614_storage": {
             "label": "struct AchievementLib.AchievementMetadata",
             "members": [
               {
@@ -338,12 +353,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(AchievementsContainer)14958_storage": {
+          "t_struct(AchievementsContainer)14601_storage": {
             "label": "struct AchievementLib.AchievementsContainer",
             "members": [
               {
                 "label": "achievementsConfigs",
-                "type": "t_mapping(t_uint64,t_struct(AchievementConfig)14941_storage)",
+                "type": "t_mapping(t_uint64,t_struct(AchievementConfig)14584_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -361,19 +376,19 @@
               },
               {
                 "label": "peeranhaNFT",
-                "type": "t_contract(IPeeranhaNFT)14661",
+                "type": "t_contract(IPeeranhaNFT)14313",
                 "offset": 8,
                 "slot": "2"
               }
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(AchievementsMetadata)14964_storage": {
+          "t_struct(AchievementsMetadata)14607_storage": {
             "label": "struct AchievementLib.AchievementsMetadata",
             "members": [
               {
                 "label": "metadata",
-                "type": "t_mapping(t_uint64,t_struct(AchievementMetadata)14971_storage)",
+                "type": "t_mapping(t_uint64,t_struct(AchievementMetadata)14614_storage)",
                 "offset": 0,
                 "slot": "0"
               }
@@ -392,7 +407,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(BannedUserInfo)21748_storage": {
+          "t_struct(BannedUserInfo)21391_storage": {
             "label": "struct UserLib.BannedUserInfo",
             "members": [
               {
@@ -410,36 +425,36 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(BannedUsers)21741_storage": {
+          "t_struct(BannedUsers)21384_storage": {
             "label": "struct UserLib.BannedUsers",
             "members": [
               {
                 "label": "bannedUserInfo",
-                "type": "t_mapping(t_address,t_struct(BannedUserInfo)21748_storage)",
+                "type": "t_mapping(t_address,t_struct(BannedUserInfo)21391_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CommunityPeriodReward)21453_storage": {
+          "t_struct(CommunityPeriodReward)21096_storage": {
             "label": "struct RewardLib.CommunityPeriodReward",
             "members": [
               {
                 "label": "communityPeriodRewardShares",
-                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21459_storage)",
+                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CommunityRatingForUser)21690_storage": {
+          "t_struct(CommunityRatingForUser)21333_storage": {
             "label": "struct UserLib.CommunityRatingForUser",
             "members": [
               {
                 "label": "userRating",
-                "type": "t_mapping(t_uint32,t_struct(UserRating)21695_storage)",
+                "type": "t_mapping(t_uint32,t_struct(UserRating)21338_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -451,26 +466,26 @@
               },
               {
                 "label": "userPeriodRewards",
-                "type": "t_mapping(t_uint16,t_struct(UserPeriodRewards)21468_storage)",
+                "type": "t_mapping(t_uint16,t_struct(UserPeriodRewards)21111_storage)",
                 "offset": 0,
                 "slot": "2"
               }
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(CommunityReward)21447_storage": {
+          "t_struct(CommunityReward)21090_storage": {
             "label": "struct RewardLib.CommunityReward",
             "members": [
               {
                 "label": "communityPeriodReward",
-                "type": "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21453_storage)",
+                "type": "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21096_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(IpfsHash)15265_storage": {
+          "t_struct(IpfsHash)14908_storage": {
             "label": "struct CommonLib.IpfsHash",
             "members": [
               {
@@ -488,7 +503,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(PeriodRating)21435_storage": {
+          "t_struct(PeriodRating)21078_storage": {
             "label": "struct RewardLib.PeriodRating",
             "members": [
               {
@@ -512,19 +527,19 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PeriodRewardContainer)21441_storage": {
+          "t_struct(PeriodRewardContainer)21084_storage": {
             "label": "struct RewardLib.PeriodRewardContainer",
             "members": [
               {
                 "label": "periodRewardShares",
-                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21459_storage)",
+                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PeriodRewardShares)21459_storage": {
+          "t_struct(PeriodRewardShares)21102_storage": {
             "label": "struct RewardLib.PeriodRewardShares",
             "members": [
               {
@@ -578,12 +593,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(User)21670_storage": {
+          "t_struct(User)21313_storage": {
             "label": "struct UserLib.User",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -614,12 +629,12 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(UserCollection)21735_storage": {
+          "t_struct(UserCollection)21378_storage": {
             "label": "struct UserLib.UserCollection",
             "members": [
               {
                 "label": "users",
-                "type": "t_mapping(t_address,t_struct(User)21670_storage)",
+                "type": "t_mapping(t_address,t_struct(User)21313_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -632,55 +647,55 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserContext)21726_storage": {
+          "t_struct(UserContext)21369_storage": {
             "label": "struct UserLib.UserContext",
             "members": [
               {
                 "label": "users",
-                "type": "t_struct(UserCollection)21735_storage",
+                "type": "t_struct(UserCollection)21378_storage",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "userRatingCollection",
-                "type": "t_struct(UserRatingCollection)21676_storage",
+                "type": "t_struct(UserRatingCollection)21319_storage",
                 "offset": 0,
                 "slot": "2"
               },
               {
                 "label": "periodRewardContainer",
-                "type": "t_struct(PeriodRewardContainer)21441_storage",
+                "type": "t_struct(PeriodRewardContainer)21084_storage",
                 "offset": 0,
                 "slot": "3"
               },
               {
                 "label": "achievementsContainer",
-                "type": "t_struct(AchievementsContainer)14958_storage",
+                "type": "t_struct(AchievementsContainer)14601_storage",
                 "offset": 0,
                 "slot": "4"
               },
               {
                 "label": "peeranhaToken",
-                "type": "t_contract(IPeeranhaToken)14674",
+                "type": "t_contract(IPeeranhaToken)14326",
                 "offset": 0,
                 "slot": "7"
               },
               {
                 "label": "peeranhaCommunity",
-                "type": "t_contract(IPeeranhaCommunity)14340",
+                "type": "t_contract(IPeeranhaCommunity)13992",
                 "offset": 0,
                 "slot": "8"
               },
               {
                 "label": "peeranhaContent",
-                "type": "t_contract(IPeeranhaContent)14591",
+                "type": "t_contract(IPeeranhaContent)14243",
                 "offset": 0,
                 "slot": "9"
               }
             ],
             "numberOfBytes": "320"
           },
-          "t_struct(UserPeriodRewards)21468_storage": {
+          "t_struct(UserPeriodRewards)21111_storage": {
             "label": "struct RewardLib.UserPeriodRewards",
             "members": [
               {
@@ -691,14 +706,14 @@
               },
               {
                 "label": "periodRating",
-                "type": "t_mapping(t_uint32,t_struct(PeriodRating)21435_storage)",
+                "type": "t_mapping(t_uint32,t_struct(PeriodRating)21078_storage)",
                 "offset": 0,
                 "slot": "1"
               }
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserRating)21695_storage": {
+          "t_struct(UserRating)21338_storage": {
             "label": "struct UserLib.UserRating",
             "members": [
               {
@@ -716,12 +731,12 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(UserRatingCollection)21676_storage": {
+          "t_struct(UserRatingCollection)21319_storage": {
             "label": "struct UserLib.UserRatingCollection",
             "members": [
               {
                 "label": "communityRatingForUser",
-                "type": "t_mapping(t_address,t_struct(CommunityRatingForUser)21690_storage)",
+                "type": "t_mapping(t_address,t_struct(CommunityRatingForUser)21333_storage)",
                 "offset": 0,
                 "slot": "0"
               }
@@ -752,7 +767,7 @@
       }
     },
     "c0111f04fdb01f835c5f45e2086563ff0398ad337a699748a927b94ab36a0389": {
-      "address": "0x6d824022d8244802b5eccbf3e165C7032c19Ca47",
+      "address": "0xF351Bc62CcA98C3e26f1cd3d003f17082C05ecB4",
       "layout": {
         "storage": [
           {
@@ -800,7 +815,7 @@
             "label": "communities",
             "offset": 0,
             "slot": "53",
-            "type": "t_struct(CommunityCollection)15483_storage",
+            "type": "t_struct(CommunityCollection)15126_storage",
             "contract": "PeeranhaCommunity",
             "src": "contracts/PeeranhaCommunity.sol:17"
           },
@@ -808,7 +823,7 @@
             "label": "peeranhaUser",
             "offset": 0,
             "slot": "55",
-            "type": "t_contract(IPeeranhaUser)14893",
+            "type": "t_contract(IPeeranhaUser)14536",
             "contract": "PeeranhaCommunity",
             "src": "contracts/PeeranhaCommunity.sol:18"
           }
@@ -830,7 +845,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IPeeranhaUser)14893": {
+          "t_contract(IPeeranhaUser)14536": {
             "label": "contract IPeeranhaUser",
             "numberOfBytes": "20"
           },
@@ -838,20 +853,20 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(CommunityContainer)15475_storage)": {
+          "t_mapping(t_uint32,t_struct(CommunityContainer)15118_storage)": {
             "label": "mapping(uint32 => struct CommunityLib.CommunityContainer)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(Tag)15466_storage)": {
+          "t_mapping(t_uint32,t_struct(Tag)15109_storage)": {
             "label": "mapping(uint32 => struct CommunityLib.Tag)",
             "numberOfBytes": "32"
           },
-          "t_struct(Community)15462_storage": {
+          "t_struct(Community)15105_storage": {
             "label": "struct CommunityLib.Community",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -876,12 +891,12 @@
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(CommunityCollection)15483_storage": {
+          "t_struct(CommunityCollection)15126_storage": {
             "label": "struct CommunityLib.CommunityCollection",
             "members": [
               {
                 "label": "communities",
-                "type": "t_mapping(t_uint32,t_struct(CommunityContainer)15475_storage)",
+                "type": "t_mapping(t_uint32,t_struct(CommunityContainer)15118_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -894,25 +909,25 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(CommunityContainer)15475_storage": {
+          "t_struct(CommunityContainer)15118_storage": {
             "label": "struct CommunityLib.CommunityContainer",
             "members": [
               {
                 "label": "info",
-                "type": "t_struct(Community)15462_storage",
+                "type": "t_struct(Community)15105_storage",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "tags",
-                "type": "t_mapping(t_uint32,t_struct(Tag)15466_storage)",
+                "type": "t_mapping(t_uint32,t_struct(Tag)15109_storage)",
                 "offset": 0,
                 "slot": "3"
               }
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(IpfsHash)15265_storage": {
+          "t_struct(IpfsHash)14908_storage": {
             "label": "struct CommonLib.IpfsHash",
             "members": [
               {
@@ -930,12 +945,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Tag)15466_storage": {
+          "t_struct(Tag)15109_storage": {
             "label": "struct CommunityLib.Tag",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               }
@@ -957,8 +972,8 @@
         }
       }
     },
-    "12f7be41d3a08abac5d204f0bfad28a3991954636aa8ce111a4335b73c4df374": {
-      "address": "0x5519460350405B1CECd8Eae58964509e31b2A18d",
+    "f88373dc786347f8c8ff95b732f64cd1ce0dac8532922cf3cfae807833f752de": {
+      "address": "0xfC0549Ed25543301aDeF015E24633431A2721AEc",
       "layout": {
         "storage": [
           {
@@ -1006,7 +1021,7 @@
             "label": "posts",
             "offset": 0,
             "slot": "53",
-            "type": "t_struct(PostCollection)16374_storage",
+            "type": "t_struct(PostCollection)16017_storage",
             "contract": "PeeranhaContent",
             "src": "contracts/PeeranhaContent.sol:23"
           },
@@ -1014,7 +1029,7 @@
             "label": "documentationTree",
             "offset": 0,
             "slot": "57",
-            "type": "t_struct(DocumentationTree)16303_storage",
+            "type": "t_struct(DocumentationTree)15946_storage",
             "contract": "PeeranhaContent",
             "src": "contracts/PeeranhaContent.sol:24"
           },
@@ -1022,7 +1037,7 @@
             "label": "translations",
             "offset": 0,
             "slot": "58",
-            "type": "t_struct(TranslationCollection)16380_storage",
+            "type": "t_struct(TranslationCollection)16023_storage",
             "contract": "PeeranhaContent",
             "src": "contracts/PeeranhaContent.sol:25"
           }
@@ -1052,15 +1067,15 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IPeeranhaCommunity)14340": {
+          "t_contract(IPeeranhaCommunity)13992": {
             "label": "contract IPeeranhaCommunity",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaUser)14893": {
+          "t_contract(IPeeranhaUser)14536": {
             "label": "contract IPeeranhaUser",
             "numberOfBytes": "20"
           },
-          "t_enum(PostType)16207": {
+          "t_enum(PostType)15850": {
             "label": "enum PostLib.PostType",
             "members": [
               "ExpertPost",
@@ -1085,19 +1100,19 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(TranslationContainer)16400_storage)": {
+          "t_mapping(t_bytes32,t_struct(TranslationContainer)16043_storage)": {
             "label": "mapping(bytes32 => struct PostLib.TranslationContainer)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(ReplyContainer)16297_storage)": {
+          "t_mapping(t_uint16,t_struct(ReplyContainer)15940_storage)": {
             "label": "mapping(uint16 => struct PostLib.ReplyContainer)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(PostContainer)16360_storage)": {
+          "t_mapping(t_uint256,t_struct(PostContainer)16003_storage)": {
             "label": "mapping(uint256 => struct PostLib.PostContainer)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(IpfsHash)15265_storage)": {
+          "t_mapping(t_uint32,t_struct(IpfsHash)14908_storage)": {
             "label": "mapping(uint32 => struct CommonLib.IpfsHash)",
             "numberOfBytes": "32"
           },
@@ -1105,16 +1120,16 @@
             "label": "mapping(uint8 => bytes32)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint8,t_struct(CommentContainer)16255_storage)": {
+          "t_mapping(t_uint8,t_struct(CommentContainer)15898_storage)": {
             "label": "mapping(uint8 => struct PostLib.CommentContainer)",
             "numberOfBytes": "32"
           },
-          "t_struct(Comment)16240_storage": {
+          "t_struct(Comment)15883_storage": {
             "label": "struct PostLib.Comment",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1151,12 +1166,12 @@
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(CommentContainer)16255_storage": {
+          "t_struct(CommentContainer)15898_storage": {
             "label": "struct PostLib.CommentContainer",
             "members": [
               {
                 "label": "info",
-                "type": "t_struct(Comment)16240_storage",
+                "type": "t_struct(Comment)15883_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1181,19 +1196,19 @@
             ],
             "numberOfBytes": "192"
           },
-          "t_struct(DocumentationTree)16303_storage": {
+          "t_struct(DocumentationTree)15946_storage": {
             "label": "struct PostLib.DocumentationTree",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_mapping(t_uint32,t_struct(IpfsHash)15265_storage)",
+                "type": "t_mapping(t_uint32,t_struct(IpfsHash)14908_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(IpfsHash)15265_storage": {
+          "t_struct(IpfsHash)14908_storage": {
             "label": "struct CommonLib.IpfsHash",
             "members": [
               {
@@ -1211,12 +1226,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Post)16335_storage": {
+          "t_struct(Post)15978_storage": {
             "label": "struct PostLib.Post",
             "members": [
               {
                 "label": "postType",
-                "type": "t_enum(PostType)16207",
+                "type": "t_enum(PostType)15850",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1294,19 +1309,19 @@
               },
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "3"
               }
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(PostCollection)16374_storage": {
+          "t_struct(PostCollection)16017_storage": {
             "label": "struct PostLib.PostCollection",
             "members": [
               {
                 "label": "posts",
-                "type": "t_mapping(t_uint256,t_struct(PostContainer)16360_storage)",
+                "type": "t_mapping(t_uint256,t_struct(PostContainer)16003_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1318,37 +1333,37 @@
               },
               {
                 "label": "peeranhaCommunity",
-                "type": "t_contract(IPeeranhaCommunity)14340",
+                "type": "t_contract(IPeeranhaCommunity)13992",
                 "offset": 0,
                 "slot": "2"
               },
               {
                 "label": "peeranhaUser",
-                "type": "t_contract(IPeeranhaUser)14893",
+                "type": "t_contract(IPeeranhaUser)14536",
                 "offset": 0,
                 "slot": "3"
               }
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(PostContainer)16360_storage": {
+          "t_struct(PostContainer)16003_storage": {
             "label": "struct PostLib.PostContainer",
             "members": [
               {
                 "label": "info",
-                "type": "t_struct(Post)16335_storage",
+                "type": "t_struct(Post)15978_storage",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "replies",
-                "type": "t_mapping(t_uint16,t_struct(ReplyContainer)16297_storage)",
+                "type": "t_mapping(t_uint16,t_struct(ReplyContainer)15940_storage)",
                 "offset": 0,
                 "slot": "5"
               },
               {
                 "label": "comments",
-                "type": "t_mapping(t_uint8,t_struct(CommentContainer)16255_storage)",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)15898_storage)",
                 "offset": 0,
                 "slot": "6"
               },
@@ -1373,12 +1388,12 @@
             ],
             "numberOfBytes": "320"
           },
-          "t_struct(Reply)16277_storage": {
+          "t_struct(Reply)15920_storage": {
             "label": "struct PostLib.Reply",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1439,18 +1454,18 @@
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(ReplyContainer)16297_storage": {
+          "t_struct(ReplyContainer)15940_storage": {
             "label": "struct PostLib.ReplyContainer",
             "members": [
               {
                 "label": "info",
-                "type": "t_struct(Reply)16277_storage",
+                "type": "t_struct(Reply)15920_storage",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "comments",
-                "type": "t_mapping(t_uint8,t_struct(CommentContainer)16255_storage)",
+                "type": "t_mapping(t_uint8,t_struct(CommentContainer)15898_storage)",
                 "offset": 0,
                 "slot": "4"
               },
@@ -1475,12 +1490,12 @@
             ],
             "numberOfBytes": "256"
           },
-          "t_struct(Translation)16392_storage": {
+          "t_struct(Translation)16035_storage": {
             "label": "struct PostLib.Translation",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15265_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1511,24 +1526,24 @@
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(TranslationCollection)16380_storage": {
+          "t_struct(TranslationCollection)16023_storage": {
             "label": "struct PostLib.TranslationCollection",
             "members": [
               {
                 "label": "translations",
-                "type": "t_mapping(t_bytes32,t_struct(TranslationContainer)16400_storage)",
+                "type": "t_mapping(t_bytes32,t_struct(TranslationContainer)16043_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(TranslationContainer)16400_storage": {
+          "t_struct(TranslationContainer)16043_storage": {
             "label": "struct PostLib.TranslationContainer",
             "members": [
               {
                 "label": "info",
-                "type": "t_struct(Translation)16392_storage",
+                "type": "t_struct(Translation)16035_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1561,7 +1576,7 @@
       }
     },
     "707c4481670e24088ed6d0cfb653558f9f5f8409dbfd0dec471955c8c3eb7cd3": {
-      "address": "0x2966646908323afBffD44d5b54788B519Fe5b89B",
+      "address": "0x0e836BBb2c643Db7E392E9DFFA1176863FC22638",
       "layout": {
         "storage": [
           {
@@ -1769,7 +1784,7 @@
             "label": "achievementsNFTContainer",
             "offset": 0,
             "slot": "354",
-            "type": "t_struct(AchievementNFTsContainer)16169_storage",
+            "type": "t_struct(AchievementNFTsContainer)15812_storage",
             "contract": "PeeranhaNFT",
             "src": "contracts/PeeranhaNFT.sol:16"
           }
@@ -1811,7 +1826,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_enum(AchievementsType)14901": {
+          "t_enum(AchievementsType)14544": {
             "label": "enum AchievementCommonLib.AchievementsType",
             "members": [
               "Rating",
@@ -1864,7 +1879,7 @@
             "label": "mapping(uint256 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint64,t_struct(AchievementNFTsConfigs)16161_storage)": {
+          "t_mapping(t_uint64,t_struct(AchievementNFTsConfigs)15804_storage)": {
             "label": "mapping(uint64 => struct NFTLib.AchievementNFTsConfigs)",
             "numberOfBytes": "32"
           },
@@ -1872,7 +1887,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(AchievementNFTsConfigs)16161_storage": {
+          "t_struct(AchievementNFTsConfigs)15804_storage": {
             "label": "struct NFTLib.AchievementNFTsConfigs",
             "members": [
               {
@@ -1895,19 +1910,19 @@
               },
               {
                 "label": "achievementsType",
-                "type": "t_enum(AchievementsType)14901",
+                "type": "t_enum(AchievementsType)14544",
                 "offset": 0,
                 "slot": "2"
               }
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(AchievementNFTsContainer)16169_storage": {
+          "t_struct(AchievementNFTsContainer)15812_storage": {
             "label": "struct NFTLib.AchievementNFTsContainer",
             "members": [
               {
                 "label": "achievementsNFTConfigs",
-                "type": "t_mapping(t_uint64,t_struct(AchievementNFTsConfigs)16161_storage)",
+                "type": "t_mapping(t_uint64,t_struct(AchievementNFTsConfigs)15804_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -1984,7 +1999,7 @@
       }
     },
     "d78c98d35f0dcce4d619e7d1c1bfddf34253493242904d52e2f5cdab2855dfe5": {
-      "address": "0x543772F76882D5F44dCA96d8e10dEB82775899Ca",
+      "address": "0x499c56B1f9c936c0aFaf82ea4597528a7c4e9DE7",
       "layout": {
         "storage": [
           {
@@ -2144,7 +2159,7 @@
             "label": "statusRewardContainer",
             "offset": 0,
             "slot": "305",
-            "type": "t_struct(StatusRewardContainer)21499_storage",
+            "type": "t_struct(StatusRewardContainer)21142_storage",
             "contract": "PeeranhaToken",
             "src": "contracts/PeeranhaToken.sol:32"
           },
@@ -2152,7 +2167,7 @@
             "label": "userPeriodStake",
             "offset": 0,
             "slot": "306",
-            "type": "t_struct(UserPeriodStake)21522_storage",
+            "type": "t_struct(UserPeriodStake)21165_storage",
             "contract": "PeeranhaToken",
             "src": "contracts/PeeranhaToken.sol:33"
           },
@@ -2160,7 +2175,7 @@
             "label": "stakeTotalContainer",
             "offset": 0,
             "slot": "307",
-            "type": "t_struct(StakeTotalContainer)21511_storage",
+            "type": "t_struct(StakeTotalContainer)21154_storage",
             "contract": "PeeranhaToken",
             "src": "contracts/PeeranhaToken.sol:34"
           },
@@ -2168,7 +2183,7 @@
             "label": "peeranhaUser",
             "offset": 0,
             "slot": "309",
-            "type": "t_contract(IPeeranhaUser)14893",
+            "type": "t_contract(IPeeranhaUser)14536",
             "contract": "PeeranhaToken",
             "src": "contracts/PeeranhaToken.sol:35"
           }
@@ -2206,7 +2221,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IPeeranhaUser)14893": {
+          "t_contract(IPeeranhaUser)14536": {
             "label": "contract IPeeranhaUser",
             "numberOfBytes": "20"
           },
@@ -2218,11 +2233,11 @@
             "label": "mapping(address => mapping(address => uint256))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_mapping(t_uint16,t_struct(StatusReward)21502_storage))": {
+          "t_mapping(t_address,t_mapping(t_uint16,t_struct(StatusReward)21145_storage))": {
             "label": "mapping(address => mapping(uint16 => struct TokenLib.StatusReward))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(StakeUserContainer)21531_storage)": {
+          "t_mapping(t_address,t_struct(StakeUserContainer)21174_storage)": {
             "label": "mapping(address => struct TokenLib.StakeUserContainer)",
             "numberOfBytes": "32"
           },
@@ -2242,15 +2257,15 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(StakeTotal)21516_storage)": {
+          "t_mapping(t_uint16,t_struct(StakeTotal)21159_storage)": {
             "label": "mapping(uint16 => struct TokenLib.StakeTotal)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(StatusReward)21502_storage)": {
+          "t_mapping(t_uint16,t_struct(StatusReward)21145_storage)": {
             "label": "mapping(uint16 => struct TokenLib.StatusReward)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(UserStake)21536_storage)": {
+          "t_mapping(t_uint16,t_struct(UserStake)21179_storage)": {
             "label": "mapping(uint16 => struct TokenLib.UserStake)",
             "numberOfBytes": "32"
           },
@@ -2306,7 +2321,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(StakeTotal)21516_storage": {
+          "t_struct(StakeTotal)21159_storage": {
             "label": "struct TokenLib.StakeTotal",
             "members": [
               {
@@ -2324,12 +2339,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(StakeTotalContainer)21511_storage": {
+          "t_struct(StakeTotalContainer)21154_storage": {
             "label": "struct TokenLib.StakeTotalContainer",
             "members": [
               {
                 "label": "stakeTotals",
-                "type": "t_mapping(t_uint16,t_struct(StakeTotal)21516_storage)",
+                "type": "t_mapping(t_uint16,t_struct(StakeTotal)21159_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -2342,12 +2357,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(StakeUserContainer)21531_storage": {
+          "t_struct(StakeUserContainer)21174_storage": {
             "label": "struct TokenLib.StakeUserContainer",
             "members": [
               {
                 "label": "userStake",
-                "type": "t_mapping(t_uint16,t_struct(UserStake)21536_storage)",
+                "type": "t_mapping(t_uint16,t_struct(UserStake)21179_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -2360,7 +2375,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(StatusReward)21502_storage": {
+          "t_struct(StatusReward)21145_storage": {
             "label": "struct TokenLib.StatusReward",
             "members": [
               {
@@ -2372,31 +2387,31 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(StatusRewardContainer)21499_storage": {
+          "t_struct(StatusRewardContainer)21142_storage": {
             "label": "struct TokenLib.StatusRewardContainer",
             "members": [
               {
                 "label": "statusReward",
-                "type": "t_mapping(t_address,t_mapping(t_uint16,t_struct(StatusReward)21502_storage))",
+                "type": "t_mapping(t_address,t_mapping(t_uint16,t_struct(StatusReward)21145_storage))",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(UserPeriodStake)21522_storage": {
+          "t_struct(UserPeriodStake)21165_storage": {
             "label": "struct TokenLib.UserPeriodStake",
             "members": [
               {
                 "label": "userPeriodStake",
-                "type": "t_mapping(t_address,t_struct(StakeUserContainer)21531_storage)",
+                "type": "t_mapping(t_address,t_struct(StakeUserContainer)21174_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(UserStake)21536_storage": {
+          "t_struct(UserStake)21179_storage": {
             "label": "struct TokenLib.UserStake",
             "members": [
               {
@@ -2433,9 +2448,9 @@
         }
       }
     },
-    "18636630f38580196f6373347186023ea2fdea136f1c5f564895869af150015b": {
-      "address": "0x27cf1C3041e7fb09387FF8a7FdEBCC519abC5Be4",
-      "txHash": "0x233336039705f22866b85663f5c3f21251c2f123934c47e91c387771969e2bb0",
+    "cd77a11a021196401789c965781beca4ad12f94022e6784f16e1d3cdf79109ac": {
+      "address": "0xf566986246E8Ba6309a5AfC9941EAB37a848bBe5",
+      "txHash": "0x857ed509fbd488c630de23e9ca638b9bab70d080a01c4eb18bcbcde15feaced4",
       "layout": {
         "storage": [
           {
@@ -2523,7 +2538,7 @@
             "label": "userContext",
             "offset": 0,
             "slot": "203",
-            "type": "t_struct(UserContext)21553_storage",
+            "type": "t_struct(UserContext)21369_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:33"
           },
@@ -2531,7 +2546,7 @@
             "label": "achievementsMetadata",
             "offset": 0,
             "slot": "213",
-            "type": "t_struct(AchievementsMetadata)14791_storage",
+            "type": "t_struct(AchievementsMetadata)14607_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:34"
           },
@@ -2539,7 +2554,7 @@
             "label": "bannedUsers",
             "offset": 0,
             "slot": "214",
-            "type": "t_struct(BannedUsers)21568_storage",
+            "type": "t_struct(BannedUsers)21384_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:35"
           },
@@ -2547,7 +2562,7 @@
             "label": "communityReward",
             "offset": 0,
             "slot": "215",
-            "type": "t_struct(CommunityReward)21274_storage",
+            "type": "t_struct(CommunityReward)21090_storage",
             "contract": "PeeranhaUser",
             "src": "contracts/PeeranhaUser.sol:36"
           }
@@ -2589,23 +2604,23 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IPeeranhaCommunity)14167": {
+          "t_contract(IPeeranhaCommunity)13992": {
             "label": "contract IPeeranhaCommunity",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaContent)14418": {
+          "t_contract(IPeeranhaContent)14243": {
             "label": "contract IPeeranhaContent",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaNFT)14488": {
+          "t_contract(IPeeranhaNFT)14313": {
             "label": "contract IPeeranhaNFT",
             "numberOfBytes": "20"
           },
-          "t_contract(IPeeranhaToken)14501": {
+          "t_contract(IPeeranhaToken)14326": {
             "label": "contract IPeeranhaToken",
             "numberOfBytes": "20"
           },
-          "t_enum(AchievementsType)14728": {
+          "t_enum(AchievementsType)14544": {
             "label": "enum AchievementCommonLib.AchievementsType",
             "members": [
               "Rating",
@@ -2630,15 +2645,15 @@
             "label": "mapping(address => mapping(uint64 => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(BannedUserInfo)21575_storage)": {
+          "t_mapping(t_address,t_struct(BannedUserInfo)21391_storage)": {
             "label": "mapping(address => struct UserLib.BannedUserInfo)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(CommunityRatingForUser)21517_storage)": {
+          "t_mapping(t_address,t_struct(CommunityRatingForUser)21333_storage)": {
             "label": "mapping(address => struct UserLib.CommunityRatingForUser)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)21497_storage)": {
+          "t_mapping(t_address,t_struct(User)21313_storage)": {
             "label": "mapping(address => struct UserLib.User)",
             "numberOfBytes": "32"
           },
@@ -2658,11 +2673,11 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(PeriodRewardShares)21286_storage)": {
+          "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)": {
             "label": "mapping(uint16 => struct RewardLib.PeriodRewardShares)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint16,t_struct(UserPeriodRewards)21295_storage)": {
+          "t_mapping(t_uint16,t_struct(UserPeriodRewards)21111_storage)": {
             "label": "mapping(uint16 => struct RewardLib.UserPeriodRewards)",
             "numberOfBytes": "32"
           },
@@ -2670,15 +2685,15 @@
             "label": "mapping(uint32 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21280_storage)": {
+          "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21096_storage)": {
             "label": "mapping(uint32 => struct RewardLib.CommunityPeriodReward)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(PeriodRating)21262_storage)": {
+          "t_mapping(t_uint32,t_struct(PeriodRating)21078_storage)": {
             "label": "mapping(uint32 => struct RewardLib.PeriodRating)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint32,t_struct(UserRating)21522_storage)": {
+          "t_mapping(t_uint32,t_struct(UserRating)21338_storage)": {
             "label": "mapping(uint32 => struct UserLib.UserRating)",
             "numberOfBytes": "32"
           },
@@ -2686,11 +2701,11 @@
             "label": "mapping(uint64 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint64,t_struct(AchievementConfig)14768_storage)": {
+          "t_mapping(t_uint64,t_struct(AchievementConfig)14584_storage)": {
             "label": "mapping(uint64 => struct AchievementLib.AchievementConfig)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint64,t_struct(AchievementMetadata)14798_storage)": {
+          "t_mapping(t_uint64,t_struct(AchievementMetadata)14614_storage)": {
             "label": "mapping(uint64 => struct AchievementLib.AchievementMetadata)",
             "numberOfBytes": "32"
           },
@@ -2698,7 +2713,7 @@
             "label": "mapping(uint8 => bytes32)",
             "numberOfBytes": "32"
           },
-          "t_struct(AchievementConfig)14768_storage": {
+          "t_struct(AchievementConfig)14584_storage": {
             "label": "struct AchievementLib.AchievementConfig",
             "members": [
               {
@@ -2721,14 +2736,14 @@
               },
               {
                 "label": "achievementsType",
-                "type": "t_enum(AchievementsType)14728",
+                "type": "t_enum(AchievementsType)14544",
                 "offset": 24,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(AchievementMetadata)14798_storage": {
+          "t_struct(AchievementMetadata)14614_storage": {
             "label": "struct AchievementLib.AchievementMetadata",
             "members": [
               {
@@ -2746,12 +2761,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(AchievementsContainer)14785_storage": {
+          "t_struct(AchievementsContainer)14601_storage": {
             "label": "struct AchievementLib.AchievementsContainer",
             "members": [
               {
                 "label": "achievementsConfigs",
-                "type": "t_mapping(t_uint64,t_struct(AchievementConfig)14768_storage)",
+                "type": "t_mapping(t_uint64,t_struct(AchievementConfig)14584_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -2769,19 +2784,19 @@
               },
               {
                 "label": "peeranhaNFT",
-                "type": "t_contract(IPeeranhaNFT)14488",
+                "type": "t_contract(IPeeranhaNFT)14313",
                 "offset": 8,
                 "slot": "2"
               }
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(AchievementsMetadata)14791_storage": {
+          "t_struct(AchievementsMetadata)14607_storage": {
             "label": "struct AchievementLib.AchievementsMetadata",
             "members": [
               {
                 "label": "metadata",
-                "type": "t_mapping(t_uint64,t_struct(AchievementMetadata)14798_storage)",
+                "type": "t_mapping(t_uint64,t_struct(AchievementMetadata)14614_storage)",
                 "offset": 0,
                 "slot": "0"
               }
@@ -2800,7 +2815,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(BannedUserInfo)21575_storage": {
+          "t_struct(BannedUserInfo)21391_storage": {
             "label": "struct UserLib.BannedUserInfo",
             "members": [
               {
@@ -2818,36 +2833,36 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(BannedUsers)21568_storage": {
+          "t_struct(BannedUsers)21384_storage": {
             "label": "struct UserLib.BannedUsers",
             "members": [
               {
                 "label": "bannedUserInfo",
-                "type": "t_mapping(t_address,t_struct(BannedUserInfo)21575_storage)",
+                "type": "t_mapping(t_address,t_struct(BannedUserInfo)21391_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CommunityPeriodReward)21280_storage": {
+          "t_struct(CommunityPeriodReward)21096_storage": {
             "label": "struct RewardLib.CommunityPeriodReward",
             "members": [
               {
                 "label": "communityPeriodRewardShares",
-                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21286_storage)",
+                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CommunityRatingForUser)21517_storage": {
+          "t_struct(CommunityRatingForUser)21333_storage": {
             "label": "struct UserLib.CommunityRatingForUser",
             "members": [
               {
                 "label": "userRating",
-                "type": "t_mapping(t_uint32,t_struct(UserRating)21522_storage)",
+                "type": "t_mapping(t_uint32,t_struct(UserRating)21338_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -2859,26 +2874,26 @@
               },
               {
                 "label": "userPeriodRewards",
-                "type": "t_mapping(t_uint16,t_struct(UserPeriodRewards)21295_storage)",
+                "type": "t_mapping(t_uint16,t_struct(UserPeriodRewards)21111_storage)",
                 "offset": 0,
                 "slot": "2"
               }
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(CommunityReward)21274_storage": {
+          "t_struct(CommunityReward)21090_storage": {
             "label": "struct RewardLib.CommunityReward",
             "members": [
               {
                 "label": "communityPeriodReward",
-                "type": "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21280_storage)",
+                "type": "t_mapping(t_uint32,t_struct(CommunityPeriodReward)21096_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(IpfsHash)15092_storage": {
+          "t_struct(IpfsHash)14908_storage": {
             "label": "struct CommonLib.IpfsHash",
             "members": [
               {
@@ -2896,7 +2911,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(PeriodRating)21262_storage": {
+          "t_struct(PeriodRating)21078_storage": {
             "label": "struct RewardLib.PeriodRating",
             "members": [
               {
@@ -2920,19 +2935,19 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PeriodRewardContainer)21268_storage": {
+          "t_struct(PeriodRewardContainer)21084_storage": {
             "label": "struct RewardLib.PeriodRewardContainer",
             "members": [
               {
                 "label": "periodRewardShares",
-                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21286_storage)",
+                "type": "t_mapping(t_uint16,t_struct(PeriodRewardShares)21102_storage)",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PeriodRewardShares)21286_storage": {
+          "t_struct(PeriodRewardShares)21102_storage": {
             "label": "struct RewardLib.PeriodRewardShares",
             "members": [
               {
@@ -2986,12 +3001,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(User)21497_storage": {
+          "t_struct(User)21313_storage": {
             "label": "struct UserLib.User",
             "members": [
               {
                 "label": "ipfsDoc",
-                "type": "t_struct(IpfsHash)15092_storage",
+                "type": "t_struct(IpfsHash)14908_storage",
                 "offset": 0,
                 "slot": "0"
               },
@@ -3022,12 +3037,12 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(UserCollection)21562_storage": {
+          "t_struct(UserCollection)21378_storage": {
             "label": "struct UserLib.UserCollection",
             "members": [
               {
                 "label": "users",
-                "type": "t_mapping(t_address,t_struct(User)21497_storage)",
+                "type": "t_mapping(t_address,t_struct(User)21313_storage)",
                 "offset": 0,
                 "slot": "0"
               },
@@ -3040,55 +3055,55 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserContext)21553_storage": {
+          "t_struct(UserContext)21369_storage": {
             "label": "struct UserLib.UserContext",
             "members": [
               {
                 "label": "users",
-                "type": "t_struct(UserCollection)21562_storage",
+                "type": "t_struct(UserCollection)21378_storage",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "userRatingCollection",
-                "type": "t_struct(UserRatingCollection)21503_storage",
+                "type": "t_struct(UserRatingCollection)21319_storage",
                 "offset": 0,
                 "slot": "2"
               },
               {
                 "label": "periodRewardContainer",
-                "type": "t_struct(PeriodRewardContainer)21268_storage",
+                "type": "t_struct(PeriodRewardContainer)21084_storage",
                 "offset": 0,
                 "slot": "3"
               },
               {
                 "label": "achievementsContainer",
-                "type": "t_struct(AchievementsContainer)14785_storage",
+                "type": "t_struct(AchievementsContainer)14601_storage",
                 "offset": 0,
                 "slot": "4"
               },
               {
                 "label": "peeranhaToken",
-                "type": "t_contract(IPeeranhaToken)14501",
+                "type": "t_contract(IPeeranhaToken)14326",
                 "offset": 0,
                 "slot": "7"
               },
               {
                 "label": "peeranhaCommunity",
-                "type": "t_contract(IPeeranhaCommunity)14167",
+                "type": "t_contract(IPeeranhaCommunity)13992",
                 "offset": 0,
                 "slot": "8"
               },
               {
                 "label": "peeranhaContent",
-                "type": "t_contract(IPeeranhaContent)14418",
+                "type": "t_contract(IPeeranhaContent)14243",
                 "offset": 0,
                 "slot": "9"
               }
             ],
             "numberOfBytes": "320"
           },
-          "t_struct(UserPeriodRewards)21295_storage": {
+          "t_struct(UserPeriodRewards)21111_storage": {
             "label": "struct RewardLib.UserPeriodRewards",
             "members": [
               {
@@ -3099,14 +3114,14 @@
               },
               {
                 "label": "periodRating",
-                "type": "t_mapping(t_uint32,t_struct(PeriodRating)21262_storage)",
+                "type": "t_mapping(t_uint32,t_struct(PeriodRating)21078_storage)",
                 "offset": 0,
                 "slot": "1"
               }
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserRating)21522_storage": {
+          "t_struct(UserRating)21338_storage": {
             "label": "struct UserLib.UserRating",
             "members": [
               {
@@ -3124,12 +3139,12 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(UserRatingCollection)21503_storage": {
+          "t_struct(UserRatingCollection)21319_storage": {
             "label": "struct UserLib.UserRatingCollection",
             "members": [
               {
                 "label": "communityRatingForUser",
-                "type": "t_mapping(t_address,t_struct(CommunityRatingForUser)21517_storage)",
+                "type": "t_mapping(t_address,t_struct(CommunityRatingForUser)21333_storage)",
                 "offset": 0,
                 "slot": "0"
               }
@@ -3151,6 +3166,548 @@
           "t_uint64": {
             "label": "uint64",
             "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "ddeafaf1bb9675921ed06aaf79e1e6c2854e3e57754a740387dcaaa6b9518928": {
+      "address": "0x1541f2f1cDC0152958ded6a1BE4A80958b15Fde4",
+      "txHash": "0x8df7bdd2bfcf7740f1fb932efa15e5a6962650de6d59ccef5462bb6805b097a8",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "domainSeperator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32",
+            "contract": "EIP712BaseUpgradeable",
+            "src": "contracts/base/EIP712BaseUpgradeable.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "nonces",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "NativeMetaTransactionUpgradeable",
+            "src": "contracts/base/NativeMetaTransactionUpgradeable.sol:18"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)179_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:247"
+          },
+          {
+            "label": "_roleMembers",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_mapping(t_bytes32,t_struct(AddressSet)4363_storage)",
+            "contract": "AccessControlEnumerableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlEnumerableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:76"
+          },
+          {
+            "label": "factoryData",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_struct(FactoryData)7101_storage",
+            "contract": "CommunityTokenRewardFactory",
+            "src": "contracts/CommunityTokenRewardFactory.sol:26"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_contract(ICommunityTokenReward)13953)dyn_storage": {
+            "label": "contract ICommunityTokenReward[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint32)dyn_storage": {
+            "label": "uint32[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICommunityTokenReward)13953": {
+            "label": "contract ICommunityTokenReward",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaCommunity)13992": {
+            "label": "contract IPeeranhaCommunity",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaUser)14536": {
+            "label": "contract IPeeranhaUser",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)4363_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)179_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_bool)": {
+            "label": "mapping(uint16 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint32,t_array(t_contract(ICommunityTokenReward)13953)dyn_storage)": {
+            "label": "mapping(uint32 => contract ICommunityTokenReward[])",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)4363_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)4062_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(FactoryData)7101_storage": {
+            "label": "struct CommunityTokenRewardFactory.FactoryData",
+            "members": [
+              {
+                "label": "communitiesTokenReward",
+                "type": "t_mapping(t_uint32,t_array(t_contract(ICommunityTokenReward)13953)dyn_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "isSetPool",
+                "type": "t_mapping(t_uint16,t_bool)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "factoryCommunitiesId",
+                "type": "t_array(t_uint32)dyn_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "peeranhaUser",
+                "type": "t_contract(IPeeranhaUser)14536",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "peeranhaCommunity",
+                "type": "t_contract(IPeeranhaCommunity)13992",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(RoleData)179_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)4062_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "696da9f25a1c76e3c08d1b342fd2f54efaa6dc9d974e583e04620cbaab50942c": {
+      "address": "0x2a0ADDcD7F2460551AC9B7E6752c7fA699cCe835",
+      "txHash": "0x6fc4150a7e8caf5e251c068e3aa827d53577c8d46616b868dc372a6bf445984a",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "domainSeperator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32",
+            "contract": "EIP712BaseUpgradeable",
+            "src": "contracts/base/EIP712BaseUpgradeable.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "nonces",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "NativeMetaTransactionUpgradeable",
+            "src": "contracts/base/NativeMetaTransactionUpgradeable.sol:18"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)179_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:247"
+          },
+          {
+            "label": "_roleMembers",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_mapping(t_bytes32,t_struct(AddressSet)4363_storage)",
+            "contract": "AccessControlEnumerableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlEnumerableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:76"
+          },
+          {
+            "label": "factoryData",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_struct(FactoryData)6977_storage",
+            "contract": "CommunityTokenRewardFactory",
+            "src": "contracts/CommunityTokenRewardFactory.sol:26"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_contract(ICommunityTokenReward)13718)dyn_storage": {
+            "label": "contract ICommunityTokenReward[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint32)dyn_storage": {
+            "label": "uint32[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICommunityTokenReward)13718": {
+            "label": "contract ICommunityTokenReward",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaCommunity)13757": {
+            "label": "contract IPeeranhaCommunity",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPeeranhaUser)14301": {
+            "label": "contract IPeeranhaUser",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)4363_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)179_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_bool)": {
+            "label": "mapping(uint16 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint32,t_array(t_contract(ICommunityTokenReward)13718)dyn_storage)": {
+            "label": "mapping(uint32 => contract ICommunityTokenReward[])",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)4363_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)4062_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(FactoryData)6977_storage": {
+            "label": "struct CommunityTokenRewardFactory.FactoryData",
+            "members": [
+              {
+                "label": "communitiesTokenReward",
+                "type": "t_mapping(t_uint32,t_array(t_contract(ICommunityTokenReward)13718)dyn_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "isSetPool",
+                "type": "t_mapping(t_uint16,t_bool)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "factoryCommunitiesId",
+                "type": "t_array(t_uint32)dyn_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "peeranhaUser",
+                "type": "t_contract(IPeeranhaUser)14301",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "peeranhaCommunity",
+                "type": "t_contract(IPeeranhaCommunity)13757",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(RoleData)179_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)4062_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
           },
           "t_uint8": {
             "label": "uint8",

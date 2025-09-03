@@ -21,7 +21,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     IPeeranhaCommunity peeranhaCommunity;
   }
 
-  bytes32 public constant OWNER_COMMUNITY_TOKEN_FACTORY = bytes32(keccak256("OWNER_COMMUNITY_TOKEN_FACTORY"));
+  bytes32 public constant START_FACTORY_PERIOD_ROLE = bytes32(keccak256("START_FACTORY_PERIOD_ROLE")); // add START_FACTORY_PERIOD_ROLE
 
   FactoryData factoryData;
 
@@ -35,8 +35,8 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   }
 
   function __Factory_init() internal onlyInitializing {
-    _grantRole(OWNER_COMMUNITY_TOKEN_FACTORY, _msgSender());
-    _setRoleAdmin(OWNER_COMMUNITY_TOKEN_FACTORY, DEFAULT_ADMIN_ROLE);
+    _grantRole(START_FACTORY_PERIOD_ROLE, _msgSender());
+    _setRoleAdmin(START_FACTORY_PERIOD_ROLE, DEFAULT_ADMIN_ROLE);
   }
 
   function dispatcherCheck(address userAddress) internal {
@@ -78,7 +78,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   }
   
   // set pools
-  function startPeriod() external override onlyRole(OWNER_COMMUNITY_TOKEN_FACTORY) {
+  function startPeriod() external override onlyRole(START_FACTORY_PERIOD_ROLE) {
     uint16 period = RewardLib.getPeriod();
     require(!factoryData.isSetPool[period], "pool_already_set");    // todo: tests
     factoryData.isSetPool[period] = true;
@@ -146,6 +146,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   // }
 
   function getVersion() public pure returns (uint256) {
-    return 9;
+    return 10;
   }
 }

@@ -4,7 +4,7 @@ const { USER_ADDRESS, COMMUNITY_ADDRESS } = require('../env.json');
 async function main() {
   const PeeranhaToken = await ethers.getContractFactory("PeeranhaTokenTestFac");
   console.log("Deploying PeeranhaToken TESt...");
-  const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PETE", "PETE", "0x0000000000000000000000000000000000000000"], {timeout: 0});
+  const peeranhaToken = await upgrades.deployProxy(PeeranhaToken, ["PEKE", "PEKE", "0x0000000000000000000000000000000000000000"], {timeout: 0});
   console.log("Peeranha token deployed to:", peeranhaToken.address);
 }
 
