@@ -29,6 +29,7 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
 
     bytes32 public constant VERIFIER_ROLE = bytes32(keccak256("VERIFIER_ROLE"));
     bytes32 public constant VERIFIED_ROLE = bytes32(keccak256("VERIFIED_ROLE"));
+    bytes32 public constant START_FACTORY_PERIOD_ROLE = bytes32(keccak256("START_FACTORY_PERIOD_ROLE"));
 
     UserLib.UserContext userContext;
     AchievementLib.AchievementsMetadata achievementsMetadata;
@@ -37,8 +38,6 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
 
     function initialize() public initializer {
         __Peeranha_init();
-        setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
-        setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
     }
     
     function __Peeranha_init() public onlyInitializing {
@@ -53,6 +52,11 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         _setRoleAdmin(PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
         _setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
         _setRoleAdmin(DISPATCHER_ROLE, PROTOCOL_ADMIN_ROLE);
+        _setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
+        _setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
+        _setRoleAdmin(START_FACTORY_PERIOD_ROLE, DEFAULT_ADMIN_ROLE);
+        _grantRole(VERIFIED_ROLE, _msgSender());
+        _grantRole(VERIFIER_ROLE, _msgSender());
     }
 
     // This is to support Native meta transactions
@@ -588,6 +592,8 @@ contract PeeranhaUser is IPeeranhaUser, Initializable, NativeMetaTransactionUpgr
         } else if (actionRole == UserLib.ActionRole.AdminOrCommunityAdminOrCommunityModerator &&   // test
         !(isAdmin || isCommunityAdmin || isCommunityModerator)) {
             message = "not_allowed_admin_or_comm_admin_or_comm_moderator";
+        } else if (actionRole == UserLib.ActionRole.StartFactoryPeriodRole && !hasRole(START_FACTORY_PERIOD_ROLE, actionCaller)) {
+            message = "not_allowed_not_start_factory_period_role";
         } else {
             isHasRole = true;
             message = '';

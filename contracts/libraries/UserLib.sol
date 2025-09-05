@@ -149,7 +149,8 @@ library UserLib {
     AdminOrCommunityAdmin,
     CommunityAdmin,
     CommunityModerator,
-    AdminOrCommunityAdminOrCommunityModerator
+    AdminOrCommunityAdminOrCommunityModerator,
+    StartFactoryPeriodRole
   }
 
   event UserCreated(address indexed userAddress);
