@@ -29,6 +29,7 @@
     "size-contracts": "npx hardhat size-contracts",
     "prepare:test": "cp env-test.json env.json",
     "prepare:staging": "cp env-staging.json env.json",
+    "prepare:prod-base": "cp env-prod-base.json env.json",
     "deploy:local": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network local scripts/deploy.js || node scripts/change-env-values.js 0",
     "deploy:test": "cp env-test.json env.json && node scripts/change-env-values.js 2 && npx hardhat run --network amoy scripts/deploy.js || node scripts/change-env-values.js 0",
     "deploy:test-supra": "npx hardhat run --network supra scripts/deploy.js",
