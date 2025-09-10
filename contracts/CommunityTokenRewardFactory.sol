@@ -9,10 +9,7 @@ import "./interfaces/IPeeranhaCommunity.sol";
 import "./CommunityTokenReward.sol";
 import "./base/NativeMetaTransactionUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-
-
-contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransactionUpgradeable, AccessControlEnumerableUpgradeable {
+contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMetaTransactionUpgradeable {
   struct FactoryData {
     mapping(uint32 => ICommunityTokenReward[]) communitiesTokenReward;  // communityId
     mapping(uint16 => bool) isSetPool;  // period
@@ -20,8 +17,6 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     IPeeranhaUser peeranhaUser;
     IPeeranhaCommunity peeranhaCommunity;
   }
-
-  bytes32 public constant START_FACTORY_PERIOD_ROLE = bytes32(keccak256("START_FACTORY_PERIOD_ROLE")); // add START_FACTORY_PERIOD_ROLE
 
   FactoryData factoryData;
 
@@ -35,8 +30,7 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
   }
 
   function __Factory_init() internal onlyInitializing {
-    _grantRole(START_FACTORY_PERIOD_ROLE, _msgSender());
-    _setRoleAdmin(START_FACTORY_PERIOD_ROLE, DEFAULT_ADMIN_ROLE);
+    __NativeMetaTransactionUpgradeable_init("CommunityTokenRewardFactory");
   }
 
   function dispatcherCheck(address userAddress) internal {
@@ -65,20 +59,10 @@ contract CommunityTokenRewardFactory is ICommunityTokenRewardFactory, NativeMeta
     address communityTokenAddress = address(factoryData.communitiesTokenReward[communityId][contractsCommunityTokenRewardLength - 1]);
     emit CommunityTokenCreated(communityTokenAddress, communityId);
   }
-
-  // This is to support Native meta transactions
-  // never use msg.sender directly, use _msgSender() instead
-  function _msgSender()
-      internal
-      override(ContextUpgradeable, NativeMetaTransactionUpgradeable)
-      view
-      returns (address sender)
-  {
-      return NativeMetaTransactionUpgradeable._msgSender();
-  }
   
   // set pools
-  function startPeriod() external override onlyRole(START_FACTORY_PERIOD_ROLE) {
+  function startPeriod() external override {
+    factoryData.peeranhaUser.checkHasRole(_msgSender(), UserLib.ActionRole.StartFactoryPeriodRole, 0); // todo test
     uint16 period = RewardLib.getPeriod();
     require(!factoryData.isSetPool[period], "pool_already_set");    // todo: tests
     factoryData.isSetPool[period] = true;

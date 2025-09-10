@@ -72,8 +72,15 @@ module.exports = {
       accounts: [ADMIN_PRIVATE_KEY],
       chainId: 84532,
       gas: 7000000,
-      gasPrice: 6358562,
+      gasPrice: 6398562,
       // url: 'https://base-sepolia.blockpi.network/v1/rpc/public',
+    },
+    base: {
+      url: `https://mainnet.base.org/`,
+      accounts: [ADMIN_PRIVATE_KEY],
+      chainId: 8453,
+      gas: 7000000,
+      gasPrice: 300000,
     },
     supra: {
       url: `https://rpc-evm-devnet.supra.com/rpc/v1/eth`,
