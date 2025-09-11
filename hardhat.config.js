@@ -79,8 +79,8 @@ module.exports = {
       url: `https://mainnet.base.org/`,
       accounts: [ADMIN_PRIVATE_KEY],
       chainId: 8453,
-      gas: 7000000,
-      gasPrice: 300000,
+      gas: 2100000,
+      gasPrice: 10000000,
     },
     supra: {
       url: `https://rpc-evm-devnet.supra.com/rpc/v1/eth`,
