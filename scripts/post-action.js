@@ -18,7 +18,7 @@ const {
 const { testAccount, Language, NFT, achievements, testCommunity, testTag, testPost, testReply, testComment, postTranslation, replyTranslation, commentTranslation } = require("./common-action");
 const crypto = require("crypto");
 const fs = require("fs");
-const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, START_FACTORY_PERIOD_ROLE, VERIFIER_ROLE, VERIFIED_ROLE } = require("../test/contracts/utils");
+const { PROTOCOL_ADMIN_ROLE, DISPATCHER_ROLE, BOT_ROLE, START_FACTORY_PERIOD_ROLE, VERIFIER_ROLE, VERIFIED_ROLE, DEFAULT_ADMIN_ROLE } = require("../test/contracts/utils");
 const abiDecoder = require('abi-decoder'); // eslint-disable-line import/no-extraneous-dependencies
 
 const PostTypeEnum = { ExpertPost: 0, CommonPost: 1, Tutorial: 2, Documentatation: 3 };
@@ -200,28 +200,61 @@ async function main() {
   // await decodeData('0x910ca38dc611cbd003e5240f0fb3d11bb1345cdfe6d6cc41b30bf9bdf90a7ea5');
   // await decodeData('0xcffe3ffa01eb5dfe6757f1834fdd55373ceac3250e8f567f1932f8b7b7f72105');
   // await contentFunctions();
-  await userFunctions();
+  // await userFunctions();
   // await communityTokenFactoryFunctions();
   // await communityTokenFunctions();
   // await communityFunctions();
   // await transferEthTokens();
-
   // await tokenTest()
 
-
-
-  /*
-  const provider = new ethers.providers.JsonRpcProvider("https://polygon-mainnet.infura.io/v3/a3f79a2311e94bb995c8da43eda18ecb");
-  const feeData = await provider.getFeeData();
-  console.log(`feeData: ${JSON.stringify(feeData, null, 2)}`);
-
-  const gasPrice = await provider.send("eth_gasPrice", []);
-  console.log(BigInt(gasPrice).toString());
-  */
+  await verifyFunctions();
 }
-// polygon
-// "USERLIB_ADDRESS": "0xe133065ea671f6dCC72fA68E35B596DC63A038FB",
-//   "USER_ADDRESS": "0x0409170935e270E9456a9602A0c0D6CB9865A1a2",
+
+async function verifyFunctions() {
+  const signers = await ethers.getSigners();
+  const PeeranhaUser = await ethers.getContractFactory("PeeranhaUser", {
+		libraries: {
+			UserLib: "0xA2D294d346D72Dd91f105406bF94891542A9e7db",
+		}
+	});
+  // console.log(`USER_ADDRESS ${USER_ADDRESS}`)
+  const peeranhaUser = await PeeranhaUser.attach("0xc51ABb9835Ac274733c18cFeb9A196717D51F512");
+
+
+  const txObj = await peeranhaUser.setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
+  console.log(`Submitted transaction txObj - ${JSON.stringify(txObj)}`);
+  console.log(`Waiting for transaction confirmation`); 
+  await txObj.wait();
+  console.log('Transaction confirmed');
+
+  const txObj2 = await peeranhaUser.setRoleAdmin(VERIFIED_ROLE, VERIFIER_ROLE);
+  console.log(`Submitted transaction txObj2 - ${JSON.stringify(txObj2)}`);
+  console.log(`Waiting for transaction confirmation`); 
+  await txObj2.wait();
+  console.log('Transaction confirmed');
+
+  const txObj3 = await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0].address);
+  console.log(`Submitted transaction txObj3 - ${JSON.stringify(txObj3)}`);
+  console.log(`Waiting for transaction confirmation`); 
+  await txObj3.wait();
+  console.log('Transaction confirmed');
+
+  const txObj4 = await peeranhaUser.grantRole(VERIFIED_ROLE, signers[0].address);
+  console.log(`Submitted transaction txObj4 - ${JSON.stringify(txObj4)}`);
+  console.log(`Waiting for transaction confirmation`); 
+  await txObj4.wait();
+  console.log('Transaction confirmed');
+
+
+  // const txObj5 = await peeranhaUser.grantRole(VERIFIER_ROLE, "0x0000000000000000000000000000000000000000")
+  // const txObj5 = await peeranhaUser.grantRole(VERIFIED_ROLE, "0x0000000000000000000000000000000000000000")
+
+  // console.log(`Submitted transaction txObj5 - ${JSON.stringify(txObj5)}`);
+  // console.log(`Waiting for transaction confirmation`); 
+  // await txObj5.wait();
+  // console.log('Transaction confirmed');
+}
+
 
 
 async function userFunctions() {
@@ -241,6 +274,7 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.giveCommunityModeratorPermission("0xE902761E0207A8470caA51FA11f397069FdADa2b", 2);
   
   // const txObj = await peeranhaUser.hasRole(VERIFIED_ROLE, "0x27C87b99BbDd93857D841d72e0Fd7d176a915Ec0");
+  // const txObj = await peeranhaUser.hasRole(DEFAULT_ADMIN_ROLE, signers[0].address);
   // const txObj = await peeranhaUser.checkHasRole("0x31339c62C0A44b875297945edb93D88092b5fa91", 6, 1)
 
   // const txObj = await peeranhaUser.banUser(signers[0].address, "0xed5aec8204ac145bb388fdf7a36dc518fab9e0f3");
@@ -253,10 +287,10 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.grantRole(DISPATCHER_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(BOT_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // const txObj = await peeranhaUser.grantRole(PROTOCOL_ADMIN_ROLE, "0x570895fd1f7d529606e495885f6eaf1924baa08e");
-  // const txObj = await peeranhaUser.grantRole(START_FACTORY_PERIOD_ROLE, "0x31339c62C0A44b875297945edb93D88092b5fa91");
   // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.revokeRole(PROTOCOL_ADMIN_ROLE, "0x9fBE2C1d7B0Ebeddb2faEF30Be00Ed838f19E499");
   // const txObj = await peeranhaUser.getRoleAdmin(VERIFIER_ROLE);
+    // const txObj = await peeranhaUser.grantRole(START_FACTORY_PERIOD_ROLE, "0x27c87b99bbdd93857d841d72e0fd7d176a915ec0");
 
 
   // const txObj = await peeranhaUser.setRoleAdmin(VERIFIER_ROLE, PROTOCOL_ADMIN_ROLE);
@@ -282,12 +316,16 @@ async function userFunctions() {
   // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 22983 + 1267, 1)
   // const txObj = await peeranhaUser.getUserPeriodCommunityRating("0xd5566CF4C82cA2e5af22cC1CBd984eAC802d6180", 24187, 1)
   // const txObj = await peeranhaUser.getPeriod();
-
+  
   console.log(`Contract: PeeranhaUser - ${USER_ADDRESS}`)
   console.log(`Submitted transaction - ${JSON.stringify(txObj)}`);
   console.log(`Waiting for transaction confirmation`); 
   await txObj.wait();
   console.log('Transaction confirmed');
+
+  // const txObj = await peeranhaUser.getRoleAdmin(VERIFIER_ROLE);
+  // const txObj = await peeranhaUser.getRoleAdmin(DISPATCHER_ROLE);
+  // const txObj = await peeranhaUser.getRoleAdmin(BOT_ROLE);
 
   // const txObj2 = await peeranhaUser.grantRole(VERIFIED_ROLE, "0xdf5C1E9B4a97C83b72E3d34f254729c39a206F6E")
   // console.log(`Submitted transaction - ${JSON.stringify(txObj2)}`);
@@ -327,7 +365,7 @@ async function communityFunctions() {
 
 async function communityTokenFactoryFunctions() {
   const CommunityTokenRewardFactory = await ethers.getContractFactory("CommunityTokenRewardFactory");
-  const communityTokenRewardFactory = await CommunityTokenRewardFactory.attach("0x5e1666030e400b53949c3c79E264dfd528680a8c");
+  const communityTokenRewardFactory = await CommunityTokenRewardFactory.attach("0xd1103C46B3E636CC65dD12eAb8281E8BCCcdBDeD");
   const signers = await ethers.getSigners();
 
   // const txObj = await communityTokenRewardFactory.createNewCommunityTokenReward(signers[0].address, 1, "0x0D32acb46717c0388913865909A53C50f83FBd0e", ethers.utils.parseEther("8000"), ethers.utils.parseEther("1400"));

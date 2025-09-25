@@ -69,6 +69,7 @@
     "post-action-amoy": "npx hardhat run --network amoy scripts/post-action.js",
     "post-action-base_sepolia": "npx hardhat run --network base_sepolia scripts/post-action.js",
     "post-action-prod-base": "npx hardhat run --network base scripts/post-action.js",
+    "post-action-prod-polygon": "npx hardhat run --network polygon scripts/post-action.js",
     "get-user-nonce-mumbai": "npx hardhat run --network mumbai scripts/get-user-nonce.js",
     "query-versions:staging": "cp env-staging.json env.json && node scripts/change-env-values.js 1 && npx hardhat run --network amoy scripts/query-versions.js || node scripts/change-env-values.js 0",
     "grant-community-admin:test": "cp env-test.json env.json && npx hardhat run --network amoy scripts/grant-community-admin.js",
