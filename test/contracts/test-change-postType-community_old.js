@@ -1,8 +1,10 @@
-// first and 15 min reply OFF
+// first and 15 min reply ON
+
+/*
 
 const { expect } = require("chai");
 const { 
-	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer, changeStartRating,
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer,
 	PostTypeEnum, LanguagesEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
@@ -258,7 +260,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -279,7 +281,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -300,7 +302,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -321,7 +323,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -342,7 +344,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -363,7 +365,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -387,7 +389,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -408,7 +410,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -429,7 +431,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -450,7 +452,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -471,7 +473,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -492,7 +494,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -525,7 +527,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -555,7 +557,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -584,7 +586,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -613,7 +615,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -642,7 +644,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -672,7 +674,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -708,7 +710,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -741,7 +743,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -774,7 +776,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -807,7 +809,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -840,7 +842,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -873,7 +875,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -896,16 +898,16 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedCommonReply);
+				await expect(newRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test upVote reply common -> expert", async function () {
@@ -920,16 +922,16 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedExpertReply);
+				await expect(newRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test upVote reply expert -> common (delete reply)", async function () {
@@ -944,15 +946,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -972,15 +974,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -1003,11 +1005,11 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -1027,11 +1029,11 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -1051,15 +1053,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -1079,15 +1081,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -1113,19 +1115,19 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				await expect(newRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 2 upVote 2 downVote reply common -> expert", async function () {
@@ -1143,19 +1145,19 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				await expect(newRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test 2 upVote 2 downVote reply expert -> common (delete reply)", async function () {
@@ -1173,18 +1175,18 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -1207,18 +1209,18 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -1245,8 +1247,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -1256,12 +1258,12 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating);
+				await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 4 cancel vote reply common -> expert", async function () {
@@ -1280,8 +1282,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -1291,12 +1293,12 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating);
+				await expect(newRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test 4 cancel vote reply expert -> common (delete reply)", async function () {
@@ -1315,8 +1317,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -1326,11 +1328,11 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -1354,8 +1356,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -1365,11 +1367,11 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -1393,12 +1395,12 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(newRating).to.equal(StartRating);
+				const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test first/quick reply common -> expert 0 vote", async function () {
@@ -1414,12 +1416,12 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(newRating).to.equal(StartRating);
+				const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(newRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test first/quick reply expert -> common 0 vote (delete reply)", async function () {
@@ -1435,15 +1437,15 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.deleteReply(signers[0].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(newRating).to.equal(StartRating + DeleteOwnReply);
 			});
 		});
@@ -1464,15 +1466,15 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRatingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(newRatingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedCommonReply);
 			});
 
@@ -1490,15 +1492,15 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRatingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(newRatingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedExpertReply);
 			});
 
@@ -1516,19 +1518,19 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				const ratingReplyAfterDeleteReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				const ratingPostAfterDeleteReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPostAfterDeleteReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(ratingReplyAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				await expect(ratingPostAfterDeleteReply).to.equal(StartRating + AcceptedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingReply).to.equal(StartRating + DeleteOwnReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedExpertReply);
@@ -1548,19 +1550,19 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				const ratingReplyAfterDeleteReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				const ratingPostAfterDeleteReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPostAfterDeleteReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(ratingReplyAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				await expect(ratingPostAfterDeleteReply).to.equal(StartRating + AcceptedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingReply).to.equal(StartRating + DeleteOwnReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedCommonReply);
@@ -1952,8 +1954,8 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
 					await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 					
-					const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(newRating).to.equal(StartRating);
+					const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				});
 
 				it("Test first/quick reply after common -> expert", async function () {
@@ -1970,8 +1972,8 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English);
 					await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 					
-					const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(newRating).to.equal(StartRating);
+					const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				});
 			});
 
@@ -1993,8 +1995,8 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 					
 					const userPost = await peeranhaUser.getUserRating(signers[1].address, 1);
-					const userReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(userReply).to.equal(StartRating + AcceptCommonReply);
+					const userReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(userReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 					await expect(userPost).to.equal(StartRating + AcceptedCommonReply);
 				});
 
@@ -2014,8 +2016,8 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 					
 					const userPost = await peeranhaUser.getUserRating(signers[1].address, 1);
-					const userReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(userReply).to.equal(StartRating + AcceptExpertReply);
+					const userReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(userReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 					await expect(userPost).to.equal(StartRating + AcceptedExpertReply);
 				});
 			});
@@ -2162,13 +2164,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertPost);
 			});
 
@@ -2186,13 +2188,13 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonPost);
 			});
 
@@ -2211,13 +2213,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.Tutorial, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedTutorial);
 			});
 
@@ -2236,7 +2238,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -2261,7 +2263,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -2286,7 +2288,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -2314,13 +2316,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedExpertPost);
 
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -2343,13 +2345,13 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonPost);
 
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -2373,13 +2375,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.Tutorial, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedTutorial);
 
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -2403,7 +2405,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -2433,7 +2435,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -2463,7 +2465,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -2503,13 +2505,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
@@ -2545,7 +2547,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -2577,13 +2579,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.Tutorial, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 			});
 
@@ -2609,7 +2611,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -2641,7 +2643,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -2673,7 +2675,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.Tutorial, LanguagesEnum.English);
@@ -2711,7 +2713,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, DefaultCommunityId);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 			});
 
@@ -2741,10 +2743,10 @@ describe("Test change postType and community id by moderator and common user", f
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, DefaultCommunityId));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, DefaultCommunityId);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 
 			it("Test 2 upVote 2 downVote tutorial DefaultCommunity -> community-2", async function () {
@@ -2775,7 +2777,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.Tutorial, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, DefaultCommunityId);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 			});
 		});
@@ -2808,14 +2810,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
 				await expect(newRatingVote3Community1).to.equal(StartRating + 100);	// 100 - createUserWithAnotherRating
@@ -2854,14 +2856,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 
 			it("Test cancel votes tutorial community-1 -> community-2", async function () {
@@ -2890,14 +2892,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.Tutorial, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 		});
 
@@ -2917,18 +2919,18 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test upVote common reply community-1 -> community-2", async function () {
@@ -2945,18 +2947,18 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test upVote expert reply community-1 -> community-2 (delete reply)", async function () {
@@ -2973,22 +2975,22 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 
 			it("Test upVote common reply community-1 -> community-2 (delete reply)", async function () {
@@ -3005,22 +3007,22 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 		});
 
@@ -3040,17 +3042,17 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedExpertReply);
 
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -3073,17 +3075,17 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonReply);
 
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -3106,27 +3108,27 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DownvotedExpertReply + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 
-				const newRatingVoteCommunity1 = changeStartRating(await peeranhaUser.getUserRating(accountDeployed, 1));
+				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
 				await expect(newRatingVoteCommunity1).to.equal(StartRating + DownvoteExpertReply);
 				const newRatingVoteCommunity2 = await peeranhaUser.getUserRating(accountDeployed, 2);
-				await expect(newRatingVoteCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingVoteCommunity2).to.equal(0);
 			});
 
 			it("Test downVote common reply community-1 -> community-2 (delete reply)", async function () {
@@ -3143,27 +3145,27 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply + DownvotedCommonReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 
-				const newRatingVoteCommunity1 = changeStartRating(await peeranhaUser.getUserRating(accountDeployed, 1));
+				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
 				await expect(newRatingVoteCommunity1).to.equal(StartRating + DownvoteCommonReply);
 				const newRatingVoteCommunity2 = await peeranhaUser.getUserRating(accountDeployed, 2);
-				await expect(newRatingVoteCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingVoteCommunity2).to.equal(0);
 			});
 		});
 
@@ -3186,21 +3188,21 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 			
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
 				await expect(newRatingVote3Community1).to.equal(StartRating + DownvoteExpertReply + 100);	// 100 - createUserWithAnotherRating
@@ -3230,21 +3232,21 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 2 upVote 2 downVote expert reply community-1 -> community-2 (delete reply)", async function () {
@@ -3264,25 +3266,25 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 
 			it("Test 2 upVote 2 downVote common reply community-1 -> community-2 (delete reply)", async function () {
@@ -3302,25 +3304,25 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 				
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
 				await expect(newRatingVote3Community1).to.equal(StartRating + DownvoteCommonReply + 100);	// 100 - createUserWithAnotherRating
@@ -3353,8 +3355,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -3364,14 +3366,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
 				await expect(newRatingVote3Community1).to.equal(StartRating + 100);	// 100 - createUserWithAnotherRating
@@ -3401,8 +3403,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -3412,14 +3414,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 4 cancel vote expert reply community-1 -> community-2 (delete reply)", async function () {
@@ -3439,8 +3441,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -3450,18 +3452,18 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 
 			it("Test 4 cancel vote common reply community-1 -> community-2 (delete reply)", async function () {
@@ -3481,8 +3483,8 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -3492,18 +3494,18 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 
 				const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
 				await expect(newRatingVote3Community1).to.equal(StartRating + 100); // 100 - createUserWithAnotherRating
@@ -3534,14 +3536,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test first/quick common reply community-1 -> community-2 0 vote", async function () {
@@ -3559,14 +3561,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test first/quick expert reply community-1 -> community-2 0 vote (delete reply)", async function () {
@@ -3584,15 +3586,15 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.deleteReply(signers[0].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
 				await expect(newRatingCommunity2).to.equal(0);
@@ -3617,20 +3619,20 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating);
 				const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-				const newRatingReplyCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptedExpertReply);
-				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptExpertReply);
+				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test own best expert reply community-1 -> community-2", async function () {
@@ -3649,13 +3651,13 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 
 				const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(userRating).to.equal(StartRatingWithoutAction);
+				await expect(userRating).to.equal(0);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newUserRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(newUserRatingCommunity1).to.equal(StartRatingWithoutAction);
+				await expect(newUserRatingCommunity1).to.equal(0);
 				const newUserRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-				await expect(newUserRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newUserRatingCommunity2).to.equal(0);
 			});
 
 			it("Test best common reply community-1 -> community-2", async function () {
@@ -3674,20 +3676,20 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating);
 				const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-				const newRatingReplyCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptedCommonReply);
-				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptCommonReply);
+				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test best expert reply community-1 -> community-2 (delete reply)", async function () {
@@ -3706,26 +3708,26 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				const ratingReplyAfterDeleteReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				const ratingPostAfterDeleteReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPostAfterDeleteReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(ratingPostAfterDeleteReply).to.equal(StartRating + AcceptedExpertReply);
 				await expect(ratingReplyAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating + AcceptedExpertReply);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
 				const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingPostCommunity2).to.equal(StartRatingWithoutAction);
-				await expect(newRatingReplyCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingPostCommunity2).to.equal(0);
+				await expect(newRatingReplyCommunity2).to.equal(0);
 			});
 
 			it("Test best common reply community-1 -> community-2 (delete reply)", async function () {
@@ -3744,26 +3746,26 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				const ratingReplyAfterDeleteReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				const ratingPostAfterDeleteReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPostAfterDeleteReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(ratingPostAfterDeleteReply).to.equal(StartRating + AcceptedCommonReply);
 				await expect(ratingReplyAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating + AcceptedCommonReply);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating + DeleteOwnReply);
 				const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
 				const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingPostCommunity2).to.equal(StartRatingWithoutAction);
-				await expect(newRatingReplyCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingPostCommunity2).to.equal(0);
+				await expect(newRatingReplyCommunity2).to.equal(0);
 			});
 		});
 
@@ -3790,7 +3792,7 @@ describe("Test change postType and community id by moderator and common user", f
 			
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertPost);
 				});
 
@@ -3813,7 +3815,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonPost);
 				});
 			});
@@ -3845,7 +3847,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 					const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
@@ -3884,7 +3886,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 				});
 			});
@@ -3921,7 +3923,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(StartRating);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating);
 				});
 
@@ -3955,7 +3957,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(StartRating);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating);
 				});
 			});
@@ -3982,7 +3984,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply);
 				});
 
@@ -4006,7 +4008,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply);
 				});
 			});
@@ -4034,7 +4036,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + DownvotedExpertReply);
 
 					const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -4063,7 +4065,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonReply);
 
 					const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
@@ -4101,7 +4103,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
 
 					const newRatingVote3Community1 = await peeranhaUser.getUserRating(signers[3].address, 1);
@@ -4141,7 +4143,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
 				});
 			});
@@ -4179,7 +4181,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(StartRating);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating);
 				});
 
@@ -4214,7 +4216,7 @@ describe("Test change postType and community id by moderator and common user", f
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(StartRating);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating);
 				});
 			});
@@ -4238,9 +4240,9 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-					await expect(newRatingCommunity1).to.equal(StartRatingWithoutAction);
+					await expect(newRatingCommunity1).to.equal(0);
 					const newRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-					await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+					await expect(newRatingCommunity2).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				});
 
 				it("Test first/quick common reply after community-1 -> community-2", async function () {
@@ -4260,9 +4262,9 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-					await expect(newRatingCommunity1).to.equal(StartRatingWithoutAction);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2));
-					await expect(newRatingCommunity2).to.equal(StartRating);
+					await expect(newRatingCommunity1).to.equal(0);
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
+					await expect(newRatingCommunity2).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				});
 			});
 
@@ -4285,13 +4287,13 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 
-					const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+					const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 					const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingPostCommunity1).to.equal(StartRating);
 					await expect(newRatingReplyCommunity1).to.equal(0);
 					const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-					const newRatingReplyCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-					await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptExpertReply );
+					const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+					await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply );
 					await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptedExpertReply);
 				});
 
@@ -4312,13 +4314,13 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 
-					const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+					const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 					const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingPostCommunity1).to.equal(StartRating);
 					await expect(newRatingReplyCommunity1).to.equal(0);
 					const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-					const newRatingReplyCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-					await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptCommonReply);
+					const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+					await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 					await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptedCommonReply);
 				});
 			});
@@ -4343,7 +4345,7 @@ describe("Test change postType and community id by moderator and common user", f
 					
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + DeleteOwnPost);
 				});
 				
@@ -4364,9 +4366,9 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 					await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 					
-					const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(StartRating);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + DeleteOwnReply);
 				});
 			});
@@ -4436,14 +4438,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonPost);
 			});
 
@@ -4462,7 +4464,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -4491,7 +4493,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -4500,7 +4502,7 @@ describe("Test change postType and community id by moderator and common user", f
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
 				await expect(newRatingVoteCommunity1).to.equal(StartRating + DownvoteCommonPost);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonPost);
 				const newRatingVoteCommunity2 = await peeranhaUser.getUserRating(accountDeployed, 2);
 				await expect(newRatingVoteCommunity2).to.equal(0);
@@ -4521,7 +4523,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonPost);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -4553,19 +4555,19 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply);
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test upVote reply common -> expert and community-1 -> default community", async function () {
@@ -4582,19 +4584,19 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, DefaultCommunityId);
-				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply);
+				await expect(newRatingCommunity2).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 			});
 
 			it("Test upVote reply expert -> common and community-1 -> community-2 (delete reply)", async function () {
@@ -4611,15 +4613,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -4627,7 +4629,7 @@ describe("Test change postType and community id by moderator and common user", f
 				await expect(newRatingCommunity1).to.equal(StartRating + DeleteOwnReply);
 
 				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
-				await expect(newRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newRatingCommunity2).to.equal(0);
 			});
 		});
 
@@ -4647,11 +4649,11 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
@@ -4660,7 +4662,7 @@ describe("Test change postType and community id by moderator and common user", f
 				const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
 				await expect(newRatingVoteCommunity1).to.equal(StartRating + DownvoteCommonReply);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonReply);
 				const newRatingVoteCommunity2 = await peeranhaUser.getUserRating(accountDeployed, 2);
 				await expect(newRatingVoteCommunity2).to.equal(0);
@@ -4680,15 +4682,15 @@ describe("Test change postType and community id by moderator and common user", f
 
 				await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
-				const userRatingAfterDeleteReply =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRatingAfterDeleteReply =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRatingAfterDeleteReply).to.equal(StartRating + DeleteOwnReply + DownvotedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
@@ -4722,21 +4724,21 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating);
 
 				const newRatingPostCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-				const newRatingReplyCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingReplyCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingPostCommunity2).to.equal(StartRating + AcceptedCommonReply);
-				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptCommonReply);
+				await expect(newRatingReplyCommunity2).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test best own reply expert -> common and community-1 -> community-2", async function () {
@@ -4756,14 +4758,14 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 
 				const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(userRating).to.equal(StartRatingWithoutAction);
+				await expect(userRating).to.equal(0);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.CommonPost, LanguagesEnum.English);
 				const newUserRatingCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(newUserRatingCommunity1).to.equal(StartRatingWithoutAction);
+				await expect(newUserRatingCommunity1).to.equal(0);
 
 				const newUserRatingCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
-				await expect(newUserRatingCommunity2).to.equal(StartRatingWithoutAction);
+				await expect(newUserRatingCommunity2).to.equal(0);
 			});
 
 			it("Test best reply common -> expert and community-1 -> default community (delete reply)", async function () {
@@ -4782,19 +4784,19 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				const ratingReplyAfterDeleteReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				const ratingPostAfterDeleteReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPostAfterDeleteReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				await expect(ratingPostAfterDeleteReply).to.equal(StartRating + AcceptedCommonReply);
 				await expect(ratingReplyAfterDeleteReply).to.equal(StartRating + DeleteOwnReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], DefaultCommunityId, PostTypeEnum.ExpertPost, LanguagesEnum.English);
-				const newRatingPostCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPostCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReplyCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingPostCommunity1).to.equal(StartRating + AcceptedCommonReply);
 				await expect(newRatingReplyCommunity1).to.equal(StartRating + DeleteOwnReply);
@@ -4829,7 +4831,7 @@ describe("Test change postType and community id by moderator and common user", f
 			
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonPost);
 				});
 			});
@@ -4855,7 +4857,7 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 					const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 					await expect(newRatingCommunity1).to.equal(0);
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + UpvotedCommonReply);
 				});
 
@@ -4907,7 +4909,7 @@ describe("Test change postType and community id by moderator and common user", f
 					const newRatingVoteCommunity1 = await peeranhaUser.getUserRating(accountDeployed, 1);
 					await expect(newRatingVoteCommunity1).to.equal(0);
 
-					const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					await expect(newRatingCommunity2).to.equal(StartRating + DownvotedCommonReply);
 					const newRatingVoteCommunity2 = await peeranhaUser.getUserRating(accountDeployed, 2);
 					await expect(newRatingVoteCommunity2).to.equal(StartRating + DownvoteCommonReply);
@@ -4934,14 +4936,14 @@ describe("Test change postType and community id by moderator and common user", f
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 					
 					const userPostCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
-					const userReplyCommunity1 = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+					const userReplyCommunity1 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 					await expect(userPostCommunity1).to.equal(0);
 					await expect(userReplyCommunity1).to.equal(StartRating);
 
-					const userPostCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+					const userPostCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 					const userReplyCommunity2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 2);
 					await expect(userPostCommunity2).to.equal(StartRating + AcceptedCommonReply);
-					await expect(userReplyCommunity2).to.equal(StartRating + AcceptCommonReply);
+					await expect(userReplyCommunity2).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				});
 			});
 		});
@@ -4967,7 +4969,7 @@ describe("Test change postType and community id by moderator and common user", f
 				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(0);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DeleteOwnPost);
 			});
 			
@@ -4988,10 +4990,10 @@ describe("Test change postType and community id by moderator and common user", f
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 2, PostTypeEnum.ExpertPost, LanguagesEnum.English);
 				await peeranhaContent.connect(signers[1]).deleteReply(signers[1].address, 1, 1);
 				
-				const newRatingCommunity1 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const newRatingCommunity1 = await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(newRatingCommunity1).to.equal(StartRating);
 
-				const newRatingCommunity2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 2));
+				const newRatingCommunity2 = await peeranhaUser.getUserRating(signers[1].address, 2);
 				await expect(newRatingCommunity2).to.equal(StartRating + DeleteOwnReply);
 			});
 		});
@@ -5327,7 +5329,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5348,7 +5350,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5369,7 +5371,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5390,7 +5392,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5411,7 +5413,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5432,7 +5434,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.Tutorial, [1], LanguagesEnum.English);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 0, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5465,7 +5467,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5495,7 +5497,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedExpertPost * 2 + DownvotedExpertPost * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5524,7 +5526,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5553,7 +5555,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedCommonPost * 2 + DownvotedCommonPost * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5582,7 +5584,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial * 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5612,7 +5614,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + UpvotedTutorial* 2 + DownvotedTutorial * 2);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5649,7 +5651,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5682,7 +5684,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5715,7 +5717,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5748,7 +5750,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.Tutorial, LanguagesEnum.English)
@@ -5781,7 +5783,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5814,7 +5816,7 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 0, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5838,16 +5840,16 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedCommonReply);
+				await expect(newRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test upVote reply common -> expert", async function () {
@@ -5863,16 +5865,16 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedExpertReply);
+				await expect(newRating).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
 			});
 		});
 
@@ -5891,11 +5893,11 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedExpertReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
@@ -5916,11 +5918,11 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 0);
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
 				await expect(userRating).to.equal(StartRating + DownvotedCommonReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
@@ -5947,20 +5949,20 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				await expect(newRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 2 upVote 2 downVote reply common -> expert", async function () {
@@ -5979,20 +5981,20 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[2]).voteItem(signers[2].address, 1, 1, 0, 1);
 				await peeranhaContent.connect(signers[3]).voteItem(signers[3].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + UpvotedCommonReply * 2 + DownvotedCommonReply * 2 + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2);
+				await expect(newRating).to.equal(StartRating + UpvotedExpertReply * 2 + DownvotedExpertReply * 2 + FirstExpertReply + QuickExpertReply);
 			});
 		});
 
@@ -6014,8 +6016,8 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -6026,12 +6028,12 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating);
+				await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test 4 cancel vote reply common -> expert", async function () {
@@ -6050,8 +6052,8 @@ describe("Test change postType and community id by author", function () {
 
 				await peeranhaContent.connect(signers[2]).createPost(signers[2].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-				const oldRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(oldRating).to.equal(StartRating);
+				const oldRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(oldRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
 				await peeranhaContent.voteItem(signers[0].address, 1, 1, 0, 1);
@@ -6062,12 +6064,12 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 				await peeranhaContent.connect(signers[4]).voteItem(signers[4].address, 1, 1, 0, 0);
 
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(signers[1].address, 1);
+				await expect(userRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 
 				await peeranhaContent.connect(signers[2]).editPost(signers[2].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
 				const newRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRating).to.equal(StartRating);
+				await expect(newRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 			});
 		});
 
@@ -6086,12 +6088,12 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
-				const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(newRating).to.equal(StartRating);
+				const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 
 			it("Test first/quick reply common -> expert 0 rating", async function () {
@@ -6107,12 +6109,12 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.connect(signers[1]).createPost(signers[1].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 				await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				
-				const userRating =  changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(userRating).to.equal(StartRating);
+				const userRating =  await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(userRating).to.equal(StartRating + FirstExpertReply + QuickExpertReply);
 
 				await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
-				const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-				await expect(newRating).to.equal(StartRating);
+				const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+				await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 			});
 		});
 
@@ -6132,15 +6134,15 @@ describe("Test change postType and community id by author", function () {
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedExpertReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRatingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(newRatingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedCommonReply);
 			});
 
@@ -6158,11 +6160,11 @@ describe("Test change postType and community id by author", function () {
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
 				const userRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(userRating).to.equal(StartRatingWithoutAction);
+				await expect(userRating).to.equal(0);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 				const newUserRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-				await expect(newUserRating).to.equal(StartRatingWithoutAction);
+				await expect(newUserRating).to.equal(0);
 			});
 
 			it("Test best reply common -> expert", async function () {
@@ -6179,15 +6181,15 @@ describe("Test change postType and community id by author", function () {
 				await  peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 				await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 				
-				const ratingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const ratingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const ratingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply);
+				await expect(ratingReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 				await expect(ratingPost).to.equal(StartRating + AcceptedCommonReply);
 
 				await peeranhaContent.editPost(signers[0].address, 1, hashContainer[0], [], 1, PostTypeEnum.ExpertPost, LanguagesEnum.English)
-				const newRatingPost = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
+				const newRatingPost = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 				const newRatingReply = await peeranhaUser.getUserRating(signers[1].address, 1);
-				await expect(newRatingReply).to.equal(StartRating + AcceptExpertReply);
+				await expect(newRatingReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 				await expect(newRatingPost).to.equal(StartRating + AcceptedExpertReply);
 			});
 		});
@@ -6576,8 +6578,8 @@ describe("Test change postType and community id by author", function () {
 					await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 					await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 					
-					const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(newRating).to.equal(StartRating);
+					const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				});
 
 				it("Test first/quick reply after common -> expert", async function () {
@@ -6594,8 +6596,8 @@ describe("Test change postType and community id by author", function () {
 					await peeranhaContent.connect(signers[1]).editPost(signers[1].address, 1, hashContainer[0], [], 1, PostTypeEnum.CommonPost, LanguagesEnum.English)
 					await  peeranhaContent.createReply(signers[0].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 					
-					const newRating = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(newRating).to.equal(StartRating);
+					const newRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(newRating).to.equal(StartRating + FirstCommonReply + QuickCommonReply);
 				});
 			});
 
@@ -6617,8 +6619,8 @@ describe("Test change postType and community id by author", function () {
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 					
 					const userPost = await peeranhaUser.getUserRating(signers[1].address, 1);
-					const userReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(userReply).to.equal(StartRating + AcceptCommonReply);
+					const userReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(userReply).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 					await expect(userPost).to.equal(StartRating + AcceptedCommonReply);
 				});
 
@@ -6638,8 +6640,8 @@ describe("Test change postType and community id by author", function () {
 					await peeranhaContent.connect(signers[1]).changeStatusBestReply(signers[1].address, 1, 1);
 					
 					const userPost = await peeranhaUser.getUserRating(signers[1].address, 1);
-					const userReply = changeStartRating(await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1));
-					await expect(userReply).to.equal(StartRating + AcceptExpertReply);
+					const userReply = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
+					await expect(userReply).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 					await expect(userPost).to.equal(StartRating + AcceptedExpertReply);
 				});
 			});
@@ -6706,4 +6708,4 @@ describe("Test change postType and community id by author", function () {
         //     return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
         // }));
 	}
-
+*/

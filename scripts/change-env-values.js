@@ -65,7 +65,7 @@ const unitTest = [
 	{ field: 'constant ACTIVE_USERS_IN_PERIOD', value: 2, path: `../contracts/PeeranhaToken.sol`, isFunction: false },
 	{ field: 'constant DEFAULT_COMMUNITY', value: 3, path: `../contracts/libraries/PostLib.sol`, isFunction: false },
 	{ field: 'function addUserRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
-	{ field: 'function setEnergy(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
+	{ field: 'function setEnergy(', value: `/*`, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriodRating(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
     { field: 'function getContractInformation(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },
 	{ field: 'function getPeriod(', value: ``, path: `../contracts/PeeranhaUser.sol`, isFunction: true },

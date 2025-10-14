@@ -1,5 +1,6 @@
-// first and 15 min reply OFF
+// first and 15 min reply ON
 
+/*
 const { expect } = require("chai");
 const { 
     createPeerenhaAndTokenContract, getHashContainer, getHashesContainer, createTags, PostTypeEnum, StartRating,
@@ -365,7 +366,7 @@ describe("Test permissions", function () {
             const adminRating = await peeranhaUser.getUserRating(signers[0].address, 1);
 
 			expect((await peeranhaContent.getReply(1, 1)).isDeleted).to.be.true;
-			expect(userRating).to.be.equal(userOldRating + ModeratorDeleteReply);
+			expect(userRating).to.be.equal(userOldRating + ModeratorDeleteReply - FirstExpertReply - QuickExpertReply);
 			expect(adminRating).to.be.equal(adminOldRating);
         })
 
@@ -502,7 +503,7 @@ describe("Test permissions", function () {
             const replier = await peeranhaUser.getUserRating(signers[2].address, 1);
             const userAction = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
             await expect(user).to.equal(userRating);
-            await expect(replier).to.equal(replierRating + DownvotedExpertReply);
+            await expect(replier).to.equal(replierRating + DownvotedExpertReply - FirstExpertReply - QuickExpertReply);
             await expect(userAction).to.equal(userActionRating + DownvoteExpertReply);
     
             await peeranhaContent.deletePost(signers[0].address, 1);
@@ -528,7 +529,7 @@ describe("Test permissions", function () {
             const replier = await peeranhaUser.getUserRating(signers[2].address, 1);
             const userAction = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);		
             await expect(user).to.equal(userRating);
-            await expect(replier).to.equal(replierRating + DownvotedCommonReply);
+            await expect(replier).to.equal(replierRating + DownvotedCommonReply - FirstCommonReply - QuickCommonReply);
             await expect(userAction).to.equal(userActionRating + DownvoteCommonReply);
     
             await peeranhaContent.deletePost(signers[0].address, 1);
@@ -550,7 +551,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[2].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedExpertReply);
-            await expect(replierRating).to.equal(StartRating + AcceptExpertReply);
+            await expect(replierRating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
             await peeranhaContent.deletePost(signers[0].address, 1);
     
@@ -569,7 +570,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[2].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedCommonReply);
-            await expect(replierRating).to.equal(StartRating + AcceptCommonReply);
+            await expect(replierRating).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
             await peeranhaContent.deletePost(signers[0].address, 1);
     
@@ -656,7 +657,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[2].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedExpertReply);
-            await expect(replierRating).to.equal(StartRating + AcceptExpertReply);
+            await expect(replierRating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
             await peeranhaContent.deleteReply(signers[0].address, 1, 1);
     
@@ -675,7 +676,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[2].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedCommonReply);
-            await expect(replierRating).to.equal(StartRating + AcceptCommonReply);
+            await expect(replierRating).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
             await peeranhaContent.deleteReply(signers[0].address, 1, 1);
     
@@ -751,7 +752,7 @@ describe("Test permissions", function () {
             const adminRating = await peeranhaUser.getUserRating(signers[1].address, 1);
 
 			expect((await peeranhaContent.getReply(1, 1)).isDeleted).to.be.true;
-			expect(userRating).to.be.equal(userOldRating + ModeratorDeleteReply);
+			expect(userRating).to.be.equal(userOldRating + ModeratorDeleteReply - FirstExpertReply - QuickExpertReply);
 			expect(adminRating).to.be.equal(adminOldRating);
         })
 
@@ -867,7 +868,7 @@ describe("Test permissions", function () {
             const userAction = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1) + StartRating;		
             await expect(user).to.equal(StartRating);
             await expect(admin).to.equal(StartRating);
-            await expect(replier).to.equal(StartRating + UpvotedExpertReply);
+            await expect(replier).to.equal(StartRating + UpvotedExpertReply + FirstExpertReply + QuickExpertReply);
             await expect(userAction).to.equal(StartRating);
     
             await peeranhaContent.deletePost(signers[0].address, 1);
@@ -897,7 +898,7 @@ describe("Test permissions", function () {
             const userAction = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1) + StartRating;		
             await expect(user).to.equal(StartRating);
             await expect(admin).to.equal(StartRating);
-            await expect(replier).to.equal(StartRating + UpvotedCommonReply);
+            await expect(replier).to.equal(StartRating + UpvotedCommonReply + FirstCommonReply + QuickCommonReply);
             await expect(userAction).to.equal(StartRating);
     
             await peeranhaContent.deletePost(signers[0].address, 1);
@@ -984,7 +985,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedExpertReply);
-            await expect(replierRating).to.equal(StartRating + AcceptExpertReply);
+            await expect(replierRating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
             await peeranhaContent.connect(signers[2]).deletePost(signers[2].address, 1);
     
@@ -1006,7 +1007,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedCommonReply);
-            await expect(replierRating).to.equal(StartRating + AcceptCommonReply);
+            await expect(replierRating).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
             await peeranhaContent.connect(signers[2]).deletePost(signers[2].address, 1);
     
@@ -1108,7 +1109,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedExpertReply);
-            await expect(replierRating).to.equal(StartRating + AcceptExpertReply);
+            await expect(replierRating).to.equal(StartRating + AcceptExpertReply + FirstExpertReply + QuickExpertReply);
 
             await peeranhaContent.connect(signers[2]).deleteReply(signers[2].address, 1, 1);
     
@@ -1130,7 +1131,7 @@ describe("Test permissions", function () {
             const userRating = await peeranhaUser.getUserRating(signers[0].address, 1);
             const replierRating = await peeranhaUser.getUserRating(signers[1].address, 1);
             await expect(userRating).to.equal(StartRating + AcceptedCommonReply);
-            await expect(replierRating).to.equal(StartRating + AcceptCommonReply);
+            await expect(replierRating).to.equal(StartRating + AcceptCommonReply + FirstCommonReply + QuickCommonReply);
 
             await peeranhaContent.connect(signers[2]).deleteReply(signers[2].address, 1, 1);
     
@@ -1288,3 +1289,4 @@ describe("Test permissions", function () {
         });
     });
 });
+*/

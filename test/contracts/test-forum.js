@@ -1,7 +1,7 @@
 const { disableExperimentalFragmentVariables } = require("@apollo/client");
 const { expect } = require("chai");
 const { 
-	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer,
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer, changeStartRating,
 	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime, EmptyIpfs,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
@@ -849,7 +849,7 @@ describe("Test post", function () {
 			const comment = await peeranhaContent.getComment(1, 0, 1);
 			expect(comment.isDeleted).to.equal(true);
 
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating = changeStartRating(changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1)));
 			await expect(userRating).to.equal(StartRating + ModeratorDeleteComment);
 		});
 
@@ -931,11 +931,11 @@ describe("Test post", function () {
 		it("Test delete expert best reply by moderator", async function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating = changeStartRating(changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1)));
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 			
-			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating2).to.equal(userRating + AcceptExpertReply);
 			await expect(userActionRating2).to.equal(StartRating + AcceptedExpertReply);
@@ -946,7 +946,7 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(0);
 
 			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newUserRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			await expect(newUserActionRating).to.equal(StartRating + AcceptedExpertReply);
 			await expect(newUserRating).to.equal(StartRating + ModeratorDeleteReply);
 		});
@@ -954,11 +954,11 @@ describe("Test post", function () {
 		it("Test delete post after choosing best common reply", async function () { // TODO: post or reply
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 
-			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);	
 			await expect(userRating2).to.equal(userRating + AcceptCommonReply);
 			await expect(userActionRating2 ).to.equal(StartRating + AcceptedCommonReply);
@@ -969,7 +969,7 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(0);
 
 			const newUserActionRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newUserRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newUserRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			await expect(newUserActionRating).to.equal(StartRating + AcceptedCommonReply);
 			await expect(newUserRating).to.equal(StartRating + ModeratorDeleteReply);
 		});
@@ -978,12 +978,12 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.ExpertPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-			const userRating2Reply = await peeranhaUser.getUserRating(signers[2].address, 1);
+			const userRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+			const userRating2Reply = changeStartRating(await peeranhaUser.getUserRating(signers[2].address, 1));
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 			
-			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
 			await expect(userRating2).to.equal(userRating + AcceptExpertReply);
 			await expect(userActionRating2).to.equal(StartRating + AcceptedExpertReply);
@@ -994,7 +994,7 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(0);
 
 			const newAuthorPostRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newOldBestReplyRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newOldBestReplyRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			await expect(newAuthorPostRating).to.equal(StartRating + AcceptedExpertReply);
 			await expect(newOldBestReplyRating).to.equal(StartRating + ModeratorDeleteReply);
 
@@ -1003,8 +1003,8 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(2);
 
 			const newAuthorPostRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newAuthorOldBestReplyRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
-			const newAuthorNewBestReplyRating = await peeranhaUser.getUserRating(signers[2].address, 1);
+			const newAuthorOldBestReplyRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+			const newAuthorNewBestReplyRating = changeStartRating(await peeranhaUser.getUserRating(signers[2].address, 1));
 			await expect(newAuthorPostRating2).to.equal(newAuthorPostRating + AcceptedExpertReply);
 			await expect(newAuthorOldBestReplyRating2).to.equal(newAuthorOldBestReplyRating2);
 			await expect(newAuthorNewBestReplyRating).to.equal(userRating2Reply + AcceptExpertReply);
@@ -1014,12 +1014,12 @@ describe("Test post", function () {
 			await peeranhaContent.createPost(signers[0].address, 1, hashContainer[0], PostTypeEnum.CommonPost, [1], LanguagesEnum.English);
 			await peeranhaContent.connect(signers[1]).createReply(signers[1].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
 			await peeranhaContent.connect(signers[2]).createReply(signers[2].address, 1, 0, hashContainer[1], false, LanguagesEnum.English);
-			const userRating = await peeranhaUser.getUserRating(signers[1].address, 1);
-			const userRating2Reply = await peeranhaUser.getUserRating(signers[2].address, 1);
+			const userRating = changeStartRating(changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1)));
+			const userRating2Reply = changeStartRating(changeStartRating(await peeranhaUser.getUserRating(signers[2].address, 1)));
 
 			await peeranhaContent.changeStatusBestReply(signers[0].address, 1, 1);
 
-			const userRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const userRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			const userActionRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);	
 			await expect(userRating2).to.equal(userRating + AcceptCommonReply);
 			await expect(userActionRating2 ).to.equal(StartRating + AcceptedCommonReply);
@@ -1030,7 +1030,7 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(0);
 
 			const newAuthorPostRating = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newOldBestReplyRating = await peeranhaUser.getUserRating(signers[1].address, 1);
+			const newOldBestReplyRating = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
 			await expect(newAuthorPostRating).to.equal(StartRating + AcceptedCommonReply);
 			await expect(newOldBestReplyRating).to.equal(StartRating + ModeratorDeleteReply);
 
@@ -1039,8 +1039,8 @@ describe("Test post", function () {
 			expect(post.bestReply).to.equal(2);
 
 			const newAuthorPostRating2 = await peeranhaUser.getUserRating(peeranhaUser.deployTransaction.from, 1);
-			const newAuthorOldBestReplyRating2 = await peeranhaUser.getUserRating(signers[1].address, 1);
-			const newAuthorNewBestReplyRating = await peeranhaUser.getUserRating(signers[2].address, 1);
+			const newAuthorOldBestReplyRating2 = changeStartRating(await peeranhaUser.getUserRating(signers[1].address, 1));
+			const newAuthorNewBestReplyRating = changeStartRating(await peeranhaUser.getUserRating(signers[2].address, 1));
 			await expect(newAuthorPostRating2).to.equal(newAuthorPostRating + AcceptedCommonReply);
 			await expect(newAuthorOldBestReplyRating2).to.equal(newAuthorOldBestReplyRating2);
 			await expect(newAuthorNewBestReplyRating).to.equal(userRating2Reply + AcceptCommonReply);

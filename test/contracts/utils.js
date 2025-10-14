@@ -230,6 +230,10 @@ const getUsers = (hashes) => {
     })
 }
 
+function changeStartRating (rating) {
+	return rating == 0 ? StartRating : rating;
+}
+
 const StartEnergy = 1000;       // was 300
 const PeriodTime = 6000;
 const QuickReplyTime = 6000; // in milliseconds, defines at CommonLib
@@ -462,7 +466,7 @@ const DEFAULT_ADMIN_ROLE = 0x00;
 const TRANSACTION_DELAY = 3000;
 
 module.exports = { 
-    wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther, getContract,
+    wait, getBalance, availableBalanceOf, getOwnerMinted, getTotalSupply, getInt, getAddressContract, createContract, createContractToken, getUsers, getUserReward, parseEther, getContract, changeStartRating,
     getIdsContainer, getHashesContainer, createTags, getHashContainer, getHashTranslation, getTranslationValues, hashContainer, getHash, registerTwoUsers, createUserWithAnotherRating, createPeerenhaAndTokenContract,
     periodRewardCoefficient, StartEnergy, PeriodTime, QuickReplyTime, deleteTime, coefficientToken, periodUserReward, StartRating, StartRatingWithoutAction, PostTypeEnum, LanguagesEnum, fraction, poolToken,
     setRetingOnePeriod, ratingChanges, ratingChangesSkipPeriod, twiceChengeRatingIn1Period, activeIn1st2nd3rdPeriod, twiceChengeRatingIn2NDPeriod, energyDownVotePost, energyDownVoteReply, energyVoteComment, energyUpvotePost, energyUpvoteReply,

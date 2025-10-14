@@ -758,4 +758,18 @@ library UserLib {
     RewardLib.PeriodRating storage userPeriodCommuntiyRating = userContext.userRatingCollection.communityRatingForUser[user].userPeriodRewards[rewardPeriod].periodRating[communityId];
     return (userPeriodCommuntiyRating.ratingToReward, userPeriodCommuntiyRating.penalty);
   }
+
+  function getCountCommunityActiveUsersInPeriodWithPositiveRating(UserLib.UserContext storage userContext, RewardLib.CommunityReward storage communityReward, uint16 period, uint32 communityId) external view returns (uint256) {
+    address[] memory allActiveUsers = communityReward.communityPeriodReward[communityId].communityPeriodRewardShares[period].activeUsersInPeriod;
+    uint256 countActiveUsers = allActiveUsers.length;
+    uint256 countActiveUsersWithPositiveRating = 0;
+    uint32 rating;
+    uint32 penalty;
+    for (uint i; i < countActiveUsers; i++) {
+        (rating, penalty) = UserLib.getUserPeriodCommunityRating(userContext, allActiveUsers[i], period, communityId);
+        if(rating > penalty) //test
+            countActiveUsersWithPositiveRating++;
+    }
+    return countActiveUsersWithPositiveRating;
+  }
 }

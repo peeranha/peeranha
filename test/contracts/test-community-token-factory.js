@@ -64,11 +64,12 @@ describe("Test community token factory", function () {
 			const ipfsHashes = getHashesContainer(2);
 			const hashContainer = getHashContainer();
 			await peeranhaUser.createUser(accountDeployed, hashContainer[1]);
+			await peeranhaUser.grantRole(VERIFIER_ROLE, signers[0]);
 			await peeranhaCommunity.createCommunity(accountDeployed, ipfsHashes[0], createTags(5));
 			await peeranhaCommunity.freezeCommunity(accountDeployed, 1);
 
 			await peeranhaUser.connect(signers[1]).createUser(signers[1].address, hashContainer[1]);
-
+			await peeranhaUser.grantRole(VERIFIER_ROLE, signers[1]);
 			await expect(communityTokenRewardFactory.connect(signers[1]).createNewCommunityTokenReward(accountDeployed, 1, token.address, 100, 20)).to.be.revertedWith('Community is frozen');
 		});
 
@@ -108,7 +109,7 @@ describe("Test community token factory", function () {
 
 			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			const communityTokenContract = await getContract(addressLastCreatedContract, "CommunityTokenReward");
-			await expect(communityTokenContract.updateCommunityRewardSettings(accountDeployed, 1, 20, 2)).to.be.revertedWith('Community_token_contract_not_exist');
+			await expect(communityTokenContract.updateCommunityRewardSettings(accountDeployed, 20, 2)).to.be.revertedWith('Community_token_contract_not_exist');
 		});
 
 		it("Test edit community token (community dont has any community tokens)", async function () {
@@ -120,7 +121,7 @@ describe("Test community token factory", function () {
 
 			const addressLastCreatedContract = await communityTokenRewardFactory.getAddressLastCreatedContract(1)
 			const communityTokenContract = await getContract(addressLastCreatedContract, "CommunityTokenReward");
-			await expect(communityTokenContract.updateCommunityRewardSettings(accountDeployed, 1, 20, 2)).to.be.revertedWith('Token_communityId_not_exist');
+			await expect(communityTokenContract.updateCommunityRewardSettings(accountDeployed, 20, 2)).to.be.revertedWith('Token_communityId_not_exist');
 		});
 	});
 

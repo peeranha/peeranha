@@ -1,15 +1,40 @@
 const { expect } = require("chai");
 const { 
-	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer,
+	wait, createPeerenhaAndTokenContract, registerTwoUsers, createUserWithAnotherRating, getHashContainer, getHashesContainer, createTags, getIdsContainer, changeStartRating,
 	PostTypeEnum, StartRating, StartRatingWithoutAction, deleteTime, DeleteOwnReply, QuickReplyTime,
     DownvoteExpertPost, UpvotedExpertPost, DownvotedExpertPost, DownvoteCommonPost, UpvotedCommonPost, DownvotedCommonPost,
     ModeratorDeletePost, DownvoteExpertReply, UpvotedExpertReply, DownvotedExpertReply, AcceptExpertReply, AcceptedExpertReply, 
     FirstExpertReply, QuickExpertReply, DownvoteCommonReply, UpvotedCommonReply, DownvotedCommonReply, AcceptCommonReply,
     AcceptedCommonReply, FirstCommonReply, QuickCommonReply, ModeratorDeleteReply, ModeratorDeleteComment,
-	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId, LanguagesEnum, DISPATCHER_ROLE, PeriodTime
+	DownvoteTutorial, UpvotedTutorial, DownvotedTutorial, DeleteOwnPost, DefaultCommunityId, LanguagesEnum, DISPATCHER_ROLE, PeriodTime, VERIFIED_ROLE, VERIFIER_ROLE
 } = require('./utils');
 const { parseEther }  = require("ethers/lib/utils");
 
+async function createUser(peeranhaUser, verifier, user, hash) {
+	if (!(await peeranhaUser.connect(verifier).hasRole(VERIFIER_ROLE, verifier.address))) {
+		await peeranhaUser.grantRole(VERIFIER_ROLE, verifier.address);
+	}
+	await peeranhaUser.connect(user).createUser(user.address, hash);
+	await peeranhaUser.connect(verifier).grantRole(VERIFIED_ROLE, user.address);
+}
+
+async function createCommunities (peeranhaCommunity, wallet, countOfCommunities, communitiesIds) {
+	const ipfsHashes = await getHashesContainer(countOfCommunities);
+	await Promise.all(await communitiesIds.map(async(id) => {
+		return await peeranhaCommunity.createCommunity(wallet, ipfsHashes[id - 1], createTags(5));
+	}));
+
+
+	expect(await peeranhaCommunity.getCommunitiesCount()).to.equal(countOfCommunities)
+	// Occasionally, a verification error occurs.
+        // Communities are created successfully, but during the verification step,
+        // they are returned in a non-deterministic order, as is the value being checked.
+        // The issue reproduces approximately 1 in 5 runs.
+
+        // await Promise.all(communitiesIds.map(async(id) => {
+        //     const community = await peeranhaCommunity.getCommunity(id);
+        //     return await expect(community.ipfsDoc.hash).to.equal(ipfsHashes[id - 1]);
+    // }));
 
 describe("Test local", function () {
 	

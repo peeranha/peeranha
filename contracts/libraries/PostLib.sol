@@ -275,6 +275,8 @@ library PostLib  {
                 postContainer.info.officialReply = postContainer.info.replyCount;
             }
 
+            // Reward for first and quick reply is disabled for now
+            /*
             if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
                 if (getActiveReplyCount(postContainer) == 1) {
                     replyContainer.info.isFirstReply = true;
@@ -285,6 +287,7 @@ library PostLib  {
                     self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
                 }
             }
+            */
         } else {
           getReplyContainerSafe(postContainer, parentReplyId);
           replyContainer.info.parentReplyId = parentReplyId;  
@@ -633,12 +636,15 @@ library PostLib  {
 
         int32 changeReplyAuthorRating;
         if (replyContainer.info.rating >= 0) {
+            // Reward for first and quick reply is disabled for now
+            /*
             if (replyContainer.info.isFirstReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply);
             }
             if (replyContainer.info.isQuickReply) {
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply);
             }
+            */
             if (isBestReply && postType != PostType.Tutorial) { // todo: need? postType != PostType.Tutorial
                 changeReplyAuthorRating += -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.AcceptReply);
             }
@@ -869,10 +875,12 @@ library PostLib  {
         ); 
 
         vote(self, replyContainer.info.author, votedUser, postType, isUpvote, ratingChange, TypeContent.Reply, communityId);
-        int32 oldRating = replyContainer.info.rating;
+        // int32 oldRating = replyContainer.info.rating;
         replyContainer.info.rating += ratingChange;
-        int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
+        // int32 newRating = replyContainer.info.rating; // or oldRating + ratingChange gas
 
+        // Reward for first and quick reply is disabled for now
+        /*
         if (replyContainer.info.isFirstReply) {
             if (oldRating < 0 && newRating >= 0) {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
@@ -888,6 +896,7 @@ library PostLib  {
                 self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
             }
         }
+        */
 
         return isCancel ?
             (ratingChange > 0 ?
@@ -1019,6 +1028,8 @@ library PostLib  {
             int32 changeReplyAuthorRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
                 (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
 
+            // Reward for first and quick reply is disabled for now
+            /*
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
                     changeReplyAuthorRating += newTypeRating.firstReply - oldTypeRating.firstReply;
@@ -1027,6 +1038,7 @@ library PostLib  {
                     changeReplyAuthorRating += newTypeRating.quickReply - oldTypeRating.quickReply;
                 }
             }
+            */
             if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += newTypeRating.acceptReply - oldTypeRating.acceptReply;
                 changePostAuthorRating += newTypeRating.acceptedReply - oldTypeRating.acceptedReply;
@@ -1061,6 +1073,8 @@ library PostLib  {
             (positive, negative) = getHistoryInformations(replyContainer.historyVotes, replyContainer.votedUsers);
 
             int32 changeReplyAuthorRating = typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+            // Reward for first and quick reply is disabled for now
+            /*
             if (replyContainer.info.rating >= 0) {
                 if (replyContainer.info.isFirstReply) {
                     changeReplyAuthorRating += typeRating.firstReply;
@@ -1069,6 +1083,7 @@ library PostLib  {
                     changeReplyAuthorRating += typeRating.quickReply;
                 }
             }
+            */
             if (bestReplyId == replyId && postContainer.info.author != replyContainer.info.author) {
                 changeReplyAuthorRating += typeRating.acceptReply;
                 changePostAuthorRating += typeRating.acceptedReply;
